@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>補充:消融實驗與模型分析 - BERT 論文深度解析</title>
+    <link rel="stylesheet" href="../transformer-tutorial/style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <h1>🔬 補充:消融實驗 (Ablation Studies)</h1>
+            <div class="paper-meta">
+                <div class="meta-item">
+                    <strong>論文章節</strong>
+                    Section 5 (Ablation Studies)
+                </div>
+                <div class="meta-item">
+                    <strong>重要性</strong>
+                    ⭐⭐⭐ 證明設計選擇的科學依據
+                </div>
+            </div>
+        </div>
+
+        <div class="key-concept" style="background: var(--warning-light); border-left-color: var(--accent-color);">
+            <h3>⚠️ 原教學缺漏的重要內容</h3>
+            <p>這些內容在原論文中佔據完整章節,但在原教學中缺失:</p>
+            <ul>
+                <li><strong>Section 5.1</strong>: 預訓練任務的影響 (NSP 與 雙向性的重要性)</li>
+                <li><strong>Section 5.2</strong>: 模型大小的影響 (為什麼 LARGE 比 BASE 好)</li>
+                <li><strong>Section 5.3</strong>: Feature-based 方法 vs Fine-tuning</li>
+                <li><strong>Section 2 (Related Work)</strong>: 研究脈絡</li>
+                <li><strong>詳細的訓練過程</strong>: TPU、Batch Size、訓練時間等</li>
+            </ul>
+        </div>
+
+        <h2>🔬 什麼是消融實驗 (Ablation Studies)?</h2>
+
+        <div class="explanation">
+            <h4>📖 定義</h4>
+            <p><strong>Ablation (消融)</strong> = 逐一移除模型的某個組件,觀察效能變化</p>
+            <p><strong>目的:</strong>科學地證明每個設計選擇的必要性</p>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:找出關鍵食材</h4>
+            <p><strong>場景:一道美味的蛋炒飯</strong></p>
+            
+            <p><strong>完整版:</strong>蛋 + 飯 + 蔥 + 醬油 + 鹽 → 好吃 ⭐⭐⭐⭐⭐</p>
+            
+            <p><strong>消融實驗:</strong></p>
+            <ul>
+                <li>拿掉「蔥」→ 還不錯 ⭐⭐⭐⭐ (蔥不太重要)</li>
+                <li>拿掉「蛋」→ 變難吃 ⭐⭐ (蛋很重要!)</li>
+                <li>拿掉「醬油」→ 很難吃 ⭐ (醬油超重要!)</li>
+            </ul>
+
+            <p><strong>結論:</strong>蛋和醬油是關鍵食材!</p>
+        </div>
+
+        <h2>🎯 實驗 1: 預訓練任務的影響</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                We demonstrate the importance of the deep bidirectionality of BERT by evaluating two pre-training objectives using exactly the same pre-training data, fine-tuning scheme, and hyperparameters as BERT-BASE.
+            </div>
+            <div class="translation">
+                我們通過評估兩個預訓練目標來證明 BERT 深度雙向性的重要性,使用與 BERT-BASE 完全相同的預訓練資料、微調方案和超參數。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>🧪 測試三個版本</h4>
+
+            <h5>版本 A: BERT-BASE (完整版)</h5>
+            <ul>
+                <li>✅ Masked LM (MLM)</li>
+                <li>✅ Next Sentence Prediction (NSP)</li>
+                <li>✅ 雙向 Transformer</li>
+            </ul>
+
+            <h5>版本 B: No NSP</h5>
+            <ul>
+                <li>✅ Masked LM (MLM)</li>
+                <li>❌ 移除 NSP</li>
+                <li>✅ 雙向 Transformer</li>
+            </ul>
+
+            <h5>版本 C: LTR & No NSP (類似 GPT)</h5>
+            <ul>
+                <li>❌ 改用單向 LM (Left-to-Right)</li>
+                <li>❌ 移除 NSP</li>
+                <li>❌ 只有左側上下文</li>
+            </ul>
+        </div>
+
+        <div class="explanation">
+            <h4>📊 實驗結果</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>模型</th>
+                        <th>MNLI-m</th>
+                        <th>QNLI</th>
+                        <th>MRPC</th>
+                        <th>SQuAD v1.1</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: var(--primary-light);">
+                        <td><strong>BERT-BASE</strong></td>
+                        <td><strong>84.4</strong></td>
+                        <td><strong>91.7</strong></td>
+                        <td><strong>88.0</strong></td>
+                        <td><strong>88.5</strong></td>
+                    </tr>
+                    <tr>
+                        <td>No NSP</td>
+                        <td>83.9 (↓0.5)</td>
+                        <td>89.4 (↓2.3)</td>
+                        <td>86.7 (↓1.3)</td>
+                        <td>87.9 (↓0.6)</td>
+                    </tr>
+                    <tr>
+                        <td>LTR & No NSP</td>
+                        <td>82.1 (↓2.3)</td>
+                        <td>88.4 (↓3.3)</td>
+                        <td>77.5 (↓10.5) 😱</td>
+                        <td>77.8 (↓10.7) 😱</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>關鍵發現:</strong></p>
+            <ol>
+                <li><strong>NSP 有用</strong>:移除 NSP 讓 QNLI 下降 2.3%,SQuAD 下降 0.6%</li>
+                <li><strong>雙向性超重要</strong>:單向模型在 MRPC 和 SQuAD 上<strong>暴跌 10%</strong>!</li>
+                <li><strong>SQuAD 特別需要雙向</strong>:問答任務必須同時看左右</li>
+            </ol>
+        </div>
+
+        <div class="problem">
+            <h4>❌ 為什麼單向模型在 SQuAD 這麼差?</h4>
+            
+            <p><strong>任務:</strong>閱讀理解 - 在文章中找答案</p>
+
+            <p><strong>例子:</strong></p>
+            <pre><code>文章: "Albert Einstein was born in Germany in 1879."
+問題: "Where was Einstein born?"
+答案: "Germany"</code></pre>
+
+            <p><strong>單向模型 (LTR) 的困境:</strong></p>
+            <pre><code>看到 "Germany" 時:
+← 左邊: "Albert Einstein was born in"
+→ 右邊: 看不到! (單向限制)
+
+怎麼知道 "Germany" 是答案?
+需要看右邊的 "in 1879" 來確認是地點!</code></pre>
+
+            <p><strong>雙向模型 (BERT) 的優勢:</strong></p>
+            <pre><code>看到 "Germany" 時:
+← 左邊: "Albert Einstein was born in"
+→ 右邊: "in 1879"
+
+清楚知道這是「地點」,可以自信地選為答案!</code></pre>
+        </div>
+
+        <div class="solution">
+            <h4>✅ 嘗試「修復」單向模型</h4>
+            <p>研究者加了 BiLSTM 來增加雙向性:</p>
+            <ul>
+                <li>SQuAD 有改善,但還是遠低於 BERT</li>
+                <li>GLUE 任務反而變差</li>
+            </ul>
+            <p><strong>結論:</strong>淺層雙向 (BiLSTM) ≠ 深層雙向 (BERT)</p>
+        </div>
+
+        <h2>📏 實驗 2: 模型大小的影響</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                We can see that larger models lead to a strict accuracy improvement across all four datasets, even for MRPC which only has 3,600 labeled training examples, and is substantially different from the pre-training tasks.
+            </div>
+            <div class="translation">
+                我們可以看到,更大的模型在所有四個資料集上都帶來了嚴格的準確度提升,即使是只有 3,600 個標記訓練樣本的 MRPC,且與預訓練任務有很大差異。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>🧪 測試不同大小的模型</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>模型</th>
+                        <th>層數 (L)</th>
+                        <th>隱藏 (H)</th>
+                        <th>頭數 (A)</th>
+                        <th>參數</th>
+                        <th>MRPC</th>
+                        <th>MNLI-m</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>微型</td>
+                        <td>3</td>
+                        <td>256</td>
+                        <td>4</td>
+                        <td>~10M</td>
+                        <td>82.8</td>
+                        <td>77.4</td>
+                    </tr>
+                    <tr>
+                        <td>小型</td>
+                        <td>6</td>
+                        <td>512</td>
+                        <td>8</td>
+                        <td>~30M</td>
+                        <td>86.1</td>
+                        <td>81.7</td>
+                    </tr>
+                    <tr>
+                        <td>中型</td>
+                        <td>12</td>
+                        <td>512</td>
+                        <td>8</td>
+                        <td>~50M</td>
+                        <td>86.7</td>
+                        <td>83.6</td>
+                    </tr>
+                    <tr style="background: var(--primary-light);">
+                        <td><strong>BERT-BASE</strong></td>
+                        <td><strong>12</strong></td>
+                        <td><strong>768</strong></td>
+                        <td><strong>12</strong></td>
+                        <td><strong>110M</strong></td>
+                        <td><strong>88.0</strong></td>
+                        <td><strong>84.4</strong></td>
+                    </tr>
+                    <tr style="background: var(--secondary-light);">
+                        <td><strong>BERT-LARGE</strong></td>
+                        <td><strong>24</strong></td>
+                        <td><strong>1024</strong></td>
+                        <td><strong>16</strong></td>
+                        <td><strong>340M</strong></td>
+                        <td><strong>89.3</strong></td>
+                        <td><strong>86.7</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>驚人發現:</strong></p>
+            <ul>
+                <li>即使 MRPC 只有 3,600 個訓練樣本</li>
+                <li>更大的模型<strong>仍然</strong>表現更好!</li>
+                <li>從 10M → 340M = <strong>34 倍參數</strong> = +6.5% 準確度</li>
+            </ul>
+        </div>
+
+        <div class="explanation">
+            <h4>🤔 為什麼大模型在小資料集也更好?</h4>
+
+            <p><strong>傳統觀念:</strong>小資料集 → 應該用小模型 (避免過擬合)</p>
+
+            <p><strong>BERT 的發現:</strong>預訓練 + 微調 = 大模型也不會過擬合!</p>
+
+            <p><strong>原因:</strong></p>
+            <ol>
+                <li><strong>預訓練學到通用知識</strong>:340M 參數儲存了大量語言知識</li>
+                <li><strong>微調只調整少量參數</strong>:不是從零開始訓練</li>
+                <li><strong>更強的表達能力</strong>:能捕捉更細微的模式</li>
+            </ol>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:專家學新技能</h4>
+            
+            <p><strong>場景:學開手排車</strong></p>
+
+            <p><strong>新手 (小模型)</strong></p>
+            <ul>
+                <li>需要 100 小時練習</li>
+                <li>還是開得不太好</li>
+            </ul>
+
+            <p><strong>老司機 (大模型)</strong></p>
+            <ul>
+                <li>已經會開自排車 (預訓練)</li>
+                <li>只需要 10 小時就學會手排 (微調)</li>
+                <li>而且開得更好!</li>
+            </ul>
+
+            <p><strong>關鍵:</strong>通用知識 (開車經驗) 可以遷移!</p>
+        </div>
+
+        <h2>🎛️ 實驗 3: Feature-based vs Fine-tuning</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                All of the BERT results presented so far have used the fine-tuning approach. However, the feature-based approach, where fixed features are extracted from the pre-trained model, has certain advantages.
+            </div>
+            <div class="translation">
+                到目前為止,所有呈現的 BERT 結果都使用了微調方法。然而,基於特徵的方法(從預訓練模型中提取固定特徵)具有某些優勢。
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h4>🔍 兩種使用 BERT 的方法</h4>
+
+            <h5>方法 A: Fine-tuning (微調)</h5>
+            <pre><code>預訓練 BERT
+    ↓
+加一層輸出層
+    ↓
+用任務資料訓練 (更新 BERT 所有參數)
+    ↓
+得到任務專用模型</code></pre>
+            <p><strong>優點:</strong>效能最好</p>
+            <p><strong>缺點:</strong>每個任務都要複製一份 BERT</p>
+
+            <h5>方法 B: Feature-based (特徵提取)</h5>
+            <pre><code>預訓練 BERT (凍結,不更新)
+    ↓
+提取每層的向量表示
+    ↓
+加 BiLSTM + 分類層 (只訓練這個)
+    ↓
+得到任務專用模型</code></pre>
+            <p><strong>優點:</strong>可以預先計算表示,共用 BERT</p>
+            <p><strong>缺點:</strong>效能稍差</p>
+        </div>
+
+        <div class="key-concept">
+            <h4>📊 實驗結果 (CoNLL-2003 NER 任務)</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>方法</th>
+                        <th>F1 分數</th>
+                        <th>說明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: var(--primary-light);">
+                        <td><strong>Fine-tuning</strong></td>
+                        <td><strong>96.4</strong></td>
+                        <td>更新所有參數</td>
+                    </tr>
+                    <tr>
+                        <td>最後一層</td>
+                        <td>95.7</td>
+                        <td>只用 layer 24</td>
+                    </tr>
+                    <tr>
+                        <td>倒數第二層</td>
+                        <td>96.0</td>
+                        <td>只用 layer 23</td>
+                    </tr>
+                    <tr style="background: var(--success-light);">
+                        <td><strong>Top 4 層連接</strong></td>
+                        <td><strong>96.1</strong></td>
+                        <td>Layer 21-24 連接起來</td>
+                    </tr>
+                    <tr>
+                        <td>所有層相加</td>
+                        <td>95.6</td>
+                        <td>24 層加權平均</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>關鍵發現:</strong></p>
+            <ul>
+                <li>Feature-based 只差 Fine-tuning <strong>0.3%</strong>!</li>
+                <li>不同層編碼不同資訊,組合使用更好</li>
+                <li>BERT 兩種方法都很有效</li>
+            </ul>
+        </div>
+
+        <h2>⚙️ 詳細訓練過程</h2>
+
+        <div class="explanation">
+            <h4>🔧 BERT 如何訓練?</h4>
+
+            <h5>預訓練 (Pre-training)</h5>
+            <table>
+                <thead>
+                    <tr>
+                        <th>參數</th>
+                        <th>BERT-BASE</th>
+                        <th>BERT-LARGE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>硬體</strong></td>
+                        <td>4 Cloud TPUs (16 chips)</td>
+                        <td>16 Cloud TPUs (64 chips)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Batch Size</strong></td>
+                        <td colspan="2">256 sequences × 512 tokens = 128,000 tokens/batch</td>
+                    </tr>
+                    <tr>
+                        <td><strong>訓練步數</strong></td>
+                        <td colspan="2">1,000,000 steps (~40 epochs)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>學習率</strong></td>
+                        <td colspan="2">1e-4 (Adam, warmup 10,000 steps)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dropout</strong></td>
+                        <td colspan="2">0.1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>激活函數</strong></td>
+                        <td colspan="2">GELU (不是 ReLU)</td>
+                    </tr>
+                    <tr style="background: var(--accent-light);">
+                        <td><strong>訓練時間</strong></td>
+                        <td><strong>4 天</strong></td>
+                        <td><strong>4 天</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h5>序列長度策略</h5>
+            <p><strong>問題:</strong>長序列 (512 tokens) 的 attention 計算很貴 (O(n²))</p>
+            <p><strong>解決:</strong></p>
+            <ul>
+                <li>前 90% 步數:用 128 tokens 序列</li>
+                <li>後 10% 步數:用 512 tokens 序列</li>
+            </ul>
+            <p><strong>效果:</strong>加速訓練,同時學會長序列的位置編碼</p>
+
+            <h5>微調 (Fine-tuning)</h5>
+            <p><strong>超參數範圍:</strong></p>
+            <ul>
+                <li>Batch size: 16 或 32</li>
+                <li>Learning rate: 5e-5, 3e-5, 或 2e-5</li>
+                <li>Epochs: 2, 3, 或 4</li>
+            </ul>
+            <p><strong>建議:</strong>窮舉搜尋,選驗證集最好的</p>
+            <p><strong>速度:</strong>通常幾小時內完成</p>
+        </div>
+
+        <h2>🎓 總結</h2>
+
+        <div class="key-concept">
+            <h4>✅ 消融實驗的核心發現</h4>
+
+            <h5>1️⃣ NSP 任務有用但不關鍵</h5>
+            <ul>
+                <li>移除 NSP:效能下降 0.5-2.3%</li>
+                <li>對句子對任務 (MNLI, QNLI) 影響較大</li>
+            </ul>
+
+            <h5>2️⃣ 雙向性極其重要</h5>
+            <ul>
+                <li>單向模型:某些任務暴跌 10%+</li>
+                <li>特別是需要全局理解的任務 (SQuAD, MRPC)</li>
+                <li><strong>這是 BERT 最核心的創新!</strong></li>
+            </ul>
+
+            <h5>3️⃣ 更大的模型總是更好</h5>
+            <ul>
+                <li>即使在小資料集 (3,600 樣本)</li>
+                <li>預訓練讓大模型不會過擬合</li>
+                <li>340M 參數比 110M 好 ~2%</li>
+            </ul>
+
+            <h5>4️⃣ Feature-based 也很有效</h5>
+            <ul>
+                <li>只比 Fine-tuning 差 0.3%</li>
+                <li>某些場景更實用 (預計算、共用模型)</li>
+            </ul>
+
+            <h5>5️⃣ 訓練細節很重要</h5>
+            <ul>
+                <li>序列長度策略:先短後長</li>
+                <li>Batch size: 128,000 tokens (巨大!)</li>
+                <li>4 天 × 16 TPUs = 相當於 64 天 × 1 TPU</li>
+            </ul>
+        </div>
+
+        <div style="background: linear-gradient(135deg, var(--primary-light), var(--secondary-light)); padding: 30px; border-radius: var(--radius-lg); text-align: center; margin: 40px 0;">
+            <h3>🔬 科學的力量</h3>
+            <p style="font-size: 1.2rem; line-height: 1.8;">
+                消融實驗不只是「跑數字」,<br>
+                而是<strong>科學地證明</strong>每個設計決策!<br><br>
+                • NSP → 證明需要句子關係<br>
+                • 雙向性 → 證明全局上下文的價值<br>
+                • 模型大小 → 證明 Scaling Law<br><br>
+                這就是為什麼 BERT 如此成功! 🎯
+            </p>
+        </div>
+
+        <div class="quick-links">
+            <a href="index.html" class="quick-link">← 回到 BERT 教學首頁</a>
+            <a href="03-pretraining-tasks.html" class="quick-link">📖 第 3 頁:預訓練任務</a>
+            <a href="../index.html" class="quick-link">🏠 回到三部曲總覽</a>
+        </div>
+    </div>
+</body>
+</html>
+

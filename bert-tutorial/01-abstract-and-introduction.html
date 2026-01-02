@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 1 頁:摘要與引言 - BERT 論文深度解析</title>
+    <link rel="stylesheet" href="../transformer-tutorial/style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <h1>📖 第 1 頁:摘要與引言</h1>
+            <div class="paper-meta">
+                <div class="meta-item">
+                    <strong>論文標題</strong>
+                    BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding
+                </div>
+                <div class="meta-item">
+                    <strong>作者</strong>
+                    Jacob Devlin et al. (Google AI Language)
+                </div>
+                <div class="meta-item">
+                    <strong>發表</strong>
+                    NAACL 2019
+                </div>
+                <div class="meta-item">
+                    <strong>關鍵創新</strong>
+                    雙向預訓練、Masked LM
+                </div>
+            </div>
+        </div>
+
+        <h2>📄 Abstract (摘要)</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers.
+            </div>
+            <div class="translation">
+                我們介紹一個新的語言表示模型 BERT,代表來自 Transformers 的雙向編碼器表示。與近期的語言表示模型不同,BERT 旨在透過在所有層中同時條件化左右上下文,從無標記文本中預訓練深度雙向表示。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>🎯 BERT 是什麼?</h4>
+            <p><strong>全名:</strong> <strong>B</strong>idirectional <strong>E</strong>ncoder <strong>R</strong>epresentations from <strong>T</strong>ransformers</p>
+            
+            <p><strong>核心特色:</strong></p>
+            <ul>
+                <li><strong>Bidirectional (雙向)</strong>:同時看左邊和右邊的文字</li>
+                <li><strong>Encoder (編碼器)</strong>:使用 Transformer Encoder 架構</li>
+                <li><strong>Pre-training (預訓練)</strong>:先在大量資料上學習,再針對特定任務微調</li>
+            </ul>
+        </div>
+
+        <div class="explanation">
+            <h4>🔍 為什麼叫「雙向」?</h4>
+            <p><strong>對比舊方法:</strong></p>
+            
+            <h5>❌ 單向模型 (例如 GPT)</h5>
+            <pre><code>句子: "The cat sat on the mat"
+處理方式: The → cat → sat → on → the → mat
+         (只能看「左邊」的字)</code></pre>
+
+            <h5>✅ 雙向模型 (BERT)</h5>
+            <pre><code>句子: "The cat sat on the mat"
+處理方式: 每個字都能同時看「左邊」和「右邊」!
+
+"sat" 可以看到:
+← 左邊: The, cat
+→ 右邊: on, the, mat</code></pre>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:閱讀理解的差異</h4>
+            <p><strong>單向閱讀 (GPT 的方式)</strong></p>
+            <p>想像你用一張紙遮住右邊,一個字一個字往右讀:</p>
+            <pre><code>"The cat [遮住] [遮住] [遮住] [遮住]"
+→ 你只知道有隻貓,但不知道貓做了什麼</code></pre>
+
+            <p><strong>雙向閱讀 (BERT 的方式)</strong></p>
+            <p>你可以看整句話:</p>
+            <pre><code>"The cat sat on the mat"
+→ 你知道貓「坐」在墊子上,理解更完整!</code></pre>
+        </div>
+
+        <div class="figure">
+            <img src="images/BERT_comparisons.png" alt="BERT 與其他模型的架構對比" style="max-width: 100%; height: auto;">
+            <p class="caption">
+                <strong>圖 1.1:BERT 與其他預訓練模型的架構對比</strong><br>
+                左側是 <strong>BERT</strong>:雙向 Encoder,可以同時看到上下文的左右兩邊<br>
+                中間是 <strong>GPT</strong>:單向 Decoder,只能從左到右看<br>
+                右側是 <strong>ELMo</strong>:淺層雙向(兩個獨立的單向 LSTM)<br>
+                <strong>BERT 的優勢:</strong>深層雙向,能更好地理解上下文!
+            </p>
+        </div>
+
+        <div class="text-pair">
+            <div class="original-text">
+                As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications.
+            </div>
+            <div class="translation">
+                因此,預訓練的 BERT 模型只需添加一個額外的輸出層就可以進行微調,為廣泛的任務創建最先進的模型,例如問答和語言推理,而不需要大量特定任務的架構修改。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>🚀 BERT 的驚人成果</h4>
+            <p><strong>在 11 個 NLP 任務上刷新紀錄!</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>任務</th>
+                        <th>成績</th>
+                        <th>提升幅度</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>GLUE</strong></td>
+                        <td>80.5%</td>
+                        <td>+7.7%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MultiNLI</strong></td>
+                        <td>86.7%</td>
+                        <td>+4.6%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SQuAD v1.1</strong></td>
+                        <td>93.2 F1</td>
+                        <td>+1.5</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SQuAD v2.0</strong></td>
+                        <td>83.1 F1</td>
+                        <td>+5.1</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="analogy">
+            <h4>🤖 AI 體驗連結:為什麼 Google 搜尋變聰明了?</h4>
+            <p><strong>你可能注意到...</strong></p>
+            <p>2019 年後,Google 搜尋開始更「懂」你的問題!</p>
+
+            <p><strong>範例:</strong></p>
+            <blockquote>
+                搜尋: "2019 brazil traveler to usa need a visa"<br>
+                <br>
+                <strong>舊 Google (2019 前)</strong>: 只看關鍵字 "brazil", "usa", "visa"<br>
+                <strong>新 Google (2019 後)</strong>: 理解「巴西人」要去「美國」需不需要簽證
+            </blockquote>
+
+            <p><strong>秘密武器:</strong> Google 在 2019 年將 <strong>BERT 整合進搜尋引擎</strong>!</p>
+            <p>BERT 的「雙向理解」讓搜尋引擎更懂語意!</p>
+        </div>
+
+        <h2>🌟 引言:為什麼需要 BERT?</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                Language model pre-training has been shown to be effective for improving many natural language processing tasks. These include sentence-level tasks such as natural language inference and paraphrasing, as well as token-level tasks such as named entity recognition and question answering.
+            </div>
+            <div class="translation">
+                語言模型預訓練已被證明對改善許多自然語言處理任務有效。這些包括句子層級的任務,如自然語言推理和改寫,以及標記層級的任務,如命名實體識別和問答。
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h4>🔍 什麼是「預訓練」+「微調」?</h4>
+            <p><strong>兩階段學習策略:</strong></p>
+
+            <h5>階段 1:預訓練 (Pre-training)</h5>
+            <ul>
+                <li><strong>資料</strong>:大量無標記文本 (例如 Wikipedia)</li>
+                <li><strong>目標</strong>:學習「通用語言知識」</li>
+                <li><strong>時間</strong>:數天到數週</li>
+                <li><strong>成本</strong>:高 (需要大量 GPU)</li>
+            </ul>
+
+            <h5>階段 2:微調 (Fine-tuning)</h5>
+            <ul>
+                <li><strong>資料</strong>:少量標記資料 (例如 1 萬筆問答)</li>
+                <li><strong>目標</strong>:針對特定任務優化</li>
+                <li><strong>時間</strong>:數分鐘到數小時</li>
+                <li><strong>成本</strong>:低</li>
+            </ul>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:通才 → 專家</h4>
+            <p><strong>預訓練 = 大學通識教育</strong></p>
+            <ul>
+                <li>學習廣泛的基礎知識(數學、物理、語言...)</li>
+                <li>時間長、範圍廣</li>
+            </ul>
+
+            <p><strong>微調 = 專業訓練</strong></p>
+            <ul>
+                <li>針對特定領域深化(例如:變成「問答專家」)</li>
+                <li>時間短、目標明確</li>
+            </ul>
+
+            <p><strong>好處:</strong></p>
+            <p>有了通識基礎,學新專業會更快!</p>
+        </div>
+
+        <div class="text-pair">
+            <div class="original-text">
+                There are two existing strategies for applying pre-trained language representations to downstream tasks: feature-based and fine-tuning. The feature-based approach, such as ELMo, uses task-specific architectures that include the pre-trained representations as additional features. The fine-tuning approach, such as the Generative Pre-trained Transformer (OpenAI GPT), introduces minimal task-specific parameters, and is trained on the downstream tasks by simply fine-tuning all pre-trained parameters.
+            </div>
+            <div class="translation">
+                目前有兩種策略可將預訓練的語言表示應用於下游任務:基於特徵和微調。基於特徵的方法,如 ELMo,使用包含預訓練表示作為額外特徵的任務特定架構。微調方法,如生成式預訓練 Transformer (OpenAI GPT),引入最少的任務特定參數,並透過簡單地微調所有預訓練參數來在下游任務上訓練。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>📊 兩種應用策略</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>策略</th>
+                        <th>代表模型</th>
+                        <th>方式</th>
+                        <th>優點</th>
+                        <th>缺點</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Feature-based</strong></td>
+                        <td>ELMo</td>
+                        <td>把預訓練模型當「特徵提取器」</td>
+                        <td>靈活</td>
+                        <td>需要設計任務架構</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fine-tuning</strong></td>
+                        <td>GPT, BERT</td>
+                        <td>直接微調整個模型</td>
+                        <td>簡單、效果好</td>
+                        <td>每個任務要存一份模型</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="analogy">
+            <h4>🔧 工程類比:兩種應用方式</h4>
+            <pre><code>// Feature-based (ELMo 方式)
+pretrained_model = load_elmo()
+features = pretrained_model.extract_features(text)  // 凍結,不更新
+custom_model = build_task_model()  // 自己設計
+output = custom_model(features)  // 組合使用
+
+// Fine-tuning (BERT 方式)
+pretrained_model = load_bert()
+pretrained_model.add_output_layer(num_classes)  // 只加一層
+pretrained_model.train(task_data)  // 全部一起訓練!
+output = pretrained_model(text)
+</code></pre>
+        </div>
+
+        <h2>❌ 單向模型的問題</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                We argue that current techniques restrict the power of the pre-trained representations, especially for the fine-tuning approaches. The major limitation is that standard language models are unidirectional, and this limits the choice of architectures that can be used during pre-training.
+            </div>
+            <div class="translation">
+                我們認為目前的技術限制了預訓練表示的能力,特別是對於微調方法。主要限制是標準語言模型是單向的,這限制了預訓練期間可以使用的架構選擇。
+            </div>
+        </div>
+
+        <div class="problem">
+            <h4>❌ GPT 的限制:只能往右看</h4>
+            <p><strong>GPT 的架構:</strong></p>
+            <pre><code>句子: "The cat sat on the mat"
+
+處理 "sat":
+✓ 可以看: The, cat (左邊)
+✗ 不能看: on, the, mat (右邊)
+
+為什麼? GPT 是「語言生成模型」,
+預測「下一個字」時不能偷看答案!</code></pre>
+
+            <p><strong>問題:</strong></p>
+            <ul>
+                <li>對於「句子層級」任務還好</li>
+                <li>但對於「詞層級」任務 (例如問答) 很糟!</li>
+            </ul>
+        </div>
+
+        <div class="explanation">
+            <h4>🤔 為什麼問答任務需要雙向?</h4>
+            <p><strong>範例:</strong></p>
+            <pre><code>文章: "Mary went to the store. She bought milk."
+問題: "What did Mary buy?"
+
+分析 "She" 這個字:
+← 往左看: Mary went to the store
+→ 往右看: bought milk
+
+要知道 "She" = "Mary",需要看「左邊」!
+要知道 Mary 買了什麼,需要看「右邊」!
+
+單向模型: 處理 "She" 時看不到 "bought milk" ✗
+雙向模型: 可以同時看左右 ✓
+</code></pre>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:填空題 vs 作文題</h4>
+            <p><strong>GPT (單向) = 作文題</strong></p>
+            <p>「請續寫: The cat sat on the ___」</p>
+            <ul>
+                <li>你只能看前面的字</li>
+                <li>然後「預測」下一個字</li>
+            </ul>
+
+            <p><strong>BERT (雙向) = 填空題</strong></p>
+            <p>「The cat ___ on the mat」</p>
+            <ul>
+                <li>你可以看「前後文」</li>
+                <li>根據上下文判斷空格應該填什麼</li>
+            </ul>
+
+            <p><strong>哪個更能理解句意?</strong> 當然是填空題!</p>
+        </div>
+
+        <h2>✅ BERT 的解決方案</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                In this paper, we improve the fine-tuning based approaches by proposing BERT. BERT alleviates the previously mentioned unidirectionality constraint by using a "masked language model" (MLM) pre-training objective, inspired by the Cloze task.
+            </div>
+            <div class="translation">
+                在本文中,我們透過提出 BERT 來改進基於微調的方法。BERT 透過使用「遮罩語言模型」(MLM) 預訓練目標來緩解先前提到的單向性限制,靈感來自完形填空任務。
+            </div>
+        </div>
+
+        <div class="solution">
+            <h4>✅ 核心創新:Masked Language Model (MLM)</h4>
+            <p><strong>概念:</strong></p>
+            <p>隨機「遮住」15% 的字,讓模型預測被遮住的字!</p>
+
+            <pre><code>原句: "The cat sat on the mat"
+遮罩: "The cat [MASK] on the mat"
+任務: 預測 [MASK] = "sat"
+
+模型可以看:
+← 左邊: The, cat
+→ 右邊: on, the, mat
+→ 達成「雙向」理解!</code></pre>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:完形填空測驗</h4>
+            <p><strong>國中英文考試:</strong></p>
+            <blockquote>
+                "The weather was very ____ yesterday, so we stayed home."<br>
+                (A) sunny  (B) rainy  (C) hot
+            </blockquote>
+
+            <p>你怎麼作答?</p>
+            <ul>
+                <li>看前文: "The weather was very"</li>
+                <li>看後文: "so we stayed home"</li>
+                <li>推論: 因為待在家,可能天氣不好 → 選 (B) rainy</li>
+            </ul>
+
+            <p><strong>BERT 的訓練就是做「完形填空」!</strong></p>
+        </div>
+
+        <div class="text-pair">
+            <div class="original-text">
+                In addition to the masked language model, we also use a "next sentence prediction" task that jointly pre-trains text-pair representations.
+            </div>
+            <div class="translation">
+                除了遮罩語言模型之外,我們還使用「下一句預測」任務來共同預訓練文本對表示。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>🎯 BERT 的兩個預訓練任務</h4>
+            
+            <h5>任務 1:Masked LM (遮罩語言模型)</h5>
+            <ul>
+                <li><strong>目標</strong>:預測被遮住的字</li>
+                <li><strong>目的</strong>:學習詞層級的理解</li>
+            </ul>
+
+            <h5>任務 2:Next Sentence Prediction (下一句預測)</h5>
+            <ul>
+                <li><strong>目標</strong>:判斷句子 B 是否是句子 A 的下一句</li>
+                <li><strong>目的</strong>:學習句子之間的關係</li>
+            </ul>
+
+            <p><em>💡 詳細內容我們會在第 3 頁深入探討!</em></p>
+        </div>
+
+        <div class="analogy">
+            <h4>🤖 AI 體驗連結:從 BERT 到 ChatGPT</h4>
+            <p><strong>時間線:</strong></p>
+            <ul>
+                <li><strong>2017</strong>: Transformer 論文發表</li>
+                <li><strong>2018</strong>: GPT (單向) 和 BERT (雙向) 同年發表</li>
+                <li><strong>2019</strong>: BERT 改變 NLP 領域</li>
+                <li><strong>2020</strong>: GPT-3 (175B 參數)</li>
+                <li><strong>2022</strong>: ChatGPT 發布</li>
+            </ul>
+
+            <p><strong>關鍵差異:</strong></p>
+            <ul>
+                <li><strong>BERT</strong>: 雙向、擅長「理解」任務 (分類、問答)</li>
+                <li><strong>GPT</strong>: 單向、擅長「生成」任務 (寫作、對話)</li>
+            </ul>
+
+            <p><strong>為什麼 ChatGPT 用 GPT 不用 BERT?</strong></p>
+            <p>因為對話系統需要「逐字生成」回應,BERT 的雙向機制不適合生成任務!</p>
+
+            <p><strong>但 BERT 仍很重要!</strong></p>
+            <ul>
+                <li>Google 搜尋、Gmail 智能回覆都用 BERT</li>
+                <li>BERT 開創了「大規模預訓練」的時代</li>
+                <li>後續模型 (RoBERTa, ALBERT, ELECTRA) 都是改進 BERT</li>
+            </ul>
+        </div>
+
+        <div class="nav-bar">
+            <button class="nav-btn" disabled>← 上一頁</button>
+            <a href="index.html" class="nav-btn">📑 目錄</a>
+            <a href="02-bert-architecture.html" class="nav-btn primary">下一頁 → BERT 架構</a>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-3 推理流程詳解</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        .architecture-diagram {
+            background: white;
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="gpt3-96-layers-architecture.html">96層架構</a>
+            <span>/</span>
+            <a href="gpt3-training-vs-inference.html">訓練 vs 推理</a>
+            <span>/</span>
+            <span class="current">🚀 推理詳解</span>
+        </div>
+
+        <h1>🚀 GPT-3 推理流程：從輸入到輸出的完整旅程</h1>
+        
+        <div class="key-concept">
+            <h3>🎯 本章重點</h3>
+            <p>完整拆解 ChatGPT 回答你的問題時，背後發生的每一步：</p>
+            <ul>
+                <li>✅ 從 Tokenization 到 Embedding</li>
+                <li>✅ 通過 96 層的 Transformer</li>
+                <li>✅ 自回歸循環的詳細過程</li>
+                <li>✅ 為什麼生成速度慢</li>
+            </ul>
+        </div>
+
+
+        <h2>🔄 補充說明 03：從論文看 Token 處理方式</h2>
+
+        <div class="explanation">
+            <h4>📄 來自 GPT-3 論文的證據</h4>
+            
+            <h5>🎯 訓練目標（論文 2.1 節）</h5>
+            <div style="background: var(--accent-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
+                <p><strong>論文原文：</strong></p>
+                <blockquote style="border-left: 4px solid var(--primary-color); padding-left: 20px; font-style: italic; color: var(--text-secondary);">
+                    "GPT-3 uses the standard language modeling objective of predicting the next token given all of the previous tokens within some text."
+                </blockquote>
+                
+                <p><strong>翻譯：</strong></p>
+                <p>GPT-3 使用標準的語言建模目標：<strong>給定文本中所有前面的 tokens，預測下一個 token</strong>。</p>
+
+                <p><strong>損失函數：</strong></p>
+                <p style="text-align: center; font-size: 1.2rem; margin: 20px 0;">
+                    \[ \mathcal{L} = -\sum_{t=1}^{T} \log P(x_t | x_1, x_2, ..., x_{t-1}) \]
+                </p>
+
+                <p><strong>解讀：</strong></p>
+                <ul>
+                    <li>\( x_t \): 第 \( t \) 個 token（目標）</li>
+                    <li>\( x_1, ..., x_{t-1} \): 前面所有 tokens（輸入）</li>
+                    <li>訓練時：<strong>所有 \( t \) 的 Loss 同時計算</strong>（並行）</li>
+                    <li>推理時：<strong>逐個生成</strong> \( x_t \)（自回歸）</li>
+                </ul>
+            </div>
+
+            <h5>📥 Step 1: 原始用戶輸入的處理</h5>
+            <div style="background: var(--primary-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
+                <p><strong>你輸入:</strong></p>
+                <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm);">今天天氣怎麼樣？</pre>
+                
+                <p><strong>Tokenizer 處理:</strong></p>
+                <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm);">
+"今天天氣怎麼樣？"
+    ↓ Tokenize (切成小單位)
+[15234, 22334, 8923, 9012, 445, 30]  ← <strong>全部 6 個 tokens 一起</strong>
+    ↓ 每個數字對應一個 token ID
+</pre>
+                
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                    💡 <strong>注意:</strong> 一個中文字可能是 1 個 token，也可能是 2-3 個！<br>
+                    英文單字通常是 1 個 token，但長單字可能被切成多個。
+                </p>
+            </div>
+
+            <h5>🔢 Step 2: Embedding 轉換（全部一起）</h5>
+            <div style="background: var(--secondary-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
+                <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm);">
+Token IDs: [15234, 22334, 8923, 9012, 445, 30]  ← 6 個 tokens
+    ↓ Token Embedding Layer (<strong>同時轉換</strong>)
+向量化: 
+  [15234] → [0.23, -0.45, 0.89, ..., 0.12]  (12288 維)
+  [22334] → [-0.67, 0.34, -0.23, ..., 0.45] (12288 維)
+  [8923]  → [0.12, 0.56, -0.78, ..., 0.34]  (12288 維)
+  [9012]  → [-0.23, 0.67, 0.12, ..., -0.56] (12288 維)
+  [445]   → [0.89, -0.12, 0.34, ..., 0.78]  (12288 維)
+  [30]    → [0.45, 0.23, -0.67, ..., -0.12] (12288 維)
+    ↓ 加上 Positional Encoding
+  Position 0 + Token 15234 的 embedding
+  Position 1 + Token 22334 的 embedding
+  Position 2 + Token 8923 的 embedding
+  Position 3 + Token 9012 的 embedding
+  Position 4 + Token 445 的 embedding
+  Position 5 + Token 30 的 embedding
+
+<strong>✅ 形成輸入矩陣 (shape: [6, 12288])</strong>
+<strong>✅ 6 個 tokens 全部準備好，一起進入第 1 層！</strong>
+</pre>
+            </div>
+
+            <h5>🏗️ Step 3: 通過 96 層 Transformer（全部一起，但有 Mask）</h5>
+            <div style="background: var(--purple-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
+                <p><strong>關鍵：雖然 6 個 tokens 一起輸入，但 Causal Mask 限制了可見範圍！</strong></p>
+                
+                <p><strong>每一層的 Masked Self-Attention 運作：</strong></p>
+                <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm); margin-top: 15px;">
+<strong>輸入：</strong>[6 個 tokens × 12288 維] 全部一起進來
+
+<strong>在每一層的 Attention 計算中：</strong>
+
+Position 0 (今天):  只能 attend 到 [今天]
+Position 1 (天氣):  只能 attend 到 [今天, 天氣]
+Position 2 (怎麼):  只能 attend 到 [今天, 天氣, 怎麼]
+Position 3 (樣):    只能 attend 到 [今天, 天氣, 怎麼, 樣]
+Position 4 (？):    只能 attend 到 [今天, 天氣, 怎麼, 樣, ？]
+Position 5 (30):    只能 attend 到 [今天, 天氣, 怎麼, 樣, ？, 30]
+
+<strong>雖然物理上同時存在，但邏輯上「看不到」未來的 tokens！</strong>
+
+    ↓ Feed-Forward Network (每個 position 獨立處理)
+    ↓ Layer Norm + Residual
+    ↓ 進入下一層...
+    ↓ × 96 層
+
+<strong>輸出：</strong>[6 個 tokens × 12288 維] 全部一起輸出
+</pre>
+                
+                <p style="color: var(--danger-color); font-weight: bold;">
+                    ⚠️ 關鍵：每個 token 只能看到「它之前」的 tokens！<br>
+                    這就是 Causal Masking（因果遮蔽）
+                </p>
+
+                <div style="background: var(--accent-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
+                    <h5>📊 Causal Mask 矩陣視覺化</h5>
+                    <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm); font-family: monospace; line-height: 1.8;">
+        可以看到→ [今天] [天氣] [怎麼] [樣] [？] [30]
+               ↓
+    [今天]      ✅    ❌    ❌   ❌  ❌  ❌  
+    [天氣]      ✅    ✅    ❌   ❌  ❌  ❌  
+    [怎麼]      ✅    ✅    ✅   ❌  ❌  ❌  
+    [樣]        ✅    ✅    ✅   ✅  ❌  ❌
+    [？]        ✅    ✅    ✅   ✅  ✅  ❌
+    [30]        ✅    ✅    ✅   ✅  ✅  ✅
+
+<strong>下三角矩陣 = 只能看到「自己和之前」</strong>
+    </pre>
+                </div>
+            </div>
+
+            <h5>📊 Step 4: 預測下一個 Token（只看最後一個 position）</h5>
+            <div style="background: var(--accent-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
+                <p><strong>只看最後一個 token 的輸出向量:</strong></p>
+                <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm);">
+最後一層的輸出 (第 6 個 token "？" 的位置):
+  [0.45, -0.23, 0.89, ..., 0.12]  (12288 維)
+    ↓ Language Model Head (線性層)
+  [50257 個數字]  → 詞彙表的每個詞的「分數」
+    ↓ Softmax (轉成機率)
+  [0.001, 0.003, ..., 0.15, ..., 0.0001]
+       ↑ 第 12 個: "今"
+           ↑ 第 234 個: "很"
+               ↑ 第 1024 個: "不" 
+                   ...
+
+Top 3 預測:
+  1. "很" (機率 15%)  ← 最高！選這個
+  2. "不" (機率 12%)
+  3. "還" (機率 8%)
+</pre>
+            </div>
+
+            <h5>🔄 Step 5: 自回歸循環（一個字一個字生成）</h5>
+            <div style="background: var(--success-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
+                <p><strong>這是最關鍵的部分！</strong></p>
+                
+                <div style="background: white; color: #0f172a; padding: 20px; border-radius: var(--radius-sm); margin: 15px 0;">
+                    <p><strong>🔁 循環 1：生成第 1 個字</strong></p>
+                    <pre>
+輸入: "今天天氣怎麼樣？"
+通過 96 層 → 預測下一個字 → <strong>"很"</strong>
+輸出: "今天天氣怎麼樣？很"
+</pre>
+                </div>
+
+                <div style="background: white; color: #0f172a; padding: 20px; border-radius: var(--radius-sm); margin: 15px 0;">
+                    <p><strong>🔁 循環 2：生成第 2 個字</strong></p>
+                    <pre>
+輸入: "今天天氣怎麼樣？很"  ← 把剛才生成的加進來！
+通過 96 層 → 預測下一個字 → <strong>"好"</strong>
+輸出: "今天天氣怎麼樣？很好"
+</pre>
+                </div>
+
+                <div style="background: white; color: #0f172a; padding: 20px; border-radius: var(--radius-sm); margin: 15px 0;">
+                    <p><strong>🔁 循環 3：生成第 3 個字</strong></p>
+                    <pre>
+輸入: "今天天氣怎麼樣？很好"
+通過 96 層 → 預測下一個字 → <strong>"，"</strong>
+輸出: "今天天氣怎麼樣？很好，"
+</pre>
+                </div>
+
+                <div style="background: white; color: #0f172a; padding: 20px; border-radius: var(--radius-sm); margin: 15px 0;">
+                    <p><strong>🔁 循環 4-10：繼續生成...</strong></p>
+                    <pre>
+...
+循環 4 → "適合"
+循環 5 → "出門"
+循環 6 → "走走"
+循環 7 → "。"
+循環 8 → [EOS]  ← 生成結束符號，停止！
+</pre>
+                </div>
+
+                <p style="color: var(--primary-color); font-weight: bold; margin-top: 20px;">
+                    ✨ 最終輸出: "今天天氣怎麼樣？很好，適合出門走走。"
+                </p>
+            </div>
+        </div>
+
+        <div class="problem">
+            <h4>⚠️ 為什麼要一個字一個字生成？不能一次全部輸出嗎？</h4>
+            
+            <p><strong>答案：不能！這是 GPT-3 的設計限制，也是它的特色。</strong></p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>問題</th>
+                        <th>原因</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>為什麼慢？</strong></td>
+                        <td>
+                            每生成一個字，都要：<br>
+                            1. 重新跑一遍 96 層<br>
+                            2. 計算 50257 個候選詞的機率<br>
+                            3. 選出最佳的<br><br>
+                            生成 100 個字 = 跑 100 次模型！
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>為什麼不能並行？</strong></td>
+                        <td>
+                            因為第 N 個字<strong>依賴</strong>第 N-1 個字！<br>
+                            必須等前一個字生成完，才能生成下一個。<br><br>
+                            這就是「自回歸 (Autoregressive)」的代價。
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>有沒有優化？</strong></td>
+                        <td>
+                            ✅ <strong>KV Cache:</strong> 緩存前面 tokens 的 Key/Value<br>
+                            不用每次都重算，可以加速 2-3 倍<br><br>
+                            ✅ <strong>Batch Processing:</strong> 多個用戶一起跑<br>
+                            提高 GPU 利用率
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="analogy">
+            <h4>🎨 生活類比：畫家作畫</h4>
+            
+            <p><strong>GPT-3 生成文字 = 畫家作畫</strong></p>
+            
+            <ul>
+                <li>
+                    <strong>第 1 筆：</strong>畫家看著空白畫布，決定先畫一個圓<br>
+                    → GPT-3 看「今天天氣怎麼樣？」，決定第一個字是「很」
+                </li>
+                <li>
+                    <strong>第 2 筆：</strong>畫家看著「已經畫好的圓」，決定在旁邊加兩個點<br>
+                    → GPT-3 看「今天天氣怎麼樣？很」，決定下一個字是「好」
+                </li>
+                <li>
+                    <strong>第 3 筆：</strong>畫家看著「圓+兩點」，決定下面畫一條弧線<br>
+                    → GPT-3 看「今天天氣怎麼樣？很好」，決定加「，」
+                </li>
+                <li>
+                    <strong>第 N 筆：</strong>每一筆都基於「之前所有的筆畫」來決定！<br>
+                    → 每個字都基於「之前所有的字」來預測！
+                </li>
+            </ul>
+
+            <p style="background: var(--primary-light); padding: 15px; border-radius: var(--radius-sm); margin-top: 20px;">
+                <strong>🎯 核心概念：Sequential Generation (順序生成)</strong><br>
+                不能一次畫完整幅畫，必須一筆一筆來！<br>
+                但正因如此，每一筆都能「看懂」前面的內容，創作出連貫的作品。
+            </p>
+        </div>
+
+        <div class="key-concept">
+            <h4>💡 總結：ChatGPT 背後的完整流程</h4>
+            
+            <pre style="background: #f8fafc; color: #0f172a; padding: 20px; border-radius: var(--radius-md); line-height: 2;">
+<strong>你輸入:</strong> "今天天氣怎麼樣？"
+
+<strong>Step 1:</strong> Tokenize → [15234, 22334, 8923, 9012, 445, 30]
+
+<strong>Step 2:</strong> Embedding → 每個 token 變成 12288 維向量
+
+<strong>Step 3:</strong> 96 層 Transformer 處理
+
+<strong>Step 4:</strong> 預測第 1 個字 → "很" (機率最高)
+
+<strong>Step 5:</strong> 把 "很" 加回輸入: "今天天氣怎麼樣？很"
+
+<strong>Step 6:</strong> 再跑一次 96 層 → 預測第 2 個字 → "好"
+
+<strong>Step 7:</strong> 把 "好" 加回輸入: "今天天氣怎麼樣？很好"
+
+<strong>Step 8:</strong> 再跑一次 96 層 → 預測第 3 個字 → "，"
+
+<strong>⋮</strong>       重複 N 次...
+
+<strong>Step N:</strong> 遇到結束符號 [EOS] → 停止生成
+
+<strong>最終輸出:</strong> "很好，適合出門走走。" ✨
+            </pre>
+
+            <p style="text-align: center; font-size: 1.2rem; margin-top: 30px; color: var(--primary-color);">
+                <strong>每個字都是「96 層深度思考」的結果！</strong> 🧠
+            </p>
+        </div>
+
+        <div class="quick-links" style="margin-top: 40px;">
+            <a href="gpt3-training-vs-inference.html" class="quick-link">← 回到：訓練 vs 推理</a>
+            <a href="gpt3-96-layers-architecture.html" class="quick-link">回到：96層架構解析</a>
+        </div>
+        
+        <div class="quick-links" style="margin-top: 20px;">
+            <a href="../index.html" class="quick-link">🏠 回到首頁</a>
+            <a href="../gpt3-tutorial/index.html" class="quick-link">📖 GPT-3 教學總覽</a>
+            <a href="tokenizer-embedding-explained.html" class="quick-link">🔤 Tokenizer 專題</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 2 頁:方法概覽 - GPT-3 論文深度解析</title>
+    <link rel="stylesheet" href="../transformer-tutorial/style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>📐 第 2 頁:方法概覽 - Few-Shot Learning 深度解析</h1>
+
+        <h2>🎓 四種學習方式的光譜</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                We can identify at least four points on this spectrum: Fine-Tuning (FT), Few-Shot (FS), One-Shot (1S), and Zero-Shot (0S).
+            </div>
+            <div class="translation">
+                我們可以在這個光譜上識別出至少四個點:微調(FT)、少樣本(FS)、單樣本(1S)和零樣本(0S)。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>📊 四種學習方式比較</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>方法</th>
+                        <th>需要資料量</th>
+                        <th>是否更新權重</th>
+                        <th>效能</th>
+                        <th>實用性</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Fine-Tuning</strong></td>
+                        <td>10,000+ 範例</td>
+                        <td>✅ 是</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                        <td>⭐⭐(成本高)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Few-Shot</strong></td>
+                        <td>10-100 範例</td>
+                        <td>❌ 否</td>
+                        <td>⭐⭐⭐⭐</td>
+                        <td>⭐⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td><strong>One-Shot</strong></td>
+                        <td>1 範例</td>
+                        <td>❌ 否</td>
+                        <td>⭐⭐⭐</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Zero-Shot</strong></td>
+                        <td>0 範例(只有指令)</td>
+                        <td>❌ 否</td>
+                        <td>⭐⭐</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>1️⃣ Fine-Tuning (微調)</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                Fine-Tuning (FT) has been the most common approach in recent years, and involves updating the weights of a pre-trained model by training on a supervised dataset specific to the desired task. Typically thousands to hundreds of thousands of labeled examples are used.
+            </div>
+            <div class="translation">
+                微調(FT)是近年來最常見的方法,涉及透過在特定任務的監督資料集上訓練來更新預訓練模型的權重。通常使用數千到數十萬個標記範例。
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h4>🔍 什麼是「更新權重」?</h4>
+            <p><strong>簡化理解:</strong></p>
+            <p>想像 AI 模型內部有 1750 億個「旋鈕」(參數/權重),每個旋鈕控制一部分「知識」。</p>
+            
+            <p><strong>Fine-Tuning 的過程:</strong></p>
+            <ol>
+                <li>拿到一個已經預訓練好的模型(旋鈕已調到「通用知識」的位置)</li>
+                <li>給它 10,000 筆「情感分析」的訓練資料</li>
+                <li>模型會<strong>調整這些旋鈕</strong>,讓它更擅長情感分析</li>
+                <li>結果:模型變成「情感分析專家」</li>
+            </ol>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:專業訓練</h4>
+            <p><strong>場景:培養一個醫生</strong></p>
+            <ul>
+                <li><strong>預訓練階段</strong>:醫學院學習通用醫學知識(4 年)</li>
+                <li><strong>Fine-Tuning 階段</strong>:住院醫師專科訓練,例如「心臟科」(3-5 年)</li>
+                <li><strong>結果</strong>:變成心臟科專家,但對神經科可能就不太熟</li>
+            </ul>
+        </div>
+
+        <div class="problem">
+            <h4>❌ Fine-Tuning 的問題</h4>
+            <ul>
+                <li><strong>資料需求大</strong>:每個任務都要數千到數萬筆資料</li>
+                <li><strong>過擬合風險</strong>:可能只會做訓練資料裡的模式,遇到新情況就失效</li>
+                <li><strong>不靈活</strong>:想做新任務?對不起,再給我 10,000 筆資料!</li>
+            </ul>
+        </div>
+
+        <h2>2️⃣ Few-Shot Learning (少樣本學習)</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                Few-Shot (FS) is the term we will use in this work to refer to the setting where the model is given a few demonstrations of the task at inference time as conditioning, but no weight updates are allowed.
+            </div>
+            <div class="translation">
+                少樣本(FS)是我們在本文中使用的術語,指的是在推理時將少數幾個任務示範作為條件給模型,但不允許權重更新的設定。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>🎯 Few-Shot 的核心概念</h4>
+            <p><strong>關鍵特徵:</strong></p>
+            <ul>
+                <li><strong>不更新權重</strong>:模型的「旋鈕」完全不動!</li>
+                <li><strong>範例數量</strong>:通常 10-100 個範例(K 個)</li>
+                <li><strong>範例位置</strong>:直接寫在<strong>輸入</strong>中!</li>
+            </ul>
+
+            <p>\[ K \in [10, 100] \quad \text{(取決於 context window)} \]</p>
+        </div>
+
+        <div class="figure">
+            <img src="images/eval_strategies.png" alt="評估策略對比" style="max-width: 100%; height: auto;">
+            <p class="caption">
+                <strong>圖 2.1:三種評估策略的視覺化對比</strong><br>
+                從左到右分別是:<br>
+                • <strong>Few-Shot</strong>:給模型幾個示範例子,然後讓它完成新任務<br>
+                • <strong>One-Shot</strong>:只給一個示範例子<br>
+                • <strong>Zero-Shot</strong>:不給示範,只給自然語言指示<br>
+                所有方法都不更新模型參數,差別只在「提示」的內容!
+            </p>
+        </div>
+
+        <div class="explanation">
+            <h4>📝 Few-Shot 實際運作範例</h4>
+            <p><strong>任務:英翻法</strong></p>
+
+            <h5>輸入給 GPT-3:</h5>
+            <pre><code>// 這些都是「輸入」的一部分!
+sea otter => loutre de mer
+peppermint => menthe poivrée  
+plush girafe => girafe peluche
+cheese => [等待模型輸出]</code></pre>
+
+            <h5>GPT-3 輸出:</h5>
+            <pre><code>fromage</code></pre>
+
+            <p><strong>魔法在哪裡?</strong></p>
+            <ul>
+                <li>模型看到「前 3 個範例」就「理解」了任務是「英翻法」</li>
+                <li>沒有修改任何權重!</li>
+                <li>只是透過「模式識別」來推理</li>
+            </ul>
+        </div>
+
+        <div style="margin: 40px 0; text-align: center;">
+            <img src="../images/user_generate_image_20260101094932_5f62.png" 
+                 alt="Few-Shot Learning 工作流程" 
+                 style="max-width: 100%; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);">
+            <p class="caption">
+                <strong>🎯 Few-Shot Learning 工作流程視覺化</strong><br>
+                左側:3 個示範例子(英翻法) → 中間:GPT-3 模型(175B 參數) → 右側:輸出結果<br>
+                底部強調:<strong>無梯度更新,純推理！</strong>這就是 Few-Shot 的魔法所在!
+            </p>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:看菜單學點菜</h4>
+            <p><strong>場景:你第一次去法國餐廳</strong></p>
+            <p>服務生給你菜單:</p>
+            <pre><code>開胃菜 => Entrée
+主菜 => Plat principal  
+甜點 => Dessert
+飲料 => [你要說什麼?]</code></pre>
+            <p>你看了前 3 行,立刻知道應該說 <strong>"Boisson"</strong></p>
+            <p>你<strong>不需要</strong>去上法文課(Fine-Tuning),只需要「看幾個範例」!</p>
+        </div>
+
+        <div class="analogy">
+            <h4>🔧 工程類比:Prompt Engineering</h4>
+            <pre><code>// Few-Shot Prompt 結構
+const prompt = `
+${examples.join('\n')}  // K 個示範
+${newTask}              // 新任務
+`;
+
+// 實際程式碼範例
+const examples = [
+  "Input: I love this! | Output: Positive",
+  "Input: This is terrible. | Output: Negative",
+  "Input: Not bad! | Output: Positive"
+];
+
+const newTask = "Input: Amazing experience! | Output: ";
+
+// GPT-3 會輸出: "Positive"
+</code></pre>
+            <p><strong>⚠️ Reality Check:</strong></p>
+            <ul>
+                <li><strong>類比:</strong>GPT-3 像人類一樣「學會」了任務</li>
+                <li><strong>實際:</strong>GPT-3 是在做「模式匹配」和「統計推理」</li>
+                <li><strong>差異:</strong>它可能會被格式誤導,不是真的「理解」任務本質</li>
+            </ul>
+        </div>
+
+        <h2>3️⃣ One-Shot Learning (單樣本學習)</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                One-Shot (1S) is the same as few-shot except that only one demonstration is allowed, in addition to a natural language description of the task. The reason to distinguish one-shot from few-shot and zero-shot is that it most closely matches the way in which some tasks are communicated to humans.
+            </div>
+            <div class="translation">
+                單樣本(1S)與少樣本相同,只是除了任務的自然語言描述外,只允許一個示範。區分單樣本與少樣本和零樣本的原因是,它最接近某些任務向人類傳達的方式。
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h4>📝 One-Shot 範例</h4>
+            <pre><code>// 任務描述
+Translate English to French:
+
+// 只有 1 個範例!
+sea otter => loutre de mer
+
+// 新任務
+cheese => [等待輸出]</code></pre>
+
+            <p><strong>與 Few-Shot 的差異:</strong></p>
+            <ul>
+                <li><strong>Few-Shot</strong>:給 10-100 個範例,讓模型「確定」任務模式</li>
+                <li><strong>One-Shot</strong>:只給 1 個範例 + 任務描述,考驗模型的理解力</li>
+            </ul>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:看一次就會</h4>
+            <p><strong>場景:朋友教你玩新桌遊</strong></p>
+            <p>朋友說:「這是『誰是臥底』,每人拿到一個詞,但有一個人的詞不一樣」</p>
+            <p>然後玩一輪示範(1 個範例),你就懂了!</p>
+            <p>這就是 One-Shot —— <strong>一個範例 + 說明</strong>就足夠!</p>
+        </div>
+
+        <h2>4️⃣ Zero-Shot Learning (零樣本學習)</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                Zero-Shot (0S) is the same as one-shot except that no demonstrations are allowed, and the model is only given a natural language instruction describing the task. This method provides maximum convenience, potential for robustness, and avoidance of spurious correlations, but is also the most challenging setting.
+            </div>
+            <div class="translation">
+                零樣本(0S)與單樣本相同,只是不允許任何示範,模型只獲得描述任務的自然語言指令。這種方法提供了最大的便利性、潛在的穩健性和避免虛假相關性,但也是最具挑戰性的設定。
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h4>📝 Zero-Shot 範例</h4>
+            <pre><code>// 只有任務描述,沒有任何範例!
+Translate English to French:
+
+// 直接給新任務
+cheese => [等待輸出]</code></pre>
+
+            <p><strong>挑戰:</strong></p>
+            <ul>
+                <li>模型需要「理解」自然語言指令</li>
+                <li>沒有範例可以參考格式</li>
+                <li>完全依賴預訓練時學到的知識</li>
+            </ul>
+        </div>
+
+        <div class="analogy">
+            <h4>🤖 AI 體驗連結:你每天都在用 Zero-Shot!</h4>
+            <p><strong>你對 ChatGPT 說:</strong></p>
+            <blockquote>
+                「請幫我寫一封感謝信給我的老闆」
+            </blockquote>
+            <p>你<strong>沒有</strong>給範例,只有「指令」!</p>
+            <p>ChatGPT 就能理解並完成 → 這就是 <strong>Zero-Shot Learning</strong></p>
+
+            <p><strong>⚠️ Zero-Shot 的限制:</strong></p>
+            <p>當任務「格式模糊」時,Zero-Shot 可能表現不佳:</p>
+            <blockquote>
+                「幫我做一個表格」 → 什麼表格?幾欄?什麼格式?
+            </blockquote>
+            <p>這時候給「One-Shot 範例」會好很多!</p>
+        </div>
+
+        <h2>📊 Context Window:關鍵限制</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                $K$ can be any value from 0 to the maximum amount allowed by the model's context window, which is $n_{\mathrm{ctx}}=2048$ for all models and typically fits 10 to 100 examples.
+            </div>
+            <div class="translation">
+                K 可以是從 0 到模型上下文視窗允許的最大值之間的任何值,對於所有模型來說 \(n_{\text{ctx}}=2048\),通常可以容納 10 到 100 個範例。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>🪟 Context Window 是什麼?</h4>
+            <p><strong>定義:</strong>模型一次能「看」的最大文字量</p>
+            
+            <p><strong>GPT-3 的限制:</strong></p>
+            <p>\[ n_{\text{ctx}} = 2048 \text{ tokens} \]</p>
+
+            <p><strong>實際影響:</strong></p>
+            <ul>
+                <li>2048 tokens ≈ 1500 個英文字</li>
+                <li>Few-Shot 範例 + 任務輸入 + 輸出空間 都要在這 2048 內!</li>
+                <li>所以通常只能放 10-100 個範例</li>
+            </ul>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:短期記憶容量</h4>
+            <p>想像 Context Window 是你的「桌面空間」:</p>
+            <ul>
+                <li><strong>桌面大小固定</strong>:2048 tokens</li>
+                <li><strong>放範例</strong>:每個範例佔用一些空間</li>
+                <li><strong>放任務</strong>:新任務也要佔空間</li>
+                <li><strong>留輸出空間</strong>:還要留空間讓模型「寫答案」</li>
+            </ul>
+            <p>桌面塞滿了?對不起,舊的資料會被「推出去」(遺忘)!</p>
+        </div>
+
+        <div class="analogy">
+            <h4>🤖 AI 體驗連結:為什麼 ChatGPT 會「忘記」?</h4>
+            <p><strong>你的體驗:</strong></p>
+            <p>當你跟 ChatGPT 聊很久,它會「忘記」一開始說的內容!</p>
+
+            <p><strong>原因:</strong></p>
+            <p>對話太長 → 超過 Context Window → 最早的訊息被「擠出去」了!</p>
+
+            <p><strong>GPT-3 vs 現代模型:</strong></p>
+            <ul>
+                <li><strong>GPT-3 (2020)</strong>: 2048 tokens</li>
+                <li><strong>GPT-3.5-turbo</strong>: 4096 tokens</li>
+                <li><strong>GPT-4</strong>: 8192 / 32768 tokens</li>
+                <li><strong>GPT-4-turbo</strong>: 128000 tokens</li>
+            </ul>
+            <p>Context Window 越大 → 「記憶力」越好!</p>
+        </div>
+
+        <h2>🎯 為什麼 GPT-3 選擇 Few-Shot?</h2>
+
+        <div class="key-concept">
+            <h4>權衡考量</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>方法</th>
+                        <th>優點</th>
+                        <th>缺點</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Zero-Shot</strong></td>
+                        <td>最方便、最自然</td>
+                        <td>效能通常最差</td>
+                    </tr>
+                    <tr>
+                        <td><strong>One-Shot</strong></td>
+                        <td>接近人類學習方式</td>
+                        <td>單一範例可能不足</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Few-Shot</strong></td>
+                        <td>效能好、仍然實用</td>
+                        <td>需要準備範例</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fine-Tuning</strong></td>
+                        <td>效能最好</td>
+                        <td>成本高、不靈活</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="solution">
+            <h4>✅ GPT-3 的策略</h4>
+            <p><strong>論文測試所有三種:</strong></p>
+            <ul>
+                <li><strong>Zero-Shot</strong>:測試「純指令理解」能力</li>
+                <li><strong>One-Shot</strong>:測試「最小範例學習」能力</li>
+                <li><strong>Few-Shot</strong>:測試「最佳實用性能」</li>
+            </ul>
+            <p><strong>重點發現:</strong></p>
+            <p>Few-Shot 效能<strong>接近甚至超越</strong>許多 Fine-Tuned 模型!</p>
+        </div>
+
+        <div class="analogy">
+            <h4>🤖 AI 體驗連結:Prompt Engineering 的藝術</h4>
+            <p><strong>現在你懂了!</strong></p>
+            <p>當你「優化 ChatGPT Prompt」時,你其實在做:</p>
+            <ul>
+                <li><strong>給清晰指令</strong> → Zero-Shot</li>
+                <li><strong>給 1 個範例</strong> → One-Shot</li>
+                <li><strong>給多個範例</strong> → Few-Shot</li>
+            </ul>
+
+            <p><strong>實用技巧:</strong></p>
+            <pre><code>// ❌ 效果差的 Zero-Shot
+"幫我分析這段文字"
+
+// ✅ 效果好的 Few-Shot
+"請分析以下文字的情感 (正面/負面/中立):
+
+範例 1:
+文字: 我超喜歡這個產品!
+情感: 正面
+
+範例 2:
+文字: 完全浪費錢
+情感: 負面
+
+請分析:
+文字: 還算可以吧
+情感: [等待回答]"</code></pre>
+        </div>
+
+        <div class="nav-bar">
+            <a href="01-abstract-and-introduction.html" class="nav-btn">← 上一頁:引言</a>
+            <a href="index.html" class="nav-btn">📑 目錄</a>
+            <a href="03-model-and-training.html" class="nav-btn primary">下一頁 → 模型與訓練</a>
+        </div>
+    </div>
+</body>
+</html>
+

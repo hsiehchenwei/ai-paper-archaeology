@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InstructGPT 論文深度解析 - 從 GPT-3 到 ChatGPT 的關鍵一步</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <h1>📜 InstructGPT 深度解析</h1>
+            <p class="lead">Training language models to follow instructions with human feedback</p>
+            <div class="paper-meta">
+                <div class="meta-item">
+                    <strong>發布時間</strong>
+                    2022 年 3 月
+                </div>
+                <div class="meta-item">
+                    <strong>機構</strong>
+                    OpenAI
+                </div>
+                <div class="meta-item">
+                    <strong>核心技術</strong>
+                    RLHF (人類回饋強化學習)
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <p>這篇論文是 <strong>ChatGPT 的靈魂</strong>。它解決了 GPT-3 雖然知識淵博但「聽不懂人話」的問題，定義了現代 LLM 訓練的標準流程：<strong>SFT + RM + PPO</strong>。</p>
+            </div>
+        </div>
+
+        <h2>📚 章節導覽</h2>
+        
+        <div class="chapter-list">
+            <a href="01-introduction.html" class="chapter-card">
+                <span class="chapter-number">Chapter 01</span>
+                <h3 class="chapter-title">簡介與動機：為什麼 GPT-3 需要「上學」？</h3>
+                <p class="chapter-desc">探討 GPT-3 的「對齊問題」(Alignment Problem)。為什麼一個讀遍全網的模型，卻連簡單的指令都聽不懂？什麼是 3H 原則 (Helpful, Honest, Harmless)？</p>
+                <div class="chapter-meta">
+                    <span>⏱️ 閱讀時間：10 分鐘</span>
+                    <span>⭐ 難度：入門</span>
+                </div>
+            </a>
+
+            <a href="02-methodology.html" class="chapter-card">
+                <span class="chapter-number">Chapter 02</span>
+                <h3 class="chapter-title">核心方法：RLHF 訓練三部曲</h3>
+                <p class="chapter-desc">深度解析本論文的核心貢獻：SFT (監督微調)、RM (獎勵模型)、PPO (強化學習) 的完整流程。透過「超級歌星」的比喻，讓你秒懂複雜的訓練過程。</p>
+                <div class="chapter-meta">
+                    <span>⏱️ 閱讀時間：15 分鐘</span>
+                    <span>⭐ 難度：進階</span>
+                </div>
+            </a>
+
+            <a href="03-results.html" class="chapter-card">
+                <span class="chapter-number">Chapter 03</span>
+                <h3 class="chapter-title">結果與代價：以小博大的奇蹟</h3>
+                <p class="chapter-desc">為什麼 1.3B 的模型能打敗 175B 的模型？什麼是「對齊稅」(Alignment Tax)？以及 InstructGPT 如何鋪平通往 ChatGPT 的道路。</p>
+                <div class="chapter-meta">
+                    <span>⏱️ 閱讀時間：8 分鐘</span>
+                    <span>⭐ 難度：中等</span>
+                </div>
+            </a>
+
+            <a href="04-dataset-details.html" class="chapter-card">
+                <span class="chapter-number">Chapter 04</span>
+                <h3 class="chapter-title">數據集與實驗設計：數據從哪裡來？</h3>
+                <p class="chapter-desc">揭露 OpenAI 如何收集 13k/33k/31k 的訓練資料。40 位標註者是誰？他們如何標註？使用案例分布告訴我們什麼？</p>
+                <div class="chapter-meta">
+                    <span>⏱️ 閱讀時間：12 分鐘</span>
+                    <span>⭐ 難度：中等</span>
+                </div>
+            </a>
+
+            <a href="05-detailed-results.html" class="chapter-card">
+                <span class="chapter-number">Chapter 05</span>
+                <h3 class="chapter-title">詳細實驗結果：Truthfulness、Toxicity、Generalization</h3>
+                <p class="chapter-desc">深入分析 InstructGPT 在多個維度的表現：真實性提升 2 倍、毒性降低 25%、意外的多語言與程式碼能力，以及仍會犯的錯誤。</p>
+                <div class="chapter-meta">
+                    <span>⏱️ 閱讀時間：18 分鐘</span>
+                    <span>⭐ 難度：進階</span>
+                </div>
+            </a>
+
+            <a href="06-discussion.html" class="chapter-card">
+                <span class="chapter-number">Chapter 06</span>
+                <h3 class="chapter-title">討論與未來：我們對齊到「誰」的價值觀？</h3>
+                <p class="chapter-desc">探討對齊研究最深刻的問題：誰決定什麼是「好」的回答？InstructGPT 的限制與更廣泛的社會影響。對齊研究的未來方向。</p>
+                <div class="chapter-meta">
+                    <span>⏱️ 閱讀時間：15 分鐘</span>
+                    <span>⭐ 難度：進階</span>
+                </div>
+            </a>
+
+            <a href="07-technical-details.html" class="chapter-card" style="background: linear-gradient(135deg, #eff6ff 0%, #ecfdf5 100%); border: 2px solid var(--primary-color);">
+                <span class="chapter-number">Chapter 07</span>
+                <h3 class="chapter-title">🔬 技術深度剖析：那些沒被提到的細節</h3>
+                <p class="chapter-desc">回答讀者最常問的技術問題：為何 1.3B 能打敗 175B？架構有何差異？訓練成本多高？人類資料如何訓練到模型參數？完整數學公式與程式碼範例。</p>
+                <div class="chapter-meta">
+                    <span>⏱️ 閱讀時間：25 分鐘</span>
+                    <span>⭐ 難度：技術深入</span>
+                    <span style="background: var(--primary-color); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">🆕 新增</span>
+                </div>
+            </a>
+        </div>
+
+        <section class="section-block" style="margin-top: 40px;">
+            <h2>🎯 學習重點回顧</h2>
+            <div class="quick-links">
+                <div class="quick-link">
+                    <h3>SFT (Supervised Fine-Tuning)</h3>
+                    <p>讓模型學會「對話格式」。就像給學生看標準答案。<br><em>Ch 2: 訓練三部曲</em></p>
+                </div>
+                <div class="quick-link">
+                    <h3>RM (Reward Model)</h3>
+                    <p>讓模型學會「人類偏好」。就像訓練一個 AI 評審。<br><em>Ch 2: 訓練三部曲</em></p>
+                </div>
+                <div class="quick-link">
+                    <h3>PPO (Reinforcement Learning)</h3>
+                    <p>讓模型學會「自我優化」。就像學生為了拿高分而不斷練習。<br><em>Ch 2: 訓練三部曲</em></p>
+                </div>
+                <div class="quick-link">
+                    <h3>Alignment vs. Capability</h3>
+                    <p>模型的「能力」與「對齊」是兩個維度。1.3B 對齊模型 > 175B 未對齊模型。<br><em>Ch 3: 結果與代價</em></p>
+                </div>
+                <div class="quick-link">
+                    <h3>Data Quality > Model Size</h3>
+                    <p>13k 高品質示範 + 33k 人類偏好，效果遠勝於單純擴大模型。<br><em>Ch 4: 數據集詳情</em></p>
+                </div>
+                <div class="quick-link">
+                    <h3>"Who are we aligning to?"</h3>
+                    <p>對齊的最深刻問題：我們對齊到標註者？研究者？客戶？還是全人類？<br><em>Ch 6: 討論與未來</em></p>
+                </div>
+                <div class="quick-link" style="background: linear-gradient(135deg, #eff6ff 0%, #ecfdf5 100%); border: 2px solid var(--primary-color);">
+                    <h3>🔬 訓練成本：只需 1.6%</h3>
+                    <p>SFT + PPO 總成本 = 64.9 petaflops/s-days，只需 GPT-3 預訓練的 1.6%！<br><em>Ch 7: 技術深度剖析</em></p>
+                </div>
+                <div class="quick-link" style="background: linear-gradient(135deg, #eff6ff 0%, #ecfdf5 100%); border: 2px solid var(--primary-color);">
+                    <h3>📐 完整數學公式</h3>
+                    <p>SFT Loss、RM Pairwise Ranking、PPO Objective 的完整推導與程式碼範例。<br><em>Ch 7: 技術深度剖析</em></p>
+                </div>
+            </div>
+        </section>
+        
+        <div class="nav-bar" style="justify-content: center; margin-top: 40px;">
+            <a href="../index.html" class="nav-btn">← 回到 NLP 三部曲主頁</a>
+        </div>
+    </div>
+</body>
+</html>
+

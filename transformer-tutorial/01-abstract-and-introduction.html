@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transformer 論文深度解析 - 第1頁：Abstract 與 Introduction</title>
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <!-- 引入 Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="../index.html">🏠 首頁</a>
+        <span>/</span>
+        <a href="index.html">⚡ Transformer</a>
+        <span>/</span>
+        <span class="current">01 摘要與引言</span>
+      </div>
+
+      <h1>
+        📖 Attention Is All You Need <br /><span
+          style="
+            font-size: 0.6em;
+            color: var(--text-secondary);
+            font-weight: normal;
+          "
+          >深度解析系列</span
+        >
+      </h1>
+      <h2>第 1 頁：Abstract（摘要）與 Introduction（引言）</h2>
+
+      <div class="header-section">
+        <div class="paper-meta">
+          <div class="meta-item">
+            <strong>論文標題</strong>
+            Attention Is All You Need
+          </div>
+          <div class="meta-item">
+            <strong>作者</strong>
+            Vaswani et al. (Google Brain)
+          </div>
+          <div class="meta-item">
+            <strong>發表年份</strong>
+            NIPS 2017
+          </div>
+          <div class="meta-item">
+            <strong>原始連結</strong>
+            <a href="https://arxiv.org/abs/1706.03762" target="_blank"
+              >ArXiv PDF</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- ============= ABSTRACT 部分 ============= -->
+      <h2>一、Abstract（摘要）解析</h2>
+
+      <div class="text-pair">
+        <div class="original-text">
+          The dominant sequence transduction models are based on complex
+          recurrent or convolutional neural networks that include an encoder and
+          a decoder. The best performing models also connect the encoder and
+          decoder through an attention mechanism.
+        </div>
+        <div class="translation">
+          <p>
+            目前主流的序列轉換模型（sequence transduction
+            models）都基於複雜的<strong>遞迴神經網路（RNN）</strong>或<strong>卷積神經網路（CNN）</strong>，這些模型包含一個編碼器（encoder）和一個解碼器（decoder）。表現最好的模型還會透過<strong
+              >注意力機制（attention mechanism）</strong
+            >來連接編碼器和解碼器。
+          </p>
+        </div>
+      </div>
+
+      <div class="key-concept">
+        <h4>🔤 先理解基礎：什麼是「Token」？</h4>
+        <p><em>在理解向量之前，我們需要知道電腦如何「切割」文字。</em></p>
+
+        <h4>💡 生活類比：閱讀文章的方式</h4>
+        <p>
+          <strong>問題：</strong
+          >當你讀一篇文章時，你是一個字母一個字母讀，還是一個「詞」一個「詞」讀？
+        </p>
+        <ul>
+          <li>
+            ❌ <strong>字母級別：</strong>"A-t-t-e-n-t-i-o-n" → 太慢，語義分散
+          </li>
+          <li>✅ <strong>詞級別：</strong>"Attention" → 快速理解語義</li>
+        </ul>
+
+        <p><strong>Token 就是 AI 的「閱讀單位」</strong></p>
+        <p>Token 可以是一個完整的詞、詞的片段、或標點符號。</p>
+
+        <h4>📊 範例：英文分詞</h4>
+        <pre><code>原文：  "I love playing football."
+Tokens: ["I", "love", "play", "ing", "football", "."]
+數量：  6 個 tokens</code></pre>
+
+        <h4>⚠️ 中英文 Token 的差異（初步認識）</h4>
+        <p>
+          <strong>核心事實：</strong>中文的 token 數量通常是英文的
+          <strong>2-3 倍</strong>！
+        </p>
+        <pre><code>英文："Hello world"  → 2 tokens
+中文："你好世界"    → 6-8 tokens
+
+為什麼？→ GPT 的分詞模型主要針對英文優化</code></pre>
+
+        <h4>💰 為什麼 ChatGPT 用 Token 計費？</h4>
+        <p><strong>簡單答案：</strong>因為計算成本與 Token 數量成正比。</p>
+        <ul>
+          <li><strong>1 個 Token = 1 次向量運算</strong></li>
+          <li>Token 越多 → 計算量越大 → 成本越高</li>
+          <li>這就是為什麼中文對話通常比英文貴</li>
+        </ul>
+
+        <p><strong>💡 想深入了解？</strong></p>
+        <p>
+          <em
+            >Token 的詳細分詞技術（BPE）、為何中英文效率差異、以及 Token
+            計費的經濟學，我們將在第 5 頁深入探討。</em
+          >
+        </p>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <div class="key-concept">
+        <h4>🧮 先理解基礎：什麼是「向量」？</h4>
+        <p>
+          <em
+            >現在我們知道文字被切成 token 了，接下來看 AI 如何「理解」這些
+            token。</em
+          >
+        </p>
+
+        <h4>💡 生活類比：顏色的數字表示</h4>
+        <p><strong>問題：電腦如何理解「紅色」？</strong></p>
+        <ul>
+          <li>❌ 電腦不懂「紅色」這兩個字</li>
+          <li>✅ 但它懂數字：RGB = [255, 0, 0]（紅255、綠0、藍0）</li>
+        </ul>
+        <p>
+          這個
+          <code>[255, 0, 0]</code>
+          就是一個<strong>三維向量</strong>，用三個數字表示一個顏色。
+        </p>
+
+        <h4>🔤 同理：電腦如何理解「單字」？</h4>
+        <table>
+          <tr>
+            <th>單字</th>
+            <th>人類理解</th>
+            <th>電腦表示（向量）</th>
+          </tr>
+          <tr>
+            <td><strong>國王</strong></td>
+            <td>「君主、男性、權力...」</td>
+            <td>[0.8, 0.9, 0.1, -0.3, ...]（512個數字）</td>
+          </tr>
+          <tr>
+            <td><strong>女王</strong></td>
+            <td>「君主、女性、權力...」</td>
+            <td>[0.8, -0.7, 0.1, -0.3, ...]（512個數字）</td>
+          </tr>
+          <tr>
+            <td><strong>蘋果</strong></td>
+            <td>「水果、紅色、圓形...」</td>
+            <td>[-0.2, 0.1, 0.7, 0.5, ...]（512個數字）</td>
+          </tr>
+        </table>
+
+        <p><strong>關鍵：</strong>相似的概念，向量會很接近！</p>
+        <ul>
+          <li>「國王」和「女王」的向量很像（都是君主）</li>
+          <li>「國王」和「蘋果」的向量差很多（完全不同類別）</li>
+        </ul>
+
+        <h4>🔧 工程類比：為什麼需要向量？</h4>
+        <p><strong>類比：GPS 座標</strong></p>
+        <ul>
+          <li>❌ 「台北101」→ 電腦無法計算距離</li>
+          <li>✅ (25.034, 121.565) → 可以用數學公式算出到其他地點的距離</li>
+        </ul>
+        <p><strong>同理：單字向量化</strong></p>
+        <ul>
+          <li>❌ "king" (文字) → 無法做數學運算</li>
+          <li>✅ [0.8, 0.9, ...] (向量) → 可以計算相似度、可以做加減乘除</li>
+        </ul>
+
+        <h4>❓ 為什麼是 512 維？（為什麼不是 10 或 10000？）</h4>
+        <p>這是經驗和實驗的結果：</p>
+        <ul>
+          <li>
+            <strong>太小 (10維)：</strong
+            >無法表達複雜的語義（就像只用3個數字很難描述一個人的所有特質）
+          </li>
+          <li>
+            <strong>太大 (10000維)：</strong
+            >計算成本太高，而且容易過擬合（記住訓練資料而不是學到通用規律）
+          </li>
+          <li>
+            <strong>剛剛好 (512維)：</strong
+            >在「表達能力」和「計算成本」之間取得平衡
+          </li>
+        </ul>
+
+        <p><strong>類比：地圖的解析度</strong></p>
+        <ul>
+          <li>10維 = 超低解析度地圖（只能看到國家）</li>
+          <li>512維 = 中解析度地圖（可以看到街道細節）</li>
+          <li>10000維 = 超高解析度（能看到每塊磚頭，但檔案太大、太慢）</li>
+        </ul>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <div class="key-concept">
+        <h4>🔍 什麼是 Attention Mechanism（注意力機制）？</h4>
+        <p>
+          <em
+            >現在我們知道單字變成了向量，接下來看 Attention
+            如何使用這些向量。</em
+          >
+        </p>
+
+        <h4>💡 生活類比：在圖書館找書</h4>
+        <p>
+          <strong>情境：</strong>你走進圖書館，想找一本關於「深度學習」的書。
+        </p>
+        <ul>
+          <li><strong>你的需求 (Query)</strong>：「深度學習」</li>
+          <li>
+            <strong>書架上的標籤 (Keys)</strong
+            >：每本書的關鍵字（機器學習、深度學習、統計學...）
+          </li>
+          <li><strong>書本內容 (Values)</strong>：實際的書籍本體</li>
+        </ul>
+        <p><strong>Attention 的運作過程：</strong></p>
+        <ol>
+          <li>
+            你用「深度學習」(Query) 去<strong>比對</strong>每本書的標籤 (Keys)
+          </li>
+          <li>
+            計算<strong>相關度分數</strong>：「深度學習」這本書 →
+            100分，「機器學習」→ 80分，「烹飪」→ 0分
+          </li>
+          <li>
+            根據分數<strong>加權提取</strong>：主要拿「深度學習」那本書
+            (Value)，稍微參考「機器學習」
+          </li>
+        </ol>
+
+        <p><strong>為什麼叫 "Attention"（注意力）？</strong></p>
+        <p>
+          就像人類閱讀時，我們不會平等地看每個字，而是<strong>專注於</strong>（attend
+          to）與當前理解相關的關鍵詞。Attention 機制讓模型學會「該注意哪裡」。
+        </p>
+
+        <p><strong>💡 更多技術細節：</strong></p>
+        <p>
+          <em
+            >Query、Key、Value
+            的數學計算、向量內積、加權平均等詳細機制，我們將在第 3
+            頁深入探討。</em
+          >
+        </p>
+      </div>
+
+      <div class="explanation">
+        <h4>📊 背景知識：什麼是序列轉換（Sequence Transduction）？</h4>
+        <p><strong>序列轉換</strong>：將一個序列轉換成另一個序列的任務。</p>
+        <ul>
+          <li><strong>機器翻譯</strong>：英文句子 → 中文句子</li>
+          <li><strong>語音辨識</strong>：音訊波形 → 文字</li>
+          <li><strong>文本摘要</strong>：長文章 → 短摘要</li>
+        </ul>
+
+        <h4>🔧 傳統方法架構（2017年前）</h4>
+        <table>
+          <tr>
+            <th>模型類型</th>
+            <th>代表</th>
+            <th>優點</th>
+            <th>問題</th>
+          </tr>
+          <tr>
+            <td>RNN/LSTM/GRU</td>
+            <td>Seq2Seq</td>
+            <td>能處理變長序列</td>
+            <td>❌ 無法並行化<br />❌ 長距離依賴問題</td>
+          </tr>
+          <tr>
+            <td>CNN + Attention</td>
+            <td>ConvS2S</td>
+            <td>可並行化</td>
+            <td>❌ 需要堆疊多層才能捕捉長距離</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="analogy">
+        <h4>🔧 工程類比：序列處理 vs 並行處理</h4>
+        <p><strong>RNN vs Transformer 的核心差異：</strong></p>
+        <table>
+          <tr>
+            <th>特性</th>
+            <th>RNN</th>
+            <th>Transformer</th>
+          </tr>
+          <tr>
+            <td>處理方式</td>
+            <td>逐個序列處理（like for loop）</td>
+            <td>所有位置同時處理（like parallel map）</td>
+          </tr>
+          <tr>
+            <td>時間複雜度</td>
+            <td>O(n) 步</td>
+            <td>O(1) 步（並行）</td>
+          </tr>
+          <tr>
+            <td>GPU 利用率</td>
+            <td>~20%（大部分時間在等待）</td>
+            <td>~90%（充分並行）</td>
+          </tr>
+        </table>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <div class="text-pair">
+        <div class="original-text">
+          We propose a new simple network architecture, the Transformer, based
+          solely on attention mechanisms, dispensing with recurrence and
+          convolutions entirely.
+        </div>
+        <div class="translation">
+          <p>
+            我們提出了一個新的簡單網路架構——<strong>Transformer</strong>，它<span
+              class="highlight"
+              >完全基於注意力機制</span
+            >，<span class="highlight">完全捨棄了遞迴（RNN）和卷積（CNN）</span
+            >。
+          </p>
+        </div>
+      </div>
+
+      <div class="key-concept">
+        <h4>🎯 核心革命性概念</h4>
+        <p><strong>Transformer 的核心主張：</strong></p>
+        <ul>
+          <li>✅ <strong>只用 Attention</strong>：不需要 RNN、不需要 CNN</li>
+          <li>✅ <strong>完全可並行化</strong>：所有位置同時計算</li>
+          <li>
+            ✅ <strong>架構簡單</strong>：相比 RNN/CNN + Attention
+            的混合架構更簡潔
+          </li>
+        </ul>
+        <p><strong>這在當時（2017）是非常激進的想法！</strong></p>
+      </div>
+
+      <div class="analogy">
+        <h4>🔧 工程類比：為什麼「Attention Is All You Need」？</h4>
+        <p><strong>類比：資料庫查詢系統</strong></p>
+        <table>
+          <tr>
+            <th>傳統方法（RNN）</th>
+            <th>Transformer（Pure Attention）</th>
+          </tr>
+          <tr>
+            <td>❌ 像用 <code>for loop</code> 逐行掃描整個資料庫</td>
+            <td>✅ 像用 <code>SQL JOIN</code> 直接查詢所有相關資料</td>
+          </tr>
+          <tr>
+            <td>❌ Sequential scan - O(n)</td>
+            <td>✅ Index lookup - O(1) per position</td>
+          </tr>
+          <tr>
+            <td>❌ 前面的查詢會影響後面（有狀態）</td>
+            <td>✅ 每個查詢獨立（無狀態），可並行</td>
+          </tr>
+        </table>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <div class="text-pair">
+        <div class="original-text">
+          Experiments on two machine translation tasks show these models to be
+          superior in quality while being more parallelizable and requiring
+          significantly less time to train. Our model achieves 28.4 BLEU on the
+          WMT 2014 English-to-German translation task, improving over the
+          existing best results, including ensembles, by over 2 BLEU.
+        </div>
+        <div class="translation">
+          <p>
+            在兩個機器翻譯任務上的實驗顯示，這些模型在品質上更優秀，同時<strong>更容易並行化</strong>，且<strong>訓練時間大幅減少</strong>。我們的模型在
+            WMT 2014 英德翻譯任務上達到了
+            <strong>28.4 BLEU</strong>，比現有最佳結果（包括集成模型）提升了超過
+            <strong>2 BLEU</strong>。
+          </p>
+        </div>
+      </div>
+
+      <div class="explanation">
+        <h4>📈 實驗結果解讀</h4>
+        <p><strong>BLEU 分數（Bilingual Evaluation Understudy）：</strong></p>
+        <ul>
+          <li>
+            <strong>定義</strong>：機器翻譯品質的評估指標，0-100
+            分，分數越高越好
+          </li>
+          <li><strong>28.4 BLEU</strong>：在 2017 年是非常驚人的分數</li>
+          <li>
+            <strong>提升 2 BLEU</strong>：在翻譯任務中，提升 1 BLEU
+            就很顯著，提升 2 是巨大進步
+          </li>
+        </ul>
+
+        <h4>⚡ 效能提升</h4>
+        <table>
+          <tr>
+            <th>指標</th>
+            <th>傳統模型（RNN/CNN）</th>
+            <th>Transformer</th>
+            <th>提升</th>
+          </tr>
+          <tr>
+            <td>訓練時間</td>
+            <td>數週（單一模型）</td>
+            <td>3.5 天（8 GPUs）</td>
+            <td>🚀 <strong>大幅縮短</strong></td>
+          </tr>
+          <tr>
+            <td>BLEU 分數</td>
+            <td>~26.4（最佳集成）</td>
+            <td>28.4（單一模型）</td>
+            <td>📈 <strong>+2.0</strong></td>
+          </tr>
+          <tr>
+            <td>並行化能力</td>
+            <td>❌ 受限於序列長度</td>
+            <td>✅ 完全並行</td>
+            <td>⚡ <strong>GPU 利用率高</strong></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="analogy">
+        <h4>🔧 工程類比：訓練效率提升</h4>
+        <p><strong>想像你在編譯一個大型專案：</strong></p>
+        <ul>
+          <li>
+            ❌ <strong>RNN 方法</strong>：像用
+            <code>make</code> 單線程編譯，檔案必須按順序編譯
+          </li>
+          <li>
+            ✅ <strong>Transformer 方法</strong>：像用
+            <code>make -j8</code> 多線程編譯，所有獨立檔案同時編譯
+          </li>
+        </ul>
+        <p><strong>結果：</strong></p>
+        <ul>
+          <li>🚀 編譯時間從數小時縮短到幾分鐘</li>
+          <li>⚡ CPU/GPU 資源充分利用（不會 idle 等待）</li>
+        </ul>
+      </div>
+
+      <!-- ============= INTRODUCTION 部分 ============= -->
+      <h2>二、Introduction（引言）解析</h2>
+
+      <div class="text-pair">
+        <div class="original-text">
+          Recurrent neural networks, long short-term memory [13] and gated
+          recurrent [7] neural networks in particular, have been firmly
+          established as state of the art approaches in sequence modeling and
+          transduction problems such as language modeling and machine
+          translation [35, 2, 5].
+        </div>
+        <div class="translation">
+          <p>
+            遞迴神經網路（RNN），特別是<strong>長短期記憶網路（LSTM）</strong>[13]
+            和<strong>門控遞迴單元（GRU）</strong>[7]，已經被確立為序列建模和轉換問題（如語言建模和機器翻譯）的最先進方法
+            [35, 2, 5]。
+          </p>
+        </div>
+      </div>
+
+      <div class="explanation">
+        <h4>📚 RNN 家族回顧（2017 年前的主流）</h4>
+        <table>
+          <tr>
+            <th>模型</th>
+            <th>提出年份</th>
+            <th>核心概念</th>
+            <th>主要應用</th>
+          </tr>
+          <tr>
+            <td>Vanilla RNN</td>
+            <td>1980s</td>
+            <td>簡單循環連接</td>
+            <td>短序列處理</td>
+          </tr>
+          <tr>
+            <td>LSTM</td>
+            <td>1997</td>
+            <td>記憶單元 + 門控機制</td>
+            <td>長序列、機器翻譯</td>
+          </tr>
+          <tr>
+            <td>GRU</td>
+            <td>2014</td>
+            <td>簡化的 LSTM（2個門）</td>
+            <td>計算效率更高</td>
+          </tr>
+        </table>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <div class="text-pair">
+        <div class="original-text">
+          Recurrent models typically factor computation along the symbol
+          positions of the input and output sequences. Aligning the positions to
+          steps in computation time, they generate a sequence of hidden states
+          h<sub>t</sub>, as a function of the previous hidden state h<sub
+            >t-1</sub
+          >
+          and the input for position t. This inherently sequential nature
+          precludes parallelization within training examples, which becomes
+          critical at longer sequence lengths, as memory constraints limit
+          batching across examples.
+        </div>
+        <div class="translation">
+          <p>
+            遞迴模型通常會沿著輸入和輸出序列的符號位置進行計算。將位置對齊到計算時間步，它們會生成一系列隱藏狀態
+            h<sub>t</sub>，這是前一個隱藏狀態 h<sub>t-1</sub> 和位置 t
+            的輸入的函數。這種<span class="highlight">本質上的序列性質</span
+            >使得<span class="highlight">訓練樣本內無法並行化</span
+            >，這在較長的序列長度時變得很關鍵，因為記憶體限制會限制跨樣本的批次處理。
+          </p>
+        </div>
+      </div>
+
+      <div class="problem">
+        <h4>❌ RNN 的三大根本問題</h4>
+        <table>
+          <tr>
+            <th>問題</th>
+            <th>描述</th>
+            <th>後果</th>
+          </tr>
+          <tr>
+            <td><strong>1. 序列依賴</strong></td>
+            <td>h₀ → h₁ → h₂ → ... → hₙ<br />必須逐步計算</td>
+            <td>❌ 無法並行化<br />❌ 訓練慢</td>
+          </tr>
+          <tr>
+            <td><strong>2. 記憶體瓶頸</strong></td>
+            <td>長序列需保存大量隱藏狀態</td>
+            <td>❌ 批次大小受限<br />❌ GPU 利用率低</td>
+          </tr>
+          <tr>
+            <td><strong>3. 長距離衰減</strong></td>
+            <td>資訊經過 O(n) 步傳播</td>
+            <td>❌ 梯度消失/爆炸<br />❌ 遺忘遠端資訊</td>
+          </tr>
+        </table>
+        <p>
+          <strong>✅ Transformer 如何解決：</strong>用 O(1) 的 Attention 取代
+          O(n) 的遞迴！
+        </p>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <div class="text-pair">
+        <div class="original-text">
+          Attention mechanisms have become an integral part of compelling
+          sequence modeling and transduction models in various tasks, allowing
+          modeling of dependencies without regard to their distance in the input
+          or output sequences [2, 19]. In all but a few cases [27], however,
+          such attention mechanisms are used in conjunction with a recurrent
+          network.
+        </div>
+        <div class="translation">
+          <p>
+            注意力機制已經成為各種任務中引人注目的序列建模和轉換模型的<strong>不可或缺的一部分</strong>，它允許對依賴關係進行建模，<span
+              class="highlight"
+              >而不考慮它們在輸入或輸出序列中的距離</span
+            >
+            [2, 19]。然而，除了少數情況 [27] 外，這些注意力機制都是<span
+              class="highlight"
+              >與遞迴網路一起使用</span
+            >的。
+          </p>
+        </div>
+      </div>
+
+      <div class="explanation">
+        <h4>🔍 Attention 機制的演進</h4>
+        <p><strong>2017 年前的 Attention 使用方式：</strong></p>
+        <table>
+          <tr>
+            <th>架構</th>
+            <th>組成</th>
+            <th>問題</th>
+          </tr>
+          <tr>
+            <td>Seq2Seq + Attention (Bahdanau 2014)</td>
+            <td>RNN Encoder + RNN Decoder + Attention</td>
+            <td>❌ 仍然依賴 RNN 的序列處理</td>
+          </tr>
+          <tr>
+            <td>Attention 的角色</td>
+            <td>輔助機制（幫助 RNN 看到長距離）</td>
+            <td>❌ 不是主要計算單元</td>
+          </tr>
+        </table>
+
+        <h4>💡 Transformer 的創新</h4>
+        <ul>
+          <li>
+            ✅ <strong>Attention 從配角變主角</strong>：不再依賴 RNN，Attention
+            自己做所有事
+          </li>
+          <li>
+            ✅ <strong>Self-Attention</strong>：序列內部自己對自己做 Attention
+          </li>
+          <li>
+            ✅
+            <strong>距離無關 (Distance-Agnostic)</strong
+            >：任意兩個位置的關聯都是 O(1)
+          </li>
+        </ul>
+      </div>
+
+      <div class="analogy">
+        <h4>🔧 工程類比：Attention 從配角到主角</h4>
+        <p><strong>類比：資料庫系統的演進</strong></p>
+
+        <p><strong>舊架構（RNN + Attention）：</strong></p>
+        <pre><code>// 主要邏輯：Sequential scan（RNN）
+for record in database.sequential_scan():
+    process(record)
+    
+// Attention 只是輔助：用 index 快速查找特定記錄
+if need_specific_info:
+    quick_lookup = attention.query(index)  # 但主要工作還是 scan</code></pre>
+
+        <p><strong>新架構（Pure Attention / Transformer）：</strong></p>
+        <pre><code>// 完全基於 index 查詢，沒有 sequential scan
+results = []
+for query in queries:
+    # 每個查詢直接在全表上做 JOIN
+    result = attention.query_all_at_once(query, all_keys, all_values)
+    results.append(result)
+# 所有查詢可以並行執行</code></pre>
+
+        <p><strong>關鍵差異：</strong></p>
+        <ul>
+          <li>
+            ❌ 舊方法：Attention 是 RNN 的「快取機制」（cache for long-distance
+            dependency）
+          </li>
+          <li>
+            ✅ 新方法：Attention 是「主要計算核心」（primary computation unit）
+          </li>
+        </ul>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <div class="text-pair">
+        <div class="original-text">
+          In this work we propose the Transformer, a model architecture
+          eschewing recurrence and instead relying entirely on an attention
+          mechanism to draw global dependencies between input and output. The
+          Transformer allows for significantly more parallelization and can
+          reach a new state of the art in translation quality after being
+          trained for as little as twelve hours on eight P100 GPUs.
+        </div>
+        <div class="translation">
+          <p>
+            在這項工作中，我們提出了 <strong>Transformer</strong>，一種<span
+              class="highlight"
+              >避開遞迴</span
+            >，而是<span class="highlight">完全依賴注意力機制</span
+            >來建立輸入和輸出之間全局依賴關係的模型架構。Transformer
+            允許<strong>顯著更多的並行化</strong>，並且在僅使用 8 個 P100 GPU
+            訓練 <strong>12 小時</strong>後就能達到翻譯品質的新水準。
+          </p>
+        </div>
+      </div>
+
+      <div class="key-concept">
+        <h4>📐 Figure 1: Transformer 架構總覽</h4>
+        <img
+          src="images/figure-1-transformer-architecture.png"
+          alt="Figure 1: The Transformer - model architecture"
+          style="
+            width: 100%;
+            max-width: 800px;
+            display: block;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          "
+        />
+        <p
+          style="
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 10px;
+          "
+        >
+          <strong>圖 1：</strong>Transformer 模型架構（The Transformer - model
+          architecture）
+        </p>
+      </div>
+
+      <div class="explanation">
+        <h4>🔍 圖片詳細解說</h4>
+
+        <h5>📍 整體結構（左右對稱）</h5>
+        <ul>
+          <li>
+            <strong>左側（Encoder）：</strong
+            >將輸入序列編碼成連續表示（continuous representations）
+          </li>
+          <li>
+            <strong>右側（Decoder）：</strong>根據編碼結果，逐步生成輸出序列
+          </li>
+          <li>
+            <strong>N×標記：</strong>表示該模組堆疊 N=6 層（論文中使用 6 層）
+          </li>
+        </ul>
+
+        <h5>📍 Encoder（左側）的組成</h5>
+        <ol>
+          <li>
+            <strong>Input Embedding：</strong>將輸入 token 轉換為 512 維向量
+          </li>
+          <li>
+            <strong>Positional Encoding：</strong>加入位置資訊（因為 Transformer
+            沒有遞迴，無法自動感知順序）
+          </li>
+          <li>
+            <strong>Multi-Head Attention：</strong
+            >讓每個位置「看」所有其他位置（自注意力）
+          </li>
+          <li>
+            <strong>Add & Norm：</strong>殘差連接（Residual Connection）+
+            層歸一化（Layer Normalization）
+          </li>
+          <li>
+            <strong>Feed Forward：</strong>兩層全連接網路，對每個位置獨立處理
+          </li>
+          <li><strong>Add & Norm：</strong>再次進行殘差連接和歸一化</li>
+        </ol>
+
+        <h5>📍 Decoder（右側）的組成</h5>
+        <ol>
+          <li>
+            <strong>Output Embedding：</strong>將輸出 token
+            轉換為向量（已右移，shifted right）
+          </li>
+          <li><strong>Positional Encoding：</strong>加入位置資訊</li>
+          <li>
+            <strong>Masked Multi-Head Attention：</strong
+            >帶遮罩的自注意力（只能看到前面的位置，不能「偷看」未來）
+          </li>
+          <li><strong>Add & Norm：</strong>殘差連接 + 歸一化</li>
+          <li>
+            <strong>Multi-Head Attention：</strong>Encoder-Decoder
+            Attention（Query 來自 Decoder，Key/Value 來自 Encoder）
+          </li>
+          <li><strong>Add & Norm：</strong>殘差連接 + 歸一化</li>
+          <li><strong>Feed Forward：</strong>兩層全連接網路</li>
+          <li><strong>Add & Norm：</strong>殘差連接 + 歸一化</li>
+          <li>
+            <strong>Linear + Softmax：</strong>將 Decoder
+            輸出轉換為詞彙表上的機率分佈
+          </li>
+        </ol>
+
+        <h5>📍 關鍵設計亮點</h5>
+        <ul>
+          <li>
+            ✅ <strong>完全並行：</strong>Encoder 的所有位置可同時計算（不像 RNN
+            需要按順序）
+          </li>
+          <li>
+            ✅ <strong>殘差連接：</strong>每個子層都有 Add &
+            Norm，幫助梯度流動，訓練更深的網路
+          </li>
+          <li>
+            ✅
+            <strong>Multi-Head：</strong
+            >多頭注意力讓模型從不同角度「看」輸入（例如：語法、語義）
+          </li>
+          <li>
+            ✅ <strong>Masked Attention：</strong>Decoder
+            的遮罩確保生成時不會「偷看」未來的 token
+          </li>
+          <li>
+            ✅ <strong>Encoder-Decoder Attention：</strong>Decoder
+            可以「查詢」Encoder 的所有位置，實現翻譯等任務
+          </li>
+        </ul>
+      </div>
+
+      <div class="analogy">
+        <h4>🤖 AI 體驗連結：Transformer 與 ChatGPT</h4>
+        <p>你可能會好奇：「這篇論文跟現在的 ChatGPT 有什麼關係？」</p>
+        <ul>
+          <li>
+            <strong>GPT 的 "T"：</strong>GPT 全名是
+            <strong>Generative Pre-trained Transformer</strong
+            >。沒錯，它的核心架構就是來自這篇論文！
+          </li>
+          <li>
+            <strong>生成體驗 (Autoregressive)：</strong> <br />你看到 ChatGPT
+            回答時「一個字一個字跳出來」的樣子，正是 Transformer Decoder
+            的運作方式：<strong>根據前面的內容，預測下一個字</strong>。
+          </li>
+        </ul>
+
+        <h4>⚠️ 真實架構差異 (Reality Check)</h4>
+        <p>雖然 ChatGPT 源自 Transformer，但兩者架構略有不同：</p>
+        <table>
+          <tr>
+            <th>模型</th>
+            <th>架構</th>
+            <th>用途</th>
+          </tr>
+          <tr>
+            <td><strong>Transformer (本論文)</strong></td>
+            <td>Encoder + Decoder</td>
+            <td>
+              翻譯（英翻德）、序列轉換<br /><em>(需要理解輸入並生成輸出)</em>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>GPT 系列 (ChatGPT)</strong></td>
+            <td>Decoder-only</td>
+            <td>文字接龍、生成任務<br /><em>(專注於根據上文生成下文)</em></td>
+          </tr>
+          <tr>
+            <td><strong>BERT 系列</strong></td>
+            <td>Encoder-only</td>
+            <td>理解、分類、填空<br /><em>(專注於理解整段文字)</em></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="solution">
+        <h4>✅ Transformer 的核心優勢總結</h4>
+
+        <h4>1. 架構簡化</h4>
+        <ul>
+          <li>❌ 舊架構：RNN + CNN + Attention（混合複雜）</li>
+          <li>✅ 新架構：Pure Attention（統一簡潔）</li>
+        </ul>
+
+        <h4>2. 計算效率</h4>
+        <table>
+          <tr>
+            <th>指標</th>
+            <th>RNN</th>
+            <th>Transformer</th>
+          </tr>
+          <tr>
+            <td>序列操作數</td>
+            <td>O(n)</td>
+            <td>O(1)</td>
+          </tr>
+          <tr>
+            <td>並行化能力</td>
+            <td>❌ 無法並行</td>
+            <td>✅ 完全並行</td>
+          </tr>
+          <tr>
+            <td>最大路徑長度</td>
+            <td>O(n)</td>
+            <td>O(1)</td>
+          </tr>
+          <tr>
+            <td>訓練時間（英德翻譯）</td>
+            <td>數週</td>
+            <td>12 小時（8 GPUs）</td>
+          </tr>
+        </table>
+
+        <h4>3. 性能表現</h4>
+        <ul>
+          <li>📈 <strong>BLEU +2.0</strong>：比最佳集成模型還要好</li>
+          <li>⚡ <strong>訓練快 10-20 倍</strong>：從數週到半天</li>
+          <li>🚀 <strong>推理速度快</strong>：生產環境友好</li>
+        </ul>
+      </div>
+
+      <div class="key-concept">
+        <h4>🎯 第一頁核心要點總結</h4>
+
+        <h4>Abstract 核心訊息：</h4>
+        <ol>
+          <li>提出了只用 Attention 的新架構（Transformer）</li>
+          <li>完全捨棄 RNN 和 CNN</li>
+          <li>訓練更快、品質更好（BLEU 28.4）</li>
+        </ol>
+
+        <h4>Introduction 核心訊息：</h4>
+        <ol>
+          <li><strong>問題</strong>：RNN 序列依賴 → 無法並行化 → 訓練慢</li>
+          <li><strong>過渡</strong>：Attention 以前只是 RNN 的輔助</li>
+          <li><strong>創新</strong>：Transformer 讓 Attention 成為主角</li>
+          <li><strong>結果</strong>：12 小時訓練達到 SOTA（vs. 數週）</li>
+        </ol>
+
+        <h4>關鍵技術術語：</h4>
+        <ul>
+          <li><code>Sequence Transduction</code>：序列轉換（如翻譯）</li>
+          <li><code>Attention Mechanism</code>：注意力機制（核心創新）</li>
+          <li><code>Parallelization</code>：並行化（主要優勢）</li>
+          <li><code>Sequential Dependency</code>：序列依賴（主要限制）</li>
+          <li><code>BLEU Score</code>：翻譯品質評估指標</li>
+        </ul>
+      </div>
+
+      <div class="nav-bar">
+        <a href="index.html" class="nav-btn">← 回目錄</a>
+        <a href="02-background.html" class="nav-btn primary">
+          下一頁：Background →
+        </a>
+      </div>
+
+      <div class="quick-links" style="margin-top: 30px;">
+        <a href="../index.html" class="quick-link">← 三部曲總覽</a>
+        <a href="index.html" class="quick-link">📖 Transformer 目錄</a>
+        <a href="../bert-tutorial/index.html" class="quick-link">下一步 → BERT</a>
+      </div>
+
+      <div
+        style="
+          margin-top: 40px;
+          padding: 20px;
+          background: #ecf0f1;
+          border-radius: 5px;
+          text-align: center;
+        "
+      >
+        <p><strong>📚 學習建議</strong></p>
+        <p>在進入下一頁之前，請確保你理解：</p>
+        <ul style="text-align: left; max-width: 600px; margin: 20px auto">
+          <li>✅ 為什麼 RNN 無法並行化？</li>
+          <li>✅ Attention 如何解決長距離依賴問題？</li>
+          <li>✅ "Attention Is All You Need" 的核心主張是什麼？</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

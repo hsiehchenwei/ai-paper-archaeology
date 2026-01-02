@@ -1,0 +1,94 @@
+# ==========================================
+# 論文原文與 LaTeX 文件 (不上傳)
+# ==========================================
+arXiv-*/
+*.tex
+*.bbl
+*.sty
+*.aux
+*.log
+*.out
+*.pdf
+
+# ==========================================
+# Markdown 筆記與草稿 (不上傳)
+# ==========================================
+*.md
+!README.md
+!ATTRIBUTION.md
+!DEPLOY.md
+!DESIGN_GUIDELINES.md
+!.claude/skills/**/SKILL.md
+!.claude/skills/**/REFERENCE.md
+!.claude/skills/**/EXAMPLES.md
+!.claude/skills/**/README.md
+
+# ==========================================
+# 遊戲設定與臨時文件 (不上傳)
+# ==========================================
+*.txt
+*.jsonl
+game_config_*.jsonl
+*_game.txt
+
+# ==========================================
+# 重複的目錄結構 (不上傳)
+# ==========================================
+論文原文/
+
+# ==========================================
+# 系統與編輯器文件
+# ==========================================
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+.env
+
+# ==========================================
+# Node.js (如果未來用到)
+# ==========================================
+node_modules/
+package-lock.json
+
+# ==========================================
+# Python (如果未來用到)
+# ==========================================
+__pycache__/
+*.py[cod]
+*.so
+.Python
+venv/
+.venv/
+
+# ==========================================
+# 保留的文件 (只上傳這些)
+# ==========================================
+# ✅ HTML 文件 (*.html)
+# ✅ CSS 文件 (*.css)
+# ✅ 圖片文件 (images/ 下的 *.png, *.jpg, *.jpeg, *.gif, *.svg)
+# ✅ Python 腳本 (*.py)
+# ✅ README.md
+# ✅ workspace 設定檔
+
+!download_imrs_images.py
+
+# ==========================================
+# Claude Code 相關 (部分允許)
+# ==========================================
+.claude/
+!.claude/skills/
+.playwright/
+.playwright-mcp/
+.vscode/
+.idea/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.development
+.env.test
+.env.production
+/.claude

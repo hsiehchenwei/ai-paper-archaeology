@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 1 頁：為什麼需要 InstructGPT? - InstructGPT 論文深度解析</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="index.html">InstructGPT 深度解析</a>
+            <span>/</span>
+            <span class="current">01. 簡介與動機</span>
+        </div>
+
+        <h1>第 1 頁：為什麼 GPT-3 需要「上學」?</h1>
+        
+        <div class="header-section">
+            <p class="lead">GPT-3 雖然讀遍了網際網路，但它其實不懂你在說什麼。它只會「接龍」。這篇論文就是要解決這個問題。</p>
+            <div class="paper-meta">
+                <div class="meta-item">
+                    <strong>論文標題</strong>
+                    Training language models to follow instructions with human feedback
+                </div>
+                <div class="meta-item">
+                    <strong>發表年份</strong>
+                    2022 (NeurIPS)
+                </div>
+                <div class="meta-item">
+                    <strong>關鍵貢獻</strong>
+                    RLHF (人類回饋強化學習)
+                </div>
+            </div>
+        </div>
+
+        <section class="section-block">
+            <h2>📄 Abstract (摘要完整原文)</h2>
+            
+            <div class="text-pair">
+                <div class="original-text">
+                    <blockquote>
+                        <span data-translation="把語言模型做得更大，並不代表它就更會遵循使用者的意圖">Making language models bigger does not inherently make them better at following a user's intent.</span>
+                        <span data-translation="例如，大型語言模型可能會產生不真實、有毒，或根本對使用者沒幫助的輸出">For example, large language models can generate outputs that are untruthful, toxic, or simply not helpful to the user.</span>
+                        <span data-translation="換句話說，這些模型與使用者並未「對齊」">In other words, these models are not <em>aligned</em> with their users.</span>
+                        <br><br>
+                        <span data-translation="在本論文中，我們展示了一種透過人類回饋微調來讓語言模型與使用者意圖對齊的方法">In this paper, we show an avenue for aligning language models with user intent on a wide range of tasks by fine-tuning with human feedback.</span>
+                        <span data-translation="我們收集標註者示範的期望模型行為資料集，用於透過監督式學習微調 GPT-3">Starting with a set of labeler-written prompts and prompts submitted through the OpenAI API, we collect a dataset of labeler demonstrations of the desired model behavior, which we use to fine-tune GPT-3 using supervised learning.</span>
+                        <br><br>
+                        <span data-translation="接著我們收集模型輸出的排序資料集，用於透過人類回饋強化學習進一步微調">We then collect a dataset of rankings of model outputs, which we use to further fine-tune this supervised model using reinforcement learning from human feedback.</span>
+                        <span data-translation="我們將成果模型稱為 InstructGPT">We call the resulting models <em>InstructGPT</em>.</span>
+                        <br><br>
+                        <span data-translation="1.3B 參數的 InstructGPT 比 175B GPT-3 更受偏好，儘管參數數量少了 100 倍">In human evaluations on our prompt distribution, outputs from the 1.3B parameter InstructGPT model are preferred to outputs from the 175B GPT-3, despite having 100x fewer parameters.</span>
+                        <span data-translation="InstructGPT 在真實性上有所提升，有毒輸出生成減少，同時在公開 NLP 資料集上的性能退化極小">Moreover, InstructGPT models show improvements in truthfulness and reductions in toxic output generation while having minimal performance regressions on public NLP datasets.</span>
+                        <br><br>
+                        <span data-translation="儘管 InstructGPT 仍會犯簡單錯誤，我們的結果表明，使用人類回饋進行微調是讓語言模型與人類意圖對齊的有前景方向">Even though InstructGPT still makes simple mistakes, our results show that fine-tuning with human feedback is a promising direction for aligning language models with human intent.</span>
+                    </blockquote>
+                </div>
+                <div class="translation">
+                    <h3>🌏 完整翻譯</h3>
+                    <p>把語言模型做得更大，並不代表它就更會遵循使用者的意圖。例如，大型語言模型可能會產生不真實、有毒，或根本對使用者沒幫助的輸出。換句話說，這些模型與使用者並未「對齊」。</p>
+                    <p>在本論文中，我們展示了一種透過人類回饋微調來讓語言模型與使用者意圖對齊的方法。我們從標註者撰寫的提示與 OpenAI API 提交的提示開始，收集標註者示範的期望模型行為資料集，用於透過監督式學習微調 GPT-3。接著我們收集模型輸出的排序資料集，用於透過人類回饋強化學習進一步微調這個監督式模型。我們將成果模型稱為 InstructGPT。</p>
+                    <p>在我們的提示分布上進行的人類評估中，1.3B 參數的 InstructGPT 模型的輸出比 175B GPT-3 的輸出更受偏好，儘管參數數量少了 100 倍。此外，InstructGPT 模型在真實性上有所提升，有毒輸出生成減少，同時在公開 NLP 資料集上的性能退化極小。儘管 InstructGPT 仍會犯簡單錯誤，我們的結果表明，使用人類回饋進行微調是讓語言模型與人類意圖對齊的有前景方向。</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>1. 問題：大不一定好 (Bigger is not better)</h2>
+            
+            <div class="text-pair">
+                <div class="original-text">
+                    Making language models bigger does not inherently make them better at following a user's intent. For example, large language models can generate outputs that are untruthful, toxic, or simply not helpful to the user. In other words, these models are not <em>aligned</em> with their users.
+                </div>
+                <div class="translation">
+                    把語言模型做得更大，並不代表它就更聽話。例如，大型語言模型可能會產生不真實、有毒，或根本對使用者沒幫助的回答。換句話說，這些模型與使用者的意圖並未「對齊 (Aligned)」。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 深度解析：什麼是 Alignment (對齊)?</h4>
+                <p>在 AI 領域，「對齊」是指讓 AI 的目標與人類的目標一致。GPT-3 的訓練目標只有一個：<strong>預測下一個字 (Next Token Prediction)</strong>。</p>
+                <p>這導致了一個嚴重的脫節：</p>
+                <ul>
+                    <li><strong>使用者的目標：</strong> "幫我寫一封道歉信。"</li>
+                    <li><strong>GPT-3 的目標：</strong> "這句話後面通常接什麼？" (它可能會接著寫 "還有一封是給老闆的..." 或是編造一個故事，而不是真的寫信)</li>
+                </ul>
+            </div>
+
+            <div class="analogy">
+                <h4>💡 生活類比：狂野的天才 vs. 訓練有素的管家</h4>
+                <p><strong>GPT-3 就像一個住在深山裡的狂野天才：</strong></p>
+                <ul>
+                    <li>他讀過圖書館裡所有的書，知識淵博。</li>
+                    <li>但如果你問他：「請幫我拿一杯水。」</li>
+                    <li>他可能會回答：「水是一種化學物質，分子式 H2O...」然後繼續講水的歷史，完全無視你口渴的事實。</li>
+                </ul>
+                <p><strong>InstructGPT 就像是把這位天才送去「禮儀學校」：</strong></p>
+                <ul>
+                    <li>他學會了聽懂命令。</li>
+                    <li>當你說「拿水」時，他知道你要的是行動，而不是定義。</li>
+                    <li>這就是 <strong>Instruction Tuning (指令微調)</strong> 的意義。</li>
+                </ul>
+            </div>
+
+            <div class="analogy">
+                <h4>🔧 工程類比：Unit Tests vs. Acceptance Tests</h4>
+                <p>對於軟體工程師來說：</p>
+                <ul>
+                    <li><strong>GPT-3 (Pre-training) 通過了 Unit Tests：</strong> 每個函數 (Token) 都能跑，沒有語法錯誤，邏輯自洽。</li>
+                    <li><strong>InstructGPT (Alignment) 通過了 Acceptance Tests (UAT)：</strong> 用戶實際使用時，功能符合需求，體驗良好。</li>
+                </ul>
+                <p>一個通過所有單元測試的軟體，可能根本不是用戶想要的功能。Alignment 就是在做 UAT。</p>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>2. 解決方案：RLHF</h2>
+            
+            <div class="text-pair">
+                <div class="original-text">
+                    In this paper, we show an avenue for aligning language models with user intent on a wide range of tasks by fine-tuning with human feedback... We call the resulting models <em>InstructGPT</em>.
+                </div>
+                <div class="translation">
+                    在本論文中，我們展示了一種透過人類回饋微調 (Fine-tuning with Human Feedback) 來讓語言模型與使用者意圖對齊的方法... 我們將成果模型稱為 <em>InstructGPT</em>。
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>🎯 核心技術：RLHF</h4>
+                <p>全名是 <strong>Reinforcement Learning from Human Feedback (從人類回饋中強化學習)</strong>。這是這篇論文的金鑰匙。</p>
+                <p>它引入了「人類老師」來給 AI 打分數，而不是只靠標準答案。</p>
+            </div>
+
+            <!-- AI Generated Concept Image -->
+            <div class="figure figure-ai">
+                <img src="../images/user_generate_image_20260101163757_aff9.png" alt="Alignment Visualization" style="max-width: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-lg);">
+                <div class="caption">
+                    💡 <strong>AI 圖解：Alignment 的過程</strong><br>
+                    左邊：GPT-3 像個亂射箭的高手，雖然有力但射不準靶心。<br>
+                    右邊：RLHF 就像是教練在旁邊修正他的姿勢，讓他每次都射中「人類意圖」的紅心。
+                </div>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>3. 驚人的結果</h2>
+
+            <div class="figure figure-original">
+                <!-- 原文 PDF 圖片連結，假設使用者有 viewer 或已轉檔 -->
+                <embed src="images/original/main-graph-no-facets.pdf" type="application/pdf" width="100%" height="500px" />
+                <div class="caption">
+                    <strong>Figure 1 (原文):</strong> 人類評估勝率圖。<br>
+                    請注意看最左邊的長條 (InstructGPT 1.3B) 比最右邊的長條 (GPT-3 175B) 還要高！<br>
+                    這意味著：<strong>一個縮小了 100 倍的模型，經過 RLHF 後，竟然比原始的超大模型還好用。</strong>
+                </div>
+            </div>
+
+            <div class="analogy">
+                <h4>🤖 AI 體驗連結：為什麼 ChatGPT 這麼有禮貌？</h4>
+                <p>你有沒有發現，無論你問 ChatGPT 多奇怪的問題，它通常都會很客氣地回答，或者委婉地拒絕？</p>
+                <p>這就是 InstructGPT (及後續的 ChatGPT) 訓練出來的結果。它被訓練成要符合 <strong>3H 原則</strong>：</p>
+                <ul>
+                    <li><strong>Helpful (有幫助)</strong>：盡力解決問題。</li>
+                    <li><strong>Honest (誠實)</strong>：不說謊 (雖然還是會有幻覺)。</li>
+                    <li><strong>Harmless (無害)</strong>：不產生攻擊性或危險內容。</li>
+                </ul>
+                <p><strong>⚠️ Reality Check:</strong> 雖然它受過訓練，但「幻覺」仍然存在。它可能還是會一本正經地胡說八道，因為它的本質仍然是機率預測。</p>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>📊 核心發現 (Main Findings)</h2>
+            
+            <div class="key-findings">
+                <div class="original-text">
+                    <h3>原文：論文的六大核心結論</h3>
+                    
+                    <h4>Finding 1: 小模型打敗大模型</h4>
+                    <blockquote>
+                        <strong>Labelers significantly prefer InstructGPT outputs over outputs from GPT-3.</strong>
+                        On our test set, outputs from the 1.3B parameter InstructGPT model are preferred to outputs from the 175B GPT-3, despite having over 100x fewer parameters. 
+                        Outputs from our 175B InstructGPT are preferred to 175B GPT-3 outputs 85 ± 3% of the time.
+                    </blockquote>
+                    
+                    <h4>Finding 2: 更真實</h4>
+                    <blockquote>
+                        <strong>InstructGPT models show improvements in truthfulness over GPT-3.</strong>
+                        On the TruthfulQA benchmark, InstructGPT generates truthful and informative answers about twice as often as GPT-3.
+                        On closed-domain tasks, InstructGPT models make up information not present in the input about half as often as GPT-3 (a 21% vs. 41% hallucination rate, respectively).
+                    </blockquote>
+                    
+                    <h4>Finding 3: 毒性降低</h4>
+                    <blockquote>
+                        <strong>InstructGPT shows small improvements in toxicity over GPT-3, but not bias.</strong>
+                        InstructGPT models generate about 25% fewer toxic outputs than GPT-3 when prompted to be respectful.
+                    </blockquote>
+                    
+                    <h4>Finding 4: 對齊稅 (Alignment Tax)</h4>
+                    <blockquote>
+                        <strong>We can minimize performance regressions on public NLP datasets by modifying our RLHF fine-tuning procedure.</strong>
+                        During RLHF fine-tuning, we observe performance regressions compared to GPT-3 on certain public NLP datasets.
+                        This is an example of an "alignment tax" since our alignment procedure comes at the cost of lower performance on certain tasks that we may care about.
+                    </blockquote>
+                    
+                    <h4>Finding 5: 泛化能力</h4>
+                    <blockquote>
+                        <strong>InstructGPT models show promising generalization to instructions outside of the RLHF fine-tuning distribution.</strong>
+                        It is able to follow instructions for summarizing code, answer questions about code, and sometimes follows instructions in different languages, despite these instructions being very rare in the fine-tuning distribution.
+                    </blockquote>
+                    
+                    <h4>Finding 6: 仍有缺陷</h4>
+                    <blockquote>
+                        <strong>InstructGPT still makes simple mistakes.</strong>
+                        For example, InstructGPT can still fail to follow instructions, make up facts, give long hedging answers to simple questions, or fail to detect instructions with false premises.
+                    </blockquote>
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🎯 這些數字意味著什麼？</h4>
+                
+                <div class="comparison-grid">
+                    <div class="comparison-item">
+                        <h5>1️⃣ 1.3B 打敗 175B</h5>
+                        <p><strong>震撼程度：⭐⭐⭐⭐⭐</strong></p>
+                        <p>這就像一個小學生（1.3B）比博士生（175B）更會回答問題！參數少了 <strong>100 倍</strong>，但人類更喜歡它的答案。</p>
+                        <p class="chatgpt-connection">💬 <strong>ChatGPT 經驗</strong>：這就是為什麼 ChatGPT 不只是把模型做大，而是要對齊。</p>
+                    </div>
+                    
+                    <div class="comparison-item">
+                        <h5>2️⃣ 真實性提升 2 倍</h5>
+                        <p><strong>幻覺率：GPT-3 (41%) → InstructGPT (21%)</strong></p>
+                        <p>想像你問 AI 一個歷史問題。GPT-3 有 41% 的機率會編故事，InstructGPT 只有 21%。進步了一半！</p>
+                        <p class="chatgpt-connection">💬 <strong>ChatGPT 經驗</strong>：但你仍然會遇到它「一本正經地胡說八道」的時候，對吧？這就是那 21%。</p>
+                    </div>
+                    
+                    <div class="comparison-item">
+                        <h5>3️⃣ 對齊稅 (Alignment Tax)</h5>
+                        <p><strong>代價：公開 NLP 資料集性能下降</strong></p>
+                        <p>為了讓 AI「聽話」，在某些學術測試題上的分數會降低。這是必須付出的代價。</p>
+                        <p class="analogy-box">🏗️ <strong>類比</strong>：就像訓練建築工人遵守安全規範，雖然蓋房子速度變慢了，但更安全！</p>
+                    </div>
+                    
+                    <div class="comparison-item">
+                        <h5>4️⃣ 85% 勝率</h5>
+                        <p><strong>175B InstructGPT vs 175B GPT-3：85% 偏好率</strong></p>
+                        <p>同樣大小的模型，只是訓練方法不同，人類就壓倒性地偏好 InstructGPT。</p>
+                        <p class="chatgpt-connection">💬 <strong>ChatGPT 經驗</strong>：這就是為什麼 ChatGPT 比「原味 GPT-3」好用太多的原因！</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="nav-bar">
+            <a href="index.html" class="nav-btn">← 回目錄</a>
+            <a href="02-methodology.html" class="nav-btn primary">下一頁：訓練三部曲 (RLHF) →</a>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 4 頁:微調與結果 - BERT 論文深度解析</title>
+    <link rel="stylesheet" href="../transformer-tutorial/style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 第 4 頁:微調與驚人結果</h1>
+
+        <h2>🔧 微調 (Fine-tuning) 超簡單!</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                For each task, we simply plug in the task-specific inputs and outputs into BERT and fine-tune all the parameters end-to-end. Compared to pre-training, fine-tuning is relatively inexpensive. All of the results in the paper can be replicated in at most 1 hour on a single Cloud TPU, or a few hours on a GPU.
+            </div>
+            <div class="translation">
+                對於每個任務,我們只需將任務特定的輸入和輸出插入 BERT 並端到端微調所有參數。與預訓練相比,微調相對便宜。論文中的所有結果最多可以在單個 Cloud TPU 上1小時內複製,或在 GPU 上幾個小時內完成。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>🎯 微調成本對比</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>階段</th>
+                        <th>時間</th>
+                        <th>成本</th>
+                        <th>次數</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>預訓練</strong></td>
+                        <td>數天</td>
+                        <td>極高</td>
+                        <td>1 次 (Google 做)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>微調</strong></td>
+                        <td>數小時</td>
+                        <td>低</td>
+                        <td>每個任務 1 次</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>革命性意義:</strong></p>
+            <p>研究者可以直接用預訓練的 BERT,只需幾小時就能在新任務上達到 SOTA!</p>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:即插即用的威力</h4>
+            <p><strong>舊方法 (從頭訓練)</strong>:</p>
+            <ul>
+                <li>每個任務都要從零開始訓練</li>
+                <li>需要數天甚至數週</li>
+                <li>像是每次都要「重新製造輪子」</li>
+            </ul>
+
+            <p><strong>BERT 方法 (微調)</strong>:</p>
+            <ul>
+                <li>拿 Google 訓練好的 BERT</li>
+                <li>加一層輸出層,訓練幾小時</li>
+                <li>像是用「現成的引擎」組裝汽車</li>
+            </ul>
+        </div>
+
+        <div class="figure">
+            <img src="images/BERT_fine_tune.png" alt="BERT 微調架構" style="max-width: 100%; height: auto;">
+            <p class="caption">
+                <strong>圖 4.1:BERT 在不同任務上的微調架構</strong><br>
+                展示了 BERT 如何適應四種不同類型的 NLP 任務:<br>
+                • <strong>(a) 句子對分類</strong>:如文本蘊含、語義相似度,使用 [CLS] token<br>
+                • <strong>(b) 單句分類</strong>:如情感分析,使用 [CLS] token<br>
+                • <strong>(c) 問答</strong>:如 SQuAD,預測答案的起始和結束位置<br>
+                • <strong>(d) 單詞標註</strong>:如命名實體識別,每個 token 都輸出標籤<br>
+                <strong>關鍵:</strong>只需要加一個簡單的輸出層,其他都不變！
+            </p>
+        </div>
+
+        <h2>🌟 驚人結果:11 項任務 SOTA</h2>
+
+        <div class="key-concept">
+            <h4>📊 GLUE Benchmark (通用語言理解)</h4>
+            <p><strong>BERT 成績: 80.5% (+7.7%)</strong></p>
+            <p>在 9 個任務上都大幅領先!</p>
+
+            <h5>子任務範例</h5>
+            <ul>
+                <li><strong>CoLA</strong>: 文法判斷</li>
+                <li><strong>SST-2</strong>: 情感分析</li>
+                <li><strong>MRPC</strong>: 釋義檢測</li>
+                <li><strong>QQP</strong>: 問題相似度</li>
+                <li><strong>MNLI</strong>: 自然語言推理</li>
+            </ul>
+        </div>
+
+        <div class="key-concept">
+            <h4>📚 SQuAD (問答任務)</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>版本</th>
+                        <th>BERT 成績</th>
+                        <th>人類水準</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>SQuAD 1.1</strong></td>
+                        <td>93.2 F1</td>
+                        <td>91.2 F1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SQuAD 2.0</strong></td>
+                        <td>83.1 F1</td>
+                        <td>89.5 F1</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>驚人發現:</strong></p>
+            <p>BERT 在 SQuAD 1.1 上<strong>超越人類</strong>! (93.2 > 91.2)</p>
+        </div>
+
+        <div class="analogy">
+            <h4>🤖 AI 體驗連結:Google 搜尋的革命</h4>
+            <p><strong>2019 年 10 月,Google 宣布:</strong></p>
+            <blockquote>
+                「我們將 BERT 應用於搜尋引擎,這是過去 5 年來最大的飛躍!」
+            </blockquote>
+
+            <p><strong>實際影響:</strong></p>
+            <ul>
+                <li>影響 10% 的英文搜尋查詢</li>
+                <li>更準確理解「長尾查詢」</li>
+                <li>理解介係詞的重要性 (to, for, from)</li>
+            </ul>
+
+            <p><strong>範例:</strong></p>
+            <pre><code>搜尋: "2019 brazil traveler to usa need a visa"
+
+舊 Google: 只看關鍵字,可能誤解方向
+新 Google (BERT): 理解是「巴西人去美國」,不是反過來!</code></pre>
+        </div>
+
+        <h2>🎯 為什麼 BERT 這麼強?</h2>
+
+        <div class="solution">
+            <h4>✅ 三大優勢</h4>
+            
+            <h5>1️⃣ 雙向理解</h5>
+            <p>同時看左右上下文,理解更完整</p>
+
+            <h5>2️⃣ 大規模預訓練</h5>
+            <p>在 33 億詞上學習通用語言知識</p>
+
+            <h5>3️⃣ 簡單微調</h5>
+            <p>只需加一層輸出層,不用大改架構</p>
+        </div>
+
+        <div class="analogy">
+            <h4>🤖 AI 體驗連結:從 BERT 到現代 NLP</h4>
+            <p><strong>BERT 之後的改進模型:</strong></p>
+            <ul>
+                <li><strong>RoBERTa</strong> (2019): 改進訓練策略,移除 NSP</li>
+                <li><strong>ALBERT</strong> (2019): 參數共享,更小更快</li>
+                <li><strong>ELECTRA</strong> (2020): 改進預訓練目標</li>
+                <li><strong>DeBERTa</strong> (2020): 改進注意力機制</li>
+            </ul>
+
+            <p><strong>BERT 的影響:</strong></p>
+            <ul>
+                <li>開創「大規模預訓練」時代</li>
+                <li>證明「雙向」的重要性</li>
+                <li>讓 NLP 研究者不用從頭訓練</li>
+            </ul>
+        </div>
+
+        <div class="nav-bar">
+            <a href="03-pretraining-tasks.html" class="nav-btn">← 上一頁</a>
+            <a href="index.html" class="nav-btn">📑 目錄</a>
+            <a href="05-conclusion.html" class="nav-btn primary">下一頁 → 結論</a>
+        </div>
+    </div>
+</body>
+</html>
+

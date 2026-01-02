@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 3 頁：結果與代價 - InstructGPT 論文深度解析</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="index.html">InstructGPT 深度解析</a>
+            <span>/</span>
+            <span class="current">03. 結果與對齊稅</span>
+        </div>
+
+        <h1>第 3 頁：以小博大與對齊稅</h1>
+        
+        <div class="header-section">
+            <p class="lead">這篇論文最震撼的結論：一個 13 億參數的模型 (InstructGPT)，可以打敗 1750 億參數的模型 (GPT-3)。這證明了「資料品質 > 模型大小」。</p>
+        </div>
+
+        <section class="section-block">
+            <h2>結果：人類更喜歡 InstructGPT</h2>
+            
+            <div class="original-text">
+                <h3>📊 Main Result (原文關鍵段落)</h3>
+                <blockquote>
+                    <strong>Labelers significantly prefer InstructGPT outputs over outputs from GPT-3.</strong>
+                    On our test set, outputs from the 1.3B parameter InstructGPT model are preferred to outputs from the 175B GPT-3, despite having over 100x fewer parameters.
+                    <br><br>
+                    Outputs from our 175B InstructGPT are preferred to 175B GPT-3 outputs <strong>85 ± 3% of the time</strong>, and preferred <strong>71 ± 4% of the time</strong> to few-shot 175B GPT-3.
+                </blockquote>
+            </div>
+            
+            <div class="text-pair">
+                <div class="original-text">
+                    Outputs from the 1.3B parameter InstructGPT model are preferred to outputs from the 175B GPT-3, despite having over 100x fewer parameters.
+                </div>
+                <div class="translation">
+                    1.3B 參數的 InstructGPT 模型輸出的結果比 175B GPT-3 的輸出更受喜愛，儘管參數數量少了超過 100 倍。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 深度解析</h4>
+                <p>這是 AI 界的「大衛與歌利亞」時刻。過去幾年大家都在比誰的模型大（Scaling Laws），但這篇論文說：<strong>「只要你懂得如何與人類溝通，你不需要那麼大。」</strong></p>
+                <p>這直接啟發了後來的 LLaMA、Mistral 等「小而美」模型的研究。</p>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>代價：對齊稅 (Alignment Tax)</h2>
+            
+            <div class="problem">
+                <h4>❌ 問題：變乖了，但也變笨了？</h4>
+                <p>研究人員發現，雖然 InstructGPT 在「聽話」方面變強了，但在某些傳統 NLP 任務（如 SQuAD 問答、翻譯）上，分數反而下降了。</p>
+                <p>這被稱為 <strong>Alignment Tax (對齊稅)</strong>。</p>
+            </div>
+
+            <div class="analogy">
+                <h4>💡 生活類比：政治家的困境</h4>
+                <p>想像一個原本講話犀利、觀點獨到的名嘴 (GPT-3)：</p>
+                <ul>
+                    <li><strong>Before:</strong> 他什麼敢說，雖然有時會冒犯人，但很有料。</li>
+                    <li><strong>Alignment:</strong> 他決定去競選公職，開始學習「說話的藝術」(RLHF)。</li>
+                    <li><strong>Alignment Tax:</strong> 現在他講話變得四平八穩，滴水不漏，但也許失去了一些銳利度和創造力，甚至為了討好觀眾而變得平庸。</li>
+                </ul>
+                <p>這就是「對齊稅」——為了安全與合群，犧牲了部分能力。</p>
+            </div>
+
+            <div class="solution">
+                <h4>✅ 解決方案：PPO-ptx</h4>
+                <p>為了減輕這個副作用，OpenAI 修改了 PPO 的目標函數：</p>
+                <p>在訓練時，不僅要最大化 Reward (讓人類開心)，還要同時複習 Pre-training 的資料 (保持知識)。</p>
+                <p>\[ \text{Objective} = \text{PPO(Reward)} + \gamma \times \text{Pretraining(LogLikelihood)} \]</p>
+                <p>這就像是政治家在練習演講技巧的同時，每天還強迫自己讀《百科全書》，確保腦袋裡的東西沒丟掉。</p>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>結論：通往 ChatGPT 之路</h2>
+            
+            <div class="key-concept">
+                <h4>InstructGPT 的遺產</h4>
+                <ul>
+                    <li>它是 <strong>ChatGPT 的前身</strong>。ChatGPT 基本上就是 InstructGPT 的對話優化版。</li>
+                    <li>它證明了 <strong>RLHF</strong> 是目前讓 LLM 變得可用、安全的最有效方法。</li>
+                    <li>它揭示了模型能力 (Capability) 與對齊 (Alignment) 是兩個不同的維度。</li>
+                </ul>
+            </div>
+
+            <div class="figure figure-ai">
+                <img src="https://imrs-test.botrun.ai/api/data_images/c6/3b/c63b80c9/generated_images/2026/01/user_generate_image_20260101103002_future_path.png" alt="Road to AGI">
+                <div class="caption">
+                    💡 <strong>AI 圖解：通往 AGI 的階梯</strong><br>
+                    第一階：Transformer (架構)<br>
+                    第二階：GPT-3 (預訓練/知識)<br>
+                    第三階：InstructGPT/ChatGPT (對齊/互動)<br>
+                    下一階是什麼？(可能是 Reasoning/Agents?)
+                </div>
+            </div>
+        </section>
+
+        <div class="nav-bar">
+            <a href="02-methodology.html" class="nav-btn">← 上一頁：方法論</a>
+            <a href="index.html" class="nav-btn">目錄</a>
+            <a href="04-dataset-details.html" class="nav-btn primary">下一頁：數據集詳解 →</a>
+        </div>
+    </div>
+</body>
+</html>
+

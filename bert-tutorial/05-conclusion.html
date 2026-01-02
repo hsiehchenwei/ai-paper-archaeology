@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 5 頁:結論與影響 - BERT 論文深度解析</title>
+    <link rel="stylesheet" href="../transformer-tutorial/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 第 5 頁:結論與深遠影響</h1>
+
+        <h2>🎯 核心貢獻總結</h2>
+
+        <div class="key-concept">
+            <h4>BERT 的三大突破</h4>
+            
+            <h5>1️⃣ 證明雙向預訓練的重要性</h5>
+            <p>與單向模型 (GPT) 相比,雙向理解帶來顯著提升!</p>
+
+            <h5>2️⃣ 統一的架構</h5>
+            <p>不需要針對每個任務設計複雜架構,只需加一層就能微調!</p>
+
+            <h5>3️⃣ 11 項任務 SOTA</h5>
+            <p>在句子層級和詞層級任務都達到最先進效能!</p>
+        </div>
+
+        <h2>🌍 對業界的影響</h2>
+
+        <div class="solution">
+            <h4>✅ 實際應用案例</h4>
+            
+            <h5>1. Google 搜尋引擎</h5>
+            <ul>
+                <li>2019 年整合 BERT</li>
+                <li>影響 10% 搜尋查詢</li>
+                <li>更準確理解查詢意圖</li>
+            </ul>
+
+            <h5>2. Gmail 智能撰寫</h5>
+            <ul>
+                <li>自動完成句子</li>
+                <li>建議回覆內容</li>
+            </ul>
+
+            <h5>3. 聊天機器人</h5>
+            <ul>
+                <li>更準確的意圖理解</li>
+                <li>多輪對話能力</li>
+            </ul>
+
+            <h5>4. 文檔理解</h5>
+            <ul>
+                <li>合約審查</li>
+                <li>文獻檢索</li>
+            </ul>
+        </div>
+
+        <h2>🔬 對學術的影響</h2>
+
+        <div class="key-concept">
+            <h4>開啟「預訓練」時代</h4>
+            <p><strong>範式轉移:</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>BERT 之前</th>
+                        <th>BERT 之後</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>每個任務從頭訓練</td>
+                        <td>預訓練 + 微調</td>
+                    </tr>
+                    <tr>
+                        <td>需要大量標記資料</td>
+                        <td>少量標記資料即可</td>
+                    </tr>
+                    <tr>
+                        <td>訓練時間長</td>
+                        <td>微調只需數小時</td>
+                    </tr>
+                    <tr>
+                        <td>需要專業知識設計架構</td>
+                        <td>統一架構</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>🤝 BERT vs GPT:理解 vs 生成</h2>
+
+        <div class="key-concept">
+            <h4>兩大陣營</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>特性</th>
+                        <th>BERT 陣營</th>
+                        <th>GPT 陣營</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>代表模型</strong></td>
+                        <td>BERT, RoBERTa, DeBERTa</td>
+                        <td>GPT-2, GPT-3, ChatGPT</td>
+                    </tr>
+                    <tr>
+                        <td><strong>架構</strong></td>
+                        <td>Encoder (雙向)</td>
+                        <td>Decoder (單向)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>擅長</strong></td>
+                        <td>理解任務</td>
+                        <td>生成任務</td>
+                    </tr>
+                    <tr>
+                        <td><strong>應用</strong></td>
+                        <td>分類、問答、搜尋</td>
+                        <td>對話、寫作、創作</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="analogy">
+            <h4>🤖 AI 體驗連結:為什麼 ChatGPT 不用 BERT?</h4>
+            <p><strong>ChatGPT 需要:</strong></p>
+            <ul>
+                <li>逐字「生成」回應</li>
+                <li>不能「偷看」後面的字</li>
+                <li>→ 必須用單向 (GPT 架構)</li>
+            </ul>
+
+            <p><strong>Google 搜尋需要:</strong></p>
+            <ul>
+                <li>「理解」使用者查詢</li>
+                <li>匹配最相關的文檔</li>
+                <li>→ 適合用雙向 (BERT)</li>
+            </ul>
+
+            <p><strong>結論:</strong></p>
+            <p>不是誰比較好,而是「適合不同任務」!</p>
+        </div>
+
+        <h2>🚀 BERT 之後的發展</h2>
+
+        <div class="key-concept">
+            <h4>進化樹</h4>
+            <pre><code>2017: Transformer
+  ├─ 2018: GPT (單向)
+  └─ 2018: BERT (雙向) ⭐
+      ├─ 2019: RoBERTa (優化 BERT)
+      ├─ 2019: ALBERT (輕量化)
+      ├─ 2020: ELECTRA (新預訓練目標)
+      ├─ 2020: DeBERTa (改進注意力)
+      └─ 2019: T5 (Encoder-Decoder 統一)
+</code></pre>
+        </div>
+
+        <h2>💡 對開發者的啟發</h2>
+
+        <div class="solution">
+            <h4>實用建議</h4>
+            
+            <h5>何時用 BERT?</h5>
+            <ul>
+                <li>✅ 文本分類 (情感分析、主題分類)</li>
+                <li>✅ 問答系統</li>
+                <li>✅ 命名實體識別</li>
+                <li>✅ 語意相似度</li>
+            </ul>
+
+            <h5>何時用 GPT?</h5>
+            <ul>
+                <li>✅ 文本生成</li>
+                <li>✅ 對話系統</li>
+                <li>✅ 摘要生成</li>
+                <li>✅ 創意寫作</li>
+            </ul>
+
+            <h5>如何使用?</h5>
+            <pre><code>// 使用 Hugging Face Transformers
+from transformers import BertTokenizer, BertModel
+
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+model = BertModel.from_pretrained('bert-base-uncased')
+
+# 微調只需幾行程式碼!
+</code></pre>
+        </div>
+
+        <div class="key-concept">
+            <h4>🎓 完成檢查</h4>
+            <p>如果你能回答以下問題,代表你掌握了 BERT:</p>
+            <ol>
+                <li>BERT 的「雙向」是什麼意思?與 GPT 的單向有何不同?</li>
+                <li>Masked LM 如何讓 BERT 學會雙向理解?</li>
+                <li>為什麼 BERT 微調這麼快?</li>
+                <li>BERT 擅長什麼任務?不擅長什麼?</li>
+                <li>Google 搜尋為什麼選 BERT 不選 GPT?</li>
+            </ol>
+        </div>
+
+        <div class="nav-bar">
+            <a href="04-fine-tuning-and-results.html" class="nav-btn">← 上一頁</a>
+            <a href="index.html" class="nav-btn primary">📑 回到目錄</a>
+        </div>
+    </div>
+</body>
+</html>
+

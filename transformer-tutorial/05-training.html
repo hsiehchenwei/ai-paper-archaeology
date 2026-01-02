@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transformer 論文深度解析 - 第5頁：Training</title>
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <!-- MathJax for mathematical formulas -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$']],
+          displayMath: [['$$', '$$']]
+        }
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>
+        📖 Attention Is All You Need <br /><span
+          style="
+            font-size: 0.6em;
+            color: var(--text-secondary);
+            font-weight: normal;
+          "
+          >深度解析系列</span
+        >
+      </h1>
+      <h2>第 5 頁：Training（訓練細節）</h2>
+
+      <div class="header-section">
+        <div class="paper-meta">
+          <div class="meta-item">
+            <strong>目前章節</strong>
+            5. Training
+          </div>
+          <div class="meta-item">
+            <strong>核心主題</strong>
+            BPE、Adam Optimizer、Warmup、Regularization
+          </div>
+          <div class="meta-item">
+            <strong>閱讀難度</strong>
+            ⭐⭐⭐ (工程實作細節)
+          </div>
+        </div>
+      </div>
+
+      <!-- ============= 架構回顧與參數選擇 ============= -->
+      <div class="key-concept">
+        <h3>🔧 架構回顧：為什麼選擇 $d_{model} = 512$？</h3>
+        <p><em>在進入訓練細節前，讓我們回顧一下 Transformer 的核心參數選擇。</em></p>
+
+        <h4>📊 Transformer Base Model 的完整參數設定</h4>
+        <table>
+          <tr>
+            <th>參數</th>
+            <th>數值</th>
+            <th>意義</th>
+          </tr>
+          <tr>
+            <td><strong>$d_{model}$</strong></td>
+            <td>512</td>
+            <td>模型維度（每個詞的向量長度）</td>
+          </tr>
+          <tr>
+            <td><strong>$N$（層數）</strong></td>
+            <td>6</td>
+            <td>Encoder 和 Decoder 各 6 層</td>
+          </tr>
+          <tr>
+            <td><strong>$h$（頭數）</strong></td>
+            <td>8</td>
+            <td>Multi-Head Attention 的頭數</td>
+          </tr>
+          <tr>
+            <td><strong>$d_k = d_v$</strong></td>
+            <td>64</td>
+            <td>每個頭的維度（$d_{model}/h = 512/8$）</td>
+          </tr>
+          <tr>
+            <td><strong>$d_{ff}$</strong></td>
+            <td>2048</td>
+            <td>Feed-Forward 層的內層維度</td>
+          </tr>
+        </table>
+
+        <h4>❓ 為什麼 $d_{model}$ 選擇 512？（而不是 256 或 1024？）</h4>
+        <p><strong>這是經驗和實驗的平衡結果：</strong></p>
+
+        <h5>1. 表達能力 vs 計算成本</h5>
+        <table>
+          <tr>
+            <th>$d_{model}$</th>
+            <th>參數量</th>
+            <th>計算成本</th>
+            <th>表達能力</th>
+            <th>評估</th>
+          </tr>
+          <tr>
+            <td><strong>256（太小）</strong></td>
+            <td>~30M</td>
+            <td>低</td>
+            <td>不足</td>
+            <td>❌ 無法捕捉複雜語義</td>
+          </tr>
+          <tr>
+            <td><strong>512（剛好）</strong></td>
+            <td>~65M</td>
+            <td>中</td>
+            <td>足夠</td>
+            <td>✅ <strong>最佳平衡點</strong></td>
+          </tr>
+          <tr>
+            <td><strong>1024（太大）</strong></td>
+            <td>~230M</td>
+            <td>高</td>
+            <td>更強（但邊際效益遞減）</td>
+            <td>⚠️ 成本高，過擬合風險</td>
+          </tr>
+        </table>
+
+        <h5>2. 與 Multi-Head Attention 的配合</h5>
+        <ul>
+          <li><strong>$h = 8$ 個頭：</strong>需要 $d_{model}$ 能被 8 整除 → 512 ÷ 8 = 64（每個頭 64 維）</li>
+          <li><strong>太小（256）：</strong>256 ÷ 8 = 32 維/頭 → 每個頭的表達能力太弱</li>
+          <li><strong>剛好（512）：</strong>64 維/頭 → 足以捕捉不同類型的依賴關係</li>
+        </ul>
+
+        <h5>3. 硬體效率（GPU 友好）</h5>
+        <ul>
+          <li><strong>記憶體對齊：</strong>512 = $2^9$（2的冪次），對 GPU 記憶體訪問更高效</li>
+          <li><strong>批次處理：</strong>512 維的矩陣運算可以充分利用 GPU 並行能力</li>
+        </ul>
+
+        <h5>4. 歷史對比（站在巨人肩膀上）</h5>
+        <table>
+          <tr>
+            <th>模型</th>
+            <th>年份</th>
+            <th>隱藏層維度</th>
+          </tr>
+          <tr>
+            <td>Word2Vec</td>
+            <td>2013</td>
+            <td>100-300</td>
+          </tr>
+          <tr>
+            <td>LSTM Seq2Seq</td>
+            <td>2014</td>
+            <td>256-512</td>
+          </tr>
+          <tr>
+            <td><strong>Transformer (Base)</strong></td>
+            <td>2017</td>
+            <td><strong>512</strong></td>
+          </tr>
+          <tr>
+            <td>Transformer (Big)</td>
+            <td>2017</td>
+            <td>1024</td>
+          </tr>
+          <tr>
+            <td>BERT-Base</td>
+            <td>2018</td>
+            <td>768</td>
+          </tr>
+          <tr>
+            <td>GPT-3</td>
+            <td>2020</td>
+            <td>12,288</td>
+          </tr>
+        </table>
+
+        <p><strong>觀察：</strong></p>
+        <ul>
+          <li>2017 年時，512 是「中型」配置，在單機 8 GPU 上可訓練</li>
+          <li>論文也提供了「Big Model」($d_{model} = 1024$)，證明更大的維度確實有效</li>
+          <li>後來的 GPT-3 把維度擴大到 12,288，但需要<strong>數千張 GPU</strong></li>
+        </ul>
+
+        <h5>💡 類比：相機的畫素選擇</h5>
+        <ul>
+          <li><strong>1MP（太小）：</strong>看得出輪廓，但細節模糊 → $d_{model} = 256$</li>
+          <li><strong>12MP（剛好）：</strong>日常使用綽綽有餘，檔案大小合理 → $d_{model} = 512$</li>
+          <li><strong>48MP（太大）：</strong>細節更豐富，但檔案巨大，處理慢 → $d_{model} = 1024+$</li>
+        </ul>
+
+        <p><strong>結論：</strong>$d_{model} = 512$ 是在 2017 年硬體條件下，「<strong>性能</strong>」和「<strong>成本</strong>」的最佳平衡點！</p>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <!-- ============= 5.1 Training Data and Batching ============= -->
+      <h3>1. 訓練資料與 Tokenization (BPE)</h3>
+
+      <div class="text-pair">
+        <div class="original-text">
+          We trained on the standard WMT 2014 English-German dataset consisting of about 4.5 million sentence pairs. Sentences were encoded using byte-pair encoding [3], which has a shared source-target vocabulary of about 37000 tokens. For English-French, we used the significantly larger WMT 2014 English-French dataset consisting of 36M sentences and split tokens into a 32000 word-piece vocabulary [38]. Sentence pairs were batched together by approximate sequence length. Each training batch contained a set of sentence pairs containing approximately 25000 source tokens and 25000 target tokens.
+        </div>
+        <div class="translation">
+          <p>
+            我們在標準的 WMT 2014 英德翻譯資料集上進行訓練，該資料集包含約 <strong>450 萬個句對</strong>。句子使用 <strong>Byte-Pair Encoding (BPE)</strong> 進行編碼，共有約 <strong>37,000 個 token</strong> 的共享源-目標詞彙表。
+          </p>
+          <p>
+            對於英法翻譯，我們使用了更大的 WMT 2014 英法資料集，包含 <strong>3600 萬個句子</strong>，並將 token 分割為 <strong>32,000 個 word-piece 詞彙表</strong>。句子對按照<strong>近似序列長度</strong>批次化。每個訓練批次包含約 <strong>25,000 個源 token 和 25,000 個目標 token</strong>。
+          </p>
+        </div>
+      </div>
+
+      <div class="key-concept">
+        <h4>🧩 什麼是 Byte-Pair Encoding (BPE)？</h4>
+        <p><strong>回顧第1頁：</strong>我們學到 AI 需要把文字切成「token」。但<strong>如何決定切割的方式？</strong></p>
+        <p>這是一種「子詞」(Subword) 分詞方法，介於「單字」(Word) 和「字元」(Character) 之間。</p>
+        
+        <h5>📊 三種分詞方法對比</h5>
+        <table>
+          <tr>
+            <th>方法</th>
+            <th>範例 (英文)</th>
+            <th>優點</th>
+            <th>缺點</th>
+          </tr>
+          <tr>
+            <td><strong>Word-level</strong></td>
+            <td>"playing" → ["playing"]</td>
+            <td>語義完整</td>
+            <td>❌ 字典太大 (10萬+)，遇到新字 (OOV) 就掛掉</td>
+          </tr>
+          <tr>
+            <td><strong>Char-level</strong></td>
+            <td>"playing" → ["p","l","a","y","i","n","g"]</td>
+            <td>永遠不會 OOV</td>
+            <td>❌ 序列太長，語義分散</td>
+          </tr>
+          <tr>
+            <td><strong>BPE (Subword)</strong></td>
+            <td>"playing" → ["play", "ing"]</td>
+            <td>✅ 平衡：字典適中、可處理新字</td>
+            <td>需要訓練分詞模型</td>
+          </tr>
+        </table>
+
+        <h5>🔍 BPE 如何運作？（統計最常見的字元組合）</h5>
+        <p><strong>訓練過程（基於英文語料）：</strong></p>
+        <ol>
+          <li><strong>初始：</strong>所有詞都拆成字元
+            <pre><code>corpus = ["low", "lower", "newest", "widest"]
+→ ["l","o","w", "l","o","w","e","r", ...]</code></pre>
+          </li>
+          <li><strong>統計：</strong>找最常見的字元對
+            <pre><code>最常見："e" + "r" 出現了很多次（lower, newer, faster...）
+→ 合併成一個新 token "er"</code></pre>
+          </li>
+          <li><strong>重複：</strong>繼續合併，直到達到目標詞彙表大小（如 37,000 個 token）
+            <pre><code>"playing" → "play" (常見) + "ing" (常見)
+"unhappiness" → "un" + "happi" + "ness"</code></pre>
+          </li>
+        </ol>
+
+        <h5>❓ 為什麼中文 Token 比英文多這麼多？</h5>
+        <p><strong>核心問題：</strong>GPT / Transformer 的 BPE 是基於<strong>英文為主的語料</strong>訓練的！</p>
+
+        <h5>🔬 實際案例分析</h5>
+        <pre><code>// 使用 GPT-3 的 Tokenizer (cl100k_base)
+
+英文："I love playing football."
+Tokens: ["I", " love", " playing", " football", "."]
+數量：  5 tokens
+原因：  每個常見英文詞都有專屬 token
+
+中文："我愛踢足球。"
+Tokens: ["我", "愛", "踢", "足", "球", "。"]  // 理想情況
+實際：  ["我", "愛", "è¸¢", "èº", "球", "ã", "€", "‚"]  // GPT-3
+數量：  8-12 tokens（取決於編碼）
+原因：  中文字在訓練語料中出現頻率較低，被拆成 UTF-8 bytes</code></pre>
+
+        <h5>📊 不同語言的 Token 效率對比</h5>
+        <table>
+          <tr>
+            <th>語言</th>
+            <th>句子範例</th>
+            <th>字數</th>
+            <th>Token 數</th>
+            <th>Token/字比</th>
+          </tr>
+          <tr>
+            <td><strong>英文</strong></td>
+            <td>"The weather is nice"</td>
+            <td>4 words</td>
+            <td>4-5 tokens</td>
+            <td>~1.0</td>
+          </tr>
+          <tr>
+            <td><strong>中文</strong></td>
+            <td>"天氣很好"</td>
+            <td>4 字</td>
+            <td>8-12 tokens</td>
+            <td>~2.5</td>
+          </tr>
+          <tr>
+            <td><strong>日文</strong></td>
+            <td>"天気がいい"</td>
+            <td>5 字</td>
+            <td>12-15 tokens</td>
+            <td>~3.0</td>
+          </tr>
+          <tr>
+            <td><strong>韓文</strong></td>
+            <td>"날씨가 좋다"</td>
+            <td>5 字</td>
+            <td>10-14 tokens</td>
+            <td>~2.5</td>
+          </tr>
+        </table>
+
+        <h5>💡 為什麼會這樣？</h5>
+        <p><strong>BPE 的「訓練偏見」：</strong></p>
+        <ul>
+          <li><strong>英文常見詞：</strong>"the" → 1 個 token（因為訓練語料中出現幾百萬次）</li>
+          <li><strong>中文常見字：</strong>"的" → 可能被拆成 2-3 個 bytes（因為訓練語料中中文佔比少）</li>
+        </ul>
+
+        <pre><code>GPT-3 的訓練語料分佈（估計）：
+英文：     ~92%
+其他歐洲語言： ~7%
+中日韓：    ~1%
+
+→ BPE 學到的「常見組合」都是英文的！</code></pre>
+
+        <h5>🔧 工程類比：壓縮演算法的偏見</h5>
+        <p>想像一個<strong>專為英文設計的壓縮演算法</strong>：</p>
+        <ul>
+          <li>"the" → 用 1 byte 表示（因為太常見）</li>
+          <li>"我" → 用 3 bytes 表示（因為不在常見詞表中）</li>
+        </ul>
+        <p><strong>結果：</strong>壓縮英文很高效，壓縮中文很浪費空間（就像 BPE 的 token 效率差異）！</p>
+      </div>
+
+      <div class="analogy">
+        <h4>🤖 AI 體驗連結：BPE 的「副作用」與 Token 經濟學</h4>
+        
+        <h5>1️⃣ 為什麼 ChatGPT 拼字有時很弱？</h5>
+        <p>你是否有發現，叫 ChatGPT 倒著拼寫單字（例如 "Strawberry"）有時會出錯？</p>
+        <p><strong>原因就是 BPE Tokenization！</strong></p>
+        <ul>
+          <li>對人類來說，"Strawberry" 是 s-t-r-a-w-b-e-r-r-y (10個字母)。</li>
+          <li>對 AI 來說，它可能是一個 Token [Strawberry] 或者兩個 Token [Straw, berry]。</li>
+        </ul>
+        <p>AI <strong>「看」不到字母</strong>，它看到的是 Token 的 ID。就像你認漢字「好」是認整體形狀，而不是去數它有幾個筆畫。</p>
+
+        <hr style="border: 0; border-top: 1px dashed #ddd; margin: 20px 0" />
+
+        <h5>2️⃣ 為什麼 ChatGPT 用 Token 計費？</h5>
+        <p><strong>現實的商業模式（2024 GPT-4 定價）：</strong></p>
+        <table>
+          <tr>
+            <th>項目</th>
+            <th>價格</th>
+            <th>說明</th>
+          </tr>
+          <tr>
+            <td>輸入 (Input)</td>
+            <td>$0.03 / 1K tokens</td>
+            <td>你發送給 ChatGPT 的內容</td>
+          </tr>
+          <tr>
+            <td>輸出 (Output)</td>
+            <td>$0.06 / 1K tokens</td>
+            <td>ChatGPT 回覆給你的內容（<strong>2倍價格</strong>）</td>
+          </tr>
+        </table>
+
+        <h5>❓ 為什麼不用「字數」計費？</h5>
+        <p><strong>因為計算成本與 Token 數成正比！</strong></p>
+        <pre><code>回顧第4頁：Self-Attention 複雜度 = O(n² × d)
+其中 n = token 數量
+
+例子：
+100 tokens  → 計算量 = 100² × 12,288 = 122M 運算
+200 tokens  → 計算量 = 200² × 12,288 = 491M 運算 (4倍！)
+
+所以：Token 越多 → 電費越貴 → 收費越高</code></pre>
+
+        <h5>🌍 語言不平等的現實</h5>
+        <p><strong>同樣意思的對話：</strong></p>
+        <pre><code>英文："What's the weather like today?" → 7 tokens  → $0.00021
+中文："今天天氣如何？"              → 16 tokens → $0.00048
+
+→ 中文成本是英文的 2.3 倍！</code></pre>
+
+        <p><strong>⚠️ 這是技術債：</strong>GPT 的 BPE 為英文優化，其他語言用戶需要「補貼」更多 token。</p>
+        
+        <hr style="border: 0; border-top: 1px dashed #ddd; margin: 20px 0" />
+        
+        <h5>3️⃣ 真實應用：Context Window 與「遺忘」</h5>
+        <p><strong>ChatGPT 的推理 (Inference)：</strong></p>
+        <ul>
+          <li><strong>短對話：</strong>可能只有幾百個 token（你的問題 + 它的回答）。</li>
+          <li><strong>長對話：</strong>可能累積到數萬個 token（整個對話歷史）。</li>
+          <li><strong>為什麼會「忘記」？</strong>因為 Context Window 有上限（例如 GPT-4 是 128K token），超過就會截斷前面的內容。</li>
+        </ul>
+        
+        <p><strong>💡 總結：</strong>Token 是 AI 模型處理資訊的「基本貨幣」。理解 Tokenization 對於有效使用 LLM、控制成本以及理解模型行為都至關重要。</p>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <!-- ============= 5.2 Hardware and Schedule ============= -->
+      <h3>2. 硬體與訓練時間</h3>
+
+      <div class="text-pair">
+        <div class="original-text">
+          We trained our models on one machine with 8 NVIDIA P100 GPUs. For our base models using the hyperparameters described throughout the paper, each training step took about 0.4 seconds. We trained the base models for a total of 100,000 steps or 12 hours. For our big models,(described on the bottom line of table 3), step time was 1.0 seconds. The big models were trained for 300,000 steps (3.5 days).
+        </div>
+        <div class="translation">
+          <p>
+            我們在一台配備 <strong>8 個 NVIDIA P100 GPU</strong> 的機器上訓練模型。
+          </p>
+          <ul>
+            <li><strong>Base Model：</strong>每個訓練步驟約 <strong>0.4 秒</strong>，總共訓練 <strong>100,000 步（12 小時）</strong>。</li>
+            <li><strong>Big Model：</strong>每個訓練步驟約 <strong>1.0 秒</strong>，總共訓練 <strong>300,000 步（3.5 天）</strong>。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analogy">
+        <h4>🤖 AI 體驗連結：AI 界的「工業革命」</h4>
+        <p>現在看來，8 張 P100 跑 3.5 天簡直是「超低成本」！但這在當時是巨大的突破。</p>
+        <table>
+          <tr>
+            <th>模型</th>
+            <th>硬體規模</th>
+            <th>訓練時間</th>
+            <th>Step Time</th>
+            <th>成本估算</th>
+          </tr>
+          <tr>
+            <td><strong>Transformer Base (2017)</strong></td>
+            <td>8 × P100 GPUs</td>
+            <td>12 小時 (100K steps)</td>
+            <td>0.4 秒/步</td>
+            <td>約 $100 美金</td>
+          </tr>
+          <tr>
+            <td><strong>Transformer Big (2017)</strong></td>
+            <td>8 × P100 GPUs</td>
+            <td>3.5 天 (300K steps)</td>
+            <td>1.0 秒/步</td>
+            <td>約 $500 美金</td>
+          </tr>
+          <tr>
+            <td><strong>GPT-3 (2020)</strong></td>
+            <td>10,000+ × V100 GPUs</td>
+            <td>數週/月</td>
+            <td>—</td>
+            <td>約 $4,600,000 美金</td>
+          </tr>
+          <tr>
+            <td><strong>GPT-4 (2023)</strong></td>
+            <td>25,000+ × A100/H100</td>
+            <td>數月</td>
+            <td>—</td>
+            <td>超過 $100,000,000 美金</td>
+          </tr>
+        </table>
+        
+        <h4>⚠️ 為什麼 Step Time 很重要？</h4>
+        <p><strong>Step Time = 單次前向傳播 + 反向傳播的時間</strong></p>
+        <ul>
+          <li><strong>Base Model (0.4 秒)：</strong>參數較少 (65M)，計算快速。</li>
+          <li><strong>Big Model (1.0 秒)：</strong>參數較多 (213M)，需要 2.5 倍時間。</li>
+          <li><strong>ChatGPT 推理 (Inference)：</strong>只需要前向傳播，速度更快（通常 < 0.1 秒/token）。</li>
+        </ul>
+        
+        <p><strong>啟示：</strong>Transformer 架構的高並行性 ($O(1)$) 是後來能擴展到 GPT-4 這種超大規模的基礎。如果是 RNN，根本無法在合理時間內吃下這麼多數據。</p>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <!-- ============= 5.3 Optimizer ============= -->
+      <h3>3. 優化器 (Adam) 與 Warmup</h3>
+
+      <div class="text-pair">
+        <div class="original-text">
+          We used the Adam optimizer with $\beta_1=0.9, \beta_2=0.98$ and $\epsilon=10^{-9}$. We varied the learning rate over the course of training, according to the formula:
+          $$lrate = d_{model}^{-0.5} \cdot \min(step\_num^{-0.5}, step\_num \cdot warmup\_steps^{-1.5})$$
+          This corresponds to increasing the learning rate linearly for the first $warmup\_steps$ training steps, and decreasing it thereafter proportionally to the inverse square root of the step number. We used $warmup\_steps = 4000$.
+        </div>
+        <div class="translation">
+          <p>
+            我們使用 <strong>Adam 優化器</strong>，參數設定為 $\beta_1=0.9, \beta_2=0.98$ 以及 $\epsilon=10^{-9}$。我們根據以下公式在訓練過程中改變<strong>學習率（Learning Rate）</strong>：
+          </p>
+          <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow-x: auto;">
+            $$lrate = d_{model}^{-0.5} \cdot \min(step\_num^{-0.5}, step\_num \cdot warmup\_steps^{-1.5})$$
+          </div>
+          <p>
+            <strong>公式解釋：</strong>這對應於在<strong>前 $warmup\_steps$ 個訓練步驟中線性增加學習率</strong>，然後按照<strong>步驟數的平方根倒數比例降低學習率</strong>。我們使用 $warmup\_steps = 4000$。
+          </p>
+        </div>
+      </div>
+
+      <div class="analogy">
+        <h4>🔧 雙重類比：Warmup (暖身) 機制</h4>
+        
+        <h4>💡 生活類比：開車上高速公路</h4>
+        <ul>
+          <li><strong>Warmup (前 4000 步)：</strong>從匝道進入高速公路。你需要<strong>線性加速</strong>，不能一開始就時速 100，否則會撞車（梯度不穩定，模型發散）。</li>
+          <li><strong>Decay (4000 步後)：</strong>進入主幹道巡航。隨著接近目的地（最優解），你需要<strong>慢慢減速</strong>（學習率降低），以便精準停在停車格，而不是衝過頭。</li>
+        </ul>
+
+        <h4>🔧 工程類比：金屬退火 (Annealing)</h4>
+        <p>先加熱讓原子劇烈運動（高學習率，跳出局部最優），然後緩慢冷卻讓原子排列成整齊的晶格（低學習率，收斂到全域最優）。</p>
+        
+        <h4>🤖 AI 體驗連結：ChatGPT 的「繼續訓練」為什麼困難？</h4>
+        <p>你可能會想：「ChatGPT 已經訓練好了，為什麼不能直接『繼續學習』新知識？」</p>
+        <p><strong>Warmup 機制告訴我們原因：</strong></p>
+        <ul>
+          <li><strong>從頭訓練：</strong>可以用 Warmup 慢慢調整，模型很「柔軟」。</li>
+          <li><strong>已訓練模型：</strong>權重已經「凝固」（收斂到某個最優解），學習率必須非常小，否則會破壞原有知識。</li>
+          <li><strong>Fine-tuning：</strong>這就是為什麼 ChatGPT 的「更新」通常是用新數據「微調」，而不是直接灌新知識。</li>
+        </ul>
+        <p><strong>這也解釋了為什麼 ChatGPT 的知識截止日期（Knowledge Cutoff）很難即時更新。</strong></p>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <!-- ============= 5.4 Regularization ============= -->
+      <h3>4. 正則化 (Regularization)</h3>
+
+      <p>為了防止過擬合（Overfitting），論文使用了三種技術：</p>
+
+      <h4>📌 Residual Dropout</h4>
+      <div class="text-pair">
+        <div class="original-text">
+          We apply dropout to the output of each sub-layer, before it is added to the sub-layer input and normalized. In addition, we apply dropout to the sums of the embeddings and the positional encodings in both the encoder and decoder stacks. For the base model, we use a rate of $P_{drop} = 0.1$.
+        </div>
+        <div class="translation">
+          <p>
+            我們在<strong>每個子層的輸出上應用 Dropout</strong>，<strong>在它被加到子層輸入並標準化之前</strong>。此外，我們在 <strong>Encoder 和 Decoder 堆疊中的 Embedding 和 Positional Encoding 的總和</strong>上應用 Dropout。對於 Base Model，我們使用 $P_{drop} = 0.1$ 的比例。
+          </p>
+        </div>
+      </div>
+
+      <h4>📌 Label Smoothing</h4>
+      <div class="text-pair">
+        <div class="original-text">
+          During training, we employed label smoothing of value $\epsilon_{ls} = 0.1$. This hurts perplexity, as the model learns to be more unsure, but improves accuracy and BLEU score.
+        </div>
+        <div class="translation">
+          <p>
+            在訓練期間，我們使用了值為 $\epsilon_{ls} = 0.1$ 的<strong>標籤平滑（Label Smoothing）</strong>。這會損害困惑度（perplexity），因為模型學會了變得<strong>「更不確定」(more unsure)</strong>，但這提高了準確率和 BLEU 分數。
+          </p>
+        </div>
+      </div>
+
+      <div class="analogy">
+        <h4>🤖 AI 體驗連結：為什麼 AI 說話要有保留？</h4>
+        
+        <p><strong>Label Smoothing 的邏輯：</strong></p>
+        <ul>
+          <li><strong>沒有 Smoothing (One-hot)：</strong>老師教學生：「這張圖<strong>絕對是</strong>貓(100%)，<strong>絕對不是</strong>狗(0%)。」→ 學生變得<strong>固執、過度自信</strong>，看到長得像狗的貓就崩潰了。</li>
+          <li><strong>有 Smoothing：</strong>老師教學生：「這張圖<strong>很可能是</strong>貓(90%)，但也有一點點像狗或其他東西(10%)。」→ 學生學會<strong>保留可能性</strong>，泛化能力更強。</li>
+        </ul>
+
+        <h4>🔧 Dropout 的「隨機失憶」策略</h4>
+        <p><strong>Dropout 在哪裡發生？</strong></p>
+        <ol>
+          <li><strong>子層輸出後、殘差連接前：</strong>$\text{LayerNorm}(x + \text{Dropout}(\text{Sublayer}(x)))$</li>
+          <li><strong>Embedding + Positional Encoding 相加後：</strong>$\text{Dropout}(\text{Embedding} + \text{Positional Encoding})$</li>
+        </ol>
+        <p><strong>為什麼要這樣做？</strong></p>
+        <p>想像一個學生考試前複習：</p>
+        <ul>
+          <li><strong>沒有 Dropout：</strong>學生每次複習都記住<strong>完全相同</strong>的內容，考試時遇到變化題就不會了（過擬合）。</li>
+          <li><strong>有 Dropout：</strong>學生每次複習時<strong>隨機「忘記」10% 的內容</strong>，逼迫大腦用其他神經元來補償，結果對知識的理解更全面（泛化）。</li>
+        </ul>
+
+        <p><strong>這跟 ChatGPT 的 Temperature 有關嗎？</strong></p>
+        <p>雖然機制不同，但精神類似：</p>
+        <ul>
+          <li><strong>Label Smoothing (訓練時)：</strong>讓模型學會「不要把話說死」。</li>
+          <li><strong>Temperature (推理時)：</strong>讓生成的文字更多樣化、不那麼「機械」。</li>
+          <li><strong>Dropout (訓練時)：</strong>隨機關閉神經元，防止過度依賴特定路徑。</li>
+        </ul>
+        <p>這些技術共同讓 ChatGPT 的回答既準確又靈活，而不是死板地背誦訓練資料。</p>
+      </div>
+
+      <div class="nav-bar">
+        <a href="04-why-self-attention.html" class="nav-btn">
+          ← 上一頁：Why Self-Attention
+        </a>
+        <a href="06-results.html" class="nav-btn primary">
+          下一頁：Results (結果與數據) →
+        </a>
+      </div>
+
+      <div
+        style="
+          margin-top: 40px;
+          padding: 20px;
+          background: #ecf0f1;
+          border-radius: 5px;
+          text-align: center;
+        "
+      >
+        <p><strong>📚 學習檢查點</strong></p>
+        <ul style="text-align: left; max-width: 600px; margin: 20px auto">
+          <li>✅ <strong>BPE Tokenization：</strong>AI 看到的是 Token 不是單字（解釋了拼字弱點與 Context Window 限制）。</li>
+          <li>✅ <strong>並行訓練：</strong>Base Model 僅需 12 小時 (0.4 秒/步)，Big Model 需 3.5 天 (1.0 秒/步)，展現 Transformer 的商業可行性。</li>
+          <li>✅ <strong>Warmup 機制：</strong>學習率先升後降，解釋了為什麼已訓練模型難以「繼續學習」新知識。</li>
+          <li>✅ <strong>Dropout 策略：</strong>在子層輸出後、殘差連接前隨機「失憶」，防止過擬合。</li>
+          <li>✅ <strong>Label Smoothing：</strong>教模型「不要太鐵齒」，與 ChatGPT 的 Temperature 異曲同工。</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
+

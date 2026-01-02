@@ -1,0 +1,452 @@
+/* ==========================================
+   AI Paper Archaeology - 論文閱讀專用樣式
+   Paper Reading Specific Styles
+   ========================================== */
+
+/* 
+  使用說明：
+  這個文件包含論文閱讀頁面的所有特殊樣式
+  需要配合 global.css 一起使用
+  
+  引用順序：
+  1. global.css (基礎樣式)
+  2. paper-reading.css (論文專用)
+*/
+
+/* --- Paper Header --- */
+.header-section {
+  background: var(--bg-card);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing-xl);
+  border-top: 6px solid var(--primary-color);
+}
+
+.paper-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  background: var(--primary-light);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  margin-top: var(--spacing-md);
+}
+
+.meta-item strong {
+  display: block;
+  color: var(--primary-color);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+/* --- 原文與翻譯對照 --- */
+.text-pair {
+  display: grid;
+  gap: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  margin-bottom: var(--spacing-lg);
+}
+
+.original-text {
+  background: var(--accent-light);
+  padding: var(--spacing-md);
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  color: #4b5563;
+  position: relative;
+  border-left: 4px solid var(--accent-color);
+  line-height: 1.8;
+}
+
+.original-text::before {
+  content: "📜 Original Text";
+  font-family: var(--font-main);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--accent-color);
+  display: block;
+  margin-bottom: 0.75rem;
+  opacity: 0.9;
+}
+
+.translation {
+  background: #ffffff;
+  padding: var(--spacing-md);
+  border-left: 4px solid var(--primary-color);
+  border-top: 1px solid #e5e7eb;
+  line-height: 1.8;
+}
+
+.translation::before {
+  content: "🇹🇼 中文翻譯";
+  font-family: var(--font-main);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--primary-color);
+  display: block;
+  margin-bottom: 0.75rem;
+  opacity: 0.9;
+}
+
+/* --- 內容區塊樣式 --- */
+
+/* 詳細解釋 */
+.explanation {
+  background: var(--secondary-light);
+  border: 2px solid #a7f3d0;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+}
+
+.explanation h4 {
+  color: var(--secondary-color);
+  margin-top: 0;
+}
+
+.explanation h4::before {
+  content: "💡 ";
+}
+
+/* 生活類比 */
+.analogy {
+  background: var(--purple-light);
+  border: 2px solid #ddd6fe;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.analogy::after {
+  content: "{ }";
+  position: absolute;
+  right: -20px;
+  top: -30px;
+  font-size: 8rem;
+  font-family: var(--font-mono);
+  color: var(--purple-color);
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.analogy h4 {
+  color: var(--purple-color);
+  margin-top: 0;
+}
+
+.analogy h4::before {
+  content: "🎨 ";
+}
+
+/* 問題說明 */
+.problem {
+  background: var(--danger-light);
+  border-left: 4px solid var(--danger-color);
+  padding: var(--spacing-md);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  margin: var(--spacing-md) 0;
+}
+
+.problem h4 {
+  color: var(--danger-color);
+  margin-top: 0;
+}
+
+.problem h4::before {
+  content: "⚠️ ";
+}
+
+/* 解決方案 */
+.solution {
+  background: var(--secondary-light);
+  border-left: 4px solid var(--secondary-color);
+  padding: var(--spacing-md);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  margin: var(--spacing-md) 0;
+}
+
+.solution h4 {
+  color: var(--secondary-color);
+  margin-top: 0;
+}
+
+.solution h4::before {
+  content: "✅ ";
+}
+
+/* 核心概念 */
+.key-concept {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 2px solid var(--accent-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-lg) 0;
+  box-shadow: var(--shadow-md);
+}
+
+.key-concept h4 {
+  color: var(--accent-color);
+  margin-top: 0;
+}
+
+.key-concept h4::before {
+  content: "🎯 ";
+}
+
+/* 數學公式區塊 */
+.math-block {
+  background: white;
+  border: 2px solid var(--primary-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-lg) 0;
+  text-align: center;
+}
+
+.math-block .katex-display {
+  margin: var(--spacing-md) 0;
+}
+
+/* 重點標記 */
+.highlight {
+  background: linear-gradient(120deg, #fef3c7 0%, #fef3c7 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 40%;
+  background-position: 0 88%;
+  font-weight: 600;
+  padding: 0 4px;
+}
+
+/* --- 導航系統 --- */
+
+/* 章節導航 */
+.nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-md) 0;
+  border-top: 2px solid #e5e7eb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: white;
+  border: 2px solid var(--primary-color);
+  border-radius: var(--radius-md);
+  color: var(--primary-color);
+  font-weight: 600;
+  transition: all var(--transition-base);
+  font-size: 1rem;
+}
+
+.nav-btn:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateX(0);
+  text-decoration: none;
+}
+
+.nav-btn.prev:hover {
+  transform: translateX(-5px);
+}
+
+.nav-btn.next:hover {
+  transform: translateX(5px);
+}
+
+.nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-color: #d1d5db;
+  color: #9ca3af;
+}
+
+.nav-btn:disabled:hover {
+  background: white;
+  transform: none;
+}
+
+/* 目錄導航 */
+.nav-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-sm);
+  margin: var(--spacing-lg) 0;
+  padding: var(--spacing-md);
+  background: var(--primary-light);
+  border-radius: var(--radius-lg);
+}
+
+.nav-links a {
+  padding: 12px 16px;
+  background: white;
+  border-radius: var(--radius-md);
+  border: 1px solid #e5e7eb;
+  transition: all var(--transition-fast);
+  display: block;
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  text-decoration: none;
+}
+
+.nav-links a.current {
+  background: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+/* 返回首頁按鈕 */
+.home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--secondary-color);
+  color: white;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  transition: all var(--transition-base);
+}
+
+.home-link:hover {
+  background: var(--secondary-dark);
+  transform: translateX(-5px);
+  text-decoration: none;
+}
+
+/* --- 圖片與說明 --- */
+figure {
+  margin: var(--spacing-lg) 0;
+  text-align: center;
+}
+
+figure img {
+  margin: 0 auto var(--spacing-sm);
+  box-shadow: var(--shadow-md);
+}
+
+figcaption {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: 0 var(--spacing-md);
+}
+
+/* --- Learning Path (學習路徑) --- */
+.learning-path {
+  background: white;
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin: var(--spacing-xl) 0;
+}
+
+.learning-path h3 {
+  color: var(--primary-color);
+  margin-top: 0;
+  border-bottom: 3px solid var(--primary-color);
+  padding-bottom: var(--spacing-sm);
+}
+
+/* --- 章節列表 --- */
+.chapter-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--spacing-md) 0;
+}
+
+.chapter-list li {
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--primary-color);
+}
+
+.chapter-list li::before {
+  content: none;
+}
+
+.chapter-list a {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.chapter-list a:hover {
+  color: var(--primary-color);
+}
+
+/* --- 響應式設計 --- */
+@media (max-width: 768px) {
+  .text-pair {
+    font-size: 0.95rem;
+  }
+  
+  .original-text,
+  .translation {
+    padding: var(--spacing-sm);
+  }
+  
+  .nav-bar {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .nav-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .nav-links {
+    grid-template-columns: 1fr;
+  }
+  
+  .paper-meta {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- 列印樣式 --- */
+@media print {
+  .nav-bar,
+  .nav-links,
+  .home-link {
+    display: none;
+  }
+  
+  .text-pair,
+  .explanation,
+  .analogy,
+  .key-concept {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  .original-text,
+  .translation {
+    border: 1px solid #000;
+  }
+}
+

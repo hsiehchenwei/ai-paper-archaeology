@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-3 訓練 vs 推理：完整解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        .architecture-diagram {
+            background: white;
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            margin: 30px 0;
+        }
+        .comparison-table {
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="gpt3-96-layers-architecture.html">96層架構</a>
+            <span>/</span>
+            <span class="current">🔬 訓練 vs 推理</span>
+        </div>
+
+        <h1>🔄 GPT-3 訓練 vs 推理：Tokens 輸入方式的完整解析</h1>
+        
+        <div class="key-concept">
+            <h3>🎯 本章重點</h3>
+            <p>深入理解 GPT-3 在兩個不同階段的運作方式：</p>
+            <ul>
+                <li>✅ <strong>訓練時 (Training)</strong>：如何快速學習</li>
+                <li>✅ <strong>推理時 (Inference)</strong>：如何生成文字</li>
+                <li>✅ 為什麼 ChatGPT 會「打字」效果</li>
+            </ul>
+        </div>
+
+
+        <h2>🔄 補充說明 02：訓練 vs 推理 - Tokens 輸入方式的關鍵差異 ⭐⭐⭐</h2>
+
+        <div class="problem">
+            <h4>❓ 你的困惑：Tokens 是怎麼輸入到模型的？</h4>
+            <p><strong>核心問題：</strong></p>
+            <ol>
+                <li>「今天天氣怎麼樣？」轉成 6 個 tokens，每個是 12288 維向量</li>
+                <li>這些 tokens 是<strong>全部一起</strong>輸入？還是<strong>一個一個</strong>輸入？</li>
+                <li>輸入後的 output 會再次變成 input 嗎？</li>
+            </ol>
+            <p style="color: var(--danger-color); font-weight: bold; font-size: 1.2rem; margin-top: 20px;">
+                ⚠️ 答案：<strong>訓練(Training) 和 推理(Inference) 的方式完全不同！</strong>
+            </p>
+        </div>
+
+        <div style="margin: 40px 0; text-align: center;">
+            <img src="../images/user_generate_image_20260102012348_d907.png" 
+                 alt="GPT-3 訓練時的 Teacher Forcing 並行處理" 
+                 style="max-width: 100%; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);">
+            <p class="caption">
+                <strong>🎓 訓練時：Teacher Forcing + 並行處理</strong><br>
+                所有 tokens 同時輸入，通過 Causal Mask 限制可見範圍<br>
+                每個 position 同時預測下一個 token → 快速訓練！
+            </p>
+        </div>
+
+        <h3>📚 情境一：訓練時(Training) - 全部一起輸入（並行處理）</h3>
+
+        <div class="explanation">
+            <h4>🎓 訓練目標：學習「預測下一個字」</h4>
+            <p><strong>給定訓練資料：</strong></p>
+            <pre style="background: #f8fafc; color: #0f172a; padding: 20px; border-radius: var(--radius-md);">
+訓練句子："今天天氣怎麼樣？很好。"
+    ↓ Tokenize
+[今天, 天氣, 怎麼, 樣, ？, 很, 好, 。]
+    ↓ 轉成 Token IDs
+[15234, 22334, 8923, 9012, 445, 8876, 5432, 30]
+</pre>
+            
+            <h5 style="color: var(--primary-color);">🔑 關鍵：訓練時使用 Teacher Forcing</h5>
+            <p><strong>所有 tokens 一次全部輸入模型！</strong></p>
+        </div>
+
+        <div style="margin: 40px 0; text-align: center;">
+            <img src="../images/user_generate_image_20260102012444_58f5.png" 
+                 alt="Causal Mask 因果遮蔽矩陣視覺化" 
+                 style="max-width: 100%; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);">
+            <p class="caption">
+                <strong>🔒 Causal Mask：下三角矩陣</strong><br>
+                綠色 ✓ = 可以看到（允許 attention）<br>
+                紅色 ✗ = 看不到（阻擋 attention）<br>
+                每個 token 只能看到「自己和之前」的 tokens！
+            </p>
+        </div>
+
+        <div class="key-concept">
+            <h4>🏗️ 訓練時的完整流程（一次前向傳播）</h4>
+            
+            <h5>Step 1: 輸入準備（全部 8 個 tokens 一起）</h5>
+            <pre style="background: white; color: #0f172a; padding: 20px; border-radius: var(--radius-sm);">
+Token IDs: [15234, 22334, 8923, 9012, 445, 8876, 5432, 30]
+
+    ↓ Embedding + Positional Encoding
+    
+輸入矩陣 (shape: [8, 12288])：
+  Position 0: [今天的向量 + 位置0編碼]  → [12288 維]
+  Position 1: [天氣的向量 + 位置1編碼]  → [12288 維]
+  Position 2: [怎麼的向量 + 位置2編碼]  → [12288 維]
+  Position 3: [樣的向量 + 位置3編碼]    → [12288 維]
+  Position 4: [？的向量 + 位置4編碼]    → [12288 維]
+  Position 5: [很的向量 + 位置5編碼]    → [12288 維]
+  Position 6: [好的向量 + 位置6編碼]    → [12288 維]
+  Position 7: [。的向量 + 位置7編碼]    → [12288 維]
+
+<strong>✅ 全部 8 個 tokens 同時進入第 1 層！</strong>
+</pre>
+
+            <h5>Step 2: 通過 96 層（並行處理）</h5>
+            <pre style="background: white; color: #0f172a; padding: 20px; border-radius: var(--radius-sm);">
+<strong>每一層的 Masked Self-Attention：</strong>
+
+Position 0 (今天):  只能看到 [今天]
+Position 1 (天氣):  只能看到 [今天, 天氣]
+Position 2 (怎麼):  只能看到 [今天, 天氣, 怎麼]
+Position 3 (樣):    只能看到 [今天, 天氣, 怎麼, 樣]
+Position 4 (？):    只能看到 [今天, 天氣, 怎麼, 樣, ？]
+Position 5 (很):    只能看到 [今天, ..., ？, 很]
+Position 6 (好):    只能看到 [今天, ..., 很, 好]
+Position 7 (。):    只能看到 [今天, ..., 好, 。]
+
+<strong>🔑 關鍵：Causal Mask（因果遮蔽）</strong>
+    ↓
+阻止每個 token 看到「未來」的 tokens！
+    ↓
+但所有 8 個 position 可以「同時」在 GPU 上並行計算！
+</pre>
+
+            <div style="background: var(--accent-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
+                <h5>📊 Causal Mask 視覺化（Attention Mask 矩陣）</h5>
+                <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm); font-family: monospace; line-height: 1.8;">
+        看→ [今天] [天氣] [怎麼] [樣] [？] [很] [好] [。]
+          ↓
+[今天]     ✅    ❌    ❌   ❌  ❌  ❌  ❌  ❌  ← 只能看自己
+[天氣]     ✅    ✅    ❌   ❌  ❌  ❌  ❌  ❌  ← 能看前2個
+[怎麼]     ✅    ✅    ✅   ❌  ❌  ❌  ❌  ❌  ← 能看前3個
+[樣]       ✅    ✅    ✅   ✅  ❌  ❌  ❌  ❌
+[？]       ✅    ✅    ✅   ✅  ✅  ❌  ❌  ❌
+[很]       ✅    ✅    ✅   ✅  ✅  ✅  ❌  ❌
+[好]       ✅    ✅    ✅   ✅  ✅  ✅  ✅  ❌
+[。]       ✅    ✅    ✅   ✅  ✅  ✅  ✅  ✅  ← 能看全部
+
+<strong>下三角矩陣 = Causal Mask</strong>
+</pre>
+            </div>
+
+            <h5>Step 3: 輸出與損失計算（同時預測所有 positions）</h5>
+            <pre style="background: white; color: #0f172a; padding: 20px; border-radius: var(--radius-sm);">
+96 層後的輸出 (shape: [8, 12288])：
+  Position 0 的輸出 → 預測 Position 1 應該是什麼
+  Position 1 的輸出 → 預測 Position 2 應該是什麼
+  Position 2 的輸出 → 預測 Position 3 應該是什麼
+  ...
+  Position 7 的輸出 → 預測 Position 8 應該是什麼（結束符）
+
+    ↓ Language Model Head (線性層)
+    
+每個 position 都產生詞彙表的機率分佈：
+
+Position 0: [P("今天")=0.001, P("天氣")=0.85, ..., P("。")=0.0001]
+            ↑ 正確答案是「天氣」！Loss = -log(0.85)
+
+Position 1: [P("今天")=0.001, P("怎麼")=0.78, ..., P("。")=0.0001]
+            ↑ 正確答案是「怎麼」！Loss = -log(0.78)
+
+...
+
+Position 7: [P("[EOS]")=0.92, P("！")=0.03, ...]
+            ↑ 正確答案是結束符！Loss = -log(0.92)
+
+<strong>總 Loss = 所有 positions 的 Loss 加總</strong>
+    ↓
+反向傳播，更新所有參數
+</pre>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比：考試批改</h4>
+            <p><strong>訓練 = 老師批改填空題</strong></p>
+            
+            <p><strong>題目：</strong></p>
+            <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm);">
+今天 _____ (應填「天氣」)
+今天天氣 _____ (應填「怎麼」)
+今天天氣怎麼 _____ (應填「樣」)
+...
+</pre>
+
+            <p><strong>學生（模型）一次寫完所有空格：</strong></p>
+            <ul>
+                <li>第 1 空：學生寫「天氣」✓ (老師給分)</li>
+                <li>第 2 空：學生寫「很」✗ (老師扣分，正確是「怎麼」)</li>
+                <li>第 3 空：學生寫「樣」✓ (老師給分)</li>
+                <li>...</li>
+            </ul>
+
+            <p><strong>關鍵：</strong></p>
+            <ul>
+                <li>✅ 老師<strong>知道正確答案</strong>（訓練資料）</li>
+                <li>✅ 可以<strong>一次批改所有空格</strong>（並行）</li>
+                <li>✅ 根據錯誤調整學生的「答題策略」（反向傳播）</li>
+            </ul>
+        </div>
+
+        <div style="margin: 40px 0; text-align: center;">
+            <img src="../images/user_generate_image_20260102012416_b1f6.png" 
+                 alt="GPT-3 推理時的自回歸循環" 
+                 style="max-width: 100%; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);">
+            <p class="caption">
+                <strong>🔄 推理時：自回歸循環 (Autoregressive Loop)</strong><br>
+                循環 1: 輸入 → 96層 → 生成「很」<br>
+                循環 2: 輸入+「很」→ 96層 → 生成「好」<br>
+                循環 3: 輸入+「很」+「好」→ 96層 → 繼續...<br>
+                <strong>Output 變成下一次的 Input！</strong>
+            </p>
+        </div>
+
+        <h3>🚀 情境二：推理時(Inference) - 一個一個輸入（自回歸生成）</h3>
+
+        <div class="explanation">
+            <p><strong>推理目標：</strong>生成新的回答（模型<strong>不知道答案</strong>！）</p>
+            
+            <h5 style="color: var(--danger-color);">⚠️ 關鍵差異：推理時只能「逐字生成」</h5>
+            <p><strong>為什麼？</strong>因為模型不知道下一個字是什麼，必須先預測出來！</p>
+        </div>
+
+        <div class="key-concept">
+            <h4>🔄 推理時的自回歸循環（一次只處理一個新 token）</h4>
+            
+            <h5>🔁 循環 1：生成第 1 個字</h5>
+            <div style="background: var(--success-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
+                <p><strong>輸入矩陣 (shape: [6, 12288])：</strong></p>
+                <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm);">
+Position 0: [今天的向量 + 位置0編碼]
+Position 1: [天氣的向量 + 位置1編碼]
+Position 2: [怎麼的向量 + 位置2編碼]
+Position 3: [樣的向量 + 位置3編碼]
+Position 4: [？的向量 + 位置4編碼]
+Position 5: [30的向量 + 位置5編碼]
+
+<strong>✅ 全部 6 個 tokens 一起通過 96 層</strong>
+</pre>
+
+                <p><strong>輸出：</strong></p>
+                <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm);">
+96 層後，每個 position 都有輸出向量
+
+<strong>❗ 關鍵：只取最後一個 position (Position 5) 的輸出</strong>
+
+Position 5 的輸出向量 [12288 維]
+    ↓ Language Model Head
+詞彙表機率 [50257 個數字]
+    ↓ Softmax
+[P("很")=0.15, P("不")=0.12, P("還")=0.08, ...]
+    ↓ 選機率最高的
+<strong>預測：「很」</strong>
+</pre>
+
+                <p style="color: var(--primary-color); font-weight: bold;">
+                    ✨ 第 1 個生成的 token：「很」
+                </p>
+            </div>
+
+            <h5>🔁 循環 2：生成第 2 個字（把剛生成的加回輸入！）</h5>
+            <div style="background: var(--success-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
+                <p style="color: var(--danger-color); font-weight: bold;">
+                    ⚠️ 重點：把剛才生成的「很」加到輸入序列末尾！
+                </p>
+
+                <p><strong>新輸入矩陣 (shape: [7, 12288])：</strong></p>
+                <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm);">
+Position 0: [今天的向量 + 位置0編碼]
+Position 1: [天氣的向量 + 位置1編碼]
+Position 2: [怎麼的向量 + 位置2編碼]
+Position 3: [樣的向量 + 位置3編碼]
+Position 4: [？的向量 + 位置4編碼]
+Position 5: [30的向量 + 位置5編碼]
+Position 6: [<strong>很</strong>的向量 + 位置6編碼]  ← 新增的！
+
+<strong>✅ 再次全部 7 個 tokens 一起通過 96 層</strong>
+</pre>
+
+                <p><strong>輸出：</strong></p>
+                <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm);">
+<strong>❗ 只取最後一個 position (Position 6) 的輸出</strong>
+
+Position 6 的輸出向量
+    ↓ Language Model Head → Softmax
+[P("好")=0.42, P("棒")=0.18, P("差")=0.05, ...]
+    ↓ 選機率最高的
+<strong>預測：「好」</strong>
+</pre>
+
+                <p style="color: var(--primary-color); font-weight: bold;">
+                    ✨ 第 2 個生成的 token：「好」
+                </p>
+            </div>
+
+            <h5>🔁 循環 3-N：繼續生成...</h5>
+            <div style="background: var(--success-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
+                <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm);">
+<strong>循環 3:</strong>
+輸入: [今天, 天氣, 怎麼, 樣, ？, 很, 好]  (7 tokens)
+    → 通過 96 層 → 預測「，」
+
+<strong>循環 4:</strong>
+輸入: [今天, 天氣, 怎麼, 樣, ？, 很, 好, ，]  (8 tokens)
+    → 通過 96 層 → 預測「適合」
+
+<strong>循環 5:</strong>
+輸入: [今天, 天氣, 怎麼, 樣, ？, 很, 好, ，, 適合]  (9 tokens)
+    → 通過 96 層 → 預測「出門」
+
+...
+
+<strong>循環 N:</strong>
+輸入: [..., 走走]
+    → 通過 96 層 → 預測「。」
+
+<strong>循環 N+1:</strong>
+輸入: [..., 走走, 。]
+    → 通過 96 層 → 預測 [EOS] (結束符號)
+    → <strong>停止生成！</strong>
+</pre>
+
+                <p style="color: var(--success-color); font-weight: bold; font-size: 1.2rem; margin-top: 20px;">
+                    ✅ 最終輸出：「很好，適合出門走走。」
+                </p>
+            </div>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比：作家寫小說</h4>
+            <p><strong>推理 = 作家即興創作</strong></p>
+            
+            <p><strong>過程：</strong></p>
+            <ul>
+                <li><strong>第 1 筆：</strong>作家看「今天天氣怎麼樣？」→ 寫下「很」</li>
+                <li><strong>第 2 筆：</strong>作家看「今天天氣怎麼樣？很」→ 寫下「好」</li>
+                <li><strong>第 3 筆：</strong>作家看「今天天氣怎麼樣？很好」→ 寫下「，」</li>
+                <li>...</li>
+            </ul>
+
+            <p><strong>關鍵：</strong></p>
+            <ul>
+                <li>❌ 作家<strong>不知道結局</strong>（沒有答案）</li>
+                <li>❌ 必須<strong>寫完一個字才能想下一個</strong>（不能並行）</li>
+                <li>✅ 每寫一個字，都要<strong>重新閱讀前面所有內容</strong>（重新跑 96 層）</li>
+            </ul>
+        </div>
+
+        <h3>📊 訓練 vs 推理：完整對比表</h3>
+
+        <div class="comparison-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>特性</th>
+                        <th>訓練 (Training)</th>
+                        <th>推理 (Inference)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>目標</strong></td>
+                        <td>學習預測下一個字</td>
+                        <td>生成新的文字</td>
+                    </tr>
+                    <tr>
+                        <td><strong>輸入方式</strong></td>
+                        <td>
+                            <strong>全部 tokens 一次輸入</strong><br>
+                            例：[今天, 天氣, ..., 。] 全部進去
+                        </td>
+                        <td>
+                            <strong>逐步增加</strong><br>
+                            循環1: [今天, ..., ？]<br>
+                            循環2: [今天, ..., ？, 很]<br>
+                            循環3: [今天, ..., ？, 很, 好]<br>
+                            ...
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Causal Mask</strong></td>
+                        <td>
+                            ✅ 使用<br>
+                            每個 position 只能看到前面的
+                        </td>
+                        <td>
+                            ✅ 使用<br>
+                            同樣只能看到前面的
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>輸出使用</strong></td>
+                        <td>
+                            <strong>所有 positions 的輸出</strong><br>
+                            每個 position 預測下一個字<br>
+                            計算所有位置的 Loss
+                        </td>
+                        <td>
+                            <strong>只用最後一個 position</strong><br>
+                            其他 positions 的輸出丟棄<br>
+                            只取最後一個來預測新字
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>是否知道答案</strong></td>
+                        <td>
+                            ✅ <strong>知道</strong><br>
+                            訓練資料有完整句子<br>
+                            可以計算 Loss 並更新參數
+                        </td>
+                        <td>
+                            ❌ <strong>不知道</strong><br>
+                            必須自己生成<br>
+                            無法計算 Loss
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>並行程度</strong></td>
+                        <td>
+                            ✅ <strong>高度並行</strong><br>
+                            所有 positions 同時在 GPU 計算<br>
+                            一次前向傳播處理整個句子
+                        </td>
+                        <td>
+                            ❌ <strong>順序執行</strong><br>
+                            每次只生成 1 個新 token<br>
+                            必須等前一個生成完
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>速度</strong></td>
+                        <td>
+                            ⚡ <strong>快</strong><br>
+                            一次前向傳播 = 整句話<br>
+                            GPU 高度利用
+                        </td>
+                        <td>
+                            🐌 <strong>慢</strong><br>
+                            生成 N 個字 = N 次前向傳播<br>
+                            每次都要跑 96 層
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>記憶體需求</strong></td>
+                        <td>
+                            高（需儲存梯度）
+                        </td>
+                        <td>
+                            較低（無需梯度）<br>
+                            但隨生成長度線性增長
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Teacher Forcing</strong></td>
+                        <td>
+                            ✅ <strong>使用</strong><br>
+                            即使模型預測錯誤<br>
+                            下一步也用正確答案
+                        </td>
+                        <td>
+                            ❌ <strong>不使用</strong><br>
+                            必須用自己生成的結果<br>
+                            錯誤會累積
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>模型跑幾次</strong></td>
+                        <td>
+                            1 次<br>
+                            (處理整個句子)
+                        </td>
+                        <td>
+                            N 次<br>
+                            (生成 N 個字 = N 次)
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="problem">
+            <h4>❓ 為什麼推理不能像訓練一樣並行？</h4>
+            
+            <p><strong>問題：</strong>既然訓練時可以一次處理所有 tokens，為什麼推理時不能？</p>
+            
+            <p><strong>答案：</strong></p>
+            <ol>
+                <li>
+                    <strong>訓練時有「作弊」：</strong><br>
+                    我們已經知道完整句子，只是讓模型<strong>學習</strong>如何預測<br>
+                    即使模型在 Position 3 預測錯了，Position 4 仍然用<strong>正確答案</strong>作為輸入
+                </li>
+                <li>
+                    <strong>推理時沒有答案：</strong><br>
+                    模型必須用<strong>自己生成的字</strong>作為下一步的輸入<br>
+                    必須等第 N 個字生成完，才能生成第 N+1 個字
+                </li>
+                <li>
+                    <strong>自回歸依賴性：</strong><br>
+                    第 2 個字<strong>依賴</strong>第 1 個字的結果<br>
+                    無法跳過中間步驟直接生成最後一個字
+                </li>
+            </ol>
+        </div>
+
+        <div class="analogy">
+            <h4>🎯 核心類比：考試 vs 實戰</h4>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                <div style="background: var(--primary-light); padding: 20px; border-radius: var(--radius-md);">
+                    <h5 style="color: var(--primary-color);">📝 訓練 = 練習考古題</h5>
+                    <ul>
+                        <li>✅ 有<strong>標準答案</strong></li>
+                        <li>✅ 可以<strong>一次批改</strong>所有題目</li>
+                        <li>✅ 知道哪裡錯了，調整策略</li>
+                        <li>✅ 即使第 3 題寫錯，第 4 題仍看正確的第 3 題答案</li>
+                    </ul>
+                    <p><strong>目的：</strong>學習「如何答題」</p>
+                </div>
+
+                <div style="background: var(--danger-light); padding: 20px; border-radius: var(--radius-md);">
+                    <h5 style="color: var(--danger-color);">🚀 推理 = 正式考試</h5>
+                    <ul>
+                        <li>❌ <strong>沒有答案</strong></li>
+                        <li>❌ 必須<strong>一題一題寫</strong></li>
+                        <li>❌ 不知道對錯</li>
+                        <li>⚠️ 第 3 題錯了，第 4 題會受影響（錯誤累積）</li>
+                    </ul>
+                    <p><strong>目的：</strong>實際「答題」</p>
+                </div>
+            </div>
+        </div>
+
+        <h3>⚡ 補充：KV Cache 優化</h3>
+
+        <div class="solution">
+            <h4>✅ 問題：推理時每次都重新計算前面的 tokens 太浪費！</h4>
+            
+            <p><strong>觀察：</strong></p>
+            <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm);">
+循環 1: 計算 [今天, 天氣, 怎麼, 樣, ？] 的 Key/Value
+循環 2: 計算 [今天, 天氣, 怎麼, 樣, ？, <strong>很</strong>] 的 Key/Value
+        ↑ 前 5 個完全一樣！為什麼要重算？
+</pre>
+
+            <p><strong>優化：KV Cache (Key-Value Cache)</strong></p>
+            <pre style="background: white; color: #0f172a; padding: 15px; border-radius: var(--radius-sm);">
+<strong>循環 1:</strong>
+計算並<strong>儲存</strong> [今天, ..., ？] 的 Keys 和 Values
+預測 → 「很」
+
+<strong>循環 2:</strong>
+<strong>不重新計算</strong>前 5 個 tokens 的 Keys/Values
+只計算新 token「很」的 Keys/Values
+把它<strong>加到快取</strong>裡
+預測 → 「好」
+
+<strong>循環 3:</strong>
+只計算「好」的 Keys/Values，加到快取
+預測 → 「，」
+
+...
+
+<strong>加速：2-3 倍！</strong>
+</pre>
+
+            <p><strong>代價：</strong>需要額外記憶體儲存 KV Cache</p>
+        </div>
+
+
+        <div class="quick-links" style="margin-top: 40px;">
+            <a href="gpt3-96-layers-architecture.html" class="quick-link">← 回到：96層架構解析</a>
+            <a href="gpt3-inference-detailed.html" class="quick-link">下一章：推理詳細流程 →</a>
+        </div>
+        
+        <div class="quick-links" style="margin-top: 20px;">
+            <a href="../index.html" class="quick-link">🏠 回到首頁</a>
+            <a href="../gpt3-tutorial/index.html" class="quick-link">📖 GPT-3 教學總覽</a>
+        </div>
+    </div>
+</body>
+</html>

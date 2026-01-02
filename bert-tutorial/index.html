@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BERT 論文深度解析 - 學習路徑導覽</title>
+    <link rel="stylesheet" href="../transformer-tutorial/style.css">
+    <style>
+        .index-header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: var(--radius-lg);
+            margin-bottom: 40px;
+        }
+        .index-header h1 { color: white; margin-bottom: 10px; border: none; padding: 0; }
+        .index-header p { font-size: 1.1em; opacity: 0.95; }
+        .chapter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 40px; }
+        .chapter-card { background: var(--bg-card); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow-md); transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: var(--text-main); display: block; border: 2px solid transparent; }
+        .chapter-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--primary-color); }
+        .chapter-number { display: inline-block; background: var(--primary-color); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; font-weight: bold; margin-bottom: 12px; }
+        .chapter-title { font-size: 1.3em; font-weight: bold; color: var(--text-main); margin-bottom: 8px; }
+        .chapter-desc { color: var(--text-secondary); font-size: 0.95em; line-height: 1.6; margin-bottom: 12px; }
+        .chapter-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; color: var(--text-muted); margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; }
+        .learning-path { background: var(--accent-light); border-left: 4px solid var(--accent-color); padding: 20px; border-radius: var(--radius-sm); margin-bottom: 40px; }
+        .learning-path h3 { color: var(--accent-color); margin-top: 0; }
+        .path-list { list-style: none; padding: 0; }
+        .path-list li { padding: 8px 0; padding-left: 24px; position: relative; }
+        .path-list li::before { content: "→"; position: absolute; left: 0; color: var(--accent-color); font-weight: bold; }
+        .quick-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 40px; }
+        .quick-link { background: var(--secondary-light); color: var(--secondary-color); padding: 16px; border-radius: var(--radius-sm); text-align: center; text-decoration: none; font-weight: 600; transition: all 0.2s; }
+        .quick-link:hover { background: var(--secondary-color); color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <span class="current">🔄 BERT 教學</span>
+        </div>
+
+        <div class="index-header">
+            <h1>📖 BERT 論文深度解析</h1>
+            <p>Bidirectional Encoder Representations from Transformers</p>
+            <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.85;">為工程背景讀者設計 · 雙向理解的革命</p>
+        </div>
+
+        <div class="learning-path">
+            <h3>🎯 建議學習路徑</h3>
+            <ul class="path-list">
+                <li><strong>第一次閱讀:</strong>按順序閱讀第 1-5 頁,理解 BERT 的核心創新</li>
+                <li><strong>深入理解:</strong>重點複習第 3 頁 (Masked LM),這是 BERT 的靈魂</li>
+                <li><strong>實務連結:</strong>注意 BERT vs GPT 的對比,理解何時該用哪個</li>
+                <li><strong>延伸學習:</strong>搭配 Transformer 和 GPT-3 教學一起閱讀</li>
+            </ul>
+        </div>
+
+        <h2 style="margin-bottom: 24px;">📚 章節導覽</h2>
+        
+        <div class="chapter-grid">
+            <a href="01-abstract-and-introduction.html" class="chapter-card">
+                <span class="chapter-number">第 1 頁</span>
+                <div class="chapter-title">📖 摘要與引言</div>
+                <div class="chapter-desc">理解 BERT 的核心:雙向預訓練。對比單向模型 (GPT) 的限制,了解為什麼「看左右」比「只看左」更強。</div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 20 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="02-bert-architecture.html" class="chapter-card">
+                <span class="chapter-number">第 2 頁</span>
+                <div class="chapter-title">⚙️ BERT 架構</div>
+                <div class="chapter-desc">深入 BERT 的模型結構。學習三種 Embedding (Token + Segment + Position),理解特殊 tokens 的用途。</div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 15 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="03-pretraining-tasks.html" class="chapter-card">
+                <span class="chapter-number">第 3 頁</span>
+                <div class="chapter-title">🎓 預訓練任務</div>
+                <div class="chapter-desc">BERT 的靈魂!Masked LM (完形填空) 如何實現雙向理解。NSP (下一句預測) 如何學習句子關係。</div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 20 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="04-fine-tuning-and-results.html" class="chapter-card">
+                <span class="chapter-number">第 4 頁</span>
+                <div class="chapter-title">🏆 微調與結果</div>
+                <div class="chapter-desc">微調超簡單!只需幾小時就能在新任務上達到 SOTA。看 BERT 如何在 11 項任務上刷新紀錄。</div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 15 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="05-conclusion.html" class="chapter-card">
+                <span class="chapter-number">第 5 頁</span>
+                <div class="chapter-title">🎓 結論與影響</div>
+                <div class="chapter-desc">BERT 對業界和學術界的深遠影響。理解 BERT vs GPT 的適用場景,從 BERT 到現代 NLP 的演進。</div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 15 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="06-ablation-studies.html" class="chapter-card" style="border-left-color: var(--accent-color);">
+                <span class="chapter-number">補充</span>
+                <div class="chapter-title">🔬 消融實驗 (Ablation Studies)</div>
+                <div class="chapter-desc">
+                    <strong>⭐ 原教學缺漏！</strong>科學證明 BERT 的設計選擇:NSP 有多重要?雙向性為何關鍵?為什麼 LARGE 比 BASE 好?Feature-based vs Fine-tuning 比較。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 20 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="key-concept" style="margin-top: 40px;">
+            <h3>💡 核心概念地圖</h3>
+            <ul>
+                <li><strong>雙向 vs 單向:</strong>第 1 頁基礎,第 3 頁實現,第 5 頁應用</li>
+                <li><strong>Masked LM:</strong>第 3 頁完整解釋,這是 BERT 最重要的創新</li>
+                <li><strong>預訓練 + 微調:</strong>第 1 頁概念,第 4 頁實踐</li>
+                <li><strong>BERT vs GPT:</strong>貫穿全文,第 5 頁總結對比</li>
+            </ul>
+        </div>
+
+        <div class="solution" style="margin-top: 40px;">
+            <h3>🎓 完成指標</h3>
+            <p>當你能回答以下問題時,代表你已經掌握 BERT:</p>
+            <ol>
+                <li><strong>核心創新:</strong>BERT 的「雙向」是什麼意思?</li>
+                <li><strong>關鍵技術:</strong>Masked LM 如何實現雙向理解?</li>
+                <li><strong>實務應用:</strong>為什麼 Google 搜尋用 BERT 而不是 GPT?</li>
+                <li><strong>模型對比:</strong>何時該用 BERT?何時該用 GPT?</li>
+                <li><strong>歷史意義:</strong>BERT 對 NLP 領域有什麼影響?</li>
+            </ol>
+        </div>
+
+        <div class="quick-links">
+            <a href="../index.html" class="quick-link">← 回到三部曲總覽</a>
+            <a href="01-abstract-and-introduction.html" class="quick-link">🚀 開始學習 BERT</a>
+            <a href="../gpt3-tutorial/index.html" class="quick-link">下一步 → GPT-3</a>
+        </div>
+        
+        <div class="quick-links" style="margin-top: 20px;">
+            <a href="03-pretraining-tasks.html" class="quick-link">📐 直達核心章節</a>
+            <a href="https://arxiv.org/abs/1810.04805" class="quick-link" target="_blank">📄 原始論文</a>
+            <a href="https://github.com/google-research/bert" class="quick-link" target="_blank">💻 官方代碼</a>
+        </div>
+
+        <div style="text-align: center; margin-top: 60px; padding: 40px; background: var(--bg-body); border-radius: var(--radius-md);">
+            <h3 style="color: var(--primary-color);">📖 關於本教學</h3>
+            <p style="max-width: 600px; margin: 20px auto; line-height: 1.8; color: var(--text-secondary);">
+                本深度解析針對<strong>工程背景讀者</strong>設計。透過<strong>生活類比</strong>和<strong>工程類比</strong>,幫助你理解 BERT 如何用「完形填空」實現雙向理解,以及為什麼這個創新改變了 NLP 領域。
+            </p>
+            <p style="margin-top: 20px; font-size: 1.1em; font-weight: 600; color: var(--secondary-color);">
+                "Pre-training of Deep Bidirectional Transformers"
+            </p>
+            <p style="margin-top: 10px; color: var(--text-muted);">—— 開啟雙向理解的時代</p>
+        </div>
+
+        <div style="margin-top: 40px; padding: 20px; background: var(--purple-light); border-radius: var(--radius-md); border-left: 4px solid var(--purple-color);">
+            <h4 style="color: var(--purple-color); margin-top: 0;">🔗 三部曲完整學習</h4>
+            <p><strong>建議閱讀順序:</strong></p>
+            <ol>
+                <li><a href="../transformer-tutorial/index.html">Transformer (2017)</a> - 基礎架構</li>
+                <li><strong>BERT (2018)</strong> - 雙向理解革命 (你在這裡)</li>
+                <li><a href="../gpt3-tutorial/index.html">GPT-3 (2020)</a> - 規模化與 Few-Shot Learning</li>
+            </ol>
+            <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">完整理解現代 NLP 的三大里程碑!</p>
+        </div>
+    </div>
+</body>
+</html>
+

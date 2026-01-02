@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-3 論文深度解析 - 學習路徑導覽</title>
+    <link rel="stylesheet" href="../transformer-tutorial/style.css">
+    <style>
+        .index-header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--purple-color) 100%);
+            color: white;
+            border-radius: var(--radius-lg);
+            margin-bottom: 40px;
+        }
+        .index-header h1 {
+            color: white;
+            margin-bottom: 10px;
+            border: none;
+            padding: 0;
+        }
+        .index-header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .chapter-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: var(--text-main);
+            display: block;
+            border: 2px solid transparent;
+        }
+        .chapter-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+        .chapter-number {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        .chapter-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+        .chapter-desc {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        .chapter-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85em;
+            color: var(--text-muted);
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .difficulty {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .learning-path {
+            background: var(--accent-light);
+            border-left: 4px solid var(--accent-color);
+            padding: 20px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 40px;
+        }
+        .learning-path h3 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+        .path-list {
+            list-style: none;
+            padding: 0;
+        }
+        .path-list li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+        .path-list li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 40px;
+        }
+        .quick-link {
+            background: var(--secondary-light);
+            color: var(--secondary-color);
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .quick-link:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <span class="current">🌟 GPT-3 教學</span>
+        </div>
+
+        <div class="index-header">
+            <h1>📖 Language Models are Few-Shot Learners</h1>
+            <p>GPT-3 論文深度解析 · 完整學習路徑</p>
+            <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.85;">
+                為工程背景讀者設計 · 含生活類比與 ChatGPT 實際應用
+            </p>
+        </div>
+
+        <div class="learning-path">
+            <h3>🎯 建議學習路徑</h3>
+            <ul class="path-list">
+                <li><strong>第一次閱讀:</strong>按順序閱讀第 1-5 頁,建立完整概念框架</li>
+                <li><strong>深入理解:</strong>重點複習第 2 頁 (Few-Shot Learning) 和第 3 頁 (模型架構)</li>
+                <li><strong>實務連結:</strong>關注每頁的「AI 體驗連結」,理解與 ChatGPT 的關係</li>
+                <li><strong>技術深化:</strong>如果想更深入了解 Transformer,可先閱讀同目錄的 transformer-tutorial</li>
+            </ul>
+        </div>
+
+        <h2 style="margin-bottom: 24px;">📚 章節導覽</h2>
+        
+        <div class="chapter-grid">
+            <a href="01-abstract-and-introduction.html" class="chapter-card">
+                <span class="chapter-number">第 1 頁</span>
+                <div class="chapter-title">📖 摘要與引言</div>
+                <div class="chapter-desc">
+                    理解 GPT-3 的核心主張:規模即智能。學習 Meta-Learning 和 In-Context Learning 的概念,了解為什麼需要 GPT-3。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 20 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="02-approach-overview.html" class="chapter-card">
+                <span class="chapter-number">第 2 頁</span>
+                <div class="chapter-title">📐 方法概覽</div>
+                <div class="chapter-desc">
+                    深入理解 Zero-Shot、One-Shot、Few-Shot 三種學習方式的差異。學習 Context Window 的概念,理解為什麼 ChatGPT 會「忘記」。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 25 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="03-model-and-training.html" class="chapter-card">
+                <span class="chapter-number">第 3 頁</span>
+                <div class="chapter-title">⚙️ 模型架構與訓練</div>
+                <div class="chapter-desc">
+                    了解 GPT-3 的 175B 參數是怎麼來的,Autoregressive 為什麼讓 ChatGPT 一個字一個字打出來。學習訓練資料來源與模型並行技術。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 25 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="04-results-highlights.html" class="chapter-card">
+                <span class="chapter-number">第 4 頁</span>
+                <div class="chapter-title">🏆 結果展示</div>
+                <div class="chapter-desc">
+                    驚人的實驗結果!問答、翻譯、算數、新聞生成...看 GPT-3 在各種任務上的表現。理解為什麼 ChatGPT 算數會錯。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 20 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="05-limitations-and-impacts.html" class="chapter-card">
+                <span class="chapter-number">第 5 頁</span>
+                <div class="chapter-title">⚠️ 限制、影響與結論</div>
+                <div class="chapter-desc">
+                    理解 GPT-3 的限制 (幻覺、偏見、高成本)。探討社會影響與風險。從 GPT-3 到 ChatGPT 的進化之路。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 25 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="06-training-data-and-contamination.html" class="chapter-card" style="border-left-color: var(--danger-color);">
+                <span class="chapter-number">補充</span>
+                <div class="chapter-title">📊 訓練資料與資料污染</div>
+                <div class="chapter-desc">
+                    <strong>⭐ 原教學缺漏！</strong>深入了解 GPT-3 的訓練資料組成 (300B tokens)、Common Crawl 處理方式,以及資料污染問題的檢測與影響分析。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 20 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="key-concept" style="margin-top: 40px;">
+            <h3>💡 學習重點提示</h3>
+            <ul>
+                <li><strong>Few-Shot Learning:</strong>第 2 頁建立基礎,第 4 頁看實際效果</li>
+                <li><strong>Scaling Law:</strong>第 1 頁理論,第 3 頁實作,第 4 頁驗證</li>
+                <li><strong>Context Window:</strong>第 2 頁概念,第 3 頁技術細節,第 5 頁限制</li>
+                <li><strong>Autoregressive:</strong>第 3 頁機制,第 4 頁表現,第 5 頁限制</li>
+                <li><strong>實務應用:</strong>每頁的「AI 體驗連結」都與 ChatGPT 使用經驗相關</li>
+            </ul>
+        </div>
+
+        <div class="solution" style="margin-top: 40px;">
+            <h3>🎓 完成指標</h3>
+            <p>當你能回答以下問題時,代表你已經掌握 GPT-3 論文:</p>
+            <ol>
+                <li><strong>核心創新:</strong>GPT-3 與之前的 AI 模型最大的差異是什麼?</li>
+                <li><strong>Few-Shot Learning:</strong>為什麼 GPT-3 不需要微調就能做新任務?</li>
+                <li><strong>規模效應:</strong>為什麼 175B 參數比 1.5B 參數強這麼多?</li>
+                <li><strong>限制理解:</strong>為什麼 ChatGPT 會產生「幻覺」?</li>
+                <li><strong>實務連結:</strong>ChatGPT 與 GPT-3 的關係是什麼?</li>
+                <li><strong>社會影響:</strong>GPT-3 可能帶來哪些風險?如何應對?</li>
+            </ol>
+        </div>
+
+        <div class="quick-links">
+            <a href="../index.html" class="quick-link">
+                ← 回到三部曲總覽
+            </a>
+            <a href="01-abstract-and-introduction.html" class="quick-link">
+                🚀 開始學習 GPT-3
+            </a>
+            <a href="../tokenizer-embedding-explained.html" class="quick-link">
+                延伸 → 技術專題
+            </a>
+        </div>
+        
+        <div class="quick-links" style="margin-top: 20px;">
+            <a href="02-approach-overview.html" class="quick-link">
+                📐 直達核心章節
+            </a>
+            <a href="https://arxiv.org/abs/2005.14165" class="quick-link" target="_blank">
+                📄 原始論文 (arXiv)
+            </a>
+            <a href="https://github.com/openai/gpt-3" class="quick-link" target="_blank">
+                💻 OpenAI GitHub
+            </a>
+        </div>
+
+        <div style="text-align: center; margin-top: 60px; padding: 40px; background: var(--bg-body); border-radius: var(--radius-md);">
+            <h3 style="color: var(--primary-color);">📖 關於本教學</h3>
+            <p style="max-width: 600px; margin: 20px auto; line-height: 1.8; color: var(--text-secondary);">
+                本深度解析針對<strong>工程背景、數學基礎較弱的讀者</strong>設計。
+                每個技術概念都配有<strong>生活類比</strong>和<strong>工程類比</strong>,
+                並連結到實際的 <strong>ChatGPT 使用經驗</strong>。
+                目標是讓你不僅「看懂」論文,更能「理解」為什麼 GPT-3 改變了 AI 的歷史。
+            </p>
+            <p style="margin-top: 20px; font-size: 1.1em; font-weight: 600; color: var(--primary-color);">
+                "Language Models are Few-Shot Learners"
+            </p>
+            <p style="margin-top: 10px; color: var(--text-muted);">
+                —— 一篇開啟通用 AI 時代的論文
+            </p>
+        </div>
+
+        <div style="margin-top: 40px; padding: 20px; background: var(--purple-light); border-radius: var(--radius-md); border-left: 4px solid var(--purple-color);">
+            <h4 style="color: var(--purple-color); margin-top: 0;">🔗 延伸閱讀</h4>
+            <p>如果你想更深入了解 Transformer 架構 (GPT-3 的基礎),可以閱讀同目錄下的:</p>
+            <p><strong><a href="../transformer-tutorial/index.html">Transformer 論文深度解析 (Attention Is All You Need)</a></strong></p>
+            <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">
+                建議順序:先讀 Transformer → 再讀 GPT-3 → 完整理解現代 LLM!
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+

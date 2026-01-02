@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transformer 論文深度解析 - 學習路徑導覽</title>
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .index-header {
+        text-align: center;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--purple-color) 100%);
+        color: white;
+        border-radius: var(--radius-lg);
+        margin-bottom: 40px;
+      }
+      .index-header h1 {
+        color: white;
+        margin-bottom: 10px;
+      }
+      .index-header p {
+        font-size: 1.1em;
+        opacity: 0.95;
+      }
+      .chapter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+      }
+      .chapter-card {
+        background: var(--bg-card);
+        border-radius: var(--radius-md);
+        padding: 24px;
+        box-shadow: var(--shadow-md);
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+        color: var(--text-main);
+        display: block;
+      }
+      .chapter-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+      }
+      .chapter-number {
+        display: inline-block;
+        background: var(--primary-color);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.85em;
+        font-weight: bold;
+        margin-bottom: 12px;
+      }
+      .chapter-title {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: var(--text-main);
+        margin-bottom: 8px;
+      }
+      .chapter-desc {
+        color: var(--text-secondary);
+        font-size: 0.95em;
+        line-height: 1.6;
+        margin-bottom: 12px;
+      }
+      .chapter-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85em;
+        color: var(--text-muted);
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #e5e7eb;
+      }
+      .difficulty {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .learning-path {
+        background: var(--accent-light);
+        border-left: 4px solid var(--accent-color);
+        padding: 20px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 40px;
+      }
+      .learning-path h3 {
+        color: var(--accent-color);
+        margin-top: 0;
+      }
+      .path-list {
+        list-style: none;
+        padding: 0;
+      }
+      .path-list li {
+        padding: 8px 0;
+        padding-left: 24px;
+        position: relative;
+      }
+      .path-list li::before {
+        content: "→";
+        position: absolute;
+        left: 0;
+        color: var(--accent-color);
+        font-weight: bold;
+      }
+      .quick-links {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-top: 40px;
+      }
+      .quick-link {
+        background: var(--secondary-light);
+        color: var(--secondary-color);
+        padding: 16px;
+        border-radius: var(--radius-sm);
+        text-align: center;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+      }
+      .quick-link:hover {
+        background: var(--secondary-color);
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="../index.html">🏠 首頁</a>
+        <span>/</span>
+        <span class="current">⚡ Transformer 教學</span>
+      </div>
+
+      <div class="index-header">
+        <h1>📖 Attention Is All You Need</h1>
+        <p>Transformer 論文深度解析 · 完整學習路徑</p>
+        <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.85;">
+          為工程背景、數學基礎較弱的讀者設計 · 含生活類比與 ChatGPT 實際應用
+        </p>
+      </div>
+
+      <div class="learning-path">
+        <h3>🎯 建議學習路徑</h3>
+        <ul class="path-list">
+          <li><strong>第一次閱讀：</strong>按順序閱讀第 1-7 頁，建立完整概念框架</li>
+          <li><strong>深入理解：</strong>重點複習第 3-1 頁（Attention 機制）和第 4 頁（複雜度分析）</li>
+          <li><strong>實務連結：</strong>關注每頁的「AI 體驗連結」，理解與 ChatGPT 的關係</li>
+          <li><strong>技術深化：</strong>仔細研讀數學公式與偽代碼，嘗試手算範例</li>
+        </ul>
+      </div>
+
+      <h2 style="margin-bottom: 24px;">📚 章節導覽</h2>
+      
+      <div class="chapter-grid">
+        <!-- 第1頁 -->
+        <a href="01-abstract-and-introduction.html" class="chapter-card">
+          <span class="chapter-number">第 1 頁</span>
+          <div class="chapter-title">Abstract & Introduction</div>
+          <div class="chapter-desc">
+            理解 Transformer 的核心主張：Attention Is All You Need！
+            學習 Token、向量、Attention 的基礎概念，了解 Transformer 如何徹底取代 RNN。
+          </div>
+          <div class="chapter-meta">
+            <span>⏱️ 預計 20 分鐘</span>
+            <span class="difficulty">難度 ⭐⭐</span>
+          </div>
+        </a>
+
+        <!-- 第2頁 -->
+        <a href="02-background.html" class="chapter-card">
+          <span class="chapter-number">第 2 頁</span>
+          <div class="chapter-title">Background</div>
+          <div class="chapter-desc">
+            探討 CNN 的限制、長距離依賴問題，以及 Self-Attention 的定義。
+            理解向量加權平均與 Multi-Head 的必要性。
+          </div>
+          <div class="chapter-meta">
+            <span>⏱️ 預計 10 分鐘</span>
+            <span class="difficulty">難度 ⭐⭐</span>
+          </div>
+        </a>
+
+        <!-- 第3-1頁 -->
+        <a href="03-1-model-architecture-attention.html" class="chapter-card">
+          <span class="chapter-number">第 3-1 頁</span>
+          <div class="chapter-title">Model Architecture (1/2)</div>
+          <div class="chapter-desc">
+            <strong>核心章節！</strong>深入學習 Scaled Dot-Product Attention 和 Multi-Head Attention 的完整數學公式。
+            理解 Q/K/V 轉換、Masking 機制。
+          </div>
+          <div class="chapter-meta">
+            <span>⏱️ 預計 30 分鐘</span>
+            <span class="difficulty">難度 ⭐⭐⭐⭐⭐</span>
+          </div>
+        </a>
+
+        <!-- 第3-2頁 -->
+        <a href="03-2-model-architecture-components.html" class="chapter-card">
+          <span class="chapter-number">第 3-2 頁</span>
+          <div class="chapter-title">Model Architecture (2/2)</div>
+          <div class="chapter-desc">
+            學習 Feed-Forward Networks、Embeddings 和 Positional Encoding。
+            理解為何需要位置編碼，以及 Sin/Cos 函數的巧妙設計。
+          </div>
+          <div class="chapter-meta">
+            <span>⏱️ 預計 25 分鐘</span>
+            <span class="difficulty">難度 ⭐⭐⭐⭐</span>
+          </div>
+        </a>
+
+        <!-- 第4頁 -->
+        <a href="04-why-self-attention.html" class="chapter-card">
+          <span class="chapter-number">第 4 頁</span>
+          <div class="chapter-title">Why Self-Attention?</div>
+          <div class="chapter-desc">
+            量化分析 Self-Attention 的優勢：計算複雜度、並行能力、路徑長度。
+            理解為何 ChatGPT 的 Context Window 有限制（O(n²) 的代價）。
+          </div>
+          <div class="chapter-meta">
+            <span>⏱️ 預計 15 分鐘</span>
+            <span class="difficulty">難度 ⭐⭐⭐</span>
+          </div>
+        </a>
+
+        <!-- 第5頁 -->
+        <a href="05-training.html" class="chapter-card">
+          <span class="chapter-number">第 5 頁</span>
+          <div class="chapter-title">Training</div>
+          <div class="chapter-desc">
+            深入了解 BPE 分詞技術、為何中文 Token 比英文多。
+            學習 Adam Optimizer、Warmup 機制、Dropout 與 Label Smoothing。
+          </div>
+          <div class="chapter-meta">
+            <span>⏱️ 預計 20 分鐘</span>
+            <span class="difficulty">難度 ⭐⭐⭐</span>
+          </div>
+        </a>
+
+        <!-- 第6頁 -->
+        <a href="06-results.html" class="chapter-card">
+          <span class="chapter-number">第 6 頁</span>
+          <div class="chapter-title">Results</div>
+          <div class="chapter-desc">
+            查看 Transformer 的實驗成果：BLEU Score、消融實驗、泛化能力。
+            理解為何 Transformer 能快速取代 RNN 成為主流。
+          </div>
+          <div class="chapter-meta">
+            <span>⏱️ 預計 15 分鐘</span>
+            <span class="difficulty">難度 ⭐⭐</span>
+          </div>
+        </a>
+
+        <!-- 第7頁 -->
+        <a href="07-conclusion.html" class="chapter-card">
+          <span class="chapter-number">第 7 頁</span>
+          <div class="chapter-title">Conclusion</div>
+          <div class="chapter-desc">
+            回顧 Transformer 的歷史意義，見證 2017 年的預言如何在 2024 年成真。
+            從 Transformer 到 ChatGPT 的完整演進史。
+          </div>
+          <div class="chapter-meta">
+            <span>⏱️ 預計 15 分鐘</span>
+            <span class="difficulty">難度 ⭐⭐</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="key-concept" style="margin-top: 40px;">
+        <h3>💡 學習重點提示</h3>
+        <ul>
+          <li><strong>Token 概念：</strong>第 1 頁建立基礎，第 5 頁深入 BPE 技術</li>
+          <li><strong>向量表示：</strong>第 1 頁解釋為何需要向量，第 3-2 頁說明 Embedding 機制</li>
+          <li><strong>Attention 機制：</strong>第 1 頁給直覺類比，第 3-1 頁完整數學推導</li>
+          <li><strong>複雜度分析：</strong>第 4 頁量化 O(n²) 的代價，解釋 Context Window 限制</li>
+          <li><strong>實務應用：</strong>每頁的「AI 體驗連結」都與 ChatGPT 使用經驗相關</li>
+        </ul>
+      </div>
+
+      <div class="solution" style="margin-top: 40px;">
+        <h3>🎓 完成指標</h3>
+        <p>當你能回答以下問題時，代表你已經掌握 Transformer：</p>
+        <ol>
+          <li>為什麼 Transformer 不需要 RNN 就能處理序列？</li>
+          <li>Q、K、V 三個向量分別是什麼？為何要分開？</li>
+          <li>為什麼 ChatGPT 的 Context Window 不能無限大？</li>
+          <li>為什麼中文對話的 Token 成本比英文高？</li>
+          <li>Multi-Head Attention 解決了什麼問題？</li>
+          <li>為什麼需要 Positional Encoding？</li>
+        </ol>
+      </div>
+
+      <div class="quick-links">
+        <a href="../index.html" class="quick-link">
+          ← 回到三部曲總覽
+        </a>
+        <a href="01-abstract-and-introduction.html" class="quick-link">
+          🚀 開始學習 Transformer
+        </a>
+        <a href="../bert-tutorial/index.html" class="quick-link">
+          下一步 → BERT 教學
+        </a>
+      </div>
+      
+      <div class="quick-links" style="margin-top: 20px;">
+        <a href="03-1-model-architecture-attention.html" class="quick-link">
+          📐 直達核心章節
+        </a>
+        <a href="https://arxiv.org/abs/1706.03762" class="quick-link" target="_blank">
+          📄 原始論文 (ArXiv)
+        </a>
+        <a href="https://github.com/tensorflow/tensor2tensor" class="quick-link" target="_blank">
+          💻 官方代碼 (GitHub)
+        </a>
+      </div>
+
+      <div style="text-align: center; margin-top: 60px; padding: 40px; background: var(--bg-body); border-radius: var(--radius-md);">
+        <h3 style="color: var(--primary-color);">📖 關於本教學</h3>
+        <p style="max-width: 600px; margin: 20px auto; line-height: 1.8; color: var(--text-secondary);">
+          本深度解析針對<strong>工程背景、數學基礎較弱</strong>的讀者設計。
+          每個技術概念都配有<strong>生活類比</strong>和<strong>工程類比</strong>，
+          並連結到實際的 <strong>ChatGPT 使用經驗</strong>。
+          目標是讓你不僅「看懂」論文，更能「理解」為什麼 Transformer 改變了 AI 的歷史。
+        </p>
+        <p style="margin-top: 20px; font-size: 1.1em; font-weight: 600; color: var(--primary-color);">
+          Attention Is All You Need!
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
+

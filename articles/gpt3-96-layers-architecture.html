@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GPT-3 的 96 層架構解析</title>
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+    <style>
+      .architecture-diagram {
+        background: white;
+        padding: 40px;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        margin: 30px 0;
+      }
+      .layer-block {
+        border: 3px solid var(--primary-color);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        margin: 10px 0;
+        background: var(--primary-light);
+      }
+      .layer-block h5 {
+        margin: 0 0 10px 0;
+        color: var(--primary-color);
+      }
+      .sublayer {
+        background: white;
+        padding: 12px;
+        margin: 8px 0;
+        border-left: 4px solid var(--secondary-color);
+        border-radius: var(--radius-sm);
+      }
+      .stack-visual {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        margin: 20px 0;
+      }
+      .mini-layer {
+        height: 8px;
+        background: linear-gradient(
+          90deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        border-radius: 2px;
+        position: relative;
+      }
+      .layer-label {
+        position: absolute;
+        right: -80px;
+        top: -4px;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+      }
+      .comparison-table {
+        margin: 30px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="../index.html">🏠 首頁</a>
+        <span>/</span>
+        <span class="current">🔬 技術專題: 96層架構</span>
+      </div>
+
+      <h1>🏗️ GPT-3 的 96 層架構深度解析</h1>
+
+      <div class="key-concept">
+        <h3>🎯 核心問題:96 層是什麼樣的層?</h3>
+        <p>
+          <strong>簡答:</strong> 96 層
+          <strong>Transformer Decoder Block</strong>
+        </p>
+        <p>每一層都包含:</p>
+        <ul>
+          <li>✅ Masked Self-Attention (遮蔽自注意力)</li>
+          <li>✅ Feed-Forward Network (前饋神經網路)</li>
+          <li>✅ Layer Normalization × 2 (層標準化)</li>
+          <li>✅ Residual Connections × 2 (殘差連接)</li>
+        </ul>
+      </div>
+
+      <h2>📐 單層 Decoder Block 的內部結構</h2>
+
+      <div style="margin: 40px 0; text-align: center">
+        <img
+          src="../images/user_generate_image_20260101095049_59d9.png"
+          alt="GPT-3 96層架構視覺化"
+          style="
+            max-width: 600px;
+            width: 100%;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+          "
+        />
+        <p class="caption">
+          <strong>🏗️ GPT-3 96 層架構視覺化</strong><br />
+          垂直堆疊的 Transformer Decoder Blocks<br />
+          每個 Block:Masked Self-Attention → LayerNorm → FFN → LayerNorm<br />
+          中間省略號代表總共 <strong>96 層</strong>的堆疊！
+        </p>
+      </div>
+
+      <div class="architecture-diagram">
+        <h4 style="text-align: center; color: var(--primary-color)">
+          第 N 層 Decoder Block (N = 1 到 96)
+        </h4>
+
+        <div
+          style="
+            border: 2px dashed var(--text-secondary);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <p style="text-align: center; color: var(--text-secondary)">
+            ⬇️ 輸入 (從上一層或 Embedding 層)
+          </p>
+          <p
+            style="
+              text-align: center;
+              font-family: monospace;
+              background: #f1f5f9;
+              color: #0f172a;
+              padding: 10px;
+              border-radius: var(--radius-sm);
+            "
+          >
+            shape: [batch_size, seq_len, d_model]<br />
+            = [batch, tokens, 12288]
+          </p>
+        </div>
+
+        <div class="layer-block">
+          <h5>🔷 子層 1: Masked Self-Attention</h5>
+
+          <div class="sublayer">
+            <strong>1.1 Layer Norm (前)</strong>
+            <pre style="font-size: 0.9rem; margin: 10px 0">
+x_norm = LayerNorm(x)</pre
+            >
+          </div>
+
+          <div class="sublayer">
+            <strong>1.2 Multi-Head Attention</strong>
+            <pre style="font-size: 0.9rem; margin: 10px 0">
+# 96 個注意力頭
+Q = W_Q @ x_norm  # Query
+K = W_K @ x_norm  # Key  
+V = W_V @ x_norm  # Value
+
+# 計算注意力 (帶遮蔽!)
+attention_output = MultiHeadAttention(Q, K, V, mask=causal_mask)
+                    </pre
+            >
+            <p style="color: var(--danger-color)">
+              <strong>⚠️ 關鍵:Causal Mask</strong>
+            </p>
+            <p>確保 token 只能看到「之前」的 tokens,不能看到「之後」的!</p>
+          </div>
+
+          <div class="sublayer">
+            <strong>1.3 Residual Connection</strong>
+            <pre style="font-size: 0.9rem; margin: 10px 0">
+x = x + attention_output  # 殘差連接</pre
+            >
+            <p>將原始輸入加回來,幫助梯度傳播!</p>
+          </div>
+        </div>
+
+        <div
+          style="
+            text-align: center;
+            margin: 20px 0;
+            font-size: 2rem;
+            color: var(--text-secondary);
+          "
+        >
+          ⬇️
+        </div>
+
+        <div
+          class="layer-block"
+          style="
+            border-color: var(--secondary-color);
+            background: var(--secondary-light);
+          "
+        >
+          <h5 style="color: var(--secondary-color)">
+            🔷 子層 2: Feed-Forward Network
+          </h5>
+
+          <div class="sublayer">
+            <strong>2.1 Layer Norm (前)</strong>
+            <pre style="font-size: 0.9rem; margin: 10px 0">
+x_norm = LayerNorm(x)</pre
+            >
+          </div>
+
+          <div class="sublayer">
+            <strong>2.2 兩層全連接網路</strong>
+            <pre style="font-size: 0.9rem; margin: 10px 0">
+# 第一層:擴展
+hidden = GELU(W_1 @ x_norm + b_1)
+# d_model (12288) → d_ff (49152) 
+# 擴展 4 倍!
+
+# 第二層:壓縮回來
+ffn_output = W_2 @ hidden + b_2
+# d_ff (49152) → d_model (12288)
+                    </pre
+            >
+            <p><strong>作用:</strong>每個 token 獨立處理,增加非線性變換!</p>
+          </div>
+
+          <div class="sublayer">
+            <strong>2.3 Residual Connection</strong>
+            <pre style="font-size: 0.9rem; margin: 10px 0">
+x = x + ffn_output  # 殘差連接</pre
+            >
+          </div>
+        </div>
+
+        <div
+          style="
+            border: 2px dashed var(--text-secondary);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <p style="text-align: center; color: var(--text-secondary)">
+            ⬇️ 輸出 (傳給下一層)
+          </p>
+          <p
+            style="
+              text-align: center;
+              font-family: monospace;
+              background: #f1f5f9;
+              color: #0f172a;
+              padding: 10px;
+              border-radius: var(--radius-sm);
+            "
+          >
+            shape: [batch_size, seq_len, d_model]<br />
+            = [batch, tokens, 12288]
+          </p>
+        </div>
+      </div>
+
+      <h2>🏗️ 完整的 96 層堆疊</h2>
+
+      <div class="architecture-diagram">
+        <h4 style="text-align: center">GPT-3 175B 完整架構</h4>
+
+        <div
+          style="
+            background: var(--accent-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0">📥 輸入階段</h5>
+          <div
+            style="
+              background: white;
+              padding: 15px;
+              border-radius: var(--radius-sm);
+              margin: 10px 0;
+            "
+          >
+            <strong>1. Token Embedding</strong>
+            <pre style="font-size: 0.85rem">
+input_ids: [1, 234, 5678, ...]  # Token IDs
+→ embeddings: [..., 12288 維向量, ...]</pre
+            >
+          </div>
+          <div
+            style="
+              background: white;
+              padding: 15px;
+              border-radius: var(--radius-sm);
+              margin: 10px 0;
+            "
+          >
+            <strong>2. Positional Encoding</strong>
+            <pre style="font-size: 0.85rem">
+learned_pos: [0→12288, 1→12288, ..., 2047→12288]
+x = token_emb + pos_emb</pre
+            >
+            <p style="font-size: 0.9rem; color: var(--text-secondary)">
+              GPT-3 使用<strong>學習式</strong>位置編碼,最多支援 2048 個 tokens
+            </p>
+          </div>
+        </div>
+
+        <div
+          style="
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0">🔁 96 層 Transformer Decoder</h5>
+
+          <div class="stack-visual">
+            <div class="mini-layer" style="background: var(--danger-color)">
+              <span class="layer-label">第 96 層 ⭐</span>
+            </div>
+            <div class="mini-layer"></div>
+            <div class="mini-layer"></div>
+            <div class="mini-layer"></div>
+            <div
+              style="
+                text-align: center;
+                color: var(--text-secondary);
+                font-size: 1.5rem;
+                margin: 5px 0;
+              "
+            >
+              ...
+            </div>
+            <div class="mini-layer">
+              <span class="layer-label">第 50 層</span>
+            </div>
+            <div
+              style="
+                text-align: center;
+                color: var(--text-secondary);
+                font-size: 1.5rem;
+                margin: 5px 0;
+              "
+            >
+              ...
+            </div>
+            <div class="mini-layer">
+              <span class="layer-label">第 10 層</span>
+            </div>
+            <div class="mini-layer"></div>
+            <div class="mini-layer"></div>
+            <div class="mini-layer" style="background: var(--success-color)">
+              <span class="layer-label">第 1 層 🚀</span>
+            </div>
+          </div>
+
+          <p style="text-align: center; font-size: 1.1rem; margin-top: 20px">
+            <strong>每一層都執行相同的操作:</strong><br />
+            Masked Self-Attention → Add & Norm → FFN → Add & Norm
+          </p>
+        </div>
+
+        <div
+          style="
+            background: var(--success-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0">📤 輸出階段</h5>
+          <div
+            style="
+              background: white;
+              padding: 15px;
+              border-radius: var(--radius-sm);
+              margin: 10px 0;
+            "
+          >
+            <strong>1. Final Layer Norm</strong>
+            <pre style="font-size: 0.85rem">
+x_final = LayerNorm(x_from_layer_96)</pre
+            >
+          </div>
+          <div
+            style="
+              background: white;
+              padding: 15px;
+              border-radius: var(--radius-sm);
+              margin: 10px 0;
+            "
+          >
+            <strong>2. Language Model Head</strong>
+            <pre style="font-size: 0.85rem">
+logits = W_lm @ x_final  # [vocab_size, d_model]
+# 12288 → 50257 (詞彙表大小)
+
+probabilities = Softmax(logits)
+next_token = argmax(probabilities)</pre
+            >
+          </div>
+        </div>
+      </div>
+
+      <h2>📊 三大模型的架構對比</h2>
+
+      <div style="margin: 40px 0">
+        <img
+          src="../images/user_generate_image_20260101231745_bd01.png"
+          alt="Transformer vs GPT-3 架構對比"
+          style="
+            max-width: 100%;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+          "
+        />
+        <p class="caption">
+          <strong>🔍 關鍵差異：原始 Transformer vs GPT-3</strong><br />
+          左：Encoder-Decoder 架構（雙向 + 單向）<br />
+          右：Decoder-Only 架構（純單向，但堆疊 96 層！）
+        </p>
+      </div>
+
+      <h2>🆚 補充說明 01：與原始 Transformer 的關鍵差異</h2>
+
+      <div class="explanation">
+        <h4>🔑 核心差異：Encoder-Decoder vs Decoder-Only</h4>
+
+        <table>
+          <thead>
+            <tr>
+              <th>特性</th>
+              <th>原始 Transformer (2017)</th>
+              <th>GPT-3 (2020)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1️⃣ 架構組成</strong></td>
+              <td>
+                ✅ <strong>Encoder</strong> (6 層)<br />
+                ✅ <strong>Decoder</strong> (6 層)<br />
+                ✅ <strong>Cross-Attention</strong> 連接兩者
+              </td>
+              <td>
+                ❌ 沒有 Encoder<br />
+                ✅ <strong>只有 Decoder</strong> (96 層)<br />
+                ❌ 沒有 Cross-Attention
+              </td>
+            </tr>
+            <tr>
+              <td><strong>2️⃣ Attention 機制</strong></td>
+              <td>
+                <strong>Encoder:</strong> 雙向 Self-Attention<br />
+                (可以看到前後所有 tokens)<br /><br />
+                <strong>Decoder:</strong> 單向 Masked Self-Attention<br />
+                (只能看到之前的 tokens)
+              </td>
+              <td>
+                <strong>全部:</strong> 單向 Masked Self-Attention<br />
+                (永遠只能看到之前的 tokens)<br /><br />
+                這就是「自回歸 (Autoregressive)」
+              </td>
+            </tr>
+            <tr>
+              <td><strong>3️⃣ 輸入方式</strong></td>
+              <td>
+                <strong>Encoder:</strong> 完整輸入句子<br />
+                <strong>Decoder:</strong> 逐字生成輸出
+              </td>
+              <td>
+                <strong>全部:</strong> 逐字處理與生成<br />
+                輸入也是一個 token 一個 token 喂進去
+              </td>
+            </tr>
+            <tr>
+              <td><strong>4️⃣ 設計目標</strong></td>
+              <td>
+                🎯 <strong>Seq2Seq 任務</strong><br />
+                翻譯：英文 → 中文<br />
+                摘要：長文 → 短文
+              </td>
+              <td>
+                🎯 <strong>Language Modeling</strong><br />
+                給前文 → 預測下一個字<br />
+                (但可以透過 prompt 做任何任務!)
+              </td>
+            </tr>
+            <tr>
+              <td><strong>5️⃣ Position Encoding</strong></td>
+              <td>
+                <strong>固定式 (Sinusoidal)</strong><br />
+                sin/cos 函數計算<br />
+                支援任意長度
+              </td>
+              <td>
+                <strong>學習式 (Learned)</strong><br />
+                參數可訓練<br />
+                <strong>限制:</strong> 最多 2048 tokens
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="key-concept">
+        <h4>💡 為什麼 GPT-3 拿掉 Encoder？</h4>
+
+        <p><strong>1. 簡化架構 = 更好擴展</strong></p>
+        <ul>
+          <li>Decoder-Only 更容易堆疊到 96 層</li>
+          <li>不需要管理 Encoder-Decoder 之間的連接</li>
+          <li>訓練更穩定</li>
+        </ul>
+
+        <p><strong>2. Language Modeling 夠強大</strong></p>
+        <ul>
+          <li>「預測下一個字」這個簡單任務，學會了就能做所有事</li>
+          <li>透過 prompt engineering，可以模擬翻譯、摘要、問答等</li>
+          <li>不需要專門的 Encoder 來「理解」輸入</li>
+        </ul>
+
+        <p><strong>3. 自回歸的優勢</strong></p>
+        <ul>
+          <li>生成過程自然流暢（一個字接一個字）</li>
+          <li>可以控制生成長度（想生成多長就多長）</li>
+          <li>符合人類寫作的習慣</li>
+        </ul>
+      </div>
+
+      <div class="analogy">
+        <h4>🎬 生活類比：電影劇本創作</h4>
+
+        <p><strong>原始 Transformer (Encoder-Decoder) = 翻譯機</strong></p>
+        <ul>
+          <li><strong>Encoder:</strong> 先讀完整部英文劇本，完全理解</li>
+          <li><strong>Decoder:</strong> 根據理解，逐句翻譯成中文</li>
+          <li><strong>適合:</strong> 有明確輸入→輸出的任務</li>
+        </ul>
+
+        <p><strong>GPT-3 (Decoder-Only) = 即興作家</strong></p>
+        <ul>
+          <li>給他一個開頭：「在一個黑暗的夜晚...」</li>
+          <li>他根據「目前為止的所有文字」，猜下一個字</li>
+          <li>然後把新字加進去，再猜下一個字</li>
+          <li><strong>適合:</strong> 創造性任務、開放式生成</li>
+        </ul>
+      </div>
+
+      <h2>📊 三大模型的架構對比</h2>
+
+      <div class="comparison-table">
+        <table>
+          <thead>
+            <tr>
+              <th>特性</th>
+              <th>Transformer (2017)</th>
+              <th>BERT Large (2018)</th>
+              <th>GPT-3 175B (2020)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>架構類型</strong></td>
+              <td>Encoder + Decoder</td>
+              <td>Encoder Only</td>
+              <td><strong>Decoder Only</strong></td>
+            </tr>
+            <tr>
+              <td><strong>層數</strong></td>
+              <td>6 + 6 = 12</td>
+              <td>24</td>
+              <td><strong>96 ⭐</strong></td>
+            </tr>
+            <tr>
+              <td><strong>d_model</strong></td>
+              <td>512</td>
+              <td>1024</td>
+              <td><strong>12,288</strong></td>
+            </tr>
+            <tr>
+              <td><strong>注意力頭</strong></td>
+              <td>8</td>
+              <td>16</td>
+              <td><strong>96</strong></td>
+            </tr>
+            <tr>
+              <td><strong>d_ff</strong></td>
+              <td>2048</td>
+              <td>4096</td>
+              <td><strong>49,152</strong></td>
+            </tr>
+            <tr>
+              <td><strong>參數量</strong></td>
+              <td>~65M</td>
+              <td>340M</td>
+              <td><strong>175B</strong></td>
+            </tr>
+            <tr>
+              <td><strong>每層參數</strong></td>
+              <td>~5M</td>
+              <td>~14M</td>
+              <td><strong>~1.8B</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>💡 為什麼是 96 層?</h2>
+
+      <div class="explanation">
+        <h4>🎯 層數的演進邏輯</h4>
+
+        <p><strong>經驗法則:</strong></p>
+        <ul>
+          <li>更深 = 更複雜的特徵提取</li>
+          <li>淺層:學習基本語法、詞性</li>
+          <li>中層:學習句子結構、語義關係</li>
+          <li>深層:學習抽象概念、推理能力</li>
+        </ul>
+
+        <h5>實驗發現</h5>
+        <table>
+          <thead>
+            <tr>
+              <th>層數</th>
+              <th>模型</th>
+              <th>觀察</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>6-12</td>
+              <td>Transformer, GPT-1</td>
+              <td>基本語言理解</td>
+            </tr>
+            <tr>
+              <td>24</td>
+              <td>BERT Large, GPT-2</td>
+              <td>更好的上下文理解</td>
+            </tr>
+            <tr>
+              <td>48</td>
+              <td>T5-11B</td>
+              <td>開始出現 emergent abilities</td>
+            </tr>
+            <tr style="background: var(--primary-light)">
+              <td><strong>96</strong></td>
+              <td><strong>GPT-3 175B</strong></td>
+              <td><strong>Few-shot learning, 推理能力質變</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="analogy">
+        <h4>🏢 生活類比:大樓的樓層</h4>
+
+        <div style="text-align: center; margin: 20px 0">
+          <img
+            src="../images/user_generate_image_20260102035516_c9c2.png"
+            alt="96層摩天大樓類比"
+            style="
+              max-width: 100%;
+              border-radius: var(--radius-md);
+              box-shadow: var(--shadow-sm);
+            "
+          />
+        </div>
+
+        <p><strong>場景:思考過程</strong></p>
+
+        <div style="margin: 20px 0">
+          <p><strong>6 層 (Transformer)</strong> = 6 層樓的公寓</p>
+          <p>適合基本生活,但視野有限</p>
+        </div>
+
+        <div style="margin: 20px 0">
+          <p><strong>24 層 (BERT)</strong> = 24 層的商辦大樓</p>
+          <p>每層負責不同部門,協同合作</p>
+        </div>
+
+        <div style="margin: 20px 0">
+          <p><strong>96 層 (GPT-3)</strong> = 96 層的摩天大樓 🏙️</p>
+          <ul>
+            <li>底層 (1-20):處理基礎輸入(語法、詞性)</li>
+            <li>中層 (21-60):理解語義和關係</li>
+            <li>高層 (61-96):抽象推理和創造</li>
+          </ul>
+          <p>越高的樓層 → 視野越廣 → 思考越抽象!</p>
+        </div>
+      </div>
+
+      <h2>🔬 層與層之間發生什麼?</h2>
+
+      <div class="explanation">
+        <h4>資訊的逐層精煉</h4>
+
+        <pre
+          style="
+            background: #f8fafc;
+            color: #0f172a;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            line-height: 1.8;
+          "
+        >
+<strong>輸入:</strong> "The cat sat on the"
+
+<strong>第 1-10 層:</strong> 識別詞性
+- "The" = 冠詞
+- "cat" = 名詞
+- "sat" = 動詞(過去式)
+- "on" = 介系詞
+- "the" = 冠詞
+
+<strong>第 11-30 層:</strong> 理解語法結構
+- "The cat" = 主語
+- "sat on the X" = 動作 + 位置關係
+- 預期下一個詞:地點名詞
+
+<strong>第 31-60 層:</strong> 語義理解
+- 場景:貓坐在某處
+- 常見搭配:"mat", "floor", "table"
+- 排除不合理選項:"sky", "water"
+
+<strong>第 61-90 層:</strong> 上下文推理
+- 如果前文提到"living room" → "sofa", "carpet"
+- 如果前文提到"garden" → "fence", "grass"
+
+<strong>第 91-96 層:</strong> 最終決策
+- 綜合所有資訊
+- 計算每個候選詞的機率
+- <strong>輸出: "mat" (機率最高)</strong>
+            </pre>
+      </div>
+
+      <h2>⚠️ 96 層的挑戰</h2>
+
+      <div class="problem">
+        <h4>❌ 超深網路的問題</h4>
+
+        <table>
+          <thead>
+            <tr>
+              <th>問題</th>
+              <th>原因</th>
+              <th>GPT-3 的解決方案</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>梯度消失</strong></td>
+              <td>96 層傳播會衰減</td>
+              <td>✅ Residual Connection<br />✅ Layer Norm</td>
+            </tr>
+            <tr>
+              <td><strong>訓練不穩定</strong></td>
+              <td>深度網路容易發散</td>
+              <td>✅ 小心的初始化<br />✅ 學習率調度</td>
+            </tr>
+            <tr>
+              <td><strong>記憶體爆炸</strong></td>
+              <td>需要儲存每層的激活值</td>
+              <td>✅ Gradient Checkpointing<br />✅ Model Parallelism</td>
+            </tr>
+            <tr>
+              <td><strong>推理速度慢</strong></td>
+              <td>必須依序執行 96 層</td>
+              <td>⚠️ 無法完全解決<br />需要大量 GPU</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>🎓 關鍵技術:Residual Connection</h2>
+
+      <div class="explanation">
+        <h4>為什麼 96 層不會梯度消失?</h4>
+
+        <p><strong>沒有 Residual Connection:</strong></p>
+        <pre
+          style="
+            background: white;
+            color: #0f172a;
+            padding: 15px;
+            border-radius: var(--radius-sm);
+          "
+        >
+x₁ = Layer₁(x₀)
+x₂ = Layer₂(x₁)
+x₃ = Layer₃(x₂)
+...
+x₉₆ = Layer₉₆(x₉₅)
+
+梯度傳播: ∂L/∂x₀ = ∂L/∂x₉₆ × ∂x₉₆/∂x₉₅ × ... × ∂x₁/∂x₀
+                    ↑ 96 個小於 1 的數相乘 → 接近 0!
+            </pre
+        >
+
+        <p><strong>有 Residual Connection:</strong></p>
+        <pre
+          style="
+            background: white;
+            color: #0f172a;
+            padding: 15px;
+            border-radius: var(--radius-sm);
+          "
+        >
+x₁ = x₀ + Layer₁(x₀)
+x₂ = x₁ + Layer₂(x₁)
+x₃ = x₂ + Layer₃(x₂)
+...
+x₉₆ = x₉₅ + Layer₉₆(x₉₅)
+
+梯度傳播: ∂L/∂x₀ = ∂L/∂x₉₆ × (1 + ∂Layer/∂x)
+                    ↑ 總有一條「高速公路」直達頂層!
+            </pre
+        >
+
+        <p><strong>結果:</strong>梯度可以順利傳回第 1 層,訓練穩定!</p>
+      </div>
+
+      <h2>🎯 總結</h2>
+
+      <div style="margin: 40px 0">
+        <img
+          src="../images/user_generate_image_20260101231814_4465.png"
+          alt="GPT-3 推理流程"
+          style="
+            max-width: 100%;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+          "
+        />
+        <p class="caption">
+          <strong>🔄 GPT-3 的自回歸生成流程</strong><br />
+          從用戶輸入 → Tokenize → 96層處理 → 預測機率 → 選字 → 循環<br />
+          每次只生成一個 token，然後把它加回輸入，重新預測下一個！
+        </p>
+      </div>
+
+      <div
+        class="key-concept"
+        style="
+          background: linear-gradient(
+            135deg,
+            var(--primary-light),
+            var(--accent-light)
+          );
+          padding: 30px;
+          border-radius: var(--radius-lg);
+          margin: 40px 0;
+          border: 3px solid var(--primary-color);
+        "
+      >
+        <h3 style="text-align: center; color: var(--primary-color)">
+          🔍 深入探討
+        </h3>
+        <p
+          style="
+            font-size: 1.15rem;
+            line-height: 1.8;
+            text-align: center;
+            margin: 20px 0;
+          "
+        >
+          想了解 <strong>訓練與推理時 tokens 如何輸入</strong>？<br />
+          想知道為什麼 ChatGPT 會<strong>一個字一個字</strong>生成回答？<br /><br />
+          👉
+          <a
+            href="gpt3-training-vs-inference.html"
+            style="
+              background: var(--primary-color);
+              color: white;
+              padding: 15px 30px;
+              border-radius: var(--radius-md);
+              text-decoration: none;
+              font-weight: bold;
+              display: inline-block;
+              margin-top: 10px;
+            "
+            >點擊查看：訓練 vs 推理完整解析 →</a
+          >
+        </p>
+      </div>
+
+      <h2>🎯 總結</h2>
+
+      <div class="key-concept">
+        <h4>✅ GPT-3 的 96 層架構 - 完整理解</h4>
+
+        <ol>
+          <li>
+            <strong>架構選擇：Decoder-Only</strong>
+            <p>
+              與原始 Transformer 不同，GPT-3 只用 Decoder，沒有 Encoder！<br />
+              更簡單、更容易擴展到 96 層。
+            </p>
+          </li>
+          <li>
+            <strong>每層都是 Transformer Decoder Block</strong>
+            <p>Masked Self-Attention + Feed-Forward Network</p>
+          </li>
+          <li>
+            <strong>層與層完全相同</strong>
+            <p>只是參數不同，結構相同</p>
+          </li>
+          <li>
+            <strong>資訊逐層精煉</strong>
+            <p>從基礎語法 → 語義理解 → 抽象推理</p>
+          </li>
+          <li>
+            <strong>自回歸生成：一個字一個字來</strong>
+            <p>
+              每生成一個字，就把它加回輸入，重新跑一次 96 層！<br />
+              這就是為什麼 ChatGPT 回答時會「打字」的效果。
+            </p>
+          </li>
+          <li>
+            <strong>關鍵技術讓深度成為可能</strong>
+            <p>Residual Connection + Layer Norm</p>
+          </li>
+          <li>
+            <strong>96 層 = 質變的關鍵</strong>
+            <p>出現 few-shot learning 等 emergent abilities！</p>
+          </li>
+        </ol>
+
+        <div
+          style="
+            background: var(--danger-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin-top: 30px;
+          "
+        >
+          <h5 style="color: var(--danger-color)">⚡ 兩大核心概念</h5>
+          <p>
+            <strong>1. Decoder-Only 架構：</strong>不需要
+            Encoder，純粹的語言建模
+          </p>
+          <p>
+            <strong>2. Autoregressive 生成：</strong>一個 token 一個 token
+            預測，無法並行
+          </p>
+          <p style="margin-top: 15px; font-size: 1.1rem">
+            這兩個特性讓 GPT-3 能做到「看起來像在思考」的效果！🧠
+          </p>
+        </div>
+      </div>
+
+      <div
+        style="
+          background: linear-gradient(
+            135deg,
+            var(--primary-light),
+            var(--purple-light)
+          );
+          padding: 30px;
+          border-radius: var(--radius-lg);
+          text-align: center;
+          margin: 40px 0;
+        "
+      >
+        <h3>🏗️ 96 層摩天大樓</h3>
+        <p style="font-size: 1.2rem; line-height: 1.8">
+          不只是數量上的堆疊,<br />
+          更是<strong>質量</strong>的突破!<br /><br />
+          從「懂語言」→ 到「會思考」→ 到「能創造」<br />
+          這就是深度的力量! 🚀
+        </p>
+      </div>
+
+      <div class="quick-links">
+        <a href="../index.html" class="quick-link">← 回到三部曲總覽</a>
+        <a href="model-dimension-evolution.html" class="quick-link"
+          >← 上一專題:維度演進</a
+        >
+        <a href="gpt3-training-vs-inference.html" class="quick-link"
+          >下一章：訓練 vs 推理 →</a
+        >
+      </div>
+
+      <div class="quick-links" style="margin-top: 20px">
+        <a href="../gpt3-tutorial/index.html" class="quick-link"
+          >📖 GPT-3 教學總覽</a
+        >
+        <a href="tokenizer-embedding-explained.html" class="quick-link"
+          >🔤 Tokenizer 專題</a
+        >
+        <a
+          href="../transformer-tutorial/03-2-model-architecture-components.html"
+          class="quick-link"
+          >📖 Transformer 組件詳解</a
+        >
+      </div>
+    </div>
+  </body>
+</html>

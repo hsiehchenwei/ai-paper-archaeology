@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 7 頁：技術深度剖析 - InstructGPT 論文深度解析</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="index.html">InstructGPT 深度解析</a>
+            <span>/</span>
+            <span class="current">07. 技術深度剖析</span>
+        </div>
+
+        <h1>第 7 頁：技術深度剖析 — 那些沒被提到的細節</h1>
+        
+        <div class="header-section">
+            <p class="lead">前面的章節專注在「概念理解」，這一頁我們要深入「技術實作」：模型架構、訓練方法、參數更新、計算成本，以及那些原始論文有寫但教學文件沒提到的關鍵細節。</p>
+        </div>
+
+        <section class="section-block">
+            <h2>🤔 讀者常見的技術疑惑</h2>
+            
+            <div class="problem">
+                <h4>❓ 五大技術疑問</h4>
+                <ol>
+                    <li><strong>為何 1.3B 參數可以打敗 175B 參數？</strong> 參數縮減 100 倍還能贏？</li>
+                    <li><strong>模型架構與 GPT-3 的差異在哪？</strong> 是否有結構上的改變？</li>
+                    <li><strong>這是 Fine-Tuning 還是重新訓練？</strong> 從哪裡開始訓練的？</li>
+                    <li><strong>人類對齊資料如何訓練到模型參數？</strong> 技術上是怎麼做的？</li>
+                    <li><strong>訓練成本到底多高？</strong> 為何只需 GPT-3 的 1.6% 成本？</li>
+                </ol>
+                <p><strong>本章將逐一解答這些疑問，並附上原始論文的證據。</strong></p>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>❓ 疑問 1：為何參數縮減 100 倍還能贏？</h2>
+            
+            <div class="original-text">
+                <h3>📖 論文原文（Abstract, Line 103）</h3>
+                <blockquote>
+                    "In human evaluations on our prompt distribution, outputs from the <strong>1.3B parameter InstructGPT model are preferred to outputs from the 175B GPT-3</strong>, despite having <strong>100x fewer parameters</strong>."
+                </blockquote>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 技術解答</h4>
+                <p><strong>關鍵洞察：這不是模型「變小」，而是「對齊 vs 能力」的對比實驗。</strong></p>
+                
+                <h5>實際對比的是什麼？</h5>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>模型</th>
+                            <th>參數量</th>
+                            <th>架構</th>
+                            <th>訓練方式</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>GPT-3 (175B)</strong></td>
+                            <td>175B</td>
+                            <td>96 層 Transformer</td>
+                            <td>只有預訓練（Next Token Prediction）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>InstructGPT (1.3B)</strong></td>
+                            <td>1.3B</td>
+                            <td>較少層 Transformer</td>
+                            <td>預訓練 + RLHF（人類對齊）</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h5>為何小模型能贏？</h5>
+                <ul>
+                    <li><strong>GPT-3 (175B) 的問題：</strong>知識豐富，但不懂人類意圖。它會「接龍」但不會「回答」。</li>
+                    <li><strong>InstructGPT (1.3B) 的優勢：</strong>知識較少，但透過 RLHF 學會了「人類想要什麼」。</li>
+                    <li><strong>評估標準：</strong>人類偏好評分（Preference），而非知識測驗。</li>
+                </ul>
+            </div>
+
+            <div class="key-concept">
+                <h4>🎯 核心概念：能力 vs 對齊</h4>
+                <p><strong>模型的「能力」(Capability) 與「對齊」(Alignment) 是兩個獨立維度：</strong></p>
+                <ul>
+                    <li><strong>能力：</strong>知識廣度、推理深度、複雜任務處理能力（與參數量高度相關）</li>
+                    <li><strong>對齊：</strong>理解人類意圖、遵循指令、生成有用回答（與訓練方法相關）</li>
+                </ul>
+                <p>論文證明：<strong>1.3B + 對齊 > 175B + 無對齊</strong>（在人類偏好評分上）</p>
+            </div>
+
+            <div class="analogy">
+                <h4>💡 生活類比：學歷 vs 服務態度</h4>
+                <p>想像你要找一個服務人員：</p>
+                <ul>
+                    <li><strong>候選人 A（GPT-3 175B）：</strong>博士學歷，知識淵博，但總是自顧自地講專業術語，不理會你的問題。</li>
+                    <li><strong>候選人 B（InstructGPT 1.3B）：</strong>高中學歷，知識有限，但很會聽你的需求，給出你真正想要的答案。</li>
+                </ul>
+                <p>如果你要的是「好的服務體驗」，你會選誰？<strong>大部分人選 B。</strong></p>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>❓ 疑問 2：模型架構與 GPT-3 的差異？</h2>
+            
+            <div class="original-text">
+                <h3>📖 論文原文（Line 138）</h3>
+                <blockquote>
+                    "We train three model sizes <strong>(1.3B, 6B, and 175B parameters)</strong>, and <strong>all of our models use the GPT-3 architecture</strong>."
+                </blockquote>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 技術解答</h4>
+                <p><strong>架構完全相同，零差異！</strong></p>
+
+                <h5>詳細對比表</h5>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>項目</th>
+                            <th>GPT-3</th>
+                            <th>InstructGPT</th>
+                            <th>差異</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>基礎架構</strong></td>
+                            <td>Transformer Decoder</td>
+                            <td>Transformer Decoder</td>
+                            <td>✅ 完全相同</td>
+                        </tr>
+                        <tr>
+                            <td><strong>層數（175B）</strong></td>
+                            <td>96 層</td>
+                            <td>96 層</td>
+                            <td>✅ 完全相同</td>
+                        </tr>
+                        <tr>
+                            <td><strong>注意力機制</strong></td>
+                            <td>Multi-Head Self-Attention</td>
+                            <td>Multi-Head Self-Attention</td>
+                            <td>✅ 完全相同</td>
+                        </tr>
+                        <tr>
+                            <td><strong>參數初始化</strong></td>
+                            <td>從頭訓練</td>
+                            <td>從 GPT-3 checkpoint 開始</td>
+                            <td>❌ 差異在這！</td>
+                        </tr>
+                        <tr>
+                            <td><strong>訓練方式</strong></td>
+                            <td>Next Token Prediction</td>
+                            <td>SFT + RM + PPO（RLHF）</td>
+                            <td>❌ 關鍵差異</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-concept">
+                <h4>🎯 結論</h4>
+                <p><strong>InstructGPT 沒有任何架構創新，所有的改進都來自「訓練方法」的創新（RLHF）。</strong></p>
+                <p>這就像同一台鋼琴，但一個是自學（GPT-3），一個是有老師指導（InstructGPT）。</p>
+            </div>
+
+            <div class="analogy">
+                <h4>💡 生活類比：同款車不同駕訓</h4>
+                <ul>
+                    <li><strong>GPT-3：</strong>Tesla Model S，工廠出廠就開始自己亂開（看路人怎麼開就怎麼開）</li>
+                    <li><strong>InstructGPT：</strong>同一台 Tesla Model S，但經過專業駕訓班訓練（遵循交通規則、理解路標）</li>
+                </ul>
+                <p>車子本身一模一樣，差別在「訓練方式」。</p>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>❓ 疑問 3：Fine-Tuning 還是重新訓練？</h2>
+            
+            <div class="original-text">
+                <h3>📖 論文原文（Line 100-101）</h3>
+                <blockquote>
+                    "...we collect a dataset of labeler demonstrations of the desired model behavior, which we use to <strong>fine-tune GPT-3 using supervised learning</strong>. We then collect a dataset of rankings of model outputs, which we use to <strong>further fine-tune this supervised model</strong> using reinforcement learning from human feedback."
+                </blockquote>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 技術解答</h4>
+                <p><strong>答案：100% 是 Fine-Tuning（微調），不是重新訓練！</strong></p>
+
+                <h5>訓練流程三階段</h5>
+                <div style="background: white; padding: 20px; border-radius: 12px; margin: 20px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <pre style="background: #1e293b; color: #e2e8f0; padding: 20px; border-radius: 8px; overflow-x: auto;">
+<strong style="color: #60a5fa;">階段 1: SFT (Supervised Fine-Tuning)</strong>
+├─ 起點：<span style="color: #fbbf24;">GPT-3 預訓練 checkpoint</span>
+├─ 資料：13k 人類手寫示範
+│   └─ 範例：(Prompt: "解釋黑洞", Output: "黑洞是...")
+├─ 方法：監督學習（Cross-Entropy Loss）
+├─ 訓練量：<span style="color: #34d399;">16 epochs</span>
+├─ 學習率：9.65e-6 到 5.73e-6
+└─ 結果：學會「對話格式」
+
+<strong style="color: #60a5fa;">階段 2: RM (Reward Model Training)</strong>
+├─ 起點：<span style="color: #fbbf24;">SFT 模型（移除最後一層）</span>
+├─ 資料：33k 人類比較排序
+│   └─ 範例：(Prompt, [Output_A, Output_B, ...], Ranking: A>C>B>D)
+├─ 方法：Pairwise Ranking Loss
+├─ 模型大小：只訓練 6B RM（節省成本）
+└─ 結果：訓練一個「AI 評審」預測人類偏好
+
+<strong style="color: #60a5fa;">階段 3: PPO (Reinforcement Learning)</strong>
+├─ 起點：<span style="color: #fbbf24;">SFT 模型</span>
+├─ 資料：31k prompts（無標註，只要輸入）
+├─ 方法：PPO 算法 + KL Divergence 懲罰
+│   └─ 目標：最大化 RM 評分，但不能偏離 SFT 太遠
+├─ KL 係數：β = 0.02
+└─ 結果：自我優化拿高分
+                    </pre>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>🎯 關鍵：起點是 GPT-3</h4>
+                <p><strong>每個階段都是從前一個階段的 checkpoint 繼續訓練，不是從頭開始！</strong></p>
+                <ul>
+                    <li>SFT 模型 = GPT-3 + 13k 示範</li>
+                    <li>RM 模型 = SFT 模型（改架構）+ 33k 排序</li>
+                    <li>PPO 模型 = SFT 模型 + RM 引導的強化學習</li>
+                </ul>
+            </div>
+
+            <div class="analogy">
+                <h4>🔧 工程類比：Git Branching</h4>
+                <pre style="background: #1e293b; color: #e2e8f0; padding: 15px; border-radius: 8px;"><code>main (GPT-3)
+  │
+  ├─> feature/sft (SFT Model)
+  │     │
+  │     ├─> feature/reward-model (RM Model)
+  │     │
+  │     └─> feature/ppo (PPO Model) ← 最終的 InstructGPT
+  │
+  └─> (不動原始 GPT-3)
+</code></pre>
+                <p>每個分支都是從主線分出去，不是重新建立一個新專案。</p>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>❓ 疑問 4：訓練成本多高？</h2>
+            
+            <div class="original-text">
+                <h3>📖 論文原文（Line 618, Discussion 章節）</h3>
+                <blockquote>
+                    "The cost of collecting our data and the compute for training runs, including experimental runs is a fraction of what was spent to train GPT-3: training our <strong>175B SFT model requires 4.9 petaflops/s-days</strong> and training our <strong>175B PPO-ptx model requires 60 petaflops/s-days</strong>, compared to <strong>3,640 petaflops/s-days for GPT-3</strong>."
+                </blockquote>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 技術解答</h4>
+                <h5>計算成本對比</h5>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>訓練階段</th>
+                            <th>計算成本（petaflops/s-days）</th>
+                            <th>佔 GPT-3 比例</th>
+                            <th>估計費用（假設）</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>GPT-3 預訓練</strong></td>
+                            <td>3,640</td>
+                            <td>100%</td>
+                            <td>~$4.6M USD</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SFT 訓練</strong></td>
+                            <td>4.9</td>
+                            <td>0.13%</td>
+                            <td>~$6,200 USD</td>
+                        </tr>
+                        <tr>
+                            <td><strong>PPO 訓練</strong></td>
+                            <td>60</td>
+                            <td>1.6%</td>
+                            <td>~$76,000 USD</td>
+                        </tr>
+                        <tr style="background: var(--secondary-light); font-weight: bold;">
+                            <td><strong>總計（RLHF）</strong></td>
+                            <td>64.9</td>
+                            <td>1.78%</td>
+                            <td>~$82,200 USD</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: 15px; color: var(--text-muted); font-size: 0.9em;">
+                    * 費用估算基於 2022 年的雲端 GPU 價格（V100/A100），實際成本可能不同
+                </p>
+
+                <h5>為什麼這麼便宜？</h5>
+                <ul>
+                    <li><strong>不用從頭訓練：</strong>GPT-3 的知識已經內建，只需「調整行為」</li>
+                    <li><strong>資料量小：</strong>13k + 33k + 31k，遠小於 GPT-3 的 45TB 訓練資料</li>
+                    <li><strong>訓練輪數少：</strong>SFT 只需 16 epochs，PPO 也不需要太多迭代</li>
+                </ul>
+            </div>
+
+            <div class="key-concept">
+                <h4>🎯 重大啟示</h4>
+                <p><strong>花費不到 2% 的成本，就能讓模型從「會接龍」變成「懂人話」！</strong></p>
+                <p>這就是為什麼 RLHF 如此重要：極高的投資報酬率（ROI）。</p>
+            </div>
+
+            <div class="analogy">
+                <h4>💡 生活類比：買車 vs 駕訓</h4>
+                <ul>
+                    <li><strong>買車（GPT-3 預訓練）：</strong>$460 萬元</li>
+                    <li><strong>駕訓班（RLHF）：</strong>$8 萬元（不到 2%）</li>
+                </ul>
+                <p>花 2% 的額外成本，就能讓一台有強大引擎但亂開的車，變成遵守交通規則的好司機。</p>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>❓ 疑問 5：人類對齊資料如何訓練到模型參數？</h2>
+            
+            <div class="explanation">
+                <h4>🔍 這是最核心的技術問題！</h4>
+                <p>讓我們逐一拆解每個階段的<strong>數學公式、參數更新方式、以及實際發生的事情</strong>。</p>
+            </div>
+
+            <!-- 階段 1: SFT -->
+            <h3 style="margin-top: 40px;">階段 1️⃣：SFT（監督微調）</h3>
+            
+            <div class="original-text">
+                <h4>📖 論文原文（Line 191）</h4>
+                <blockquote>
+                    "We then fine-tune a pretrained GPT-3 model on this data using supervised learning."
+                </blockquote>
+            </div>
+
+            <div class="explanation">
+                <h4>🔬 技術細節</h4>
+                
+                <h5>訓練目標：最小化 Negative Log-Likelihood</h5>
+                <div class="math-block">
+                    <p>\[ \mathcal{L}_{\text{SFT}}(\theta) = - \sum_{(x, y) \in D_{\text{SFT}}} \sum_{t=1}^{|y|} \log P_\theta(y_t \mid x, y_{<t}) \]</p>
+                    <p><strong>符號說明：</strong></p>
+                    <ul>
+                        <li>\( x \): 輸入 Prompt（例如："解釋黑洞"）</li>
+                        <li>\( y \): 人類手寫的目標回答</li>
+                        <li>\( y_t \): 回答中的第 \( t \) 個 token</li>
+                        <li>\( \theta \): 模型參數（GPT-3 的所有權重矩陣）</li>
+                        <li>\( P_\theta(y_t \mid x, y_{<t}) \): 模型預測下一個 token 的機率</li>
+                    </ul>
+                </div>
+
+                <h5>白話文解釋</h5>
+                <p><strong>強迫模型「一字不差」地模仿人類寫的答案。</strong></p>
+                <p>如果模型預測錯誤，Loss 就會很大；預測正確，Loss 接近 0。透過梯度下降，模型的參數會逐漸調整到「能正確預測人類會寫什麼」。</p>
+
+                <h5>參數如何更新？</h5>
+                <pre style="background: #1e293b; color: #e2e8f0; padding: 15px; border-radius: 8px;"><code># 偽代碼
+for epoch in range(16):  # 訓練 16 輪
+    for (prompt, human_answer) in sft_dataset:
+        # 1. Forward Pass: 模型生成預測
+        predicted_logits = gpt3_model(prompt)
+        
+        # 2. 計算 Loss
+        loss = cross_entropy_loss(predicted_logits, human_answer)
+        
+        # 3. Backward Pass: 計算梯度
+        gradients = compute_gradients(loss, model.parameters())
+        
+        # 4. 參數更新（Adam optimizer）
+        for param in model.parameters():
+            param = param - learning_rate * gradients[param]
+</code></pre>
+            </div>
+
+            <div class="key-concept">
+                <h4>🎯 SFT 的作用</h4>
+                <p>讓模型學會「對話格式」，知道遇到 instruction 要怎麼回應，而不是繼續接龍。</p>
+            </div>
+
+            <!-- 階段 2: RM -->
+            <h3 style="margin-top: 40px;">階段 2️⃣：RM（獎勵模型訓練）</h3>
+            
+            <div class="original-text">
+                <h4>📖 論文原文（Line 299-304）</h4>
+                <blockquote>
+                    "Starting from the SFT model with the <strong>final unembedding layer removed</strong>, we trained a model to take in a prompt and response, and output <strong>a scalar reward</strong>... trained on a dataset of comparisons between two model outputs."
+                </blockquote>
+            </div>
+
+            <div class="explanation">
+                <h4>🔬 技術細節</h4>
+                
+                <h5>模型架構改動</h5>
+                <pre style="background: #1e293b; color: #e2e8f0; padding: 15px; border-radius: 8px;"><code>SFT 模型（96 層 Transformer）
+├─ Layer 1-95: 保持不變
+├─ Layer 96: <span style="color: #fbbf24;">移除 unembedding layer（原本輸出詞彙機率）</span>
+└─ <span style="color: #34d399;">新增 Linear Layer: [d_model] → [1]（輸出 scalar reward）</span>
+</code></pre>
+
+                <h5>訓練目標：Pairwise Ranking Loss</h5>
+                <div class="math-block">
+                    <p>\[ \mathcal{L}_{\text{RM}}(\theta) = - \mathbb{E}_{(x, y_w, y_l) \sim D_{\text{RM}}} \left[ \log \sigma(r_\theta(x, y_w) - r_\theta(x, y_l)) \right] \]</p>
+                    <p><strong>符號說明：</strong></p>
+                    <ul>
+                        <li>\( r_\theta(x, y) \): Reward Model 給 (Prompt \( x \), 回答 \( y \)) 的評分（一個數字）</li>
+                        <li>\( y_w \): Winner（人類更喜歡的回答）</li>
+                        <li>\( y_l \): Loser（人類較不喜歡的回答）</li>
+                        <li>\( \sigma \): Sigmoid 函數，將差值壓縮到 0-1 之間</li>
+                    </ul>
+                </div>
+
+                <h5>白話文解釋</h5>
+                <p><strong>訓練一個「AI 評審」，能自動預測人類會給幾分。</strong></p>
+                <p>目標：讓 Winner 的分數 > Loser 的分數，且差距越大越好。</p>
+
+                <h5>為什麼用「比較」而不是「打分」？</h5>
+                <div style="background: var(--primary-light); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <p><strong>心理學發現：</strong>人類很難給絕對分數（你的 7 分可能是我的 5 分），但判斷「A 比 B 好」非常容易且一致。</p>
+                    <p>一次排序 K 個輸出，可以產生 \( \binom{K}{2} \) 個比較對！例如 K=4 可以產生 6 對，資料效率高。</p>
+                </div>
+            </div>
+
+            <!-- 階段 3: PPO -->
+            <h3 style="margin-top: 40px;">階段 3️⃣：PPO（強化學習優化）</h3>
+            
+            <div class="original-text">
+                <h4>📖 論文原文（Line 195）</h4>
+                <blockquote>
+                    "We fine-tune the supervised policy to optimize this reward using the PPO algorithm."
+                </blockquote>
+            </div>
+
+            <div class="explanation">
+                <h4>🔬 技術細節</h4>
+                
+                <h5>訓練目標：最大化 Reward - KL Penalty</h5>
+                <div class="math-block">
+                    <p>\[ \text{Objective} = \mathbb{E}_{x \sim D, y \sim \pi_\theta} \left[ r_\phi(x, y) \right] - \beta \cdot \text{KL}(\pi_\theta \| \pi_{\text{SFT}}) \]</p>
+                    <p><strong>符號說明：</strong></p>
+                    <ul>
+                        <li>\( r_\phi(x, y) \): RM 給的獎勵分數（來自階段 2）</li>
+                        <li>\( \pi_\theta \): 當前策略（模型）</li>
+                        <li>\( \pi_{\text{SFT}} \): SFT 模型（參考點）</li>
+                        <li>\( \beta \): KL 懲罰係數（論文中 \( \beta = 0.02 \)）</li>
+                        <li>\( \text{KL}(\pi_\theta \| \pi_{\text{SFT}}) \): KL Divergence（衡量兩個分布的差異）</li>
+                    </ul>
+                </div>
+
+                <h5>PPO-ptx 變體（減輕對齊稅）</h5>
+                <div class="math-block">
+                    <p>\[ \text{Objective}_{\text{PPO-ptx}} = \mathbb{E}_{x \sim D, y \sim \pi_\theta} \left[ r_\phi(x, y) \right] - \beta \cdot \text{KL}(\pi_\theta \| \pi_{\text{SFT}}) + \gamma \cdot \mathbb{E}_{x \sim D_{\text{pretrain}}} \left[ \log \pi_\theta(x) \right] \]</p>
+                    <p><strong>新增項：</strong></p>
+                    <ul>
+                        <li>\( \gamma \cdot \mathbb{E}_{x \sim D_{\text{pretrain}}} [ \log \pi_\theta(x) ] \): 在 GPT-3 預訓練資料上的 log-likelihood</li>
+                        <li><strong>作用：</strong>同時複習 GPT-3 的原始知識，避免「對齊稅」（在傳統 NLP 任務上性能下降）</li>
+                    </ul>
+                </div>
+
+                <h5>白話文解釋</h5>
+                <ol>
+                    <li>模型根據 Prompt 生成新回答 \( y \)</li>
+                    <li>RM 給這個回答打分 \( r(x, y) \)</li>
+                    <li>如果分數高，就<strong>強化</strong>「生成這個答案」的參數</li>
+                    <li>如果分數低，就<strong>懲罰</strong>「生成這個答案」的參數</li>
+                    <li>同時確保不要偏離 SFT 模型太遠（KL 懲罰）</li>
+                    <li>額外複習 GPT-3 原始知識（pretraining mix）</li>
+                </ol>
+
+                <h5>參數如何更新？（PPO 算法）</h5>
+                <pre style="background: #1e293b; color: #e2e8f0; padding: 15px; border-radius: 8px; overflow-x: auto;"><code># 偽代碼（簡化版）
+for iteration in range(num_iterations):
+    # 1. 採樣：生成一批回答
+    batch_prompts = sample_prompts(ppo_dataset)
+    batch_responses = model.generate(batch_prompts)
+    
+    # 2. 評分：用 RM 打分
+    rewards = reward_model(batch_prompts, batch_responses)
+    
+    # 3. 計算 Advantage（優勢函數）
+    advantages = compute_advantages(rewards)
+    
+    # 4. PPO 更新（多個 epochs）
+    for ppo_epoch in range(4):
+        # 計算 policy ratio
+        old_log_probs = model.log_prob(batch_responses)
+        new_log_probs = model.log_prob(batch_responses)  # 更新後
+        ratio = exp(new_log_probs - old_log_probs)
+        
+        # PPO Clipped Objective
+        clipped_ratio = clip(ratio, 1-epsilon, 1+epsilon)
+        surrogate_loss = min(ratio * advantages, clipped_ratio * advantages)
+        
+        # KL Penalty
+        kl_penalty = compute_kl(model, sft_model)
+        
+        # Pretraining Mix（PPO-ptx）
+        pretrain_loss = -log_likelihood(model, pretrain_data)
+        
+        # Total Loss
+        total_loss = -surrogate_loss + beta * kl_penalty + gamma * pretrain_loss
+        
+        # 梯度下降
+        total_loss.backward()
+        optimizer.step()
+</code></pre>
+            </div>
+
+            <div class="key-concept">
+                <h4>🎯 PPO 的精髓</h4>
+                <p><strong>讓模型「自己練習」拿高分，但不要走火入魔（偏離太遠）。</strong></p>
+                <p>就像學生為了考高分而不斷練習，但不能為了分數而作弊（KL 懲罰確保誠實）。</p>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>🎯 技術總結：三階段訓練流程圖解</h2>
+            
+            <div style="background: linear-gradient(135deg, #eff6ff 0%, #ecfdf5 100%); padding: 30px; border-radius: 16px; margin: 30px 0;">
+                <pre style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow-x: auto;"><code style="color: #1e293b; font-family: monospace; line-height: 1.8;">
+<strong style="color: #2563eb;">┌─────────────────────────────────────────────────────────────┐</strong>
+<strong style="color: #2563eb;">│  Stage 0: GPT-3 Pretraining (起點)                         │</strong>
+<strong style="color: #2563eb;">└─────────────────────────────────────────────────────────────┘</strong>
+                    │
+                    │ <span style="color: #059669;">✓ 175B 參數，96 層 Transformer</span>
+                    │ <span style="color: #059669;">✓ 45TB 網路文字訓練</span>
+                    │ <span style="color: #059669;">✓ 成本：3,640 petaflops/s-days ($4.6M)</span>
+                    ↓
+<strong style="color: #d97706;">┌─────────────────────────────────────────────────────────────┐</strong>
+<strong style="color: #d97706;">│  Stage 1: SFT (Supervised Fine-Tuning)                     │</strong>
+<strong style="color: #d97706;">│  資料：13k 人類示範                                         │</strong>
+<strong style="color: #d97706;">│  目標：- Σ log P(y_t | x, y_<t)                            │</strong>
+<strong style="color: #d97706;">│  方法：監督學習（Cross-Entropy Loss）                       │</strong>
+<strong style="color: #d97706;">│  成本：4.9 petaflops/s-days (0.13% of GPT-3)              │</strong>
+<strong style="color: #d97706;">│  結果：學會「對話格式」                                      │</strong>
+<strong style="color: #d97706;">└─────────────────────────────────────────────────────────────┘</strong>
+                    │
+                    ├────────────────────┐
+                    │                    │
+                    ↓                    ↓
+<strong style="color: #7c3aed;">┌──────────────────────┐    ┌──────────────────────────────┐</strong>
+<strong style="color: #7c3aed;">│  Stage 2: RM         │    │  繼續用於 Stage 3            │</strong>
+<strong style="color: #7c3aed;">│  (Reward Model)      │    └──────────────────────────────┘</strong>
+<strong style="color: #7c3aed;">│  資料：33k 比較排序   │</strong>
+<strong style="color: #7c3aed;">│  架構：移除最後一層   │</strong>
+<strong style="color: #7c3aed;">│       + Linear(1)    │</strong>
+<strong style="color: #7c3aed;">│  目標：預測人類偏好   │</strong>
+<strong style="color: #7c3aed;">│  結果：AI 評審        │</strong>
+<strong style="color: #7c3aed;">└──────────────────────┘</strong>
+         │
+         │ <span style="color: #7c3aed;">提供 reward signal</span>
+         └───────────────┐
+                         ↓
+<strong style="color: #059669;">┌─────────────────────────────────────────────────────────────┐</strong>
+<strong style="color: #059669;">│  Stage 3: PPO (Reinforcement Learning)                      │</strong>
+<strong style="color: #059669;">│  資料：31k prompts（無標註）                                 │</strong>
+<strong style="color: #059669;">│  目標：E[r(x,y)] - β·KL(π||π_SFT) + γ·log P_pretrain(x)   │</strong>
+<strong style="color: #059669;">│  方法：PPO 算法 + KL 懲罰 + Pretraining Mix                │</strong>
+<strong style="color: #059669;">│  成本：60 petaflops/s-days (1.6% of GPT-3)                 │</strong>
+<strong style="color: #059669;">│  結果：自我優化拿高分，保持知識                              │</strong>
+<strong style="color: #059669;">└─────────────────────────────────────────────────────────────┘</strong>
+                    │
+                    ↓
+<strong style="color: #2563eb;">        🎉 InstructGPT (最終模型) 🎉</strong>
+                </code></pre>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>📊 數據規模總覽</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>階段</th>
+                        <th>資料集</th>
+                        <th>數量</th>
+                        <th>標註方式</th>
+                        <th>訓練時間</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>SFT</strong></td>
+                        <td>人類示範</td>
+                        <td>~13k prompts</td>
+                        <td>Labeler <strong>親自寫</strong>完整回答</td>
+                        <td>16 epochs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RM</strong></td>
+                        <td>比較排序</td>
+                        <td>~33k prompts<br>(產生 >100k 對)</td>
+                        <td>Labeler <strong>排序</strong> 4-9 個輸出</td>
+                        <td>1 epoch</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PPO</strong></td>
+                        <td>Prompts only</td>
+                        <td>~31k prompts</td>
+                        <td><strong>無需標註</strong>（只要輸入）</td>
+                        <td>多次迭代</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="background: var(--secondary-light); padding: 15px; border-radius: 8px; margin-top: 20px;">
+                <h4 style="color: var(--secondary-color); margin-top: 0;">💡 為什麼 RM 資料最多？</h4>
+                <p><strong>因為「排序」比「寫答案」快得多！</strong></p>
+                <ul>
+                    <li><strong>寫答案 (SFT):</strong> Labeler 要花 5-10 分鐘構思並寫出高品質回答。</li>
+                    <li><strong>排序 (RM):</strong> Labeler 只需看 4-9 個現成答案，花 1-2 分鐘排序即可。</li>
+                    <li>一次排序產生 \( \binom{K}{2} \) 個比較對（K=4 產生 6 對），資料效率高！</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>🎓 結語：技術要點回顧</h2>
+            
+            <div class="key-concept">
+                <h4>五大技術要點</h4>
+                <ol style="line-height: 2;">
+                    <li><strong>架構完全相同：</strong>InstructGPT = GPT-3 架構，零差異</li>
+                    <li><strong>訓練方式創新：</strong>SFT + RM + PPO（RLHF）</li>
+                    <li><strong>成本極低：</strong>只需 GPT-3 的 1.6% 計算成本</li>
+                    <li><strong>參數更新：</strong>透過梯度下降，人類偏好被編碼進模型權重</li>
+                    <li><strong>對齊 vs 能力：</strong>1.3B + 對齊 > 175B + 無對齊（在人類偏好上）</li>
+                </ol>
+            </div>
+
+            <div style="background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary-light) 100%); padding: 30px; border-radius: 16px; text-align: center; margin-top: 30px;">
+                <h3 style="color: var(--primary-color); margin-top: 0;">🔬 技術洞察</h3>
+                <p style="font-size: 1.1rem; line-height: 1.8; max-width: 800px; margin: 20px auto;">
+                    InstructGPT 的技術貢獻不在「模型架構創新」，而在<strong>訓練方法創新</strong>：<br><br>
+                    證明了「對齊」可以用極低成本實現，且效果驚人。<br>
+                    這為後續的 ChatGPT、Claude、Gemini 等模型鋪平了道路。
+                </p>
+            </div>
+        </section>
+
+        <div class="nav-bar">
+            <a href="06-discussion.html" class="nav-btn">← 上一頁：討論與未來</a>
+            <a href="index.html" class="nav-btn">目錄</a>
+        </div>
+    </div>
+</body>
+</html>

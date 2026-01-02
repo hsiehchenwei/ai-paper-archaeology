@@ -1,0 +1,60 @@
+MIT License
+
+Copyright (c) 2026 AI Paper Archaeology Project
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## 圖片與內容版權說明
+
+本專案中的教學內容（HTML、CSS、文字說明）採用 MIT License。
+
+### 論文圖片版權
+
+本專案中使用的論文圖片來自以下學術論文，版權歸原作者所有：
+
+1. **Transformer 架構圖片**
+   - 來源：Vaswani, A., et al. (2017). "Attention is All You Need". arXiv:1706.03762
+   - 版權：© 2017 Google LLC and Google Brain
+   
+2. **BERT 架構圖片**
+   - 來源：Devlin, J., et al. (2018). "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding". arXiv:1810.04805
+   - 版權：© 2018 Google AI Language
+   
+3. **GPT-3 實驗圖表**
+   - 來源：Brown, T., et al. (2020). "Language Models are Few-Shot Learners". arXiv:2005.14165
+   - 版權：© 2020 OpenAI
+   
+4. **InstructGPT 圖表**
+   - 來源：Ouyang, L., et al. (2022). "Training language models to follow instructions with human feedback". arXiv:2203.02155
+   - 版權：© 2022 OpenAI
+
+### 使用聲明
+
+這些圖片僅用於非商業性教育目的，符合學術合理使用原則（Fair Use）。所有圖片均：
+- 用於教育和學術討論
+- 明確標註原始來源
+- 不用於任何商業用途
+- 不聲稱擁有這些圖片的版權
+
+如果您是版權持有人且對使用有疑慮，請聯繫專案維護者，我們將立即處理。
+
+詳細的圖片來源清單請參見 [ATTRIBUTION.md](ATTRIBUTION.md)
+

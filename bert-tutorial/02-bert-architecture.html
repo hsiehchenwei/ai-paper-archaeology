@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 2 頁:BERT 架構詳解 - BERT 論文深度解析</title>
+    <link rel="stylesheet" href="../transformer-tutorial/style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>⚙️ 第 2 頁:BERT 架構詳解</h1>
+
+        <h2>🏗️ 模型架構:Transformer Encoder</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                BERT's model architecture is a multi-layer bidirectional Transformer encoder based on the original implementation described in Vaswani et al. (2017). Because the use of Transformers has become common and our implementation is almost identical to the original, we will omit an exhaustive background description of the model architecture.
+            </div>
+            <div class="translation">
+                BERT 的模型架構是一個多層雙向 Transformer 編碼器,基於 Vaswani 等人 (2017) 描述的原始實作。由於 Transformers 的使用已經變得普遍,而我們的實作幾乎與原始版本相同,因此我們將省略模型架構的詳盡背景描述。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>📐 BERT 的兩個尺寸</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>模型</th>
+                        <th>層數 (L)</th>
+                        <th>隱藏維度 (H)</th>
+                        <th>注意力頭 (A)</th>
+                        <th>參數量</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>BERT-BASE</strong></td>
+                        <td>12</td>
+                        <td>768</td>
+                        <td>12</td>
+                        <td>110M</td>
+                    </tr>
+                    <tr>
+                        <td><strong>BERT-LARGE</strong></td>
+                        <td>24</td>
+                        <td>1024</td>
+                        <td>16</td>
+                        <td>340M</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>設計考量:</strong></p>
+            <p>BERT-BASE 的大小與 GPT 相同 (110M),方便比較!</p>
+        </div>
+
+        <div class="figure">
+            <img src="images/BERT_Overall.png" alt="BERT 整體架構" style="max-width: 100%; height: auto;">
+            <p class="caption">
+                <strong>圖 2.1:BERT 的整體架構</strong><br>
+                展示了 BERT 的 Transformer Encoder 結構。<br>
+                • <strong>輸入層</strong>:Token + Segment + Position Embeddings<br>
+                • <strong>中間層</strong>:多層 Transformer Encoder (12 層或 24 層)<br>
+                • <strong>輸出層</strong>:每個 token 都有對應的輸出向量<br>
+                注意每個 token 都能「看到」整個序列的資訊(雙向注意力)！
+            </p>
+        </div>
+
+        <div class="explanation">
+            <h4>🔍 關鍵差異:BERT vs GPT</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>特性</th>
+                        <th>BERT</th>
+                        <th>GPT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>架構</strong></td>
+                        <td>Transformer Encoder</td>
+                        <td>Transformer Decoder</td>
+                    </tr>
+                    <tr>
+                        <td><strong>注意力</strong></td>
+                        <td>雙向 (看左右)</td>
+                        <td>單向 (只看左)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>訓練任務</strong></td>
+                        <td>Masked LM + NSP</td>
+                        <td>預測下一個字</td>
+                    </tr>
+                    <tr>
+                        <td><strong>擅長</strong></td>
+                        <td>理解任務</td>
+                        <td>生成任務</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>🔤 輸入表示:三種 Embeddings</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                For a given token, its input representation is constructed by summing the corresponding token, segment, and position embeddings.
+            </div>
+            <div class="translation">
+                對於給定的標記,其輸入表示是透過將相應的標記嵌入、片段嵌入和位置嵌入相加來構建的。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>📊 BERT 輸入 = 三種 Embedding 相加</h4>
+            <pre><code>輸入表示 = Token Embedding + Segment Embedding + Position Embedding</code></pre>
+
+            <h5>1️⃣ Token Embedding (詞嵌入)</h5>
+            <ul>
+                <li>將每個字轉換成向量</li>
+                <li>使用 WordPiece,詞彙表大小 30,000</li>
+            </ul>
+
+            <h5>2️⃣ Segment Embedding (片段嵌入)</h5>
+            <ul>
+                <li>區分句子 A 和句子 B</li>
+                <li>只有兩種值:E<sub>A</sub> 或 E<sub>B</sub></li>
+            </ul>
+
+            <h5>3️⃣ Position Embedding (位置嵌入)</h5>
+            <ul>
+                <li>標記每個字的位置</li>
+                <li>支援最多 512 個 tokens</li>
+            </ul>
+        </div>
+
+        <div class="figure">
+            <img src="images/Input_Emebeddings.png" alt="BERT 輸入 Embeddings" style="max-width: 100%; height: auto;">
+            <p class="caption">
+                <strong>圖 2.2:BERT 的輸入表示</strong><br>
+                展示了如何將文字轉換成 BERT 的輸入向量。<br>
+                • <strong>Token Embeddings</strong>:每個詞的向量表示<br>
+                • <strong>Segment Embeddings</strong>:標記屬於句子 A 還是句子 B (用 E<sub>A</sub> 或 E<sub>B</sub>)<br>
+                • <strong>Position Embeddings</strong>:標記每個 token 的位置 (0, 1, 2, ...)<br>
+                三者相加後,就是送進 Transformer 的輸入！
+            </p>
+        </div>
+
+        <div class="explanation">
+            <h4>🔍 特殊 Tokens</h4>
+            <p><strong>[CLS]</strong> - Classification token</p>
+            <ul>
+                <li>永遠是第一個 token</li>
+                <li>用於分類任務的整句表示</li>
+            </ul>
+
+            <p><strong>[SEP]</strong> - Separator token</p>
+            <ul>
+                <li>分隔兩個句子</li>
+                <li>也用於標記句子結尾</li>
+            </ul>
+
+            <p><strong>[MASK]</strong> - Mask token</p>
+            <ul>
+                <li>預訓練時用來遮蔽字詞</li>
+                <li>微調時不會出現</li>
+            </ul>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:三種標記系統</h4>
+            <p><strong>想像你在讀一本雙語對照書:</strong></p>
+
+            <p><strong>Token Embedding</strong> = 每個字的意思</p>
+            <ul>
+                <li>"cat" → [0.2, -0.5, 0.8, ...] (貓的向量)</li>
+            </ul>
+
+            <p><strong>Segment Embedding</strong> = 標記這是英文還是中文那一側</p>
+            <ul>
+                <li>左頁(英文) → E<sub>A</sub></li>
+                <li>右頁(中文) → E<sub>B</sub></li>
+            </ul>
+
+            <p><strong>Position Embedding</strong> = 這個字在第幾個位置</p>
+            <ul>
+                <li>第 1 個字 → P<sub>0</sub></li>
+                <li>第 2 個字 → P<sub>1</sub></li>
+            </ul>
+        </div>
+
+        <div class="analogy">
+            <h4>🤖 AI 體驗連結:為什麼 ChatGPT 有 Token 限制?</h4>
+            <p><strong>BERT</strong>: 最多 512 tokens</p>
+            <p><strong>GPT-3</strong>: 最多 2048 tokens</p>
+            <p><strong>GPT-4</strong>: 最多 8192 / 32768 tokens</p>
+
+            <p><strong>限制來源:</strong></p>
+            <p>Position Embedding 的長度是固定的!</p>
+            <ul>
+                <li>BERT 只訓練了 512 個位置嵌入</li>
+                <li>超過就無法處理</li>
+            </ul>
+
+            <p><strong>解決方案:</strong></p>
+            <ul>
+                <li>訓練更長的位置嵌入</li>
+                <li>使用相對位置編碼</li>
+                <li>使用 ALiBi、RoPE 等新技術</li>
+            </ul>
+        </div>
+
+        <div class="nav-bar">
+            <a href="01-abstract-and-introduction.html" class="nav-btn">← 上一頁</a>
+            <a href="index.html" class="nav-btn">📑 目錄</a>
+            <a href="03-pretraining-tasks.html" class="nav-btn primary">下一頁 → 預訓練任務</a>
+        </div>
+    </div>
+</body>
+</html>
+

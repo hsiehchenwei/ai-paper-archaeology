@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 2 頁：RLHF 訓練三部曲 - InstructGPT 論文深度解析</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="index.html">InstructGPT 深度解析</a>
+            <span>/</span>
+            <span class="current">02. 核心方法 (RLHF)</span>
+        </div>
+
+        <h1>第 2 頁：如何教會 AI 聽懂人話？ (RLHF 三步驟)</h1>
+        
+        <div class="header-section">
+            <p class="lead">這篇論文最經典的貢獻，就是定義了現代大模型訓練的黃金標準流程：SFT -> RM -> PPO。</p>
+        </div>
+
+        <section class="section-block">
+            <h2>這張圖定義了未來幾年的 AI 發展</h2>
+            
+            <!-- 原文方法論 -->
+            <div class="original-text">
+                <h3>📖 Method: High-level Methodology (原文完整段落)</h3>
+                <blockquote>
+                    <span data-translation="我們的方法遵循 Ziegler 等人（2019）和 Stiennon 等人（2020）的方法">Our methodology follows that of Ziegler et al. (2019) and Stiennon et al. (2020), who applied it in the stylistic continuation and summarization domains.</span>
+                    <span data-translation="我們從一個預訓練語言模型、一組提示分布，以及一組訓練有素的人類標註者開始">We start with a pretrained language model, a distribution of prompts on which we want our model to produce aligned outputs, and a team of trained human labelers.</span>
+                    <span data-translation="然後我們應用以下三個步驟：">We then apply the following three steps:</span>
+                    <br><br>
+                    <strong>Step 1: <span data-translation="收集示範數據，訓練監督式策略">Collect demonstration data, and train a supervised policy.</span></strong>
+                    <span data-translation="標註者在輸入提示分布上提供期望行為的示範">Our labelers provide demonstrations of the desired behavior on the input prompt distribution.</span>
+                    <span data-translation="然後我們使用監督式學習在這些數據上微調預訓練的 GPT-3 模型">We then fine-tune a pretrained GPT-3 model on this data using supervised learning.</span>
+                    <br><br>
+                    <strong>Step 2: <span data-translation="收集比較數據，訓練獎勵模型">Collect comparison data, and train a reward model.</span></strong>
+                    <span data-translation="我們收集模型輸出之間的比較數據集，標註者指出對於給定輸入他們更偏好哪個輸出">We collect a dataset of comparisons between model outputs, where labelers indicate which output they prefer for a given input.</span>
+                    <span data-translation="然後我們訓練獎勵模型來預測人類偏好的輸出">We then train a reward model to predict the human-preferred output.</span>
+                    <br><br>
+                    <strong>Step 3: <span data-translation="使用 PPO 針對獎勵模型優化策略">Optimize a policy against the reward model using PPO.</span></strong>
+                    <span data-translation="我們使用 RM 的輸出作為標量獎勵">We use the output of the RM as a scalar reward.</span>
+                    <span data-translation="我們使用 PPO 演算法微調監督式策略以優化這個獎勵">We fine-tune the supervised policy to optimize this reward using the PPO algorithm.</span>
+                    <br><br>
+                    <span data-translation="步驟 2 和 3 可以持續迭代；在當前最佳策略上收集更多比較數據，用於訓練新的 RM 然後新的策略">Steps 2 and 3 can be iterated continuously; more comparison data is collected on the current best policy, which is used to train a new RM and then a new policy.</span>
+                </blockquote>
+            </div>
+            
+            <div class="figure figure-original">
+                <embed src="images/original/InstructGPT_Diagram3.1.pdf" type="application/pdf" width="100%" height="600px" />
+                <div class="caption">
+                    <strong>Figure 2 (原文 Figure 2):</strong> InstructGPT 的三階段訓練流程圖。<br>
+                    這張圖非常重要，幾乎所有後來的模型（LLaMA, Claude 等）都遵循這個架構。
+                </div>
+            </div>
+
+            <!-- AI 生成漫畫：更親民的版本 -->
+            <div class="figure figure-ai">
+                <img src="../images/user_generate_image_20260101164104_86dd.png" alt="RLHF Training Comic" style="max-width: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-lg);">
+                <div class="caption">
+                    💡 <strong>AI 漫畫：RLHF 訓練流程（親民版）</strong>
+                </div>
+            </div>
+
+            <div class="analogy">
+                <h4>💡 生活類比：訓練超級歌星 (The Voice)</h4>
+                <p>我們可以把訓練 AI 比喻成培養一個超級歌手：</p>
+                <ul>
+                    <li><strong>Step 1 (SFT): 導師示範</strong><br>
+                    人類導師親自唱一遍（寫出正確答案），AI 歌手跟著學。這是模仿學習。</li>
+                    
+                    <li><strong>Step 2 (RM): 評審評分</strong><br>
+                    AI 唱好幾種版本，人類評審不唱了，只負責排名（A 比 B 好）。我們訓練一個「AI 評審」來模仿人類的口味。</li>
+                    
+                    <li><strong>Step 3 (PPO): 自我修煉</strong><br>
+                    AI 歌手自己關在房間練唱，唱完給「AI 評審」聽，如果分數高就保持，分數低就修正。這樣可以無限練習！</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>第一步：監督式微調 (Supervised Fine-Tuning, SFT)</h2>
+            
+            <div class="text-pair">
+                <div class="original-text">
+                    Step 1: Collect demonstration data, and train a supervised policy. Our labelers provide demonstrations of the desired behavior on the input prompt distribution... We then fine-tune a pretrained GPT-3 model on this data using supervised learning.
+                </div>
+                <div class="translation">
+                    步驟 1：收集示範資料，並訓練監督式策略。我們的標註者針對輸入提示提供期望行為的示範... 然後我們利用這些資料透過監督式學習微調 GPT-3。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 深度解析</h4>
+                <p>這是最直覺的一步。GPT-3 原本只會接龍，現在我們給它看人類是怎麼回答問題的。</p>
+                <ul>
+                    <li><strong>Input:</strong> "請向六歲小孩解釋登陸月球。"</li>
+                    <li><strong>Human Output:</strong> "很久以前，人類坐著大火箭飛到了月亮上..."</li>
+                </ul>
+                <p>模型透過學習這些成對的資料，學會了「對話的格式」。</p>
+                <p><strong>缺點：</strong> 人類寫答案很貴，很慢，很難大規模生產。</p>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>第二步：獎勵模型 (Reward Model, RM)</h2>
+            
+            <div class="text-pair">
+                <div class="original-text">
+                    Step 2: Collect comparison data, and train a reward model. We collect a dataset of comparisons between model outputs, where labelers indicate which output they prefer... We then train a reward model to predict the human-preferred output.
+                </div>
+                <div class="translation">
+                    步驟 2：收集比較資料，並訓練獎勵模型。我們收集模型輸出的比較資料，標註者會指出他們更喜歡哪一個輸出... 然後我們訓練一個獎勵模型來預測人類偏好的輸出。
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>為什麼要「比較」而不是「打分」？</h4>
+                <p>論文發現，讓人直接給 1-10 分很難統一標準（你的 7 分可能是我的 5 分）。</p>
+                <p>但是，讓人判斷 <strong>「A 比 B 好」</strong> 卻非常容易且一致。這就是 <strong>Ranking (排名)</strong> 的力量。</p>
+            </div>
+
+            <div class="math-block">
+                <h4>📐 數學公式：Loss Function</h4>
+                <p>獎勵模型的訓練目標是最小化以下 Loss：</p>
+                <p>\[ \text{loss}(\theta) = - \mathbb{E}_{(x, y_w, y_l) \sim D} \left[ \log(\sigma(r_\theta(x, y_w) - r_\theta(x, y_l))) \right] \]</p>
+                <ul>
+                    <li>\(r_\theta(x, y)\)：獎勵模型對輸入 \(x\) 和回答 \(y\) 的評分。</li>
+                    <li>\(y_w\)：勝出的回答 (Winner)。</li>
+                    <li>\(y_l\)：落敗的回答 (Loser)。</li>
+                    <li><strong>直觀意義：</strong> 我們希望 Winner 的分數比 Loser 的分數高越多越好（讓差值經過 Sigmoid 後接近 1）。</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <h2>第三步：強化學習 (PPO)</h2>
+            
+            <div class="text-pair">
+                <div class="original-text">
+                    Step 3: Optimize a policy against the reward model using PPO. We use the output of the RM as a scalar reward. We fine-tune the supervised policy to optimize this reward...
+                </div>
+                <div class="translation">
+                    步驟 3：使用 PPO 針對獎勵模型優化策略。我們將獎勵模型的輸出作為純量獎勵。我們微調監督式策略以最大化此獎勵...
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 深度解析：為什麼需要 PPO？</h4>
+                <p>有了 RM (AI 評審)，我們就有了一個不需要人類介入也能快速打分的機制。PPO (Proximal Policy Optimization) 是一種強化學習演算法，它的作用是讓模型不斷嘗試生成新的回答，想辦法騙過 RM 拿到高分。</p>
+                <p><strong>注意：</strong> 為了防止模型為了拿高分而「走火入魔」（例如一直重複某個高分關鍵字），Loss function 中通常會加入一個 KL Divergence 懲罰項，限制它不能偏離原始模型太遠。</p>
+            </div>
+        </section>
+
+        <div class="nav-bar">
+            <a href="01-introduction.html" class="nav-btn">← 上一頁：引言</a>
+            <a href="index.html" class="nav-btn">目錄</a>
+            <a href="03-results.html" class="nav-btn primary">下一頁：主要結果 →</a>
+        </div>
+    </div>
+</body>
+</html>
+

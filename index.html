@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
+    <title>AI Paper Archaeology - 深入考古改變世界的 AI 論文</title>
+    <meta
+      name="title"
+      content="AI Paper Archaeology - 深入考古改變世界的 AI 論文"
+    />
+    <meta
+      name="description"
+      content="深入解析改變 AI 世界的經典論文，從 Transformer 到 GPT-3、BERT、InstructGPT，用白話文帶你考古 AI 發展史。包含論文逐句翻譯、技術深度解析與生活化類比。"
+    />
+    <meta
+      name="keywords"
+      content="AI, 人工智慧, 論文解析, Transformer, BERT, GPT-3, InstructGPT, 機器學習, 深度學習, NLP, 自然語言處理, 白話文教學, 技術科普"
+    />
+    <meta name="author" content="謝承緯 (Chen Wei Hsieh)" />
+    <meta name="robots" content="index, follow" />
+    <link
+      rel="canonical"
+      href="https://hsiehchenwei.github.io/ai-paper-archaeology/"
+    />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/"
+    />
+    <meta
+      property="og:title"
+      content="AI Paper Archaeology - 深入考古改變世界的 AI 論文"
+    />
+    <meta
+      property="og:description"
+      content="深入解析改變 AI 世界的經典論文，從 Transformer 到 GPT，用白話文帶你考古 AI 發展史"
+    />
+    <meta
+      property="og:image"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/og-image.png"
+    />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:site_name" content="AI Paper Archaeology" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/"
+    />
+    <meta
+      property="twitter:title"
+      content="AI Paper Archaeology - 深入考古改變世界的 AI 論文"
+    />
+    <meta
+      property="twitter:description"
+      content="深入解析改變 AI 世界的經典論文，從 Transformer 到 GPT，用白話文帶你考古 AI 發展史"
+    />
+    <meta
+      property="twitter:image"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/og-image.png"
+    />
+
+    <!-- Structured Data / Schema.org -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "AI Paper Archaeology",
+        "alternateName": "AI 論文考古",
+        "url": "https://hsiehchenwei.github.io/ai-paper-archaeology/",
+        "description": "深入解析改變 AI 世界的經典論文，從 Transformer 到 GPT，用白話文帶你考古 AI 發展史",
+        "author": {
+          "@type": "Person",
+          "name": "謝承緯",
+          "email": "pushy.chordal_0s@icloud.com"
+        },
+        "inLanguage": "zh-TW",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://hsiehchenwei.github.io/ai-paper-archaeology/?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+
+    <link rel="stylesheet" href="styles/global.css" />
+    <link rel="stylesheet" href="styles/home.css" />
+  </head>
+  <body>
+    <!-- Hero Section -->
+    <div class="container">
+      <div class="hero">
+        <div class="hero-content">
+          <h1>考古 AI 的<br />黃金年代</h1>
+          <p class="hero-subtitle">
+            從 2017 Transformer 到 2023 GPT-4<br />
+            用白話文解析那些改變世界的經典論文
+          </p>
+        </div>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tab-container" id="featured">
+        <div class="tab-nav">
+          <button class="tab-btn active" onclick="switchTab('timeline')">
+            論文時間軸
+          </button>
+          <button class="tab-btn" onclick="switchTab('topics')">
+            精選專題
+          </button>
+          <button class="tab-btn" onclick="switchTab('articles')">
+            知識筆記
+          </button>
+          <button class="tab-btn" onclick="switchTab('about')">關於本站</button>
+        </div>
+
+        <!-- Tab 2: Topics (Bento Grid) -->
+        <div id="topics" class="tab-content">
+          <div class="bento-grid">
+            <!-- Featured Card: NLP Trilogy -->
+            <div
+              class="bento-card featured"
+              onclick="location.href='topics/nlp-trilogy.html'"
+              style="cursor: pointer"
+            >
+              <div
+                class="card-icon"
+                style="
+                  background: transparent;
+                  width: 100px;
+                  height: 100px;
+                  margin-bottom: 20px;
+                  padding: 0;
+                "
+              >
+                <img
+                  src="images/user_generate_image_20260102041052_792e_256.png"
+                  alt="NLP Trilogy Icon"
+                  style="width: 100%; height: 100%; object-fit: contain"
+                />
+              </div>
+              <h3>現代 NLP 演進三部曲</h3>
+              <p>
+                探索改變 NLP 世界的關鍵論文：從 Transformer 架構革命， 到 BERT
+                的雙向理解，再到 GPT-3 的規模奇蹟， 最後以 InstructGPT
+                實現人類對齊。
+              </p>
+              <div class="card-meta">
+                <span>2017-2022</span>
+                <span>•</span>
+                <span>4 篇核心論文</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 1: Timeline -->
+        <div id="timeline" class="tab-content active">
+          <div
+            class="bento-card"
+            style="
+              background: transparent;
+              border: none;
+              box-shadow: none;
+              padding: 0;
+            "
+          >
+            <h3 style="text-align: center; margin-bottom: 10px">
+              ⏳ AI 發展黃金年代
+            </h3>
+
+            <div class="timeline-container">
+              <div class="timeline-line"></div>
+
+              <!-- 2017 Transformer -->
+              <div class="timeline-item right">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                  <div
+                    class="timeline-header"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 15px;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    <img
+                      src="images/user_generate_image_20260102041052_792e_256.png"
+                      style="width: 56px; height: 56px; object-fit: contain"
+                      alt="Transformer Icon"
+                    />
+                    <h3 style="margin: 0">2017 Transformer</h3>
+                  </div>
+                  <strong>Attention Is All You Need</strong>
+                  <p>拋棄 RNN，奠定現代 LLM 基礎。</p>
+                  <a href="transformer-tutorial/index.html" class="quick-link"
+                    >深度解析 →</a
+                  >
+                </div>
+              </div>
+
+              <!-- 2018 BERT -->
+              <div class="timeline-item left">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                  <div
+                    class="timeline-header"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 15px;
+                      margin-bottom: 10px;
+                      justify-content: flex-end;
+                    "
+                  >
+                    <h3 style="margin: 0">2018 BERT</h3>
+                    <img
+                      src="images/user_generate_image_20260102041123_05b5_256.png"
+                      style="width: 56px; height: 56px; object-fit: contain"
+                      alt="BERT Icon"
+                    />
+                  </div>
+                  <strong>雙向理解革命</strong>
+                  <p>Masked LM 讓機器真正「讀懂」上下文。</p>
+                  <a href="bert-tutorial/index.html" class="quick-link"
+                    >深度解析 →</a
+                  >
+                </div>
+              </div>
+
+              <!-- 2020 GPT-3 -->
+              <div class="timeline-item right">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                  <div
+                    class="timeline-header"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 15px;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    <img
+                      src="images/user_generate_image_20260102041143_3328_256.png"
+                      style="width: 56px; height: 56px; object-fit: contain"
+                      alt="GPT-3 Icon"
+                    />
+                    <h3 style="margin: 0">2020 GPT-3</h3>
+                  </div>
+                  <strong>規模奇蹟</strong>
+                  <p>175B 參數展現 Few-Shot Learning 能力。</p>
+                  <a href="gpt3-tutorial/index.html" class="quick-link"
+                    >深度解析 →</a
+                  >
+                </div>
+              </div>
+
+              <!-- 2022 InstructGPT -->
+              <div class="timeline-item left">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                  <div
+                    class="timeline-header"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 15px;
+                      margin-bottom: 10px;
+                      justify-content: flex-end;
+                    "
+                  >
+                    <h3 style="margin: 0">2022 InstructGPT</h3>
+                    <img
+                      src="images/user_generate_image_20260102041223_7eac_256.png"
+                      style="width: 56px; height: 56px; object-fit: contain"
+                      alt="InstructGPT Icon"
+                    />
+                  </div>
+                  <strong>對齊人類意圖</strong>
+                  <p>RLHF 讓 AI 終於能聽懂並遵循指令。</p>
+                  <a href="instructgpt-tutorial/index.html" class="quick-link"
+                    >深度解析 →</a
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Articles -->
+        <div id="articles" class="tab-content">
+          <div style="margin-bottom: 30px; text-align: center">
+            <h3
+              style="
+                font-size: 1.5rem;
+                color: var(--text-main);
+                margin-bottom: 10px;
+              "
+            >
+              📝 知識筆記
+            </h3>
+            <p style="color: var(--text-secondary)">深度技術解析與實作筆記</p>
+          </div>
+
+          <div class="magazine-grid">
+            <!-- Article 1: Featured (GPT-3 Inference) -->
+            <a
+              href="articles/gpt3-inference-detailed.html"
+              class="magazine-card featured-article"
+            >
+              <div class="card-image-wrapper">
+                <img
+                  src="images/user_generate_image_20260102051640_9a1a.png"
+                  alt="GPT-3 Inference Cover"
+                />
+              </div>
+              <div class="card-content">
+                <span class="card-tag">最新文章</span>
+                <h3>GPT-3 推理流程詳解</h3>
+                <p>
+                  完整拆解 ChatGPT 回答問題時，背後發生的每一步：從 Tokenization
+                  到 96 層 Transformer 的自回歸循環。
+                </p>
+                <span class="read-more">閱讀全文</span>
+              </div>
+            </a>
+
+            <!-- Article 2: Training vs Inference -->
+            <a
+              href="articles/gpt3-training-vs-inference.html"
+              class="magazine-card"
+            >
+              <div class="card-image-wrapper">
+                <img
+                  src="images/user_generate_image_20260102051654_7ade.png"
+                  alt="Training vs Inference Cover"
+                />
+              </div>
+              <div class="card-content">
+                <span
+                  class="card-tag"
+                  style="
+                    background: var(--secondary-light);
+                    color: var(--secondary-color);
+                  "
+                  >機制解析</span
+                >
+                <h3>訓練 vs 推理：Tokens 輸入機制</h3>
+                <p>
+                  深入解析為什麼訓練時可以並行處理 (Teacher
+                  Forcing)，而推理時只能逐字生成。
+                </p>
+                <span class="read-more">閱讀全文</span>
+              </div>
+            </a>
+
+            <!-- Article 3: 96 Layers -->
+            <a
+              href="articles/gpt3-96-layers-architecture.html"
+              class="magazine-card"
+            >
+              <div class="card-image-wrapper">
+                <img
+                  src="images/user_generate_image_20260102051709_5bd1.png"
+                  alt="96 Layers Cover"
+                />
+              </div>
+              <div class="card-content">
+                <span
+                  class="card-tag"
+                  style="
+                    background: var(--purple-light);
+                    color: var(--purple-color);
+                  "
+                  >架構拆解</span
+                >
+                <h3>GPT-3 的 96 層架構解析</h3>
+                <p>
+                  96 層 Decoder Block
+                  到底在做什麼？每層如何分工？探索深度學習模型的「摩天大樓」結構。
+                </p>
+                <span class="read-more">閱讀全文</span>
+              </div>
+            </a>
+
+            <!-- Article 4: Dimensions -->
+            <a
+              href="articles/model-dimension-evolution.html"
+              class="magazine-card"
+            >
+              <div class="card-image-wrapper">
+                <img
+                  src="images/user_generate_image_20260102051723_77e2.png"
+                  alt="Dimension Evolution Cover"
+                />
+              </div>
+              <div class="card-content">
+                <span
+                  class="card-tag"
+                  style="
+                    background: var(--accent-light);
+                    color: var(--accent-color);
+                  "
+                  >演進史</span
+                >
+                <h3>模型維度演進史</h3>
+                <p>
+                  從 Transformer (512維) 到 GPT-3
+                  (12,288維)，維度的增長代表了什麼？視覺化向量演變。
+                </p>
+                <span class="read-more">閱讀全文</span>
+              </div>
+            </a>
+
+            <!-- Article 5: Tokenizer -->
+            <a
+              href="articles/tokenizer-embedding-explained.html"
+              class="magazine-card"
+            >
+              <div class="card-image-wrapper">
+                <img
+                  src="images/user_generate_image_20260102051739_0da6.png"
+                  alt="Tokenizer Cover"
+                />
+              </div>
+              <div class="card-content">
+                <span
+                  class="card-tag"
+                  style="
+                    background: var(--secondary-light);
+                    color: var(--secondary-color);
+                  "
+                  >基礎原理</span
+                >
+                <h3>從文字到向量：Tokenizer & Embedding</h3>
+                <p>
+                  AI 怎麼讀懂文字？拆解 Tokenization 與 Embedding
+                  的兩階段轉換，理解向量由來。
+                </p>
+                <span class="read-more">閱讀全文</span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Tab 4: About & Updates -->
+        <div id="about" class="tab-content">
+          <div class="bento-grid">
+            <!-- Mission -->
+            <div class="bento-card featured">
+              <div class="card-icon">🎯</div>
+              <h3>關於 AI Paper Archaeology</h3>
+              <p>
+                AI 技術發展神速，但每個突破都源於經典論文。
+                本站致力於「考古」這些改變世界的論文，用白話文解析技術細節，
+                讓更多人理解 AI 的演進脈絡。
+              </p>
+              <div class="card-meta" style="flex-wrap: wrap; gap: 15px">
+                <span>✅ 原文對照翻譯</span>
+                <span>✅ 生活化類比</span>
+                <span>✅ 技術深度解析</span>
+              </div>
+            </div>
+
+            <!-- Author -->
+            <div class="bento-card">
+              <div class="card-icon">👨‍💻</div>
+              <h3>關於作者</h3>
+              <p>
+                <strong>謝承緯 (Chen Wei Hsieh)</strong><br />熱愛 AI
+                技術的研究者與工程師。
+              </p>
+              <div
+                style="
+                  margin-top: 20px;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 10px;
+                "
+              >
+                <a
+                  href="https://github.com/hsiehchenwei/ai-paper-archaeology"
+                  target="_blank"
+                  class="card-link"
+                  >GitHub</a
+                >
+                <a href="mailto:pushy.chordal_0s@icloud.com" class="card-link"
+                  >Email</a
+                >
+              </div>
+            </div>
+
+            <!-- Updates -->
+            <div class="bento-card" style="display: none">
+              <!-- Hidden or removed -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="site-footer">
+        <div class="footer-grid" style="justify-content: center; gap: 40px">
+          <div class="footer-section">
+            <h4>⚖️ 版權資訊</h4>
+            <a href="LICENSE">MIT License</a>
+            <a href="ATTRIBUTION.md">圖片來源與版權聲明</a>
+          </div>
+          <div class="footer-section">
+            <h4>🌟 支持本專案</h4>
+            <a
+              href="https://github.com/hsiehchenwei/ai-paper-archaeology"
+              target="_blank"
+              >Star on GitHub</a
+            >
+          </div>
+        </div>
+
+        <div
+          style="
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+          "
+        >
+          <p>⚠️ 本站內容為 AI 根據論文原文生成的圖文解析。</p>
+          <p>圖片來源包含：原始論文截圖 與 AI 生成示意圖。</p>
+        </div>
+
+        <div class="footer-bottom">
+          <p>© 2026 AI Paper Archaeology | Made with ❤️ for AI Learners</p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Tab Switching Logic -->
+    <script>
+      function switchTab(tabId) {
+        // 1. Hide all tab contents
+        document.querySelectorAll(".tab-content").forEach((content) => {
+          content.classList.remove("active");
+        });
+
+        // 2. Deactivate all tab buttons
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+
+        // 3. Show selected content
+        document.getElementById(tabId).classList.add("active");
+
+        // 4. Activate selected button
+        // Find the button that calls this function with the matching tabId
+        const buttons = document.querySelectorAll(".tab-btn");
+        buttons.forEach((btn) => {
+          if (btn.getAttribute("onclick").includes(tabId)) {
+            btn.classList.add("active");
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

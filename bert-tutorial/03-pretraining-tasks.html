@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 3 頁:預訓練任務 - BERT 論文深度解析</title>
+    <link rel="stylesheet" href="../transformer-tutorial/style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 第 3 頁:預訓練任務詳解</h1>
+
+        <h2>任務 1:Masked Language Model (MLM)</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                In order to train a deep bidirectional representation, we simply mask some percentage of the input tokens at random, and then predict those masked tokens. We refer to this procedure as a "masked LM" (MLM). In all of our experiments, we mask 15% of all WordPiece tokens in each sequence at random.
+            </div>
+            <div class="translation">
+                為了訓練深度雙向表示,我們簡單地隨機遮蔽一定比例的輸入標記,然後預測這些被遮蔽的標記。我們將此程序稱為「遮蔽 LM」(MLM)。在我們所有的實驗中,我們隨機遮蔽每個序列中 15% 的 WordPiece 標記。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>🎯 MLM 核心機制</h4>
+            <p><strong>步驟:</strong></p>
+            <ol>
+                <li>隨機選擇 15% 的 tokens</li>
+                <li>將選中的 tokens 替換成 [MASK]</li>
+                <li>讓模型預測原始的 token</li>
+            </ol>
+
+            <pre><code>原句: "my dog is hairy"
+遮蔽: "my dog is [MASK]"
+預測: "hairy"</code></pre>
+        </div>
+
+        <div class="problem">
+            <h4>⚠️ 問題:[MASK] 只在預訓練出現!</h4>
+            <p>預訓練時:[MASK] 到處都是</p>
+            <p>微調時:[MASK] 完全不出現</p>
+            <p><strong>→ Pre-training 和 Fine-tuning 的 Mismatch!</strong></p>
+        </div>
+
+        <div class="solution">
+            <h4>✅ BERT 的聰明解法</h4>
+            <p>選中 15% 的 tokens 後,不是全部換成 [MASK]:</p>
+            <ul>
+                <li><strong>80%</strong>: 換成 [MASK]</li>
+                <li><strong>10%</strong>: 換成隨機 token</li>
+                <li><strong>10%</strong>: 保持不變</li>
+            </ul>
+
+            <h5>範例</h5>
+            <pre><code>原句: "my dog is hairy"
+
+如果選中 "hairy":
+- 80% 機率: "my dog is [MASK]"
+- 10% 機率: "my dog is apple"  (隨機字)
+- 10% 機率: "my dog is hairy"  (不變)</code></pre>
+
+            <p><strong>好處:</strong></p>
+            <ul>
+                <li>減少 pre-training 和 fine-tuning 的差異</li>
+                <li>模型學會對任何 token 都保持警覺</li>
+            </ul>
+        </div>
+
+        <div class="analogy">
+            <h4>🤖 AI 體驗連結:為什麼填空這麼有效?</h4>
+            <p><strong>你有沒有想過...</strong></p>
+            <p>為什麼做「填空題」比「作文題」更能測試理解?</p>
+
+            <p><strong>作文題 (GPT 方式)</strong>:</p>
+            <pre><code>"請續寫: The cat sat on the"
+→ 你可以亂寫,不一定理解前文</code></pre>
+
+            <p><strong>填空題 (BERT 方式)</strong>:</p>
+            <pre><code>"The cat ___ on the mat"
+→ 你必須真的理解句意才能填對!</code></pre>
+
+            <p><strong>這就是為什麼 BERT 的「理解能力」更強!</strong></p>
+        </div>
+
+        <h2>任務 2:Next Sentence Prediction (NSP)</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                Many important downstream tasks such as Question Answering (QA) and Natural Language Inference (NLI) are based on understanding the relationship between two sentences. In order to train a model that understands sentence relationships, we pre-train for a binarized next sentence prediction task.
+            </div>
+            <div class="translation">
+                許多重要的下游任務,如問答 (QA) 和自然語言推理 (NLI),都是基於理解兩個句子之間的關係。為了訓練一個理解句子關係的模型,我們對二元化的下一句預測任務進行預訓練。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>🎯 NSP 機制</h4>
+            <p><strong>任務:</strong>判斷句子 B 是否是句子 A 的「下一句」</p>
+
+            <h5>訓練資料生成:</h5>
+            <ul>
+                <li><strong>50%</strong>: B 是 A 的真實下一句 (IsNext)</li>
+                <li><strong>50%</strong>: B 是隨機抽的句子 (NotNext)</li>
+            </ul>
+
+            <h5>範例</h5>
+            <pre><code>✓ IsNext:
+A: "The man went to the store."
+B: "He bought a gallon of milk."
+
+✗ NotNext:
+A: "The man went to the store."
+B: "Penguins are flightless birds."</code></pre>
+        </div>
+
+        <div class="explanation">
+            <h4>🔍 為什麼需要 NSP?</h4>
+            <p><strong>問答任務的需求:</strong></p>
+            <pre><code>問題: "What did Mary buy?"
+文章: "Mary went to the store. She bought milk."
+
+模型需要理解:
+1. "She" 指的是 "Mary" (代名詞消解)
+2. 第二句是第一句的延續 (句子關係)</code></pre>
+
+            <p>NSP 任務強迫模型學習句子之間的連貫性!</p>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:對話理解</h4>
+            <p><strong>情境:判斷對話是否合理</strong></p>
+
+            <p>✓ 合理對話:</p>
+            <blockquote>
+                A: 「今天天氣好好!」<br>
+                B: 「對啊,我們去公園吧!」
+            </blockquote>
+
+            <p>✗ 不合理對話:</p>
+            <blockquote>
+                A: 「今天天氣好好!」<br>
+                B: 「企鵝是不會飛的鳥。」
+            </blockquote>
+
+            <p>NSP 訓練讓 BERT 學會判斷「這兩句話有沒有關係」!</p>
+        </div>
+
+        <h2>📚 預訓練資料</h2>
+
+        <div class="key-concept">
+            <h4>訓練語料</h4>
+            <ul>
+                <li><strong>BooksCorpus</strong>: 800M 詞</li>
+                <li><strong>English Wikipedia</strong>: 2,500M 詞</li>
+                <li><strong>總計</strong>: 約 33 億詞</li>
+            </ul>
+
+            <p><strong>為什麼用書籍和 Wikipedia?</strong></p>
+            <ul>
+                <li>品質高、內容連貫</li>
+                <li>需要「文檔級」語料,不是單獨的句子</li>
+                <li>才能訓練 NSP 任務</li>
+            </ul>
+        </div>
+
+        <div class="nav-bar">
+            <a href="02-bert-architecture.html" class="nav-btn">← 上一頁</a>
+            <a href="index.html" class="nav-btn">📑 目錄</a>
+            <a href="04-fine-tuning-and-results.html" class="nav-btn primary">下一頁 → 微調與結果</a>
+        </div>
+    </div>
+</body>
+</html>
+

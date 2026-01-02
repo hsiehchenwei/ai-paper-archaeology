@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>從文字到向量:Tokenizer 與 Embedding 完全解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        .pipeline-stage {
+            background: white;
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            margin: 20px 0;
+            border-left: 5px solid var(--primary-color);
+        }
+        .stage-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .code-demo {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        .code-demo .comment { color: #6a9955; }
+        .code-demo .keyword { color: #569cd6; }
+        .code-demo .string { color: #ce9178; }
+        .code-demo .number { color: #b5cea8; }
+        .matrix-visual {
+            display: grid;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .vector-vis {
+            display: flex;
+            gap: 3px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        .vector-cell {
+            width: 30px;
+            height: 30px;
+            background: var(--primary-color);
+            border-radius: 3px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .paper-timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+        .paper-item {
+            background: white;
+            padding: 20px;
+            border-left: 4px solid var(--primary-color);
+            margin: 20px 0;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <span class="current">🔬 技術專題: Tokenizer & Embedding</span>
+        </div>
+
+        <h1>🔤 從文字到向量:Tokenizer 與 Embedding 完全解析</h1>
+        
+        <div class="key-concept">
+            <h3>🎯 核心問題</h3>
+            <p><strong>Q: 如何將「我愛 AI」轉換成 512 維向量？</strong></p>
+            <p><strong>A: 需要兩個步驟！</strong></p>
+            <ol>
+                <li><strong>Tokenization</strong>: 文字 → Token IDs (整數)</li>
+                <li><strong>Embedding</strong>: Token IDs → 高維向量 (512/12288 維)</li>
+            </ol>
+            <p style="color: var(--danger-color); font-weight: bold;">⚠️ 關鍵:Tokenizer ≠ Embedding！這是兩個完全不同的步驟！</p>
+        </div>
+
+        <h2>📊 完整流程圖</h2>
+
+        <div style="margin: 40px 0; text-align: center;">
+            <img src="../images/user_generate_image_20260101095157_cd40.png" 
+                 alt="文字到向量完整流程" 
+                 style="max-width: 100%; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);">
+            <p class="caption">
+                <strong>🔄 從文字到向量的完整轉換流程</strong><br>
+                步驟 1 (藍):Tokenization → 步驟 2 (綠):Token IDs<br>
+                步驟 3 (紫):Embedding Lookup → 步驟 4 (橙):Positional Encoding<br>
+                最終:每個 token 都變成 <strong>512 維向量</strong>！
+            </p>
+        </div>
+
+        <div class="explanation" style="background: linear-gradient(135deg, var(--primary-light), var(--secondary-light)); padding: 30px;">
+            <pre style="background: white; padding: 20px; border-radius: var(--radius-md); line-height: 2;">
+原始文字: <strong>"I love AI"</strong>
+    ↓
+<span style="color: var(--primary-color);">【步驟 1: Tokenization】</span>
+分詞器將文字切成 tokens
+    ↓
+Tokens: <strong>["I", "love", "AI"]</strong>
+    ↓
+查詢詞彙表 (Vocabulary)
+    ↓
+Token IDs: <strong>[1045, 2293, 9932]</strong>  ← 這只是整數！
+    ↓
+<span style="color: var(--secondary-color);">【步驟 2: Embedding】</span>
+查詢 Embedding Matrix (學習得到)
+    ↓
+Token Embeddings: 
+  [1045] → [0.23, -0.51, 0.82, ..., 0.15]  (512 維)
+  [2293] → [0.67, 0.31, -0.22, ..., 0.91]  (512 維)
+  [9932] → [-0.12, 0.64, 0.41, ..., -0.33] (512 維)
+    ↓
+<span style="color: var(--accent-color);">【步驟 3: 加上位置資訊】</span>
+Position Encoding
+    ↓
+最終輸入: <strong>每個 token 都是 512 維向量！</strong>
+</pre>
+        </div>
+
+        <h2>🔍 步驟 1: Tokenization (分詞)</h2>
+
+        <div class="pipeline-stage">
+            <h3><span class="stage-number">1</span>什麼是 Tokenization?</h3>
+            
+            <p><strong>定義:</strong>將連續的文字切分成「tokens」(基本單位)</p>
+            
+            <div class="explanation">
+                <h4>三種主流方法</h4>
+                
+                <h5>1️⃣ Word-Level Tokenization (詞級)</h5>
+                <p><strong>論文:</strong>Word2Vec (2013), GloVe (2014)</p>
+                <div class="code-demo">
+<span class="string">"I love artificial intelligence"</span>
+→ [<span class="string">"I"</span>, <span class="string">"love"</span>, <span class="string">"artificial"</span>, <span class="string">"intelligence"</span>]
+                </div>
+                <p><strong>問題:</strong></p>
+                <ul>
+                    <li>詞彙表太大 (英文有幾十萬個詞)</li>
+                    <li>未登錄詞 (OOV) 問題:「ChatGPT」無法處理</li>
+                    <li>無法處理形態變化:「run」「running」「ran」都是不同詞</li>
+                </ul>
+
+                <h5>2️⃣ Character-Level Tokenization (字元級)</h5>
+                <div class="code-demo">
+<span class="string">"AI"</span>
+→ [<span class="string">"A"</span>, <span class="string">"I"</span>]
+                </div>
+                <p><strong>優點:</strong>詞彙表很小 (只有幾十個字母)</p>
+                <p><strong>問題:</strong>序列太長,失去詞義資訊</p>
+
+                <h5>3️⃣ Subword Tokenization (子詞級) ⭐</h5>
+                <p><strong>現代模型都用這個！</strong></p>
+                <div class="code-demo">
+<span class="string">"ChatGPT"</span>
+→ [<span class="string">"Chat"</span>, <span class="string">"G"</span>, <span class="string">"PT"</span>]
+
+<span class="string">"unbelievable"</span>
+→ [<span class="string">"un"</span>, <span class="string">"believ"</span>, <span class="string">"able"</span>]
+                </div>
+                <p><strong>優點:</strong></p>
+                <ul>
+                    <li>✅ 詞彙表大小適中 (通常 30,000-50,000)</li>
+                    <li>✅ 沒有 OOV 問題</li>
+                    <li>✅ 保留詞義資訊</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>📚 重要論文與技術演進</h2>
+
+        <div class="paper-timeline">
+            <div class="paper-item" style="border-left-color: #e74c3c;">
+                <h4>📄 Word2Vec (2013)</h4>
+                <p><strong>作者:</strong> Mikolov et al. (Google)</p>
+                <p><strong>論文:</strong> "Efficient Estimation of Word Representations in Vector Space"</p>
+                <p><strong>貢獻:</strong></p>
+                <ul>
+                    <li>提出 <strong>Word Embedding</strong> 概念</li>
+                    <li>將詞映射到連續向量空間 (通常 100-300 維)</li>
+                    <li>詞義相近的詞在向量空間中也接近</li>
+                </ul>
+                <p><strong>方法:</strong>Word-Level Tokenization</p>
+                <div class="code-demo">
+<span class="comment"># Word2Vec 範例</span>
+<span class="string">"king"</span>   → [<span class="number">0.23</span>, <span class="number">-0.51</span>, <span class="number">0.82</span>, ..., <span class="number">0.15</span>]  (<span class="number">300</span> 維)
+<span class="string">"queen"</span>  → [<span class="number">0.21</span>, <span class="number">-0.49</span>, <span class="number">0.84</span>, ..., <span class="number">0.13</span>]  (相近!)
+<span class="string">"man"</span>    → [<span class="number">0.67</span>, <span class="number">0.31</span>, <span class="number">-0.22</span>, ..., <span class="number">0.91</span>]
+                </div>
+                <p><strong>限制:</strong>只是 embedding,沒有深度模型</p>
+            </div>
+
+            <div class="paper-item" style="border-left-color: #3498db;">
+                <h4>📄 BPE - Byte Pair Encoding (2016)</h4>
+                <p><strong>作者:</strong> Sennrich et al.</p>
+                <p><strong>論文:</strong> "Neural Machine Translation of Rare Words with Subword Units"</p>
+                <p><strong>貢獻:</strong>第一個實用的 <strong>Subword Tokenization</strong> 方法</p>
+                <p><strong>核心算法:</strong></p>
+                <ol>
+                    <li>從字元級開始</li>
+                    <li>反覆合併最常出現的 pair</li>
+                    <li>直到達到目標詞彙表大小</li>
+                </ol>
+                <div class="code-demo">
+<span class="comment"># BPE 訓練過程範例</span>
+初始: <span class="string">"l o w"</span>, <span class="string">"l o w e r"</span>, <span class="string">"n e w e s t"</span>
+    ↓ 合併 (<span class="string">"e"</span>, <span class="string">"r"</span>) 最常見
+<span class="string">"l o w"</span>, <span class="string">"l o w er"</span>, <span class="string">"n e w e s t"</span>
+    ↓ 合併 (<span class="string">"er"</span>, <span class="string">"s"</span>)...
+...
+                </div>
+                <p><strong>GPT-2 和 GPT-3 都用 BPE！</strong></p>
+            </div>
+
+            <div class="paper-item" style="border-left-color: #2ecc71;">
+                <h4>📄 Transformer (2017) ⭐</h4>
+                <p><strong>論文:</strong> "Attention Is All You Need"</p>
+                <p><strong>Embedding 細節:</strong></p>
+                <ul>
+                    <li><strong>Tokenizer:</strong> BPE (詞彙表 ~37,000)</li>
+                    <li><strong>d_model:</strong> 512 維</li>
+                    <li><strong>Embedding Matrix:</strong> [vocab_size, d_model] = [37000, 512]</li>
+                </ul>
+                <div class="code-demo">
+<span class="comment"># Transformer Embedding 過程</span>
+<span class="keyword">class</span> <span class="string">TokenEmbedding</span>:
+    <span class="keyword">def</span> __init__(<span class="keyword">self</span>):
+        <span class="comment"># 可學習的參數矩陣</span>
+        <span class="keyword">self</span>.embedding = nn.Embedding(
+            num_embeddings=<span class="number">37000</span>,  <span class="comment"># 詞彙表大小</span>
+            embedding_dim=<span class="number">512</span>      <span class="comment"># 向量維度</span>
+        )
+    
+    <span class="keyword">def</span> forward(<span class="keyword">self</span>, token_ids):
+        <span class="comment"># token_ids: [batch, seq_len]</span>
+        <span class="comment"># 輸出: [batch, seq_len, 512]</span>
+        <span class="keyword">return</span> <span class="keyword">self</span>.embedding(token_ids)
+                </div>
+                <p><strong>關鍵創新:</strong>Embedding 是<strong>可學習的參數</strong>,隨著模型訓練而優化！</p>
+            </div>
+
+            <div class="paper-item" style="border-left-color: #9b59b6;">
+                <h4>📄 BERT (2018)</h4>
+                <p><strong>論文:</strong> "BERT: Pre-training of Deep Bidirectional Transformers"</p>
+                <p><strong>Tokenizer:</strong> WordPiece (Google 開發)</p>
+                <ul>
+                    <li><strong>詞彙表:</strong> 30,522 tokens</li>
+                    <li><strong>d_model (Base):</strong> 768 維</li>
+                    <li><strong>d_model (Large):</strong> 1024 維</li>
+                </ul>
+                <p><strong>特殊 tokens:</strong></p>
+                <div class="code-demo">
+[CLS] <span class="comment"># 句子開頭,用於分類任務</span>
+[SEP] <span class="comment"># 句子分隔符</span>
+[MASK] <span class="comment"># 遮蔽 token,用於預訓練</span>
+[PAD] <span class="comment"># 填充,讓序列長度一致</span>
+                </div>
+                <p><strong>Embedding 組成:</strong></p>
+                <div class="code-demo">
+最終 Embedding = Token Embedding 
+               + Segment Embedding  <span class="comment"># 區分句子 A/B</span>
+               + Position Embedding <span class="comment"># 位置資訊</span>
+                </div>
+            </div>
+
+            <div class="paper-item" style="border-left-color: #e67e22;">
+                <h4>📄 GPT-3 (2020)</h4>
+                <p><strong>論文:</strong> "Language Models are Few-Shot Learners"</p>
+                <p><strong>Tokenizer:</strong> BPE (跟 GPT-2 相同)</p>
+                <ul>
+                    <li><strong>詞彙表:</strong> 50,257 tokens</li>
+                    <li><strong>d_model:</strong> 12,288 維 (175B 版本)</li>
+                    <li><strong>Embedding Matrix:</strong> [50257, 12288] = <strong>6.15 億個參數</strong>!</li>
+                </ul>
+                <div class="code-demo">
+<span class="comment"># GPT-3 的 Embedding</span>
+token_embedding = Embedding(<span class="number">50257</span>, <span class="number">12288</span>)
+position_embedding = Embedding(<span class="number">2048</span>, <span class="number">12288</span>)  <span class="comment"># 最多 2048 tokens</span>
+
+<span class="comment"># 前向傳播</span>
+x = token_embedding(input_ids) + position_embedding(positions)
+<span class="comment"># x.shape = [batch, seq_len, 12288]</span>
+                </div>
+            </div>
+        </div>
+
+        <h2>🔬 深入理解:Embedding Matrix</h2>
+
+        <div class="explanation">
+            <h4>Embedding Matrix 是什麼?</h4>
+            
+            <p><strong>本質:</strong>一個巨大的查詢表 (Lookup Table)</p>
+
+            <h5>Transformer (512 維) 的 Embedding Matrix</h5>
+            <div class="code-demo">
+Shape: [vocab_size, d_model] = [<span class="number">37000</span>, <span class="number">512</span>]
+
+視覺化:
+     維度 →  [ 0 ]  [ 1 ]  [ 2 ]  ...  [511]
+Token ID
+   [  0 ] → [<span class="number">0.12</span>][<span class="number">-0.34</span>][ <span class="number">0.56</span>] ... [<span class="number">0.78</span>]  ← [PAD] token
+   [  1 ] → [<span class="number">0.23</span>][ <span class="number">0.45</span>][<span class="number">-0.12</span>] ... [<span class="number">-0.34</span>]  ← [START] token
+   [  2 ] → [<span class="number">-0.45</span>][ <span class="number">0.67</span>][ <span class="number">0.89</span>] ... [<span class="number">0.12</span>]  ← "the"
+   [ 1045] → [<span class="number">0.67</span>][ <span class="number">0.31</span>][<span class="number">-0.22</span>] ... [<span class="number">0.91</span>]  ← "I"
+   [ 2293] → [<span class="number">0.82</span>][<span class="number">-0.15</span>][ <span class="number">0.43</span>] ... [<span class="number">-0.56</span>]  ← "love"
+   ...
+   [36999] → [<span class="number">-0.12</span>][ <span class="number">0.34</span>][<span class="number">-0.56</span>] ... [<span class="number">0.78</span>]  ← 最後一個 token
+
+總參數: <span class="number">37000</span> × <span class="number">512</span> = <strong><span class="number">18,944,000</span> 個參數</strong>
+            </div>
+
+            <h5>GPT-3 (12288 維) 的 Embedding Matrix</h5>
+            <div class="code-demo">
+Shape: [<span class="number">50257</span>, <span class="number">12288</span>]
+
+總參數: <span class="number">50257</span> × <span class="number">12288</span> = <strong><span class="number">617,558,016</span> 個參數</strong>
+<span class="comment"># 光是 Embedding 就有 6.17 億參數!</span>
+<span class="comment"># 佔 GPT-3 總參數 (175B) 的 0.35%</span>
+            </div>
+        </div>
+
+        <h2>💻 實際程式碼範例</h2>
+
+        <div class="pipeline-stage">
+            <h3>從文字到向量:完整流程</h3>
+
+            <h4>範例 1: Transformer (512 維)</h4>
+            <div class="code-demo">
+<span class="keyword">import</span> torch
+<span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn
+
+<span class="comment"># 步驟 1: Tokenization (假設已經完成)</span>
+text = <span class="string">"I love AI"</span>
+token_ids = [<span class="number">1045</span>, <span class="number">2293</span>, <span class="number">9932</span>]  <span class="comment"># 查表得到</span>
+token_ids = torch.tensor(token_ids).unsqueeze(<span class="number">0</span>)  <span class="comment"># [1, 3]</span>
+
+<span class="comment"># 步驟 2: Token Embedding</span>
+vocab_size = <span class="number">37000</span>
+d_model = <span class="number">512</span>
+
+token_embedding = nn.Embedding(vocab_size, d_model)
+embedded = token_embedding(token_ids)
+<span class="keyword">print</span>(embedded.shape)  <span class="comment"># torch.Size([1, 3, 512])</span>
+
+<span class="comment"># 步驟 3: 加上位置編碼</span>
+<span class="keyword">def</span> positional_encoding(seq_len, d_model):
+    <span class="comment"># Transformer 使用 sin/cos 函數</span>
+    position = torch.arange(seq_len).unsqueeze(<span class="number">1</span>)
+    div_term = torch.exp(torch.arange(<span class="number">0</span>, d_model, <span class="number">2</span>) * 
+                        -(<span class="number">9.210340371976184</span> / d_model))
+    pe = torch.zeros(seq_len, d_model)
+    pe[:, <span class="number">0</span>::<span class="number">2</span>] = torch.sin(position * div_term)
+    pe[:, <span class="number">1</span>::<span class="number">2</span>] = torch.cos(position * div_term)
+    <span class="keyword">return</span> pe
+
+pos_encoding = positional_encoding(<span class="number">3</span>, d_model)
+final_input = embedded + pos_encoding
+<span class="keyword">print</span>(final_input.shape)  <span class="comment"># torch.Size([1, 3, 512])</span>
+
+<span class="comment"># 完成！這就是送進 Transformer 的輸入</span>
+            </div>
+
+            <h4>範例 2: GPT-3 (12288 維)</h4>
+            <div class="code-demo">
+<span class="comment"># GPT-3 使用學習式位置編碼</span>
+vocab_size = <span class="number">50257</span>
+d_model = <span class="number">12288</span>
+max_seq_len = <span class="number">2048</span>
+
+<span class="comment"># Token Embedding</span>
+token_embedding = nn.Embedding(vocab_size, d_model)
+
+<span class="comment"># Position Embedding (可學習)</span>
+position_embedding = nn.Embedding(max_seq_len, d_model)
+
+<span class="comment"># 前向傳播</span>
+token_ids = torch.tensor([[<span class="number">1045</span>, <span class="number">2293</span>, <span class="number">9932</span>]])  <span class="comment"># [1, 3]</span>
+positions = torch.arange(<span class="number">3</span>).unsqueeze(<span class="number">0</span>)  <span class="comment"># [1, 3]: [0, 1, 2]</span>
+
+x = token_embedding(token_ids) + position_embedding(positions)
+<span class="keyword">print</span>(x.shape)  <span class="comment"># torch.Size([1, 3, 12288])</span>
+
+<span class="comment"># 每個 token 現在是 12288 維向量！</span>
+            </div>
+        </div>
+
+        <h2>🎯 訓練過程:Embedding 如何學習?</h2>
+
+        <div class="explanation">
+            <h4>Embedding 不是手動設計的,是<strong>訓練</strong>得到的！</h4>
+
+            <h5>初始化 (訓練前)</h5>
+            <div class="code-demo">
+<span class="comment"># 隨機初始化</span>
+embedding = nn.Embedding(<span class="number">50257</span>, <span class="number">12288</span>)
+<span class="comment"># 每個 token 的向量都是隨機數</span>
+<span class="keyword">print</span>(embedding.weight[<span class="number">1045</span>])  
+<span class="comment"># tensor([0.0234, -0.0123, 0.0456, ...])  ← 隨機值</span>
+            </div>
+
+            <h5>訓練過程</h5>
+            <pre style="background: white; padding: 20px; border-radius: var(--radius-md); line-height: 1.8;">
+1. 輸入一批文字,經過 Tokenization → Token IDs
+2. 查詢 Embedding Matrix → 向量
+3. 通過 Transformer 層
+4. 預測下一個 token
+5. 計算 Loss (預測錯誤)
+6. <strong>反向傳播:更新所有參數,包括 Embedding Matrix！</strong>
+7. 重複數百萬次...
+
+結果:
+- 相似詞的 embedding 向量會變得接近
+- 不同詞的 embedding 向量會變得遠離
+- Embedding 自動學會語義關係！
+            </pre>
+
+            <h5>訓練後 (收斂)</h5>
+            <div class="code-demo">
+<span class="comment"># 語義相近的詞,向量也接近</span>
+embedding.weight[<span class="number">1045</span>]  <span class="comment"># "I"</span>
+<span class="comment"># tensor([0.67, 0.31, -0.22, ...])</span>
+
+embedding.weight[<span class="number">2293</span>]  <span class="comment"># "you"</span>
+<span class="comment"># tensor([0.65, 0.29, -0.24, ...])  ← 接近!</span>
+
+embedding.weight[<span class="number">9932</span>]  <span class="comment"># "dog"</span>
+<span class="comment"># tensor([-0.12, 0.84, 0.56, ...])  ← 完全不同</span>
+            </div>
+        </div>
+
+        <h2>📐 維度從 512 擴大到 12288 的意義</h2>
+
+        <div class="key-concept">
+            <h4>更高維度 = 更豐富的表達空間</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>維度</th>
+                        <th>表達能力</th>
+                        <th>類比</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>2 維</strong></td>
+                        <td>只能在平面上區分</td>
+                        <td>📄 一張紙</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3 維</strong></td>
+                        <td>可以用高度區分</td>
+                        <td>📦 一個盒子</td>
+                    </tr>
+                    <tr>
+                        <td><strong>512 維</strong></td>
+                        <td>能編碼基本語義關係</td>
+                        <td>🏠 一棟房子</td>
+                    </tr>
+                    <tr>
+                        <td><strong>12,288 維</strong></td>
+                        <td>能編碼極其細微的差異</td>
+                        <td>🏙️ 一整座城市</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>實際效果:</strong></p>
+            <ul>
+                <li>512 維:能分辨「快樂」vs「悲傷」</li>
+                <li>12,288 維:能分辨「欣喜若狂」vs「心滿意足」vs「淺淺微笑」</li>
+            </ul>
+        </div>
+
+        <h2>🎓 總結:關鍵技術的論文來源</h2>
+
+        <div class="key-concept">
+            <table>
+                <thead>
+                    <tr>
+                        <th>技術</th>
+                        <th>論文</th>
+                        <th>年份</th>
+                        <th>貢獻</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Word Embedding</strong></td>
+                        <td>Word2Vec</td>
+                        <td>2013</td>
+                        <td>提出詞向量概念</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Subword Tokenization</strong></td>
+                        <td>BPE (Sennrich et al.)</td>
+                        <td>2016</td>
+                        <td>解決 OOV 問題</td>
+                    </tr>
+                    <tr style="background: var(--primary-light);">
+                        <td><strong>512 維 Embedding</strong></td>
+                        <td><strong>Transformer</strong></td>
+                        <td><strong>2017</strong></td>
+                        <td>統一架構,可學習 embedding</td>
+                    </tr>
+                    <tr>
+                        <td><strong>768/1024 維</strong></td>
+                        <td>BERT</td>
+                        <td>2018</td>
+                        <td>增加表達能力</td>
+                    </tr>
+                    <tr style="background: var(--secondary-light);">
+                        <td><strong>12,288 維 Embedding</strong></td>
+                        <td><strong>GPT-3</strong></td>
+                        <td><strong>2020</strong></td>
+                        <td>極致表達能力</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="solution">
+            <h4>✅ 回答你的問題</h4>
+
+            <p><strong>Q1: 怎樣將原始資料 tokenize 到 512 維度？</strong></p>
+            <p><strong>A1:</strong> 分兩步！</p>
+            <ol>
+                <li><strong>Tokenization</strong>: 文字 → Token IDs (論文: BPE, 2016)</li>
+                <li><strong>Embedding</strong>: Token IDs → 512 維向量 (論文: Transformer, 2017)</li>
+            </ol>
+
+            <p><strong>Q2: 訓練如何擴大到 12,288 維度？</strong></p>
+            <p><strong>A2:</strong></p>
+            <ul>
+                <li>不是「擴大」,而是「重新訓練」</li>
+                <li>GPT-3 從零開始,用 [50257, 12288] 的 Embedding Matrix</li>
+                <li>經過海量資料訓練後,每個 token 學會 12,288 維的表示</li>
+            </ul>
+
+            <p><strong>Q3: Tokenizer 和 Embedding 在哪篇論文？</strong></p>
+            <p><strong>A3:</strong></p>
+            <ul>
+                <li><strong>Tokenizer (BPE)</strong>: "Neural Machine Translation of Rare Words with Subword Units" (2016)</li>
+                <li><strong>Embedding</strong>: "Attention Is All You Need" (Transformer, 2017) 第一次完整應用</li>
+                <li><strong>512 → 12,288 演進</strong>: Transformer → BERT → GPT-3</li>
+            </ul>
+        </div>
+
+        <div style="background: linear-gradient(135deg, var(--primary-light), var(--secondary-light)); padding: 30px; border-radius: var(--radius-lg); text-align: center; margin: 40px 0;">
+            <h3>🎯 核心洞察</h3>
+            <p style="font-size: 1.2rem; line-height: 1.8;">
+                <strong>Tokenizer</strong> 只是「查字典」,把文字變成數字<br>
+                <strong>Embedding</strong> 才是關鍵,把數字變成<strong>有意義的向量</strong><br><br>
+                維度越高 → 向量越精細 → AI 越聰明！<br>
+                這就是從 512 到 12,288 的秘密！🚀
+            </p>
+        </div>
+
+        <div class="quick-links">
+            <a href="../index.html" class="quick-link">← 回到三部曲總覽</a>
+            <a href="model-dimension-evolution.html" class="quick-link">下一個專題 → 維度演進</a>
+            <a href="gpt3-96-layers-architecture.html" class="quick-link">延伸 → 96層架構</a>
+        </div>
+        
+        <div class="quick-links" style="margin-top: 20px;">
+            <a href="../transformer-tutorial/index.html" class="quick-link">📖 Transformer 教學</a>
+            <a href="../bert-tutorial/index.html" class="quick-link">📖 BERT 教學</a>
+            <a href="../gpt3-tutorial/index.html" class="quick-link">📖 GPT-3 教學</a>
+        </div>
+    </div>
+</body>
+</html>
+

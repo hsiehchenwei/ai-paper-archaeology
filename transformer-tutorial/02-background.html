@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transformer 論文深度解析 - 第2頁：Background</title>
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>
+        📖 Attention Is All You Need <br /><span
+          style="
+            font-size: 0.6em;
+            color: var(--text-secondary);
+            font-weight: normal;
+          "
+          >深度解析系列</span
+        >
+      </h1>
+      <h2>第 2 頁：Background（背景）</h2>
+
+      <div class="header-section">
+        <div class="paper-meta">
+          <div class="meta-item">
+            <strong>目前章節</strong>
+            2. Background
+          </div>
+          <div class="meta-item">
+            <strong>核心主題</strong>
+            CNN 限制、計算複雜度、Self-Attention 定義
+          </div>
+          <div class="meta-item">
+            <strong>閱讀難度</strong>
+            ⭐⭐⭐ (涉及卷積運算概念)
+          </div>
+        </div>
+      </div>
+
+      <!-- ============= CNN vs Transformer ============= -->
+      <h3>1. 減少序列運算的嘗試</h3>
+
+      <div class="text-pair">
+        <div class="original-text">
+          The goal of reducing sequential computation also forms the foundation of
+          the Extended Neural GPU [20], ByteNet [15] and ConvS2S [8], all of
+          which use convolutional neural networks as basic building block,
+          computing hidden representations in parallel for all input and output
+          positions.
+        </div>
+        <div class="translation">
+          <p>
+            減少序列運算的目標也是 <strong>Extended Neural GPU</strong> [20]、<strong>ByteNet</strong> [15] 和
+            <strong>ConvS2S</strong> [8] 的基礎，這些模型都使用<strong>卷積神經網路（CNN）</strong>作為基本構建塊，並行為所有輸入和輸出位置計算隱藏表示。
+          </p>
+        </div>
+      </div>
+
+      <div class="explanation">
+        <h4>📊 為什麼使用 CNN？</h4>
+        <p>在 Transformer 出現之前，為了改善 RNN 無法並行的問題，研究者轉向了 CNN：</p>
+        <ul>
+            <li><strong>並行性</strong>：CNN 可以同時處理不同的窗口（Window），不像 RNN 需要等前一個時間步。</li>
+            <li><strong>局部特徵</strong>：CNN 很擅長捕捉鄰近詞彙的關係（如 "New" + "York"）。</li>
+        </ul>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <h3>2. 長距離依賴的挑戰</h3>
+
+      <div class="text-pair">
+        <div class="original-text">
+          In these models, the number of operations required to relate signals
+          from two arbitrary input or output positions grows in the distance
+          between positions, linearly for ConvS2S and logarithmically for
+          ByteNet. This makes it more difficult to learn dependencies between
+          distant positions [11].
+        </div>
+        <div class="translation">
+          <p>
+            在這些模型中，關聯來自兩個任意輸入或輸出位置的信號所需的操作次數，會隨著位置之間的距離增長而增加：對於
+            ConvS2S 是<strong>線性增長</strong>，對於 ByteNet 是<strong>對數增長</strong>。這使得學習<span class="highlight">遠距離位置之間的依賴關係變得更加困難</span> [11]。
+          </p>
+        </div>
+      </div>
+
+      <div class="problem">
+        <h4>❌ CNN 的視野限制（Receptive Field）</h4>
+        <p>CNN 就像透過一個小窗口看世界。如果要看兩個距離很遠的詞（例如句首的 "The" 和句尾的 "."），CNN 需要堆疊很多層才能讓它們的「視野」重疊。</p>
+        <table>
+            <tr>
+                <th>模型架構</th>
+                <th>關聯距離為 N 的兩個詞所需層數</th>
+                <th>複雜度</th>
+            </tr>
+            <tr>
+                <td>ConvS2S (CNN)</td>
+                <td>需要 N/k 層 (k=kernel size)</td>
+                <td>O(N) - 線性</td>
+            </tr>
+            <tr>
+                <td>ByteNet (Dilated CNN)</td>
+                <td>需要 log(N) 層</td>
+                <td>O(log N) - 對數</td>
+            </tr>
+            <tr>
+                <td><strong>Transformer</strong></td>
+                <td><strong>只需要 1 層</strong></td>
+                <td><strong>O(1) - 常數</strong></td>
+            </tr>
+        </table>
+      </div>
+
+      <div class="analogy">
+        <h4>🔧 工程類比：傳遞訊息的成本</h4>
+        <p><strong>情境：公司裡的訊息傳遞</strong></p>
+        <ul>
+            <li>
+                <strong>RNN (序列)</strong>：
+                <br>A 傳給 B，B 傳給 C，C 傳給 D... 最後傳給 Z。
+                <br>❌ 慢，且傳到 Z 時訊息可能已經失真。
+            </li>
+            <li>
+                <strong>CNN (層級結構)</strong>：
+                <br>基層員工傳給組長，組長傳給經理，經理傳給總監...
+                <br>❌ 距離越遠（跨部門），需要向上匯報的層級越高，路徑越長。
+            </li>
+            <li>
+                <strong>Transformer (Attention)</strong>：
+                <br>所有人在同一個群組聊天室 (Slack/Discord)。
+                <br>✅ A 可以直接 @Z，無論 Z 在哪裡，成本都是一樣的 (O(1))。
+            </li>
+        </ul>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <h3>3. Transformer 的權衡與解決方案</h3>
+
+      <div class="text-pair">
+        <div class="original-text">
+          In the Transformer this is reduced to a constant number of operations,
+          albeit at the cost of reduced effective resolution due to averaging
+          attention-weighted positions, an effect we counteract with Multi-Head
+          Attention.
+        </div>
+        <div class="translation">
+          <p>
+            在 Transformer 中，這被減少到了<strong>常數次操作</strong>，儘管這是以<span class="highlight">降低有效解析度（effective resolution）</span>為代價的，因為我們會對注意力加權位置進行平均。我們透過<strong>多頭注意力機制（Multi-Head Attention）</strong>來抵消這種影響。
+          </p>
+        </div>
+      </div>
+
+      <div class="analogy">
+        <h4>🤖 AI 體驗連結：ChatGPT 的「長記憶」優勢</h4>
+        <p><strong>對比舊時代 Chatbot (RNN)：</strong></p>
+        <ul>
+            <li>聊了 10 句之後，忘記你一開始說的內容（路徑太長，訊號衰減）</li>
+        </ul>
+        <p><strong>Transformer (ChatGPT)：</strong></p>
+        <ul>
+            <li>可以貼上一整篇文章，問它第一段的細節，它都能回答</li>
+            <li>原因：O(1) 常數操作，「隨時」都能回頭看開頭</li>
+        </ul>
+        <p><strong>這就是「長距離依賴」處理能力的差異！</strong></p>
+      </div>
+
+      <div class="explanation">
+        <h4>💡 什麼是「降低有效解析度」？</h4>
+        <p>Attention 機制本質上是將所有輸入<strong>向量</strong>進行<strong>加權平均 (Weighted Average)</strong>。</p>
+        
+        <h5>🧮 向量的加權平均（數學直覺）</h5>
+        <p>假設有三個字的向量（簡化為 3 維）：</p>
+        <pre><code>「The」  = [1.0, 0.2, 0.3]
+「cat」  = [0.1, 0.9, 0.4]
+「sleeps」= [0.2, 0.3, 1.0]
+
+# Attention 權重 (相關度分數)
+weights = [0.1, 0.7, 0.2]  # 「cat」最相關
+
+# 加權平均 (混合向量)
+output = 0.1×[1.0,0.2,0.3] + 0.7×[0.1,0.9,0.4] + 0.2×[0.2,0.3,1.0]
+       = [0.24, 0.71, 0.51]  # 新的混合向量</code></pre>
+        
+        <ul>
+            <li><strong>平均化的副作用</strong>：當你把多個向量混合在一起時，原本各自清晰的特徵可能會變得模糊。</li>
+            <li><strong>例子</strong>：把三種顏色 (RGB向量) 混合 → 變成灰色（細節丟失）</li>
+        </ul>
+        
+        <h4>✅ 解決方案：Multi-Head Attention</h4>
+        <p>既然一個視角會模糊，那就用<strong>多個視角（Heads）</strong>同時看！</p>
+        <ul>
+            <li>Head 1 專注於：<strong>語法結構</strong>（主詞-動詞關係）</li>
+            <li>Head 2 專注於：<strong>指代關係</strong>（it 指代什麼）</li>
+            <li>Head 3 專注於：<strong>時態信息</strong></li>
+        </ul>
+        <p>最後再把這些清晰的局部視角拼接起來，恢復高解析度的理解。</p>
+        <p><em>💡 詳細機制將在第 3 章 Section 3.2 詳細說明（包含完整數學公式）。</em></p>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <h3>4. Self-Attention 與 Memory Networks</h3>
+
+      <div class="text-pair">
+        <div class="original-text">
+          Self-attention, sometimes called intra-attention is an attention
+          mechanism relating different positions of a single sequence in order
+          to compute a representation of the sequence.
+        </div>
+        <div class="translation">
+          <p>
+            <strong>自注意力機制（Self-attention）</strong>，有時稱為內部注意力（intra-attention），是一種關聯<strong>單個序列</strong>中不同位置以計算該序列表示的注意力機制。
+          </p>
+        </div>
+      </div>
+
+      <div class="key-concept">
+        <h4>🎯 關鍵定義：Self-Attention</h4>
+        <p><strong>Attention vs Self-Attention:</strong></p>
+        <ul>
+            <li><strong>Attention (一般)</strong>：Source (Encoder) 對 Target (Decoder) 的關注。
+                <br><em>例子：翻譯時，看著英文原文（Source）寫中文（Target）。</em>
+            </li>
+            <li><strong>Self-Attention (自注意力)</strong>：Source 對 Source 自己內部的關注。
+                <br><em>例子：閱讀英文句子時，理解單字之間的關係（如 "The bank" 的 bank 是指銀行還是河岸，取決於同句子裡的其他詞）。</em>
+            </li>
+        </ul>
+      </div>
+
+      <div class="text-pair">
+        <div class="original-text">
+          Self-attention has been used successfully in a variety of tasks
+          including reading comprehension, abstractive summarization, textual
+          entailment and learning task-independent sentence representations [4,
+          27, 28, 22].
+        </div>
+        <div class="translation">
+          <p>
+            自注意力機制已經成功應用於多種任務，包括<strong>閱讀理解</strong>（reading comprehension）、<strong>抽象摘要生成</strong>（abstractive summarization）、<strong>文本蘊含</strong>（textual entailment）以及<strong>學習與任務無關的句子表示</strong> [4, 27, 28, 22]。
+          </p>
+        </div>
+      </div>
+
+      <div class="explanation">
+        <h4>📊 Self-Attention 的過往戰績</h4>
+        <p>在 Transformer 出現之前，Self-Attention 已經在這些任務中展現實力：</p>
+        <table>
+            <tr>
+                <th>任務</th>
+                <th>描述</th>
+                <th>Self-Attention 的作用</th>
+            </tr>
+            <tr>
+                <td>閱讀理解</td>
+                <td>讀完文章後回答問題</td>
+                <td>找到問題關鍵詞與文章段落的對應關係</td>
+            </tr>
+            <tr>
+                <td>抽象摘要生成</td>
+                <td>用自己的話總結長文</td>
+                <td>識別文章中最重要的句子與概念</td>
+            </tr>
+            <tr>
+                <td>文本蘊含</td>
+                <td>判斷句子 A 是否暗示句子 B</td>
+                <td>比對兩個句子的語義重疊與邏輯關係</td>
+            </tr>
+        </table>
+        <p><strong>關鍵洞察</strong>：Self-Attention 不是 Transformer 發明的，但 Transformer <strong>首次讓它成為唯一的主角</strong>。</p>
+      </div>
+
+      <div class="text-pair">
+        <div class="original-text">
+          End-to-end memory networks are based on a recurrent attention
+          mechanism instead of sequence-aligned recurrence and have been shown
+          to perform well on simple-language question answering and language
+          modeling tasks.
+        </div>
+        <div class="translation">
+          <p>
+            <strong>端到端記憶網路（End-to-end memory networks）</strong>基於遞迴注意力機制，而不是序列對齊的遞迴，並且已被證明在簡單語言問答和語言建模任務上表現良好。
+          </p>
+        </div>
+      </div>
+
+      <div class="explanation">
+        <h4>📚 學術淵源</h4>
+        <p>這一提到 Memory Networks 是為了致敬前人的研究，說明 Transformer 的思想並非憑空而來，而是建立在 Memory Network 將「記憶（全域資訊）」存取與「計算」分離的基礎上。</p>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <h3>5. Transformer 的歷史定位</h3>
+
+      <div class="text-pair">
+        <div class="original-text">
+          To the best of our knowledge, however, the Transformer is the first
+          transduction model relying entirely on self-attention to compute
+          representations of its input and output without using sequence-aligned
+          RNNs or convolution. In the following sections, we will describe the
+          Transformer, motivate self-attention and discuss its advantages over
+          models such as [17, 18] and [9].
+        </div>
+        <div class="translation">
+          <p>
+            然而，<span class="highlight">據我們所知，Transformer 是第一個完全依賴自注意力機制</span>來計算輸入和輸出表示的<strong>序列轉換模型</strong>，<strong>不使用序列對齊的 RNN 或卷積</strong>。在接下來的章節中，我們將描述 Transformer、解釋自注意力的動機，並討論它相對於 [17, 18] 和 [9] 等模型的優勢。
+          </p>
+        </div>
+      </div>
+
+      <div class="key-concept">
+        <h4>🏆 Transformer 的核心貢獻陳述</h4>
+        <p><strong>這句話是整個 Background 章節的高潮！</strong></p>
+        <ul>
+            <li>✅ <strong>第一個 (First)</strong>：前無古人的創新。</li>
+            <li>✅ <strong>完全依賴 Self-Attention (Relying Entirely)</strong>：不是「混合使用」，而是「純粹」。</li>
+            <li>✅ <strong>不用 RNN 或卷積 (Without RNN or Convolution)</strong>：斬斷舊世界的鎖鏈。</li>
+        </ul>
+        
+        <h4>🔮 作者的承諾（Roadmap）</h4>
+        <p>論文接下來將做三件事：</p>
+        <ol>
+            <li><strong>描述 Transformer</strong>：第 3 章的架構圖與數學公式。</li>
+            <li><strong>解釋動機</strong>：為什麼要用 Self-Attention？（第 4 章）</li>
+            <li><strong>比較優勢</strong>：與 ByteNet/ConvS2S 的量化對比（表格）。</li>
+        </ol>
+      </div>
+
+      <div class="solution">
+        <h4>🚀 第二頁總結：Transformer 的戰略地位</h4>
+        <p>本頁確立了 Transformer 在神經網路演化史上的位置：</p>
+        <ol>
+            <li><strong>RNN</strong>：序列處理，無法並行 (Sequential)。</li>
+            <li><strong>CNN (ByteNet/ConvS2S)</strong>：嘗試並行，但長距離依賴處理困難 (Hierarchical)。</li>
+            <li><strong>Transformer</strong>：完全並行 + O(1) 長距離依賴，並用 Multi-Head 解決解析度問題。</li>
+        </ol>
+      </div>
+
+      <div class="nav-bar">
+        <a href="01-abstract-and-introduction.html" class="nav-btn">
+            ← 上一頁：Abstract
+        </a>
+        <a href="03-1-model-architecture-attention.html" class="nav-btn primary">
+            下一頁：Model Architecture →
+        </a>
+      </div>
+
+      <div
+        style="
+          margin-top: 40px;
+          padding: 20px;
+          background: #ecf0f1;
+          border-radius: 5px;
+          text-align: center;
+        "
+      >
+        <p><strong>📚 學習建議</strong></p>
+        <p>下一章是整篇論文最核心、最困難的部分：<strong>模型架構</strong>。</p>
+        <p>在進入下一頁之前，請確保你腦中有這個畫面：</p>
+        <ul style="text-align: left; max-width: 600px; margin: 20px auto">
+          <li>✅ CNN 像金字塔，需要疊很高才能看到遠處。</li>
+          <li>✅ Transformer 像全體視訊會議，每個人都能直接對話。</li>
+          <li>✅ Multi-Head 就像多個專家從不同角度審視同一份文件。</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

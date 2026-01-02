@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 4 頁:結果展示 - GPT-3 論文深度解析</title>
+    <link rel="stylesheet" href="../transformer-tutorial/style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 第 4 頁:結果展示 - GPT-3 的驚人能力</h1>
+
+        <h2>📊 整體表現:Scaling Law 驗證</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                As observed in previous work, language modeling performance follows a power-law when making efficient use of training compute. After extending this trend by two more orders of magnitude, we observe only a slight (if any) departure from the power-law.
+            </div>
+            <div class="translation">
+                如先前研究所觀察到的,當有效利用訓練算力時,語言建模效能遵循冪次律。在將這個趨勢延伸兩個數量級後,我們觀察到只有輕微(如果有的話)的偏離冪次律。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>📈 Scaling Law:可預測的進步</h4>
+            <p><strong>關鍵發現:</strong></p>
+            <p>模型效能與規模之間存在<strong>平滑的冪次律關係</strong>!</p>
+
+            <p>\[ \text{Loss} \propto \text{Compute}^{-\alpha} \]</p>
+
+            <p><strong>實際意義:</strong></p>
+            <ul>
+                <li>模型越大 → Loss 越低 → 效能越好</li>
+                <li>這個趨勢<strong>可預測</strong>、<strong>平滑</strong></li>
+                <li>從 100K 參數到 175B 參數,趨勢一致!</li>
+            </ul>
+        </div>
+
+        <div class="explanation">
+            <h4>🔍 什麼是 Loss (損失)?</h4>
+            <p><strong>簡單說:</strong>模型預測錯誤的程度</p>
+
+            <h5>範例</h5>
+            <pre><code>真實文字: "The cat sat on the mat"
+模型預測: "The cat sat on the ???"
+
+如果模型說:
+- P("mat") = 0.8   → Loss 小 ✓
+- P("dog") = 0.8   → Loss 大 ✗
+
+Loss 越小 = 預測越準確
+</code></pre>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:練習越多,進步越可預測</h4>
+            <p><strong>場景:學習投籃</strong></p>
+            <ul>
+                <li><strong>練 100 次</strong>:命中率 20%</li>
+                <li><strong>練 1,000 次</strong>:命中率 40%</li>
+                <li><strong>練 10,000 次</strong>:命中率 60%</li>
+                <li><strong>練 100,000 次</strong>:命中率 75%</li>
+            </ul>
+            <p>進步曲線平滑且可預測 → 這就是「Scaling Law」的概念!</p>
+        </div>
+
+        <h2>🎯 9 大類任務評測</h2>
+
+        <div class="figure">
+            <img src="images/in_context_learning.png" alt="In-Context Learning 效果" style="max-width: 100%; height: auto;">
+            <p class="caption">
+                <strong>圖 4.1:In-Context Learning 的規模效應</strong><br>
+                這張圖展示了模型規模與 in-context learning 能力的關係。
+                橫軸是模型大小,縱軸是效能。可以看到:<br>
+                • <strong>Few-shot</strong> (藍線):隨模型增大,效能大幅提升<br>
+                • <strong>One-shot</strong> (綠線):也有明顯提升<br>
+                • <strong>Zero-shot</strong> (紅線):提升較緩慢<br>
+                <strong>結論:更大的模型更能從示範中學習!</strong>
+            </p>
+        </div>
+
+        <div class="key-concept">
+            <h4>📋 評測範圍</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>任務類別</th>
+                        <th>代表性測試</th>
+                        <th>測試什麼能力</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td><strong>語言建模</strong></td>
+                        <td>LAMBADA, HellaSwag</td>
+                        <td>預測文字、完形填空</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><strong>問答</strong></td>
+                        <td>TriviaQA, Natural Questions</td>
+                        <td>知識檢索</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td><strong>翻譯</strong></td>
+                        <td>WMT 英法/英德</td>
+                        <td>多語言能力</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td><strong>常識推理</strong></td>
+                        <td>Winograd, PhysicalQA</td>
+                        <td>理解代名詞、物理常識</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td><strong>閱讀理解</strong></td>
+                        <td>SQuAD, CoQA, RACE</td>
+                        <td>理解文章並回答問題</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td><strong>SuperGLUE</strong></td>
+                        <td>8 個子任務</td>
+                        <td>綜合 NLP 能力</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td><strong>自然語言推理</strong></td>
+                        <td>ANLI</td>
+                        <td>邏輯推理</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td><strong>算數</strong></td>
+                        <td>2-5 位數加減乘除</td>
+                        <td>數學能力</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td><strong>創意任務</strong></td>
+                        <td>新聞生成、拼字遊戲</td>
+                        <td>創造力、適應力</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="figure">
+            <img src="images/superglue_analysis.png" alt="SuperGLUE 詳細分析" style="max-width: 100%; height: auto;">
+            <p class="caption">
+                <strong>圖 4.3:SuperGLUE 基準測試的詳細分析</strong><br>
+                SuperGLUE 是一個綜合性 NLP 基準測試套件,包含多個困難任務。
+                這張圖展示了不同模型規模在 Few-Shot 設定下的表現:<br>
+                • 小模型(綠色):效能較低<br>
+                • 中型模型(黃色):穩定提升<br>
+                • <strong>GPT-3 175B(紅色):大幅領先!</strong><br>
+                在大多數子任務上,GPT-3 都達到或接近 SOTA 水準。
+            </p>
+        </div>
+
+        <h2>🌟 亮點結果 1:問答任務</h2>
+
+        <div class="key-concept">
+            <h4>📚 TriviaQA (知識問答)</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>設定</th>
+                        <th>GPT-3 準確率</th>
+                        <th>說明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Zero-Shot</strong></td>
+                        <td>64.3%</td>
+                        <td>只給問題,沒有範例</td>
+                    </tr>
+                    <tr>
+                        <td><strong>One-Shot</strong></td>
+                        <td>68.0%</td>
+                        <td>給 1 個範例</td>
+                    </tr>
+                    <tr style="background: var(--primary-light);">
+                        <td><strong>Few-Shot</strong></td>
+                        <td><strong>71.2% ⭐</strong></td>
+                        <td>給 10-100 個範例<br><strong>SOTA (當時最佳)</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>驚人發現:</strong></p>
+            <p>GPT-3 的 Few-Shot 效能 = <strong>當時最佳 Fine-Tuned 模型</strong>的水準!</p>
+        </div>
+
+        <div class="explanation">
+            <h4>📝 TriviaQA 範例</h4>
+            <pre><code>問題: What is the capital of France?
+GPT-3: Paris ✓
+
+問題: Who wrote "To Kill a Mockingbird"?
+GPT-3: Harper Lee ✓
+
+問題: What is the chemical symbol for gold?
+GPT-3: Au ✓
+</code></pre>
+            <p>這些知識全部儲存在模型的參數中,不需要查詢外部資料庫!</p>
+        </div>
+
+        <div class="analogy">
+            <h4>🤖 AI 體驗連結:ChatGPT 的「百科全書」能力</h4>
+            <p><strong>你的體驗:</strong></p>
+            <p>問 ChatGPT 各種知識問題,它通常都能回答!</p>
+
+            <p><strong>原因:</strong></p>
+            <p>訓練資料包含大量 Wikipedia、書籍、網路文章 → 知識被「壓縮」到參數中!</p>
+
+            <p><strong>⚠️ 但要注意:</strong></p>
+            <ul>
+                <li>❌ 訓練後的新資訊 → 不知道</li>
+                <li>❌ 罕見知識 → 可能錯誤</li>
+                <li>❌ 需要精確日期/數字 → 容易「幻覺」</li>
+            </ul>
+        </div>
+
+        <h2>🌟 亮點結果 2:翻譯任務</h2>
+
+        <div class="key-concept">
+            <h4>🌐 英翻法 (WMT'14)</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>方法</th>
+                        <th>BLEU 分數</th>
+                        <th>說明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>GPT-3 Zero-Shot</strong></td>
+                        <td>25.2</td>
+                        <td>只給指令「Translate to French:」</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GPT-3 Few-Shot</strong></td>
+                        <td>39.2</td>
+                        <td>給範例後大幅提升!</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SOTA (Fine-Tuned)</strong></td>
+                        <td>45.6</td>
+                        <td>專門訓練的翻譯模型</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>觀察:</strong></p>
+            <ul>
+                <li>Few-Shot 比 Zero-Shot 好很多 (25.2 → 39.2)</li>
+                <li>雖然還不如專門翻譯模型,但已經「可用」!</li>
+                <li>GPT-3 <strong>沒有針對翻譯特別訓練</strong>,純粹是語言建模的副產品</li>
+            </ul>
+        </div>
+
+        <div class="explanation">
+            <h4>📝 翻譯範例</h4>
+            <pre><code>// Few-Shot 輸入
+sea otter => loutre de mer
+peppermint => menthe poivrée
+plush giraffe => girafe peluche
+cheese => 
+
+// GPT-3 輸出
+fromage ✓
+</code></pre>
+        </div>
+
+        <div class="analogy">
+            <h4>🤖 AI 體驗連結:ChatGPT 的翻譯能力</h4>
+            <p><strong>你可以試試:</strong></p>
+            <blockquote>
+                「請翻譯成法文: I love artificial intelligence」
+            </blockquote>
+            <p>ChatGPT: "J'aime l'intelligence artificielle"</p>
+
+            <p><strong>甚至可以做「風格化翻譯」:</strong></p>
+            <blockquote>
+                「請用莎士比亞風格翻譯成英文: 我很開心」
+            </blockquote>
+            <p>ChatGPT: "Verily, mine heart doth overflow with joy!"</p>
+
+            <p>這種<strong>創意翻譯</strong>是專門翻譯模型做不到的!</p>
+        </div>
+
+        <h2>🌟 亮點結果 3:算數任務</h2>
+
+        <div class="key-concept">
+            <h4>🔢 加法測試</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>任務</th>
+                        <th>GPT-3 準確率</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2 位數加法</td>
+                        <td><strong>100%</strong> ✓</td>
+                    </tr>
+                    <tr>
+                        <td>3 位數加法</td>
+                        <td><strong>~80%</strong></td>
+                    </tr>
+                    <tr>
+                        <td>4 位數加法</td>
+                        <td><strong>~25%</strong></td>
+                    </tr>
+                    <tr>
+                        <td>5 位數加法</td>
+                        <td><strong>~10%</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>觀察:</strong></p>
+            <ul>
+                <li>簡單算數:非常準確</li>
+                <li>隨著位數增加:準確率快速下降</li>
+                <li>說明:GPT-3 不是真的「計算」,而是「模式識別」!</li>
+            </ul>
+        </div>
+
+        <div class="explanation">
+            <h4>🤔 為什麼算數會錯?</h4>
+            <p><strong>根本原因:</strong>GPT-3 不是計算器,是語言模型!</p>
+
+            <h5>它是怎麼做算數的?</h5>
+            <pre><code>// GPT-3 的「思考過程」(簡化)
+輸入: "25 + 17 = "
+
+模型看到:
+- 訓練資料中見過很多 "XX + YY = ZZ" 的模式
+- "25 + 17" 可能在訓練資料中出現過
+- 或者類似的 "2X + 1Y = 4Z" 模式
+
+輸出: "42" (透過模式識別,不是真的計算!)
+</code></pre>
+
+            <p><strong>所以:</strong></p>
+            <ul>
+                <li>簡單計算:訓練資料中常見 → 準確</li>
+                <li>複雜計算:訓練資料中罕見 → 容易錯</li>
+            </ul>
+        </div>
+
+        <div class="analogy">
+            <h4>🤖 AI 體驗連結:為什麼 ChatGPT 算數會錯?</h4>
+            <p><strong>你可能遇過:</strong></p>
+            <blockquote>
+                你: 「請計算 123456 + 789012」<br>
+                ChatGPT: 「912468」 ✓ (正確)<br><br>
+                你: 「請計算 918273 + 645182」<br>
+                ChatGPT: 「1563355」 ✗ (錯誤,正確答案是 1563455)
+            </blockquote>
+
+            <p><strong>原因:</strong></p>
+            <p>ChatGPT 不是在「計算」,而是在「猜」最可能的答案!</p>
+
+            <p><strong>解決方案:</strong></p>
+            <ul>
+                <li>✅ 使用外部工具(Code Interpreter/Plugins)</li>
+                <li>✅ 要求它「逐步推理」(Chain-of-Thought)</li>
+            </ul>
+        </div>
+
+        <h2>🌟 亮點結果 4:新聞生成</h2>
+
+        <div class="text-pair">
+            <div class="original-text">
+                In the few-shot setting, GPT-3 can generate synthetic news articles which human evaluators have difficulty distinguishing from human-generated articles.
+            </div>
+            <div class="translation">
+                在少樣本設定中,GPT-3 可以生成合成新聞文章,人類評估者很難將其與人類生成的文章區分開來。
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>📰 人類評估結果</h4>
+            <p><strong>實驗:</strong>給人類看新聞文章,問「這是 AI 寫的還是人寫的?」</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>文章長度</th>
+                        <th>人類辨識準確率</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>短文 (~200 字)</td>
+                        <td>~52% (接近隨機猜)</td>
+                    </tr>
+                    <tr>
+                        <td>中文 (~500 字)</td>
+                        <td>~50% (完全無法分辨!)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>結論:</strong>GPT-3 生成的文章品質已達「人類水準」!</p>
+        </div>
+
+        <div class="figure">
+            <img src="images/generation_plot.png" alt="新聞生成質量評估" style="max-width: 100%; height: auto;">
+            <p class="caption">
+                <strong>圖 4.2:人類辨識 AI 生成新聞的準確率</strong><br>
+                橫軸是文章長度,縱軸是人類辨識準確率。
+                可以看到隨著文章變長,辨識準確率反而下降!
+                在 ~500 字左右,人類的辨識準確率接近 50%(隨機猜測),
+                這意味著 <strong>GPT-3 生成的新聞與人類寫的幾乎無法區分</strong>。
+            </p>
+        </div>
+
+        <div class="problem">
+            <h4>⚠️ 潛在風險:假新聞生成</h4>
+            <p><strong>危險情境:</strong></p>
+            <ul>
+                <li>惡意使用者可以快速生成大量「看起來真實」的假新聞</li>
+                <li>人類難以辨別真假</li>
+                <li>可能用於政治操縱、詐騙、造謠</li>
+            </ul>
+            <p><em>論文第 6 節詳細討論了這些社會影響。</em></p>
+        </div>
+
+        <h2>📉 GPT-3 的弱點</h2>
+
+        <div class="problem">
+            <h4>❌ 表現不佳的任務</h4>
+            <p><strong>自然語言推理 (ANLI)</strong></p>
+            <ul>
+                <li>需要複雜邏輯推理</li>
+                <li>GPT-3 的表現勉強超過隨機猜測</li>
+            </ul>
+
+            <p><strong>某些閱讀理解 (RACE, QuAC)</strong></p>
+            <ul>
+                <li>需要長文理解</li>
+                <li>GPT-3 表現不如專門模型</li>
+            </ul>
+
+            <p><strong>常見失敗情境:</strong></p>
+            <ul>
+                <li>需要多步驟推理</li>
+                <li>需要精確的數學計算</li>
+                <li>需要理解長上下文(超過 2048 tokens)</li>
+            </ul>
+        </div>
+
+        <div class="explanation">
+            <h4>🤔 為什麼會有這些限制?</h4>
+            <h5>1. Context Window 限制</h5>
+            <p>2048 tokens ≈ 1500 字 → 長文章記不住全部內容</p>
+
+            <h5>2. 沒有真正的「推理」能力</h5>
+            <p>GPT-3 是做「模式匹配」,不是「邏輯推導」</p>
+
+            <h5>3. 訓練目標的限制</h5>
+            <p>只訓練「預測下一個字」→ 對複雜推理任務不夠</p>
+        </div>
+
+        <h2>🎯 Few-Shot vs Fine-Tuning 比較</h2>
+
+        <div class="key-concept">
+            <h4>📊 整體趨勢</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>任務類別</th>
+                        <th>Few-Shot vs Fine-Tuned SOTA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>語言建模</strong></td>
+                        <td>✅ 超越或持平</td>
+                    </tr>
+                    <tr>
+                        <td><strong>知識問答</strong></td>
+                        <td>✅ 持平或接近</td>
+                    </tr>
+                    <tr>
+                        <td><strong>翻譯</strong></td>
+                        <td>⚠️ 接近但仍有差距</td>
+                    </tr>
+                    <tr>
+                        <td><strong>常識推理</strong></td>
+                        <td>✅ 超越</td>
+                    </tr>
+                    <tr>
+                        <td><strong>閱讀理解</strong></td>
+                        <td>⚠️ 多數落後</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SuperGLUE</strong></td>
+                        <td>⚠️ 接近但未超越</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>結論:</strong></p>
+            <p>Few-Shot 在<strong>許多任務</strong>上已接近 Fine-Tuning 效能,同時保持<strong>完全的靈活性</strong>!</p>
+        </div>
+
+        <div class="analogy">
+            <h4>💡 生活類比:通才 vs 專家</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>通才 (GPT-3 Few-Shot)</th>
+                        <th>專家 (Fine-Tuned 模型)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>優點</strong></td>
+                        <td>靈活、什麼都能做</td>
+                        <td>專精領域表現最好</td>
+                    </tr>
+                    <tr>
+                        <td><strong>缺點</strong></td>
+                        <td>不如專家精通</td>
+                        <td>換領域就不行</td>
+                    </tr>
+                    <tr>
+                        <td><strong>成本</strong></td>
+                        <td>低(不需重新訓練)</td>
+                        <td>高(每個任務都要訓練)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="analogy">
+            <h4>🤖 AI 體驗連結:為什麼 ChatGPT 這麼「通用」?</h4>
+            <p><strong>你的體驗:</strong></p>
+            <p>ChatGPT 可以:</p>
+            <ul>
+                <li>寫程式 ✓</li>
+                <li>寫詩 ✓</li>
+                <li>翻譯 ✓</li>
+                <li>分析資料 ✓</li>
+                <li>教學 ✓</li>
+                <li>聊天 ✓</li>
+            </ul>
+
+            <p><strong>原因:</strong></p>
+            <p>ChatGPT 繼承了 GPT-3 的「Few-Shot Learning」能力 → 什麼都能做!</p>
+
+            <p><strong>這就是 GPT-3 論文的最大貢獻:</strong></p>
+            <p>證明了<strong>大模型 + Few-Shot Learning = 通用 AI 助手</strong>!</p>
+        </div>
+
+        <div class="nav-bar">
+            <a href="03-model-and-training.html" class="nav-btn">← 上一頁:模型與訓練</a>
+            <a href="index.html" class="nav-btn">📑 目錄</a>
+            <a href="05-limitations-and-impacts.html" class="nav-btn primary">下一頁 → 限制與影響</a>
+        </div>
+    </div>
+</body>
+</html>
+

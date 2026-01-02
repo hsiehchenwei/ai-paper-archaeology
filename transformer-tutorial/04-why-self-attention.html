@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transformer 論文深度解析 - 第4頁：Why Self-Attention</title>
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <link rel="preconnect" OS="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <!-- MathJax for mathematical formulas -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [["$", "$"]],
+          displayMath: [["$$", "$$"]],
+        },
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>
+        📖 Attention Is All You Need <br /><span
+          style="
+            font-size: 0.6em;
+            color: var(--text-secondary);
+            font-weight: normal;
+          "
+          >深度解析系列</span
+        >
+      </h1>
+      <h2>第 4 頁：Why Self-Attention？為什麼選擇自注意力？</h2>
+
+      <div class="header-section">
+        <div class="paper-meta">
+          <div class="meta-item">
+            <strong>目前章節</strong>
+            4. Why Self-Attention
+          </div>
+          <div class="meta-item">
+            <strong>核心主題</strong>
+            對比 Self-Attention、RNN、CNN 的三大指標
+          </div>
+          <div class="meta-item">
+            <strong>閱讀難度</strong>
+            ⭐⭐⭐⭐ (涉及複雜度分析)
+          </div>
+        </div>
+      </div>
+
+      <!-- ============= 動機與評估標準 ============= -->
+      <h3>1. 論文動機：為什麼要用 Self-Attention？</h3>
+
+      <div class="text-pair">
+        <div class="original-text">
+          In this section we compare various aspects of self-attention layers to
+          the recurrent and convolutional layers commonly used for mapping one
+          variable-length sequence of symbol representations $(x_1, ..., x_n)$
+          to another sequence of equal length $(z_1, ..., z_n)$, with $x_i, z_i
+          \in \mathbb{R}^d$, such as a hidden layer in a typical sequence
+          transduction encoder or decoder. Motivating our use of self-attention
+          we consider three desiderata.
+        </div>
+        <div class="translation">
+          <p>
+            在本節中，我們比較自注意力層與常用的<strong>遞歸層（RNN）</strong>和<strong>卷積層（CNN）</strong>在將一個可變長度的符號表示序列
+            $(x_1, ..., x_n)$ 映射到另一個等長序列 $(z_1, ..., z_n)$（其中 $x_i,
+            z_i \in
+            \mathbb{R}^d$）時的各個方面，例如典型序列轉換編碼器或解碼器中的隱藏層。為了證明使用自注意力的合理性，我們考慮<strong>三個標準</strong>。
+          </p>
+        </div>
+      </div>
+
+      <div class="key-concept">
+        <h4>🎯 三大評估標準 (Three Desiderata)</h4>
+        <p><strong>問題：</strong>選擇哪種層類型來建構 Seq2Seq 模型？</p>
+        <p><strong>評估標準：</strong></p>
+        <ol>
+          <li>
+            <strong>計算複雜度 (Computational Complexity per Layer)</strong>
+            <br />單層的總計算量是多少？ <br />→ 越低越好（節省運算資源）。
+          </li>
+          <li>
+            <strong>並行能力 (Amount of Parallelized Computation)</strong>
+            <br />最少需要多少「順序操作」（sequential operations）？ <br />→
+            越少越好（更易於並行化，訓練更快）。
+          </li>
+          <li>
+            <strong>長距離依賴的路徑長度 (Maximum Path Length)</strong>
+            <br />訊號在兩個任意位置間傳遞的最長路徑是多少？ <br />→
+            越短越好（更容易學習長距離依賴）。
+          </li>
+        </ol>
+      </div>
+
+      <div class="text-pair">
+        <div class="original-text">
+          One is the total computational complexity per layer. Another is the
+          amount of computation that can be parallelized, as measured by the
+          minimum number of sequential operations required.
+        </div>
+        <div class="translation">
+          <p>
+            第一個是<strong>每層的總計算複雜度</strong>。第二個是<strong>可並行化的計算量</strong>，通過所需的最小順序操作數來衡量。
+          </p>
+        </div>
+      </div>
+
+      <div class="text-pair">
+        <div class="original-text">
+          The third is the path length between long-range dependencies in the
+          network. Learning long-range dependencies is a key challenge in many
+          sequence transduction tasks. One key factor affecting the ability to
+          learn such dependencies is the length of the paths forward and
+          backward signals have to traverse in the network. The shorter these
+          paths between any combination of positions in the input and output
+          sequences, the easier it is to learn long-range dependencies [12].
+          Hence we also compare the maximum path length between any two input
+          and output positions in networks composed of the different layer
+          types.
+        </div>
+        <div class="translation">
+          <p>
+            第三個是網路中<strong>長距離依賴之間的路徑長度</strong>。學習長距離依賴是許多序列轉換任務的關鍵挑戰。影響學習這些依賴能力的一個關鍵因素是前向和後向訊號必須在網路中穿越的路徑長度。在輸入和輸出序列中任意位置組合之間的路徑越短，學習長距離依賴就越容易
+            [12]。因此，我們也比較了由不同層類型組成的網路中任意兩個輸入和輸出位置之間的<strong>最大路徑長度</strong>。
+          </p>
+        </div>
+      </div>
+
+      <div class="analogy">
+        <h4>🔧 雙重類比：長距離依賴問題</h4>
+
+        <h4>💡 生活類比：電話遊戲（傳話遊戲）</h4>
+        <p>
+          <strong>情境：</strong>10 個人排成一列傳話，第 1 個人說「今天晚上 7
+          點在圖書館見」。
+        </p>
+        <ul>
+          <li>
+            <strong>問題：</strong>傳到第 10
+            個人時，訊息可能變成「今天晚上在哪裡見？」
+          </li>
+          <li>
+            <strong>原因：</strong>每經過一個人，訊息就失真一次（梯度消失）。
+          </li>
+          <li>
+            <strong>解決方案：</strong>讓第 1 個人<strong
+              >直接對著第 10 個人說</strong
+            >（Self-Attention）！路徑長度 = 1。
+          </li>
+        </ul>
+
+        <h4>🔧 工程類比：資料庫 JOIN 操作</h4>
+        <pre><code>// RNN: 鏈式依賴（必須按順序處理）
+h1 = f(x1)
+h2 = f(x2, h1)       // 依賴 h1
+h3 = f(x3, h2)       // 依賴 h2
+...
+h10 = f(x10, h9)     // 依賴 h9
+// → 路徑：x1 → h1 → h2 → ... → h10 (長度 = 10)
+
+// Self-Attention: 全連接（所有位置同時看到）
+attention_matrix = softmax(Q @ K.T / sqrt(d_k))
+output = attention_matrix @ V
+// → 路徑：任意 xi 直接連接到任意 xj (長度 = 1)</code></pre>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <!-- ============= Table 1 ============= -->
+      <h3>2. 核心對比表：Self-Attention vs RNN vs CNN</h3>
+
+      <div class="key-concept">
+        <h4>📊 Table 1：三種層類型的性能對比</h4>
+        <p><strong>符號說明：</strong></p>
+        <ul>
+          <li>$n$：序列長度（例如一句話有多少個詞）</li>
+          <li>$d$：表示維度（例如每個詞是 512 維的向量）</li>
+          <li>$k$：卷積核大小</li>
+          <li>$r$：受限自注意力的鄰域大小</li>
+        </ul>
+      </div>
+
+      <div style="overflow-x: auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Layer Type<br />(層類型)</th>
+              <th>Complexity per Layer<br />(每層複雜度)</th>
+              <th>Sequential Operations<br />(順序操作數)</th>
+              <th>Maximum Path Length<br />(最大路徑長度)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Self-Attention</strong></td>
+              <td>$O(n^2 \cdot d)$</td>
+              <td>$O(1)$</td>
+              <td>$O(1)$</td>
+            </tr>
+            <tr>
+              <td><strong>Recurrent</strong></td>
+              <td>$O(n \cdot d^2)$</td>
+              <td>$O(n)$</td>
+              <td>$O(n)$</td>
+            </tr>
+            <tr>
+              <td><strong>Convolutional</strong></td>
+              <td>$O(k \cdot n \cdot d^2)$</td>
+              <td>$O(1)$</td>
+              <td>$O(\log_k(n))$</td>
+            </tr>
+            <tr>
+              <td><strong>Self-Attention (restricted)</strong></td>
+              <td>$O(r \cdot n \cdot d)$</td>
+              <td>$O(1)$</td>
+              <td>$O(n/r)$</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="explanation">
+        <h4>🔬 逐行拆解：每種層類型的特性</h4>
+
+        <div class="key-concept">
+          <h5>🧮 先理解符號：$n$ 和 $d$ 是什麼？</h5>
+          <p><strong>回顧之前學到的：</strong></p>
+          <ul>
+            <li>
+              <strong>$n$（序列長度）：</strong>一句話有多少個詞（token）
+              <br />例如："The cat sits" → n = 3
+            </li>
+            <li>
+              <strong>$d$（向量維度）：</strong>每個詞用多少個數字表示 <br />在
+              Transformer 中：<strong>$d = d_{model} = 512$</strong>
+            </li>
+          </ul>
+
+          <h5>💡 生活類比：學生名單</h5>
+          <table>
+            <tr>
+              <th>符號</th>
+              <th>意義</th>
+              <th>類比</th>
+            </tr>
+            <tr>
+              <td>$n$ (序列長度)</td>
+              <td>有多少個詞</td>
+              <td>班上有多少學生（例如 30 人）</td>
+            </tr>
+            <tr>
+              <td>$d$ (向量維度)</td>
+              <td>每個詞有多少維度</td>
+              <td>每個學生的檔案有多少欄位（姓名、年齡、科系...共 512 欄）</td>
+            </tr>
+            <tr>
+              <td>$n \times d$ 矩陣</td>
+              <td>整個輸入</td>
+              <td>30 個學生 × 512 個欄位 = 完整花名冊</td>
+            </tr>
+          </table>
+
+          <h5>🔧 為什麼複雜度公式裡有 $n$ 和 $d$？</h5>
+          <p><strong>Self-Attention 的計算：$O(n^2 \cdot d)$</strong></p>
+          <pre><code>// 計算 Attention 分數矩陣：Q × K^T
+for i in range(n):        // 第一個 n：每個 Query
+    for j in range(n):    // 第二個 n：每個 Key
+        score[i][j] = dot_product(Q[i], K[j])  // d：向量內積需要 d 次乘法
+        
+// 總計算量：n × n × d = n² × d</code></pre>
+
+          <p><strong>為什麼要乘以 $d$？</strong></p>
+          <ul>
+            <li>向量內積 (dot product) 需要逐個元素相乘再相加</li>
+            <li>Q[i] 和 K[j] 都是 512 維 → 需要 512 次乘法和 511 次加法</li>
+            <li>所以複雜度是 $O(d)$</li>
+          </ul>
+
+          <pre><code>例子：計算兩個向量的內積 (d=4 簡化版)
+Q[i] = [0.1, 0.2, 0.3, 0.4]
+K[j] = [0.5, 0.6, 0.7, 0.8]
+
+score = 0.1×0.5 + 0.2×0.6 + 0.3×0.7 + 0.4×0.8
+      = 0.05 + 0.12 + 0.21 + 0.32
+      = 0.70
+
+// 需要 4 次乘法 + 3 次加法 → O(d)</code></pre>
+        </div>
+
+        <h5>1. Self-Attention（自注意力）</h5>
+        <ul>
+          <li>
+            <strong>複雜度 $O(n^2 \cdot d)$：</strong> <br />計算 $n \times n$
+            的注意力矩陣（每個位置看所有其他位置），每個元素涉及 $d$ 維計算。
+            <br /><em>缺點：</em>當序列很長時（$n$ 大），$n^2$ 會很大。
+          </li>
+          <li>
+            <strong>順序操作 $O(1)$：</strong>
+            <br />所有位置可以<strong>完全並行</strong>計算（GPU 友好）。
+          </li>
+          <li>
+            <strong>路徑長度 $O(1)$：</strong>
+            <br />任意兩個位置<strong>直接連接</strong>（一步到達）。
+            <br /><strong>這是最大優勢！</strong>
+          </li>
+        </ul>
+
+        <h5>2. Recurrent（RNN / LSTM / GRU）</h5>
+        <ul>
+          <li>
+            <strong>複雜度 $O(n \cdot d^2)$：</strong> <br />每個時間步計算 $d
+            \times d$ 的矩陣乘法，共 $n$ 步。 <br /><em>對比：</em>當 $n < d$
+            時（常見情況，如 $n=100, d=512$），RNN 比 Self-Attention 更快。
+          </li>
+          <li>
+            <strong>順序操作 $O(n)$：</strong>
+            <br />必須<strong>按順序</strong>計算（$h_t$ 依賴
+            $h_{t-1}$），<strong>無法並行</strong>。 <br /><strong
+              >這是最大缺點！</strong
+            >訓練慢。
+          </li>
+          <li>
+            <strong>路徑長度 $O(n)$：</strong> <br />位置 1 到位置 $n$ 需要經過
+            $n-1$ 個中間步驟（梯度消失問題）。
+          </li>
+        </ul>
+
+        <h5>3. Convolutional（CNN）</h5>
+        <ul>
+          <li>
+            <strong>複雜度 $O(k \cdot n \cdot d^2)$：</strong>
+            <br />每個位置用核大小 $k$ 的卷積，涉及 $d \times d$ 運算。
+            <br /><em>對比：</em>當 $k$ 較小時，比 RNN 更慢（因為 $d^2$ 項）。
+          </li>
+          <li>
+            <strong>順序操作 $O(1)$：</strong>
+            <br />卷積操作可並行（所有位置同時計算）。
+          </li>
+          <li>
+            <strong>路徑長度 $O(\log_k(n))$：</strong>
+            <br />使用「膨脹卷積」（dilated convolution）時，需要 $\log_k(n)$
+            層才能覆蓋整個序列。 <br /><em
+              >優於 RNN，但仍不如 Self-Attention 的 $O(1)$。</em
+            >
+          </li>
+        </ul>
+
+        <h5>4. Self-Attention (Restricted)（受限自注意力）</h5>
+        <ul>
+          <li>
+            <strong>複雜度 $O(r \cdot n \cdot d)$：</strong>
+            <br />每個位置只看鄰域內的 $r$ 個位置（而非全部 $n$ 個）。 <br /><em
+              >優勢：</em
+            >當序列很長時，可以大幅降低計算量。
+          </li>
+          <li><strong>順序操作 $O(1)$：</strong> <br />仍可並行。</li>
+          <li>
+            <strong>路徑長度 $O(n/r)$：</strong>
+            <br />需要多層才能讓訊息傳遞到遠距離位置。
+          </li>
+        </ul>
+      </div>
+
+      <div class="problem">
+        <h4>❓ 問題：哪種情況下 RNN 更快？</h4>
+        <p><strong>關鍵：</strong>比較 $O(n^2 \cdot d)$ vs $O(n \cdot d^2)$</p>
+        <pre><code>Self-Attention: n² × d
+Recurrent:      n × d²
+
+當 n < d 時，Self-Attention 更快
+當 n > d 時，Recurrent 更快
+
+實際情況（NLP 任務）:
+- Word-piece 表示：n ≈ 100-200，d ≈ 512
+- 結果：n < d → Self-Attention 更快！</code></pre>
+      </div>
+
+      <div class="solution">
+        <h4>✅ Self-Attention 的勝利條件</h4>
+        <table>
+          <tr>
+            <th>評估標準</th>
+            <th>Self-Attention</th>
+            <th>RNN</th>
+            <th>CNN</th>
+            <th>勝者</th>
+          </tr>
+          <tr>
+            <td><strong>複雜度</strong><br />(當 $n < d$)</td>
+            <td>$O(n^2 \cdot d)$</td>
+            <td>$O(n \cdot d^2)$</td>
+            <td>$O(k \cdot n \cdot d^2)$</td>
+            <td>✅ Self-Attention</td>
+          </tr>
+          <tr>
+            <td><strong>並行能力</strong></td>
+            <td>$O(1)$ (完全並行)</td>
+            <td>$O(n)$ (順序)</td>
+            <td>$O(1)$ (並行)</td>
+            <td>✅ Self-Attention / CNN</td>
+          </tr>
+          <tr>
+            <td><strong>長距離依賴</strong></td>
+            <td>$O(1)$ (直接連接)</td>
+            <td>$O(n)$ (線性傳遞)</td>
+            <td>$O(\log_k(n))$ (階層傳遞)</td>
+            <td>✅ Self-Attention</td>
+          </tr>
+        </table>
+        <p>
+          <strong>結論：</strong>Self-Attention
+          在「並行能力」和「長距離依賴」上都是最優的！
+        </p>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #ddd; margin: 40px 0" />
+
+      <!-- ============= 深入分析 ============= -->
+      <h3>3. 論文的詳細分析</h3>
+
+      <div class="text-pair">
+        <div class="original-text">
+          As noted in Table 1, a self-attention layer connects all positions
+          with a constant number of sequentially executed operations, whereas a
+          recurrent layer requires $O(n)$ sequential operations. In terms of
+          computational complexity, self-attention layers are faster than
+          recurrent layers when the sequence length $n$ is smaller than the
+          representation dimensionality $d$, which is most often the case with
+          sentence representations used by state-of-the-art models in machine
+          translation, such as word-piece [38] and byte-pair [31]
+          representations.
+        </div>
+        <div class="translation">
+          <p>
+            如表 1
+            所示，自注意力層通過<strong>常數個順序執行操作</strong>連接所有位置，而遞歸層需要
+            $O(n)$ 個順序操作。在計算複雜度方面，當序列長度 $n$
+            <strong>小於表示維度 $d$</strong>
+            時，自注意力層比遞歸層更快，這是機器翻譯中最先進模型所使用的句子表示（如
+            word-piece [38] 和 byte-pair [31]
+            表示）<strong>最常見的情況</strong>。
+          </p>
+        </div>
+      </div>
+
+      <div class="key-concept">
+        <h4>🔢 實際數值範例</h4>
+        <p><strong>機器翻譯任務（WMT 2014）：</strong></p>
+        <pre><code>句子長度：n ≈ 30-100 詞
+Word-piece 表示後：n ≈ 100-200 tokens
+模型維度：d = 512 (base) 或 1024 (big)
+
+→ n < d 的情況佔絕大多數！
+→ Self-Attention 複雜度優勢：
+   O(100² × 512) vs O(100 × 512²)
+   = 5.1M vs 26.2M (RNN 慢 5 倍！)</code></pre>
+      </div>
+
+      <div class="analogy">
+        <h4>🤖 AI 體驗連結：為什麼 Context Window 不能無限大？</h4>
+        <p>
+          你可能發現 ChatGPT 的 Context Window（可記憶長度）有上限，而且越長的
+          Context 越貴。
+        </p>
+        <p><strong>原因就在這裡：複雜度 $O(n^2 \cdot d)$</strong></p>
+
+        <h5>🔢 具體數字說明</h5>
+        <p>假設 ChatGPT 的設定：</p>
+        <ul>
+          <li>
+            <strong>$d = 12,288$</strong>（GPT-4 的模型維度，比 Transformer 的
+            512 大得多！）
+          </li>
+          <li><strong>$n = 8,192$</strong>（Context Window 長度）</li>
+        </ul>
+
+        <pre><code>計算 Attention 的成本：
+n² × d = 8192² × 12288
+       = 67,108,864 × 12288
+       = 824,633,720,832 次運算！（8千億次）
+
+如果 Context Window 加倍到 16,384：
+n² × d = 16384² × 12288
+       = 268,435,456 × 12288
+       = 3,298,534,883,328 次運算（3.3兆次）
+→ 變成 4 倍！</code></pre>
+
+        <ul>
+          <li>
+            如果文章長度 ($n$) 變成 2 倍，計算量會變成
+            <strong>4 倍</strong> ($2^2$)！
+          </li>
+          <li>
+            如果文章長度變成 10 倍，計算量會變成 <strong>100 倍</strong>！
+          </li>
+          <li><strong>而且 $d$ 越大（模型越大），成本就越高！</strong></li>
+        </ul>
+        <p>
+          這就是為什麼要擴大 Context Window
+          這麼困難，因為計算成本是<strong>平方級增長</strong>的。
+        </p>
+
+        <p>
+          <strong>現實解法：</strong>Flash Attention、Sliding Window、Sparse
+          Attention（論文裡提到的 Restricted Self-Attention 的現代實作版本）。
+        </p>
+      </div>
+
+      <div class="text-pair">
+        <div class="original-text">
+          To improve computational performance for tasks involving very long
+          sequences, self-attention could be restricted to considering only a
+          neighborhood of size $r$ in the input sequence centered around the
+          respective output position. This would increase the maximum path
+          length to $O(n/r)$. We plan to investigate this approach further in
+          future work.
+        </div>
+        <div class="translation">
+          <p>
+            為了提高涉及<strong>非常長序列</strong>的任務的計算性能，自注意力可以被限制為僅考慮以相應輸出位置為中心的輸入序列中大小為
+            $r$ 的鄰域。這將使最大路徑長度增加到
+            $O(n/r)$。我們計劃在未來的工作中進一步研究這種方法。
+          </p>
+        </div>
+      </div>
+
+      <div class="analogy">
+        <h4>🔧 雙重類比：Restricted Self-Attention</h4>
+
+        <h4>💡 生活類比：會議室座位安排</h4>
+        <p>
+          <strong>情境：</strong>100
+          人的大會議，每個人都想跟所有人交流（Self-Attention）。
+        </p>
+        <ul>
+          <li>
+            <strong>問題：</strong>100 × 100 = 10,000 次對話（複雜度爆炸）。
+          </li>
+          <li>
+            <strong>Restricted 方案：</strong>每個人只跟<strong
+              >左右 10 個人</strong
+            >交流（$r=10$）。
+          </li>
+          <li>
+            <strong>結果：</strong>100 × 10 = 1,000 次對話（降低 10 倍）。
+          </li>
+          <li>
+            <strong>代價：</strong>遠端的人需要透過「中介」傳遞訊息（路徑長度
+            $O(n/r) = 10$）。
+          </li>
+        </ul>
+
+        <h4>🔧 工程類比：Sliding Window Attention</h4>
+        <pre><code>// Full Self-Attention (O(n²))
+for i in range(n):
+    for j in range(n):
+        attention[i][j] = compute(Q[i], K[j])
+
+// Restricted Self-Attention (O(n×r))
+for i in range(n):
+    start = max(0, i - r//2)
+    end = min(n, i + r//2)
+    for j in range(start, end):  // 只看鄰域
+        attention[i][j] = compute(Q[i], K[j])
+
+// 複雜度：O(n²) → O(n×r)
+// 路徑長度：O(1) → O(n/r)</code></pre>
+      </div>
+
+      <div class="text-pair">
+        <div class="original-text">
+          A single convolutional layer with kernel width $k < n$ does not
+          connect all pairs of input and output positions. Doing so requires a
+          stack of $O(n/k)$ convolutional layers in the case of contiguous
+          kernels, or $O(\log_k(n))$ in the case of dilated convolutions [18],
+          increasing the length of the longest paths between any two positions
+          in the network.
+        </div>
+        <div class="translation">
+          <p>
+            單層核寬度 $k < n$
+            的卷積層<strong>無法連接所有輸入和輸出位置對</strong>。要做到這一點，對於連續核，需要<strong
+              >堆疊 $O(n/k)$ 個卷積層</strong
+            >，或者對於膨脹卷積 [18]，需要 $O(\log_k(n))$
+            層，從而增加了網路中任意兩個位置之間的最長路徑長度。
+          </p>
+        </div>
+      </div>
+
+      <div class="key-concept">
+        <h4>🏗️ CNN 的層級結構</h4>
+        <p>
+          <strong>問題：</strong>單層 CNN 只能看到局部（核大小
+          $k$），如何看到全域？
+        </p>
+        <p><strong>解決方案：</strong>堆疊多層！</p>
+        <pre><code>層 1：每個位置看 k 個鄰居
+層 2：每個位置看 k² 個鄰居 (透過層 1)
+層 3：每個位置看 k³ 個鄰居
+...
+層 log_k(n)：每個位置看整個序列
+
+例子：k=3, n=27
+- 需要 log₃(27) = 3 層才能覆蓋全域
+- Self-Attention：只需 1 層！</code></pre>
+      </div>
+
+      <div class="text-pair">
+        <div class="original-text">
+          Convolutional layers are generally more expensive than recurrent
+          layers, by a factor of $k$. Separable convolutions [6], however,
+          decrease the complexity considerably, to $O(k \cdot n \cdot d + n
+          \cdot d^2)$. Even with $k = n$, however, the complexity of a separable
+          convolution is equal to the combination of a self-attention layer and
+          a point-wise feed-forward layer, the approach we take in our model.
+        </div>
+        <div class="translation">
+          <p>
+            卷積層通常比遞歸層<strong>更昂貴</strong>，係數為 $k$。然而，<strong
+              >可分離卷積</strong
+            >
+            [6] 可以顯著降低複雜度，降至 $O(k \cdot n \cdot d + n \cdot
+            d^2)$。但即使 $k =
+            n$，可分離卷積的複雜度也等於<strong>自注意力層加上逐點前饋層</strong>的組合，這正是我們在模型中採取的方法。
+          </p>
+        </div>
+      </div>
+
+      <div class="solution">
+        <h4>✅ 最終選擇：Self-Attention + FFN</h4>
+        <p><strong>設計決策：</strong></p>
+        <ul>
+          <li>
+            ✅ <strong>Self-Attention：</strong>處理長距離依賴（$O(1)$ 路徑）+
+            完全並行（$O(1)$ 順序操作）
+          </li>
+          <li>
+            ✅
+            <strong>FFN（Feed-Forward Network）：</strong
+            >增加非線性表達能力（類似 CNN 的逐點變換）
+          </li>
+        </ul>
+        <p>
+          <strong>結果：</strong>Transformer = Self-Attention +
+          FFN，兼具「全域視野」和「表達能力」！
+        </p>
+      </div>
+
+      <div class="text-pair">
+        <div class="original-text">
+          As side benefit, self-attention could yield more interpretable models.
+          We inspect attention distributions from our models and present and
+          discuss examples in the appendix. Not only do individual attention
+          heads clearly learn to perform different tasks, many appear to exhibit
+          behavior related to the syntactic and semantic structure of the
+          sentences.
+        </div>
+        <div class="translation">
+          <p>
+            作為附帶好處，自注意力可以<strong>產生更可解釋的模型</strong>。我們檢查了模型的注意力分佈，並在附錄中呈現和討論示例。不僅各個注意力頭明顯學會執行不同的任務，許多還表現出與句子的<strong>句法和語義結構相關</strong>的行為。
+          </p>
+        </div>
+      </div>
+
+      <div class="key-concept">
+        <h4>🔍 可解釋性優勢（Interpretability）</h4>
+        <p><strong>Self-Attention 的額外好處：</strong>可視化注意力權重！</p>
+        <ul>
+          <li>
+            <strong>RNN/CNN：</strong
+            >隱藏狀態是「黑盒子」，難以理解模型在「看」什麼。
+          </li>
+          <li>
+            <strong>Self-Attention：</strong>可以畫出「誰在看誰」的注意力矩陣。
+          </li>
+        </ul>
+        <p><strong>發現：</strong></p>
+        <ul>
+          <li>某些 head 專注於<strong>句法關係</strong>（如主詞-動詞）。</li>
+          <li>
+            某些 head 專注於<strong>語義關係</strong>（如「making ... more
+            difficult」的長距離依賴）。
+          </li>
+        </ul>
+        <p><em>→ 論文附錄有詳細的注意力可視化範例（Figure 3-5）。</em></p>
+      </div>
+
+      <div class="nav-bar">
+        <a href="03-2-model-architecture-components.html" class="nav-btn">
+          ← 上一頁：Model Architecture (2/2)
+        </a>
+        <a href="05-training.html" class="nav-btn primary">
+          下一頁：Training →
+        </a>
+      </div>
+
+      <div
+        style="
+          margin-top: 40px;
+          padding: 20px;
+          background: #ecf0f1;
+          border-radius: 5px;
+          text-align: center;
+        "
+      >
+        <p><strong>📚 學習檢查點</strong></p>
+        <p>在進入下一頁之前，請確保你理解：</p>
+        <ul style="text-align: left; max-width: 600px; margin: 20px auto">
+          <li>
+            ✅ Self-Attention 在「並行能力」($O(1)$) 和「長距離依賴」($O(1)$)
+            上都是最優的
+          </li>
+          <li>✅ 當 $n < d$ 時（NLP 常見情況），Self-Attention 比 RNN 更快</li>
+          <li>✅ RNN 的致命缺點是「順序操作」($O(n)$)，無法並行訓練</li>
+          <li>✅ CNN 需要多層堆疊才能覆蓋全域，而 Self-Attention 只需一層</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
