@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chapter 01: 四大範式的演進 | AI Paper Archaeology</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Serif+TC:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../styles/global.css" />
+    <style>
+      body {
+        font-family: "Inter", "Microsoft JhengHei", sans-serif;
+        background: #FDFBF7;
+        color: #1a1a1a;
+        line-height: 1.8;
+      }
+
+      /* Chapter Header */
+      .chapter-header {
+        position: relative;
+        height: 60vh;
+        min-height: 500px;
+        display: flex;
+        align-items: flex-end;
+        padding-bottom: 60px;
+        overflow: hidden;
+      }
+
+      .header-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('images/four_paradigms_geology.png');
+        background-size: cover;
+        background-position: center;
+        z-index: 1;
+      }
+
+      .header-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+        z-index: 2;
+      }
+
+      .header-content {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 40px;
+        color: white;
+      }
+
+      .chapter-num {
+        font-family: "Inter", sans-serif;
+        font-size: 0.9rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #C5A059;
+        margin-bottom: 10px;
+        display: block;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      }
+
+      .chapter-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin: 0 0 20px 0;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        color: #FFFFFF;
+      }
+
+      /* Content Container */
+      .content-container {
+        max-width: 900px; /* Wider for side-by-side */
+        margin: 0 auto;
+        padding: 80px 40px;
+      }
+
+      /* Typography */
+      p {
+        font-size: 1.125rem;
+        margin-bottom: 2rem;
+        color: #333;
+      }
+
+      h2 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2rem;
+        margin-top: 4rem;
+        margin-bottom: 1.5rem;
+        color: #000;
+        border-bottom: 2px solid #C5A059;
+        padding-bottom: 10px;
+        display: inline-block;
+      }
+
+      h3 {
+        font-family: "Inter", sans-serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-top: 3rem;
+        margin-bottom: 1rem;
+        color: #1a1a1a;
+      }
+
+      /* Deep Dive Block */
+      .deep-dive-block {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin: 60px 0;
+        align-items: start;
+      }
+
+      .original-text {
+        background: #f5f5f5;
+        padding: 25px;
+        border-radius: 8px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.9rem;
+        color: #444;
+        line-height: 1.6;
+        border-left: 4px solid #999;
+      }
+
+      .analysis-text {
+        font-size: 1.05rem;
+        color: #333;
+      }
+
+      .analysis-text strong {
+        color: #C5A059;
+      }
+
+      .chatgpt-insight {
+        margin-top: 20px;
+        background: #F0F7FF;
+        border: 1px solid #CCE5FF;
+        padding: 15px;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        color: #00509E;
+      }
+
+      .chatgpt-badge {
+        display: inline-block;
+        background: #0070f3;
+        color: white;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Math Block */
+      .math-block {
+        text-align: center;
+        background: white;
+        padding: 30px;
+        margin: 40px 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        font-family: "Times New Roman", serif;
+        font-size: 1.5rem;
+        font-style: italic;
+      }
+
+      /* Paper Clip Image */
+      .paper-clip {
+        background: #fff;
+        border: 1px solid #eee;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      }
+
+      .paper-clip img {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      .caption {
+        font-size: 0.85rem;
+        color: #888;
+        text-align: center;
+        font-style: italic;
+      }
+
+      /* Navigation Footer */
+      .nav-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 100px;
+        padding-top: 40px;
+        border-top: 1px solid #eee;
+      }
+
+      .nav-link {
+        color: #000;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      @media (max-width: 900px) {
+        .deep-dive-block { grid-template-columns: 1fr; gap: 20px; }
+        .content-container { padding: 40px 20px; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <header class="chapter-header">
+      <div class="header-bg"></div>
+      <div class="header-overlay"></div>
+      <div class="header-content">
+        <span class="chapter-num">Chapter 01</span>
+        <h1 class="chapter-title">四大範式的演進</h1>
+        <p style="font-size: 1.2rem; color: rgba(255,255,255,0.9); max-width: 600px;">
+          原文深度解析：從特徵工程到提示工程的數學與哲學轉向
+        </p>
+      </div>
+    </header>
+
+    <article class="content-container">
+      
+      <p style="font-size: 1.2rem; color: #666; margin-bottom: 60px;">
+        本章將逐段拆解論文的第一章（Introduction），深入探討 NLP 發展史上的兩次「巨變」（Sea Changes），並從數學角度解釋為什麼 Prompt 能改變一切。
+      </p>
+
+      <h2>1. 歷史的起點：全監督學習 (Fully Supervised)</h2>
+      
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "Fully supervised learning, where a task-specific model is trained solely on a dataset of input-output examples for the target task, has long played a central role in many machine learning tasks..."<br><br>
+          "...early NLP models relied heavily on <strong>feature engineering</strong>... where NLP researchers or engineers used their domain knowledge to define and extract salient features from raw data."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>Paradigm 1: Feature Engineering (特徵工程)</strong>
+          </p>
+          <p>
+            在深度學習之前，AI 就像是一個需要老師手把手教的學徒。我們不能只給它資料，還要告訴它「看哪裡」。例如判斷情感，我們得手寫規則：檢查是否有「開心」、「悲傷」這些詞。
+          </p>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>這就是為什麼你現在不用寫 Regular Expression (正則表達式)。</strong></p>
+            <p>以前如果你想從一堆文字中抓出 Email 或電話號碼，你必須自己寫複雜的規則代碼 (Feature Engineering)。但在 ChatGPT 時代，你只需要說一句：「幫我列出裡面所有的 Email」，模型自己就能識別出這些特徵。你從「規則制定者」變成了「需求提出者」。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "With the advent of neural network models for NLP... focus shifted to <strong>architecture engineering</strong>, where inductive bias was rather provided through the design of a suitable network architecture conducive to learning such features."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>Paradigm 2: Architecture Engineering (架構工程)</strong>
+          </p>
+          <p>
+            深度學習帶來了第一次解放。我們不再設計特徵，而是設計「大腦結構」（CNN, RNN, LSTM）。透過設計神經網路的連接方式，讓模型自己去從數據中挖掘特徵。
+          </p>
+          <div class="paper-clip">
+            <img src="../論文原文/arXiv-2107.13586v1/fig/evolution/phase1.png" alt="Architecture Engineering">
+            <div class="caption">論文原圖：架構工程時代的關注點是模型結構</div>
+          </div>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>這就像你在選單中切換模型。</strong></p>
+            <p>以前的研究者需要花幾個月設計神經網絡的層數和結構。現在對你來說，這只是 ChatGPT 介面上的一個下拉選單：你選擇用 <code>GPT-4o</code> 還是 <code>o1-preview</code>。你依然在做選擇（選擇更強的架構），但你不再需要親手搭建它。</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>2. 第一次巨變：預訓練時代 (Pre-train & Fine-tune)</h2>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "However, from 2017-2019 there was a sea change... Specifically, the standard shifted to the <strong>pre-train and fine-tune</strong> paradigm."<br><br>
+          "In this paradigm, a model with a fixed architecture is pre-trained as a language model (LM)... The above pre-trained LM will be then adapted to different downstream tasks by introducing additional parameters and fine-tuning them."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>Paradigm 3: Objective Engineering (目標工程)</strong>
+          </p>
+          <p>
+            這就是 BERT 的時代。論文稱之為「目標工程」，因為這時候的重點在於設計預訓練和微調時的 Loss Function（損失函數）。
+          </p>
+          <p>
+            <strong>生活類比：</strong><br>
+            這就像是先讓學生去圖書館讀完所有的書（Pre-train），變成博學多聞的人。然後在考試前，針對特定科目（如法律或醫學）進行短期衝刺班（Fine-tune）。
+          </p>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>這就像你在商店下載特定的 "Custom GPTs"。</strong></p>
+            <p>以前為了讓 AI 懂法律，企業需要花大錢收集法律文件來「微調」(Fine-tune) 模型參數。雖然現在你也可以建立自己的 GPTs（上傳知識庫），但差別在於：傳統 Fine-tuning 是真的改變了模型的大腦神經連結（權重），而現在的 Custom GPT 更多是外掛知識庫，模型本體通常保持不變。</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>3. 第二次巨變：Prompt 的誕生</h2>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "Now, as of this writing in 2021, we are in the middle of a second sea change, in which the 'pre-train, fine-tune' procedure is replaced by one in which we dub <strong>'pre-train, prompt, and predict'</strong>."<br><br>
+          "Instead of adapting pre-trained LMs to downstream tasks... downstream tasks are reformulated to look more like those solved during the original LM training with the help of a textual prompt."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>Paradigm 4: Prompt Engineering (提示工程)</strong>
+          </p>
+          <p>
+            這就是本論文的核心貢獻。作者敏銳地觀察到，我們不再需要去適應任務，而是<strong>「把任務偽裝成語言模型原本就在做的事」</strong>。
+          </p>
+          <div class="math-block">
+            P(y | x) &nbsp; ➔ &nbsp; P(x)
+          </div>
+          <p>
+            <strong>數學解析：</strong><br>
+            過去我們是求條件機率 $P(y|x)$（給定輸入 $x$，求標籤 $y$）。<br>
+            現在我們把它變成了 $P(x)$（求文本序列的機率）。
+          </p>
+          <p>
+            例如：與其訓練一個模型去分類情感，不如直接給它一句話：<br>
+            <code>"這部電影很棒。總體來說，它是 [Z] 的。"</code><br>
+            然後讓模型去預測 [Z] 是什麼詞（例如 "精彩"）。
+          </p>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>這就是你在對話框裡做的所有事。</strong></p>
+            <p>當你在 ChatGPT 裡輸入：「請把這篇文章總結成三點：」，你其實就是在做這篇論文說的 <strong>Task Reformulation (任務重構)</strong>。</p>
+            <p>你沒有按下任何「總結按鈕」或調用「總結 API」，你是透過文字(Prompt) 把「總結任務」包裝成一個「文字接龍遊戲」。模型以為它只是在續寫你的句子，但實際上它幫你完成了工作。這就是 Paradigm 4 的本質。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="paper-clip">
+        <img src="images/prompt_mechanism_cn.png" alt="Prompting Mechanism Explained">
+        <div class="caption">圖解：Prompting 的核心機制——就像在玩填空遊戲</div>
+      </div>
+
+      <!-- Typology Tree Diagram -->
+      <style>
+        .tree-container {
+          overflow-x: auto;
+          padding: 40px 20px;
+          margin: 60px 0;
+          background: #fff;
+          border-radius: 8px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+          text-align: center;
+        }
+        .tree-title {
+          font-family: "Noto Serif TC", serif;
+          font-size: 1.5rem;
+          margin-bottom: 40px;
+          color: #1a1a1a;
+        }
+        .tree {
+          display: inline-flex;
+          align-items: flex-start;
+          gap: 20px;
+          text-align: center;
+        }
+        .node {
+          padding: 10px 15px;
+          border: 2px solid #ddd;
+          border-radius: 6px;
+          background: #f9f9f9;
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #333;
+          position: relative;
+          z-index: 2;
+          transition: all 0.3s ease;
+        }
+        .node:hover {
+          border-color: #C5A059;
+          background: #fffbf0;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 10px rgba(197, 160, 89, 0.2);
+        }
+        .root-node {
+          background: #1a1a1a;
+          color: #fff;
+          border: none;
+          padding: 15px 30px;
+          font-size: 1.1rem;
+        }
+        .branch {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: relative;
+        }
+        .sub-branches {
+          display: flex;
+          gap: 15px;
+          margin-top: 30px;
+          position: relative;
+        }
+        /* Connector Lines */
+        .sub-branches::before {
+          content: '';
+          position: absolute;
+          top: -15px;
+          left: 50%;
+          width: 2px;
+          height: 15px;
+          background: #ddd;
+        }
+        .branch-group {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: relative;
+        }
+        .branch-group::before {
+          content: '';
+          position: absolute;
+          top: -15px;
+          left: 50%;
+          width: 2px;
+          height: 15px;
+          background: #ddd;
+        }
+        /* Horizontal line connecting sub-branches */
+        .sub-branches > .branch-group:first-child::after {
+          content: '';
+          position: absolute;
+          top: -15px;
+          right: -50%; /* Extend to connect */
+          width: 50%;
+          height: 2px;
+          background: #ddd;
+          left: 50%;
+        }
+        .sub-branches > .branch-group:last-child::after {
+          content: '';
+          position: absolute;
+          top: -15px;
+          left: -50%;
+          width: 50%;
+          height: 2px;
+          background: #ddd;
+          right: 50%;
+        }
+        /* Middle connection for multiple items - simplified for CSS-only tree */
+        .tree-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .main-branches {
+          display: flex;
+          justify-content: center;
+          gap: 40px;
+          margin-top: 40px;
+          position: relative;
+        }
+        .main-branches::before {
+          content: '';
+          position: absolute;
+          top: -20px;
+          left: 50%;
+          width: 2px;
+          height: 20px;
+          background: #ccc;
+        }
+        .main-branches::after {
+          content: '';
+          position: absolute;
+          top: -20px;
+          left: 10%; /* Approximate width cover */
+          width: 80%;
+          height: 2px;
+          background: #ccc;
+        }
+        .main-branch-col {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: relative;
+        }
+        .main-branch-col::before {
+          content: '';
+          position: absolute;
+          top: -20px;
+          left: 50%;
+          width: 2px;
+          height: 20px;
+          background: #ccc;
+        }
+        .leaf-list {
+          margin-top: 15px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          position: relative;
+        }
+        .leaf-list::before {
+          content: '';
+          position: absolute;
+          top: -15px;
+          left: 50%;
+          width: 2px;
+          height: 15px;
+          background: #eee;
+        }
+        .leaf {
+          font-size: 0.8rem;
+          color: #666;
+          padding: 4px 10px;
+          border: 1px solid #eee;
+          border-radius: 4px;
+          background: #fff;
+        }
+      </style>
+
+      <div class="tree-container">
+        <div class="tree-title">Prompting Methods Typology (分類學)</div>
+        <div class="tree-wrapper">
+          <div class="node root-node">Prompting Methods</div>
+          
+          <div class="main-branches">
+            <!-- Branch 1 -->
+            <div class="main-branch-col">
+              <div class="node">Pre-trained Models</div>
+              <div class="leaf-list">
+                <div class="leaf">Left-to-Right (GPT)</div>
+                <div class="leaf">Masked (BERT)</div>
+                <div class="leaf">Encoder-Decoder (T5)</div>
+              </div>
+            </div>
+
+            <!-- Branch 2 -->
+            <div class="main-branch-col">
+              <div class="node">Prompt Engineering</div>
+              <div class="leaf-list">
+                <div class="leaf">Shape (Cloze/Prefix)</div>
+                <div class="leaf">Manual Template</div>
+                <div class="leaf">Automated (Mining/Soft)</div>
+              </div>
+            </div>
+
+            <!-- Branch 3 -->
+            <div class="main-branch-col">
+              <div class="node">Answer Engineering</div>
+              <div class="leaf-list">
+                <div class="leaf">Shape (Token/Span)</div>
+                <div class="leaf">Manual Design</div>
+                <div class="leaf">Automated Search</div>
+              </div>
+            </div>
+
+            <!-- Branch 4 -->
+            <div class="main-branch-col">
+              <div class="node">Multi-Prompt</div>
+              <div class="leaf-list">
+                <div class="leaf">Ensemble</div>
+                <div class="leaf">Augmentation</div>
+                <div class="leaf">Decomposition</div>
+              </div>
+            </div>
+
+            <!-- Branch 5 -->
+            <div class="main-branch-col">
+              <div class="node">Training Strategies</div>
+              <div class="leaf-list">
+                <div class="leaf">Tuning-free</div>
+                <div class="leaf">Fixed-LM</div>
+                <div class="leaf">Prompt+LM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top: 30px; font-size: 0.85rem; color: #999;">*這張圖是整篇論文的導航地圖，接下來的章節將逐一解鎖這些分支。</p>
+      </div>
+
+      <h2>4. 為什麼這很重要？</h2>
+      <p>
+        這篇論文的分類體系，解釋了為什麼後來 ChatGPT 會如此成功。ChatGPT 其實就是將 Paradigm 4 推向了極致：它不需要針對每個使用者的問題去「微調」參數，它只需要透過 Prompt（也就是你的提問），利用它強大的 $P(x)$ 預測能力，接龍出你想要的答案。
+      </p>
+      <p>
+        在接下來的章節中，我們將深入探討：如果我們決定採用第四範式，我們該選擇什麼樣的模型？（GPT, BERT, 還是 T5？）
+      </p>
+
+      <div class="nav-footer">
+        <a href="index.html" class="nav-link">← 回目錄</a>
+        <a href="02-pre-trained-models.html" class="nav-link">下一章：預訓練模型的選擇 →</a>
+      </div>
+
+    </article>
+
+  </body>
+</html>

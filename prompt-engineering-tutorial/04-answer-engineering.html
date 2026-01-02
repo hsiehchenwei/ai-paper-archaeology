@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chapter 04: 答案工程 | AI Paper Archaeology</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Serif+TC:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../styles/global.css" />
+    <style>
+      body {
+        font-family: "Inter", "Microsoft JhengHei", sans-serif;
+        background: #FDFBF7;
+        color: #1a1a1a;
+        line-height: 1.8;
+      }
+
+      /* Chapter Header */
+      .chapter-header {
+        position: relative;
+        height: 60vh;
+        min-height: 500px;
+        display: flex;
+        align-items: flex-end;
+        padding-bottom: 60px;
+        overflow: hidden;
+      }
+
+      .header-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('images/answer_mapping.png');
+        background-size: cover;
+        background-position: center;
+        z-index: 1;
+      }
+
+      .header-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+        z-index: 2;
+      }
+
+      .header-content {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 40px;
+        color: white;
+      }
+
+      .chapter-num {
+        font-family: "Inter", sans-serif;
+        font-size: 0.9rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #C5A059;
+        margin-bottom: 10px;
+        display: block;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      }
+
+      .chapter-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin: 0 0 20px 0;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        color: #FFFFFF;
+      }
+
+      /* Content Container */
+      .content-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 80px 40px;
+      }
+
+      /* Typography */
+      p {
+        font-size: 1.125rem;
+        margin-bottom: 2rem;
+        color: #333;
+      }
+
+      h2 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2rem;
+        margin-top: 4rem;
+        margin-bottom: 1.5rem;
+        color: #000;
+        border-bottom: 2px solid #C5A059;
+        padding-bottom: 10px;
+        display: inline-block;
+      }
+
+      /* Deep Dive Block */
+      .deep-dive-block {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin: 60px 0;
+        align-items: start;
+      }
+
+      .original-text {
+        background: #f5f5f5;
+        padding: 25px;
+        border-radius: 8px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.9rem;
+        color: #444;
+        line-height: 1.6;
+        border-left: 4px solid #999;
+      }
+
+      .analysis-text {
+        font-size: 1.05rem;
+        color: #333;
+      }
+
+      .analysis-text strong {
+        color: #C5A059;
+      }
+
+      .chatgpt-insight {
+        margin-top: 20px;
+        background: #F0F7FF;
+        border: 1px solid #CCE5FF;
+        padding: 15px;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        color: #00509E;
+      }
+
+      .chatgpt-badge {
+        display: inline-block;
+        background: #0070f3;
+        color: white;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Mapping Box */
+      .mapping-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        background: white;
+        border: 2px solid #eee;
+        border-radius: 8px;
+        padding: 30px;
+        margin: 40px 0;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      }
+      
+      .mapping-group {
+        text-align: center;
+      }
+      
+      .mapping-title {
+        font-size: 0.85rem;
+        color: #999;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        display: block;
+      }
+      
+      .mapping-item {
+        background: #f0f0f0;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-family: monospace;
+        margin: 5px;
+        display: inline-block;
+      }
+
+      .arrow {
+        font-size: 2rem;
+        color: #C5A059;
+      }
+
+      .nav-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 100px;
+        padding-top: 40px;
+        border-top: 1px solid #eee;
+      }
+
+      .nav-link {
+        color: #000;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      @media (max-width: 900px) {
+        .deep-dive-block { grid-template-columns: 1fr; gap: 20px; }
+        .content-container { padding: 40px 20px; }
+        .mapping-box { flex-direction: column; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <header class="chapter-header">
+      <div class="header-bg"></div>
+      <div class="header-overlay"></div>
+      <div class="header-content">
+        <span class="chapter-num">Chapter 04</span>
+        <h1 class="chapter-title">答案工程</h1>
+        <p style="font-size: 1.2rem; color: rgba(255,255,255,0.9); max-width: 600px;">
+          AI 說的「好」不等於標籤上的「正面」。如何將語言模型的發散思維，收斂為精確的答案？
+        </p>
+      </div>
+    </header>
+
+    <article class="content-container">
+      
+      <p style="font-size: 1.2rem; color: #666; margin-bottom: 60px;">
+        很多人以為 Prompt 寫好就結束了，但其實「答案」本身也需要設計。論文稱之為 <strong>Answer Engineering</strong>。這是一個將「自由文本」轉化為「結構化輸出」的關鍵過程。
+      </p>
+
+      <h2>1. 答案空間 (Answer Space) vs 標籤空間 (Label Space)</h2>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "Answer engineering aims to search for an answer space Z and a map to the original output Y that results in an effective predictive model."<br><br>
+          "In manual design, the space of potential answers Z and its mapping to Y are crafted manually..."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>兩個空間的映射</strong>
+          </p>
+          <p>
+            假設你要做情感分類，你的標籤（Label Space, Y）只有兩個：<code>Positive</code> 和 <code>Negative</code>。
+          </p>
+          <p>
+            但如果你問 AI：「這部電影怎麼樣？」，它可能會回答：<code>"Fantastic"</code>, <code>"Great"</code>, <code>"Terrible"</code>, <code>"Boring"</code>... 這些詞構成了答案空間（Answer Space, Z）。
+          </p>
+          <p>
+            Answer Engineering 的任務就是建立這兩者之間的橋樑。你需要告訴系統：「如果 AI 說 'Fantastic'，那就等於 'Positive'。」
+          </p>
+        </div>
+      </div>
+
+      <div class="mapping-box">
+        <div class="mapping-group">
+          <span class="mapping-title">Answer Space (Z)</span>
+          <div class="mapping-item">Fantastic</div>
+          <div class="mapping-item">Great</div>
+          <div class="mapping-item">Awesome</div>
+        </div>
+        <div class="arrow">➔</div>
+        <div class="mapping-group">
+          <span class="mapping-title">Mapping Function</span>
+          <div class="mapping-item">Verbalizer</div>
+        </div>
+        <div class="arrow">➔</div>
+        <div class="mapping-group">
+          <span class="mapping-title">Label Space (Y)</span>
+          <div class="mapping-item" style="background: #e6fffa; color: #0070f3; font-weight: bold;">Positive</div>
+        </div>
+      </div>
+
+      <h2>2. 為什麼這很重要？</h2>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "In many cases, the answer space Z is the space of all tokens... In these cases, it is most common to directly map answer z to the final output y using the identity mapping."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>無約束 vs 有約束</strong>
+          </p>
+          <p>
+            在翻譯任務中，Answer Space 是無限的（所有可能的句子）。但在分類任務中，Answer Space 必須被嚴格限制。
+          </p>
+          <p>
+            如果不做 Answer Engineering，你的 AI 系統就會變得很不可控。例如你期待它輸出 "True" 或 "False"，結果它輸出了 "Maybe" 或 "Correct"，這會導致你的程式碼無法解析結果。
+          </p>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>這就是為什麼你需要 "JSON Mode"。</strong></p>
+            <p>在使用 ChatGPT API 時，你可能用過 <code>response_format={"type": "json_object"}</code>，或者在 Prompt 裡寫：「請只回答 Yes 或 No，不要有多餘解釋」。</p>
+            <p>這些操作的本質，全都是 Answer Engineering。你在強迫 AI 的 Answer Space 收斂到你定義的 JSON Schema 或特定關鍵字上，以便你的程式能正確讀取。這篇論文在 2021 年就將這種「約束輸出」的行為理論化了。</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>3. 答案空間設計 (Answer Space Design)</h2>
+      <p>
+        決定了形狀後，接下來的問題是：我們該選擇哪些詞作為答案？
+      </p>
+
+      <h3>A. Manual Design (手工設計)</h3>
+      <p>
+        最直觀的方法。人類覺得哪個詞好，就用哪個。
+      </p>
+      <ul>
+        <li><strong>Unconstrained Spaces</strong>: 不限制答案。例如生成任務，所有詞彙表裡的詞都是潛在答案。</li>
+        <li><strong>Constrained Spaces</strong>: 限制答案範圍。例如分類任務，我們規定只能輸出 "Positive" 或 "Negative"。</li>
+      </ul>
+
+      <h3>B. Automated Search (自動化搜索)</h3>
+      <p>
+        這部分是論文的精華之一。研究者發現，人類定義的標籤（Label）往往不是模型最喜歡的。
+      </p>
+      
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "Discrete Answer Search... It is possible that manually created answers are sub-optimal... We define a function that generates a paraphrased set of answers... The probability of the final output is then defined as the marginal probability."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>離散答案搜索 (Discrete Answer Search)</strong>
+          </p>
+          <p>
+            如果模型對 "Excellent" 的響應比 "Positive" 更強烈，為什麼我們要強迫它用 "Positive"？
+          </p>
+          <p>論文提出了幾種自動尋找最佳答案詞的方法：</p>
+          <ol>
+            <li><strong>Answer Paraphrasing (答案改寫)</strong>：利用回譯（Back-translation）技術，把標籤翻譯成其他語言再翻回來，產生多個候選詞（如 "Great", "Good", "Nice"），然後讓模型自己選它最喜歡的那個。</li>
+            <li><strong>Prune-then-Search (先剪枝再搜索)</strong>：先從詞彙表中篩選出高頻詞，再計算這些詞與目標類別的關聯度，找出最佳代表詞（Verbalizer）。</li>
+            <li><strong>Label Decomposition (標籤拆解)</strong>：對於複雜標籤如 <code>per:city_of_death</code>，直接拆解成 <code>person</code>, <code>city</code>, <code>death</code> 三個詞來計算機率。</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="chatgpt-insight">
+        <span class="chatgpt-badge">現代使用對照</span>
+        <p><strong>從 Verbalizer 到 DSPy / Optimization。</strong></p>
+        <p>在 GPT-3/4 時代，模型對自然語言的理解能力極強，我們通常不再需要去微調 "Positive" 還是 "Great" 這種細節詞彙，直接用人類直覺的詞彙通常效果就不錯。</p>
+        <p>但是，這個「自動優化」的概念演變成了現代的 <strong>Prompt Optimization 框架</strong>（如 DSPy）。我們不再只優化單個單詞，而是讓 AI 自動優化整個 Prompt 結構和範例，這本質上就是 Answer Engineering 與 Template Engineering 的集大成者。</p>
+      </div>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "Continuous Answer Search... Very few works explore the possibility of using soft answer tokens which can be optimized through gradient descent... assign a virtual token for each class label."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>連續答案搜索 (Continuous Answer Search)</strong>
+          </p>
+          <p>
+            這是一個更大膽的想法：為什麼答案必須是人類語言？
+          </p>
+          <p>
+            我們可以為每個類別訓練一個「虛擬向量」(Virtual Token)。這個向量不需要對應任何英文字，它只是高維空間中的一個點，專門用來代表這個類別。這就像是讓 AI 發明自己的語言來標記答案。
+          </p>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <a href="03-prompt-engineering-basics.html" class="nav-link">← 上一章：提示工程基礎</a>
+        <a href="05-multi-prompt-learning.html" class="nav-link">下一章：多重提示學習 →</a>
+      </div>
+
+    </article>
+
+  </body>
+</html>
+

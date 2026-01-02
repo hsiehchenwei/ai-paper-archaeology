@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chapter 07: 應用與未來 | AI Paper Archaeology</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Serif+TC:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../styles/global.css" />
+    <style>
+      body {
+        font-family: "Inter", "Microsoft JhengHei", sans-serif;
+        background: #FDFBF7;
+        color: #1a1a1a;
+        line-height: 1.8;
+      }
+
+      /* Chapter Header */
+      .chapter-header {
+        position: relative;
+        height: 60vh;
+        min-height: 500px;
+        display: flex;
+        align-items: flex-end;
+        padding-bottom: 60px;
+        overflow: hidden;
+      }
+
+      .header-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('images/future_city.png');
+        background-size: cover;
+        background-position: center;
+        z-index: 1;
+      }
+
+      .header-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+        z-index: 2;
+      }
+
+      .header-content {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 40px;
+        color: white;
+      }
+
+      .chapter-num {
+        font-family: "Inter", sans-serif;
+        font-size: 0.9rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #C5A059;
+        margin-bottom: 10px;
+        display: block;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      }
+
+      .chapter-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin: 0 0 20px 0;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        color: #FFFFFF;
+      }
+
+      /* Content Container */
+      .content-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 80px 40px;
+      }
+
+      /* Typography */
+      p {
+        font-size: 1.125rem;
+        margin-bottom: 2rem;
+        color: #333;
+      }
+
+      h2 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2rem;
+        margin-top: 4rem;
+        margin-bottom: 1.5rem;
+        color: #000;
+        border-bottom: 2px solid #C5A059;
+        padding-bottom: 10px;
+        display: inline-block;
+      }
+
+      h3 {
+        font-family: "Inter", sans-serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-top: 3rem;
+        margin-bottom: 1rem;
+        color: #1a1a1a;
+      }
+
+      /* Deep Dive Block */
+      .deep-dive-block {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin: 60px 0;
+        align-items: start;
+      }
+
+      .original-text {
+        background: #f5f5f5;
+        padding: 25px;
+        border-radius: 8px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.9rem;
+        color: #444;
+        line-height: 1.6;
+        border-left: 4px solid #999;
+      }
+
+      .analysis-text {
+        font-size: 1.05rem;
+        color: #333;
+      }
+
+      .analysis-text strong {
+        color: #C5A059;
+      }
+
+      .chatgpt-insight {
+        margin-top: 20px;
+        background: #F0F7FF;
+        border: 1px solid #CCE5FF;
+        padding: 15px;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        color: #00509E;
+      }
+
+      .chatgpt-badge {
+        display: inline-block;
+        background: #0070f3;
+        color: white;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Future Box */
+      .future-box {
+        background: #1a1a1a;
+        color: #fff;
+        padding: 40px;
+        border-radius: 12px;
+        margin: 60px 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .future-box::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, #0070f3, #C5A059);
+      }
+
+      .future-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        color: #fff;
+      }
+
+      .future-text {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        color: #ffffff; /* 強制白色文字 */
+      }
+
+      .future-box ul li {
+        color: #ffffff; /* 強制列表文字為白色 */
+        margin-bottom: 10px;
+      }
+
+      .nav-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 100px;
+        padding-top: 40px;
+        border-top: 1px solid #eee;
+      }
+
+      .nav-link {
+        color: #000;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      @media (max-width: 900px) {
+        .deep-dive-block { grid-template-columns: 1fr; gap: 20px; }
+        .content-container { padding: 40px 20px; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <header class="chapter-header">
+      <div class="header-bg"></div>
+      <div class="header-overlay"></div>
+      <div class="header-content">
+        <span class="chapter-num">Chapter 07</span>
+        <h1 class="chapter-title">應用與未來</h1>
+        <p style="font-size: 1.2rem; color: rgba(255,255,255,0.9); max-width: 600px;">
+          從 2021 年的預言，看 2026 年的現實。Prompt Engineering 如何從一種技巧，演變成構建 AI 應用的基礎設施？
+        </p>
+      </div>
+    </header>
+
+    <article class="content-container">
+      
+      <p style="font-size: 1.2rem; color: #666; margin-bottom: 60px;">
+        在這篇論文發表的 2021 年，Prompting 還只是一種「新興的 NLP 範式」。作者列舉了許多潛在的應用場景，如今大多已成為我們日常使用 AI 的標準方式。
+      </p>
+
+      <h2>1. 知識探勘 (Knowledge Probing)</h2>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "Factual probing (a.k.a. fact retrieval) is one of the earliest scenarios... knowledge is retrieved by transforming the original input into a cloze prompt... e.g. 'iPod Touch is produced by [Z].'"
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>把模型當知識庫</strong>
+          </p>
+          <p>
+            論文最早的應用之一是 LAMA (Language Model Analysis)，測試模型到底記住了多少事實。
+          </p>
+          <p>
+            現在，這已經演變成了 RAG (Retrieval-Augmented Generation) 的反面——直接利用模型內在知識。雖然我們現在更傾向於用外部知識庫來減少幻覺，但「模型內在知識」依然是推理的基礎。
+          </p>
+        </div>
+      </div>
+
+      <h2>2. 元應用 (Meta-Applications)</h2>
+
+      <p>這部分非常有趣，論文預見了 Prompt 不僅能解決 NLP 任務，還能用來「改善模型本身」。</p>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "Dataset Construction: ...suppose we have an unlabeled dataset... we can use the following template... 'Write two sentences that mean the same thing. [X][Z]'"
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>合成數據生成 (Synthetic Data)</strong>
+          </p>
+          <p>
+            論文提到用 Prompt 來生成訓練數據。這在當時是為了省標註錢，現在則是因為「人類數據不夠用了」。
+          </p>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>GPT-4 訓練了 Llama 3。</strong></p>
+            <p>現在開源模型的強大，很大程度上歸功於使用了 GPT-4 生成的高質量合成數據進行微調。這篇論文在 2021 年就指出了這條路徑：用強模型的 Prompt 能力來生產數據，訓練弱模型。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "Debiasing: ...if the probability of 'Yes' is greater than 'No', then we would assume the given text contains violence... These two probability distributions... can be combined to suppress the undesired attribute."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>AI 自我審查 (Self-Correction)</strong>
+          </p>
+          <p>
+            論文提出可以用 Prompt 讓模型自我診斷偏見。
+          </p>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>Constitutional AI (憲法 AI)。</strong></p>
+            <p>Anthropic 的 Claude 模型使用的 Constitutional AI 技術，核心思想就是用一組 Prompt (憲法) 讓模型自我批評、自我修正。這正是論文中 Debiasing 思想的規模化實踐。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="future-box">
+        <div class="future-title">2021 -> 2026: 預言成真</div>
+        <p class="future-text">
+          這篇論文的偉大之處，在於它將 Prompt 從一種「小技巧」(Trick) 提升到了「範式」(Paradigm) 的高度。<br><br>
+          它預言了：
+          <ul>
+            <li>我們不再微調模型，而是微調 Prompt (In-context Learning)。</li>
+            <li>我們會用 Prompt 來連接不同的任務 (Agent)。</li>
+            <li>Prompt 會成為一種新的程式語言 (Prompt Engineering)。</li>
+          </ul>
+          現在，這一切都已發生。我們正生活在第四範式的世界裡。
+        </p>
+      </div>
+
+      <div class="nav-footer">
+        <a href="06-training-strategies.html" class="nav-link">← 上一章：訓練策略</a>
+        <a href="../index.html" class="nav-link">回首頁</a>
+      </div>
+
+    </article>
+
+  </body>
+</html>
+

@@ -217,6 +217,56 @@
     <priority>0.7</priority>
   </url>
   
+  <!-- Prompt Engineering Tutorial -->
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/prompt-engineering-tutorial/index.html</loc>
+    <lastmod>2026-01-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/prompt-engineering-tutorial/01-four-paradigms.html</loc>
+    <lastmod>2026-01-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/prompt-engineering-tutorial/02-pre-trained-models.html</loc>
+    <lastmod>2026-01-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/prompt-engineering-tutorial/03-prompt-engineering-basics.html</loc>
+    <lastmod>2026-01-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/prompt-engineering-tutorial/04-answer-engineering.html</loc>
+    <lastmod>2026-01-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/prompt-engineering-tutorial/05-multi-prompt-learning.html</loc>
+    <lastmod>2026-01-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/prompt-engineering-tutorial/06-training-strategies.html</loc>
+    <lastmod>2026-01-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/prompt-engineering-tutorial/07-applications-and-future.html</loc>
+    <lastmod>2026-01-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- Articles (Knowledge Notes) -->
   <url>
     <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/articles/gpt3-inference-detailed.html</loc>

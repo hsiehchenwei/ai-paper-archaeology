@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chapter 02: 預訓練模型的選擇 | AI Paper Archaeology</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Serif+TC:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../styles/global.css" />
+    <style>
+      body {
+        font-family: "Inter", "Microsoft JhengHei", sans-serif;
+        background: #FDFBF7;
+        color: #1a1a1a;
+        line-height: 1.8;
+      }
+
+      /* Chapter Header */
+      .chapter-header {
+        position: relative;
+        height: 60vh;
+        min-height: 500px;
+        display: flex;
+        align-items: flex-end;
+        padding-bottom: 60px;
+        overflow: hidden;
+      }
+
+      .header-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('images/model_types_robots.png');
+        background-size: cover;
+        background-position: center;
+        z-index: 1;
+      }
+
+      .header-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+        z-index: 2;
+      }
+
+      .header-content {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 40px;
+        color: white;
+      }
+
+      .chapter-num {
+        font-family: "Inter", sans-serif;
+        font-size: 0.9rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #C5A059;
+        margin-bottom: 10px;
+        display: block;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      }
+
+      .chapter-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin: 0 0 20px 0;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        color: #FFFFFF;
+      }
+
+      /* Content Container */
+      .content-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 80px 40px;
+      }
+
+      /* Typography */
+      p {
+        font-size: 1.125rem;
+        margin-bottom: 2rem;
+        color: #333;
+      }
+
+      h2 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2rem;
+        margin-top: 4rem;
+        margin-bottom: 1.5rem;
+        color: #000;
+        border-bottom: 2px solid #C5A059;
+        padding-bottom: 10px;
+        display: inline-block;
+      }
+
+      /* Deep Dive Block */
+      .deep-dive-block {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin: 60px 0;
+        align-items: start;
+      }
+
+      .original-text {
+        background: #f5f5f5;
+        padding: 25px;
+        border-radius: 8px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.9rem;
+        color: #444;
+        line-height: 1.6;
+        border-left: 4px solid #999;
+      }
+
+      .analysis-text {
+        font-size: 1.05rem;
+        color: #333;
+      }
+
+      .analysis-text strong {
+        color: #C5A059;
+      }
+
+      .chatgpt-insight {
+        margin-top: 20px;
+        background: #F0F7FF;
+        border: 1px solid #CCE5FF;
+        padding: 15px;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        color: #00509E;
+      }
+
+      .chatgpt-badge {
+        display: inline-block;
+        background: #0070f3;
+        color: white;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .nav-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 100px;
+        padding-top: 40px;
+        border-top: 1px solid #eee;
+      }
+
+      .nav-link {
+        color: #000;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      @media (max-width: 900px) {
+        .deep-dive-block { grid-template-columns: 1fr; gap: 20px; }
+        .content-container { padding: 40px 20px; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <header class="chapter-header">
+      <div class="header-bg"></div>
+      <div class="header-overlay"></div>
+      <div class="header-content">
+        <span class="chapter-num">Chapter 02</span>
+        <h1 class="chapter-title">預訓練模型的選擇</h1>
+        <p style="font-size: 1.2rem; color: rgba(255,255,255,0.9); max-width: 600px;">
+          不是每個模型都適合玩 Prompt：GPT, BERT 與 T5 的性格分析
+        </p>
+      </div>
+    </header>
+
+    <article class="content-container">
+      
+      <p style="font-size: 1.2rem; color: #666; margin-bottom: 60px;">
+        在確定了「Prompt」這個方向後，下一個問題是：我們該用誰？這篇論文系統性地比較了當時最強的三類模型：Left-to-Right (GPT), Masked (BERT), 和 Encoder-Decoder (T5)。
+      </p>
+
+      <figure style="margin: 40px 0;">
+        <img src="images/comic_models.png" alt="AI Models Comic: GPT, BERT, T5" style="width: 100%; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        <figcaption style="text-align: center; font-size: 0.9rem; color: #666; margin-top: 10px;">
+          AI 模型的三種人格：話癆鸚鵡 (GPT)、克漏字偵探 (BERT)、精準翻譯官 (T5)
+        </figcaption>
+      </figure>
+
+      <h2>1. 天選之子：Left-to-Right LM (GPT 系列)</h2>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "Left-to-right LMs (L2R LMs), a variety of auto-regressive LM, predict the upcoming words or assign a probability P(x) to a sequence of words..."<br><br>
+          "The probability is commonly broken down using the chain rule in a left-to-right fashion: P(x) = P(x1) × ... P(xn|x1...xn-1)."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>單向生成模型 (GPT)</strong>
+          </p>
+          <p>
+            這是最標準的語言模型，像一隻只會往下說話的鸚鵡。它的原理很簡單：根據上文，猜測下一個字是什麼。
+          </p>
+          <p>
+            雖然在 BERT 出現時，這種單向結構被認為「不夠聰明」（因為看不到下文），但這篇論文指出，正是這種「接龍」特性，讓它成為 Prompt 的最佳載體。因為 Prompt 的本質就是「給個開頭，請你接下去」。
+          </p>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>這就是為什麼它是 "Chat" GPT。</strong></p>
+            <p>當你在使用 ChatGPT 時，你會發現它是逐字吐出來的（Streaming）。這正是 Left-to-Right 架構的特徵。它永遠在做同一件事：根據你給的 Prompt (上文)，預測下一個字。這種架構最適合「生成式」任務，比如寫文章、寫代碼。</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>2. 閱讀高手：Masked LM (BERT 系列)</h2>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "One popular bidirectional objective function... is the masked language model (MLM)... which aims to predict masked text pieces based on surrounded context."<br><br>
+          "In prompting methods, MLMs are generally most suitable for natural language understanding... (e.g., text classification...)"
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>雙向填空模型 (BERT)</strong>
+          </p>
+          <p>
+            BERT 是一個拿著放大鏡的偵探。它能同時看到上文和下文，任務是填補中間被挖掉的空缺 (Mask)。
+          </p>
+          <p>
+            論文指出，這種模型非常適合做「完形填空」型的 Prompt (Cloze Prompt)。例如：<br>
+            <code>"這部電影很無聊。情感：[MASK]"</code>
+          </p>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>它現在活在 "Embeddings" 裡。</strong></p>
+            <p>雖然你在聊天時很少直接跟 BERT 對話，但它無處不在。當你使用 RAG (檢索增強生成) 搜尋文件時，背後幫你把文字變成向量 (Vector) 進行比對的，通常就是 BERT 的後代。它不善言辭（生成長文能力弱），但非常擅長「理解」和「分類」。</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>3. 翻譯官：Encoder-Decoder (T5, BART)</h2>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "The encoder-decoder model is a model that uses a left-to-right LM to decode y conditioned on a separate encoder for text x..."<br><br>
+          "Pre-trained models... can be naturally used to text generation tasks... However, recent studies reveal that other non-generation tasks... can be reformulated a generation problems."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>編碼-解碼模型 (T5)</strong>
+          </p>
+          <p>
+            這是傳統機器翻譯的標準架構：左邊一個 Encoder 負責聽（讀入原文），右邊一個 Decoder 負責說（輸出譯文）。
+          </p>
+          <p>
+            Google 的 T5 (Text-to-Text Transfer Transformer) 提倡「萬物皆文本」。透過 Prompt，它可以把翻譯、摘要、分類都變成「輸入文字 -> 輸出文字」的過程。
+          </p>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>這就是 Google Bard (Gemini 前身) 的起源。</strong></p>
+            <p>Google 一直堅信 Encoder-Decoder 是更強大的架構（因為 Encoder 可以雙向理解）。雖然現在主流大模型（如 Llama, GPT-4）大多回歸了純 Decoder (GPT-style) 架構，但 Encoder-Decoder 在翻譯和特定任務上依然有獨特優勢。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <a href="01-four-paradigms.html" class="nav-link">← 上一章：四大範式</a>
+        <a href="03-prompt-engineering-basics.html" class="nav-link">下一章：提示工程基礎 →</a>
+      </div>
+
+    </article>
+
+  </body>
+</html>
+

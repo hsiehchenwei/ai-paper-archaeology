@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chapter 05: 多重提示學習 | AI Paper Archaeology</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Serif+TC:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../styles/global.css" />
+    <style>
+      body {
+        font-family: "Inter", "Microsoft JhengHei", sans-serif;
+        background: #FDFBF7;
+        color: #1a1a1a;
+        line-height: 1.8;
+      }
+
+      /* Chapter Header */
+      .chapter-header {
+        position: relative;
+        height: 60vh;
+        min-height: 500px;
+        display: flex;
+        align-items: flex-end;
+        padding-bottom: 60px;
+        overflow: hidden;
+      }
+
+      .header-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('images/multi_prompt_orchestra.png');
+        background-size: cover;
+        background-position: center;
+        z-index: 1;
+      }
+
+      .header-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+        z-index: 2;
+      }
+
+      .header-content {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 40px;
+        color: white;
+      }
+
+      .chapter-num {
+        font-family: "Inter", sans-serif;
+        font-size: 0.9rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #C5A059;
+        margin-bottom: 10px;
+        display: block;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      }
+
+      .chapter-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin: 0 0 20px 0;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        color: #FFFFFF;
+      }
+
+      /* Content Container */
+      .content-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 80px 40px;
+      }
+
+      /* Typography */
+      p {
+        font-size: 1.125rem;
+        margin-bottom: 2rem;
+        color: #333;
+      }
+
+      h2 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2rem;
+        margin-top: 4rem;
+        margin-bottom: 1.5rem;
+        color: #000;
+        border-bottom: 2px solid #C5A059;
+        padding-bottom: 10px;
+        display: inline-block;
+      }
+
+      /* Deep Dive Block */
+      .deep-dive-block {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin: 60px 0;
+        align-items: start;
+      }
+
+      .original-text {
+        background: #f5f5f5;
+        padding: 25px;
+        border-radius: 8px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.9rem;
+        color: #444;
+        line-height: 1.6;
+        border-left: 4px solid #999;
+      }
+
+      .analysis-text {
+        font-size: 1.05rem;
+        color: #333;
+      }
+
+      .analysis-text strong {
+        color: #C5A059;
+      }
+
+      .chatgpt-insight {
+        margin-top: 20px;
+        background: #F0F7FF;
+        border: 1px solid #CCE5FF;
+        padding: 15px;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        color: #00509E;
+      }
+
+      .chatgpt-badge {
+        display: inline-block;
+        background: #0070f3;
+        color: white;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Strategy Box */
+      .strategy-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin: 40px 0;
+      }
+
+      .strategy-card {
+        background: white;
+        border: 1px solid #eee;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+      }
+
+      .strategy-icon {
+        font-size: 2rem;
+        margin-bottom: 15px;
+        display: block;
+      }
+
+      .strategy-title {
+        font-weight: 700;
+        margin-bottom: 10px;
+        display: block;
+        color: #1a1a1a;
+      }
+
+      .nav-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 100px;
+        padding-top: 40px;
+        border-top: 1px solid #eee;
+      }
+
+      .nav-link {
+        color: #000;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      @media (max-width: 900px) {
+        .deep-dive-block { grid-template-columns: 1fr; gap: 20px; }
+        .content-container { padding: 40px 20px; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <header class="chapter-header">
+      <div class="header-bg"></div>
+      <div class="header-overlay"></div>
+      <div class="header-content">
+        <span class="chapter-num">Chapter 05</span>
+        <h1 class="chapter-title">多重提示學習</h1>
+        <p style="font-size: 1.2rem; color: rgba(255,255,255,0.9); max-width: 600px;">
+          獨奏不如合奏。當單一 Prompt 無法解決問題時，我們需要集成、增強與分解。
+        </p>
+      </div>
+    </header>
+
+    <article class="content-container">
+      
+      <p style="font-size: 1.2rem; color: #666; margin-bottom: 60px;">
+        在前面的章節，我們假設只給 AI 一個 Prompt。但現實世界的問題往往很複雜，單一句話說不清楚。這時候，我們需要引入「多重提示」（Multi-Prompt Learning）。這不僅是技術的堆疊，更是 AI 思維的升級。
+      </p>
+
+      <h2>1. 提示增強 (Prompt Augmentation)</h2>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "Prompt augmentation, also sometimes called demonstration learning, provides a few additional answered prompts that can be used to demonstrate how the LM should provide the answer..."<br><br>
+          "For example, instead of just providing a prompt of 'China's capital is [Z].', the prompt can be prefaced by a few examples..."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>示範學習 (Demonstration Learning)</strong>
+          </p>
+          <p>
+            這就是我們現在常說的 <strong>Few-Shot Prompting</strong>。與其讓 AI 憑空猜測，不如先給它看幾個正確的例子。
+          </p>
+          <p>
+            論文指出，這種方法利用了語言模型學習「重複模式」的能力。
+          </p>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>這是 Chain-of-Thought (CoT) 的前身。</strong></p>
+            <p>雖然這篇論文發表時 CoT (2022) 還沒正式提出，但 Prompt Augmentation 的概念已經包含了 CoT 的種子。現在當你在 Prompt 裡寫：「Let's think step by step: First... Second...」，其實就是在做 Prompt Augmentation，你給了 AI 一個「思考過程」的範例，讓它模仿。</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>2. 提示集成 (Prompt Ensembling)</h2>
+
+      <figure style="margin: 40px 0;">
+        <img src="images/prompt_council.png" alt="Prompt Ensembling Council" style="width: 100%; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        <figcaption style="text-align: center; font-size: 0.9rem; color: #666; margin-top: 10px;">
+          三個臭皮匠，勝過一個諸葛亮。多個 Prompt 共同決策，能大幅降低錯誤率。
+        </figcaption>
+      </figure>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "Prompt ensembling is the process of using multiple unanswered prompts for an input... This sort of prompt ensembling can leverage the complementary advantages of different prompts."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>多數決 (Majority Voting)</strong>
+          </p>
+          <p>
+            如果一個 Prompt 可能會出錯，那就用五個不同的 Prompt 問同一個問題，然後看大多數的答案是什麼。
+          </p>
+          <p>
+            例如：想知道某句話的情感，可以分別問：<br>
+            1. "情感是？"<br>
+            2. "這句話讓人感覺？"<br>
+            3. "評價是正面還是負面？"<br>
+            然後綜合這三個結果。
+          </p>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>這就是 Self-Consistency。</strong></p>
+            <p>現在的高級 Prompting 技巧中，有一種叫 "Self-Consistency CoT"，就是讓模型生成多條推理路徑，然後選出現頻率最高的答案。這其實就是 Prompt Ensembling 的變體。</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>3. 提示分解 (Prompt Decomposition)</h2>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "One intuitive method to address this problem is to break down the holistic prompt into different sub-prompts, and then answer each sub-prompt separately."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>分而治之 (Divide and Conquer)</strong>
+          </p>
+          <p>
+            對於複雜任務（如命名實體識別 NER），直接問「把所有人名都找出來」可能很難。不如拆解成：「這段話裡有提到『張三』嗎？是人名嗎？」「有提到『台北』嗎？是地點嗎？」。
+          </p>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>這就是 AI Agents 的雛形。</strong></p>
+            <p>現在的 Agent (如 AutoGPT, LangChain) 工作流程，本質上就是將一個大目標（例如「幫我寫個貪吃蛇遊戲」）拆解成無數個小 Prompt（「先寫遊戲邏輯」、「再寫畫面渲染」、「最後寫控制輸入」）。這就是 Prompt Decomposition 的極致表現。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <a href="04-answer-engineering.html" class="nav-link">← 上一章：答案工程</a>
+        <a href="06-training-strategies.html" class="nav-link">下一章：訓練策略 →</a>
+      </div>
+
+    </article>
+
+  </body>
+</html>
+

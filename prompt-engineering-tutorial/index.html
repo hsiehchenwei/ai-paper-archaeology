@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt Engineering 論文深度解析 | AI Paper Archaeology</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Serif+TC:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../styles/global.css" />
+    <style>
+      :root {
+        --color-gold: #c5a059;
+      }
+
+      body {
+        font-family: "Inter", "Microsoft JhengHei", sans-serif;
+        background: #fdfbf7;
+        color: #1a1a1a;
+        line-height: 1.8;
+      }
+
+      /* Hero Section */
+      .hero-section {
+        position: relative;
+        height: 80vh;
+        min-height: 600px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .hero-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("images/index_hero_starmap.png");
+        background-size: cover;
+        background-position: center;
+        filter: brightness(0.6);
+        z-index: 1;
+      }
+
+      .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle at center,
+          rgba(0, 0, 0, 0.2) 0%,
+          rgba(0, 0, 0, 0.8) 100%
+        );
+        z-index: 2;
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 3;
+        text-align: center;
+        color: white;
+        padding: 0 20px;
+      }
+
+      .hero-tag {
+        font-family: "Inter", sans-serif;
+        font-size: 0.9rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--color-gold);
+        margin-bottom: 20px;
+        display: block;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+      }
+
+      .hero-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: 4rem;
+        font-weight: 700;
+        margin: 0 0 30px 0;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+        color: white;
+      }
+
+      .hero-subtitle {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.5rem;
+        font-weight: 300;
+        opacity: 0.95;
+        max-width: 700px;
+        margin: 0 auto;
+        color: white;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+      }
+
+      /* Container */
+      .main-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 80px 40px;
+      }
+
+      /* Intro */
+      .intro-text {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.25rem;
+        line-height: 1.8;
+        color: #333;
+        margin-bottom: 60px;
+        text-align: center;
+      }
+
+      .drop-cap::first-letter {
+        float: left;
+        font-size: 4rem;
+        line-height: 0.8;
+        padding-right: 15px;
+        padding-top: 5px;
+        color: var(--color-gold);
+        font-family: "Noto Serif TC", serif;
+        font-weight: 700;
+      }
+
+      /* Curriculum Path */
+      .path-container {
+        position: relative;
+        padding-left: 40px;
+        border-left: 2px solid #e5e5e5;
+        margin-top: 60px;
+      }
+
+      .chapter-card {
+        position: relative;
+        background: white;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 40px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+        display: block;
+        color: inherit;
+      }
+
+      .chapter-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border-color: var(--color-gold);
+      }
+
+      .chapter-marker {
+        position: absolute;
+        left: -51px;
+        top: 30px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border: 4px solid var(--color-gold);
+        border-radius: 50%;
+        z-index: 2;
+      }
+
+      .chapter-num {
+        font-family: "Inter", sans-serif;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #999;
+        margin-bottom: 10px;
+        display: block;
+      }
+
+      .chapter-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #1a1a1a;
+      }
+
+      .chapter-desc {
+        font-size: 1rem;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      /* Meta Info */
+      .chapter-meta {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #f5f5f5;
+        font-size: 0.85rem;
+        color: #888;
+        display: flex;
+        gap: 20px;
+      }
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      /* Footer */
+      .footer {
+        text-align: center;
+        padding: 60px 0;
+        color: #999;
+        font-size: 0.9rem;
+        border-top: 1px solid #eee;
+        margin-top: 80px;
+      }
+
+      @media (max-width: 768px) {
+        .hero-title {
+          font-size: 2.5rem;
+        }
+        .main-container {
+          padding: 40px 20px;
+        }
+        .path-container {
+          padding-left: 20px;
+          border-left: none;
+        }
+        .chapter-marker {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hero -->
+    <header class="hero-section">
+      <div class="hero-bg"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <span class="hero-tag">Curriculum Volume. 04</span>
+        <h1 class="hero-title">提示工程的理論星圖</h1>
+        <p class="hero-subtitle">
+          Pre-train, Prompt, and Predict (2021)<br />
+          從這裡開始，我們學會了繪製與 AI 對話的地圖。
+        </p>
+      </div>
+    </header>
+
+    <div class="main-container">
+      <!-- Introduction -->
+      <div class="intro-text">
+        <p class="drop-cap">
+          如果不了解這篇論文，你就無法真正理解 Prompt Engineering。
+        </p>
+        <p>
+          在 ChatGPT 出現的前一年，Liu
+          等人發表了這篇綜述論文。這不只是一份文獻整理，更是一份<strong>「預言書」</strong>。它在那個黑魔法橫行的時代，為
+          Prompt 建立了一套嚴謹的分類學（Taxonomy）。今天我們所使用的
+          CoT、RAG、Agent，都能在這張星圖中找到它們的座標。
+        </p>
+        <p>準備好了嗎？讓我們展開這張星圖，開始這場考古之旅。</p>
+      </div>
+
+      <!-- Path -->
+      <div class="path-container">
+        <!-- Chapter 1 -->
+        <a href="01-four-paradigms.html" class="chapter-card">
+          <div class="chapter-marker"></div>
+          <span class="chapter-num">Chapter 01 • Introduction</span>
+          <div class="chapter-title">四大範式的演進 (The Four Paradigms)</div>
+          <div class="chapter-desc">
+            回顧 NLP
+            歷史的四次革命。從特徵工程到提示工程，理解為什麼我們最終選擇了「對話」作為與
+            AI 互動的介面。
+          </div>
+          <div class="chapter-meta">
+            <span class="meta-item">⏱️ 15 min</span>
+            <span class="meta-item">📚 對應原文 §1, §2</span>
+          </div>
+        </a>
+
+        <!-- Chapter 2 -->
+        <a href="02-pre-trained-models.html" class="chapter-card">
+          <div class="chapter-marker"></div>
+          <span class="chapter-num">Chapter 02 • Foundation</span>
+          <div class="chapter-title">預訓練模型的選擇 (Pre-trained Models)</div>
+          <div class="chapter-desc">
+            工欲善其事，必先利其器。深入比較 Left-to-Right (GPT), Masked (BERT),
+            Encoder-Decoder (T5) 等不同架構對 Prompt 的影響。
+          </div>
+          <div class="chapter-meta">
+            <span class="meta-item">⏱️ 20 min</span>
+            <span class="meta-item">📚 對應原文 §3</span>
+          </div>
+        </a>
+
+        <!-- Chapter 3 -->
+        <a href="03-prompt-engineering-basics.html" class="chapter-card">
+          <div class="chapter-marker"></div>
+          <span class="chapter-num">Chapter 03 • Design</span>
+          <div class="chapter-title">
+            提示工程基礎 (Prompt Engineering Basics)
+          </div>
+          <div class="chapter-desc">
+            如何設計一個好的 Prompt？從完形填空 (Cloze) 到前綴提示
+            (Prefix)，再到自動化模板搜索 (Template Search)。
+          </div>
+          <div class="chapter-meta">
+            <span class="meta-item">⏱️ 25 min</span>
+            <span class="meta-item">📚 對應原文 §4</span>
+          </div>
+        </a>
+
+        <!-- Chapter 4 -->
+        <a href="04-answer-engineering.html" class="chapter-card">
+          <div class="chapter-marker"></div>
+          <span class="chapter-num">Chapter 04 • Output</span>
+          <div class="chapter-title">答案映射工程 (Answer Engineering)</div>
+          <div class="chapter-desc">
+            當模型吐出 "Amazing" 時，我們如何知道它是「正面評價」？深入解析
+            Answer Space 與 Mapping 的設計藝術。
+          </div>
+          <div class="chapter-meta">
+            <span class="meta-item">⏱️ 15 min</span>
+            <span class="meta-item">📚 對應原文 §5</span>
+          </div>
+        </a>
+
+        <!-- Chapter 5 -->
+        <a href="05-multi-prompt-learning.html" class="chapter-card">
+          <div class="chapter-marker"></div>
+          <span class="chapter-num">Chapter 05 • Advanced</span>
+          <div class="chapter-title">多重提示學習 (Multi-Prompt Learning)</div>
+          <div class="chapter-desc">
+            一個 Prompt 不夠，那就用五個。探索
+            Ensemble（集成）、Augmentation（增強）與
+            Composition（組合）的高級技巧。
+          </div>
+          <div class="chapter-meta">
+            <span class="meta-item">⏱️ 20 min</span>
+            <span class="meta-item">📚 對應原文 §6</span>
+          </div>
+        </a>
+
+        <!-- Chapter 6 -->
+        <a href="06-training-strategies.html" class="chapter-card">
+          <div class="chapter-marker"></div>
+          <span class="chapter-num">Chapter 06 • Training</span>
+          <div class="chapter-title">訓練策略 (Training Strategies)</div>
+          <div class="chapter-desc">
+            要不要更新參數？Zero-shot, Few-shot, Fine-tuning,
+            Tuning-free，搞懂這些術語背後的權衡取捨。
+          </div>
+          <div class="chapter-meta">
+            <span class="meta-item">⏱️ 20 min</span>
+            <span class="meta-item">📚 對應原文 §7</span>
+          </div>
+        </a>
+
+        <!-- Chapter 7 -->
+        <a href="07-applications-and-future.html" class="chapter-card">
+          <div class="chapter-marker"></div>
+          <span class="chapter-num">Chapter 07 • Future</span>
+          <div class="chapter-title">應用與未來 (Applications & Future)</div>
+          <div class="chapter-desc">
+            從 2021 年的預言，看 2026 年的現實。Prompt Engineering
+            如何從一種技巧，演變成構建 AI 應用的基礎設施？
+          </div>
+          <div class="chapter-meta">
+            <span class="meta-item">⏱️ 15 min</span>
+            <span class="meta-item">📚 對應原文 §8</span>
+          </div>
+        </a>
+      </div>
+
+      <div style="text-align: center; margin-top: 60px">
+        <a href="../index.html" style="color: #999; text-decoration: none"
+          >← 回到首頁</a
+        >
+      </div>
+    </div>
+
+    <footer class="footer">© 2026 AI Paper Archaeology</footer>
+  </body>
+</html>

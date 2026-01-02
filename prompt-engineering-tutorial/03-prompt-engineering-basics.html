@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chapter 03: 提示工程基礎 | AI Paper Archaeology</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Serif+TC:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../styles/global.css" />
+    <style>
+      body {
+        font-family: "Inter", "Microsoft JhengHei", sans-serif;
+        background: #FDFBF7;
+        color: #1a1a1a;
+        line-height: 1.8;
+      }
+
+      /* Chapter Header */
+      .chapter-header {
+        position: relative;
+        height: 60vh;
+        min-height: 500px;
+        display: flex;
+        align-items: flex-end;
+        padding-bottom: 60px;
+        overflow: hidden;
+      }
+
+      .header-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('images/cloze_vs_prefix.png');
+        background-size: cover;
+        background-position: center;
+        z-index: 1;
+      }
+
+      .header-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+        z-index: 2;
+      }
+
+      .header-content {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 40px;
+        color: white;
+      }
+
+      .chapter-num {
+        font-family: "Inter", sans-serif;
+        font-size: 0.9rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #C5A059;
+        margin-bottom: 10px;
+        display: block;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      }
+
+      .chapter-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin: 0 0 20px 0;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        color: #FFFFFF;
+      }
+
+      /* Content Container */
+      .content-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 80px 40px;
+      }
+
+      /* Typography */
+      p {
+        font-size: 1.125rem;
+        margin-bottom: 2rem;
+        color: #333;
+      }
+
+      h2 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2rem;
+        margin-top: 4rem;
+        margin-bottom: 1.5rem;
+        color: #000;
+        border-bottom: 2px solid #C5A059;
+        padding-bottom: 10px;
+        display: inline-block;
+      }
+
+      /* Deep Dive Block */
+      .deep-dive-block {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin: 60px 0;
+        align-items: start;
+      }
+
+      .original-text {
+        background: #f5f5f5;
+        padding: 25px;
+        border-radius: 8px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.9rem;
+        color: #444;
+        line-height: 1.6;
+        border-left: 4px solid #999;
+      }
+
+      .analysis-text {
+        font-size: 1.05rem;
+        color: #333;
+      }
+
+      .analysis-text strong {
+        color: #C5A059;
+      }
+
+      .chatgpt-insight {
+        margin-top: 20px;
+        background: #F0F7FF;
+        border: 1px solid #CCE5FF;
+        padding: 15px;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        color: #00509E;
+      }
+
+      .chatgpt-badge {
+        display: inline-block;
+        background: #0070f3;
+        color: white;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Formula Box */
+      .formula-box {
+        background: white;
+        border: 2px solid #eee;
+        border-radius: 8px;
+        padding: 30px;
+        margin: 40px 0;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      }
+
+      .math {
+        font-family: "Times New Roman", serif;
+        font-size: 1.5rem;
+        font-style: italic;
+        margin-bottom: 15px;
+      }
+
+      .math-desc {
+        font-size: 0.9rem;
+        color: #666;
+      }
+
+      .nav-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 100px;
+        padding-top: 40px;
+        border-top: 1px solid #eee;
+      }
+
+      .nav-link {
+        color: #000;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      @media (max-width: 900px) {
+        .deep-dive-block { grid-template-columns: 1fr; gap: 20px; }
+        .content-container { padding: 40px 20px; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <header class="chapter-header">
+      <div class="header-bg"></div>
+      <div class="header-overlay"></div>
+      <div class="header-content">
+        <span class="chapter-num">Chapter 03</span>
+        <h1 class="chapter-title">提示工程基礎</h1>
+        <p style="font-size: 1.2rem; color: rgba(255,255,255,0.9); max-width: 600px;">
+          Prompt 不只是文字遊戲，它是嚴謹的數學函數。從 Cloze 到 Prefix，掌握提示的兩種基本型態。
+        </p>
+      </div>
+    </header>
+
+    <article class="content-container">
+      
+      <p style="font-size: 1.2rem; color: #666; margin-bottom: 60px;">
+        在這一章，我們將定義什麼是 Prompt。別被數學公式嚇到，這其實就是將你的問題放入一個「模板」中，讓 AI 幫你填空的過程。
+      </p>
+
+      <h2>1. Prompt 的數學定義</h2>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "A prompting function $f_{prompt}(x)$ is a function that converts the input into a specific form by inserting the input x and adding a slot [Z] where answer z may be filled later."<br><br>
+          "Apply a template, which is a textual string that has two slots: an input slot [X] for input x and an answer slot [Z]..."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>Prompt 函數</strong>
+          </p>
+          <p>
+            論文將 Prompt 定義為一個函數 $f_{prompt}$，它有兩個關鍵空位：
+          </p>
+          <ul style="list-style: none; padding-left: 0;">
+            <li><strong>[X] Input Slot</strong>：你要處理的資料（例如：「這部電影很爛」）。</li>
+            <li><strong>[Z] Answer Slot</strong>：你要 AI 填寫的答案（例如：「負面」）。</li>
+          </ul>
+          <p>
+            所謂的 Prompt Engineering，本質上就是設計這個「函數」，把你的原始資料 [X] 包裝成一個讓 AI 容易預測 [Z] 的形式。
+          </p>
+        </div>
+      </div>
+
+      <div class="formula-box">
+        <div class="math">x' = f_{prompt}(x)</div>
+        <div class="math-desc">將原始輸入 x 轉換為提示形式 x'</div>
+        <br>
+        <div style="text-align: left; background: #f9f9f9; padding: 20px; border-radius: 8px; font-family: monospace; font-size: 0.9rem;">
+          原始輸入 x: "I love this movie."<br>
+          模板 Template: "[X] Overall, it was a [Z] movie."<br>
+          <span style="color: #C5A059;">提示 x': "I love this movie. Overall, it was a [Z] movie."</span>
+        </div>
+      </div>
+
+
+      <h2>2. 兩大門派：Cloze vs Prefix</h2>
+
+      <p>
+        根據空位 [Z] 的位置，Prompt 主要分為兩種類型。這不僅僅是位置的差別，更決定了你該使用哪種 AI 模型。
+      </p>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "We will refer to the first variety of prompt with a slot to fill in the middle of the text as a <strong>cloze prompt</strong>..."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>類型一：完形填空 (Cloze Prompt)</strong>
+          </p>
+          <p>
+            這就是經典的「填空題」。答案 [Z] 藏在句子中間。
+          </p>
+          <p>
+            <strong>例子：</strong><br>
+            <code>"Twitter 的創始人是 [Z]，他在 2006 年創立了它。"</code>
+          </p>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>這是 BERT 的強項。</strong></p>
+            <p>這種方式現在較少直接用於對話，但在「知識探勘」或「事實查核」任務中依然有用。例如 Google 的搜尋建議其實就類似這種機制。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "...and the second variety of prompt where the input text comes entirely before z as a <strong>prefix prompt</strong>."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>類型二：前綴生成 (Prefix Prompt)</strong>
+          </p>
+          <p>
+            這就是「續寫」。答案 [Z] 在所有文字的最後面。
+          </p>
+          <p>
+            <strong>例子：</strong><br>
+            <code>"請翻譯以下句子：<br>Twitter 的創始人是誰？<br>Answer: [Z]"</code>
+          </p>
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>這就是 ChatGPT 的主流。</strong></p>
+            <p>你現在跟 ChatGPT 的每一次對話，本質上都是 Prefix Prompt。你把問題打在前面（Prefix），AI 在後面續寫答案。因為 GPT 模型是單向生成的（如第二章所述），它最擅長這種「接力賽」式的任務。</p>
+          </div>
+        </div>
+      </div>
+
+      <h2>3. 模板工程 (Template Engineering)</h2>
+      <p>
+        理解了這兩種形狀，你就掌握了 Prompt 的基礎。但這只是開始。真正的挑戰在於：<strong>如何找出最好的模板？</strong>
+      </p>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "Prompt template engineering, where a human engineer or algorithm searches for the best template for each task..."<br><br>
+          "Prompt templates can be manually designed or automatically searched in discrete space or continuous space."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>手工 vs 自動</strong>
+          </p>
+          <p>
+            論文將模板設計分為兩大類：
+          </p>
+          <ol>
+            <li><strong>Manual (手工設計)</strong>：依賴人類直覺。例如 LAMA 數據集就是人工寫的。缺點是「人類覺得合理的 Prompt，AI 不一定覺得好懂」。</li>
+            <li><strong>Automated (自動搜索)</strong>：讓算法去尋找最佳 Prompt。這又分為「離散」和「連續」兩種。</li>
+          </ol>
+        </div>
+      </div>
+
+      <h3>A. 離散模板搜索 (Discrete Template Search)</h3>
+      
+      <figure style="margin: 40px 0;">
+        <img src="images/automated_search.png" alt="Automated Prompt Search" style="width: 100%; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        <figcaption style="text-align: center; font-size: 0.9rem; color: #666; margin-top: 10px;">
+          從茫茫字海中「挖掘」出最佳 Prompt，就像淘金一樣。
+        </figcaption>
+      </figure>
+
+      <p>
+        如果你堅持 Prompt 必須是人類看得懂的文字，你可以用以下方法：
+      </p>
+      <ul style="padding-left: 20px;">
+        <li><strong>Prompt Mining (挖礦)</strong>：去 Wikipedia 找包含 [X] 和 [Z] 的句子，看看中間通常接什麼詞（Middle Words）。</li>
+        <li><strong>Prompt Paraphrasing (換句話說)</strong>：把一個種子 Prompt 翻譯成中文再翻譯回英文，產生多種變體，然後選效果最好的。</li>
+        <li><strong>Prompt Generation (生成)</strong>：直接訓練一個 T5 模型來幫你寫 Prompt。</li>
+      </ul>
+
+      <h3>B. 連續模板學習 (Continuous Template Learning)</h3>
+      <p>
+        <strong>"誰說 Prompt 一定要是人類語言？"</strong>
+      </p>
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "It is not necessary to limit the prompt to human-interpretable natural language... continuous prompts (a.k.a. soft prompts) perform prompting directly in the embedding space."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>軟提示 (Soft Prompts)</strong>
+          </p>
+          <p>
+            這是一個非常前衛的概念。如果我們跳過「文字」這層外衣，直接去優化輸入給模型的「向量」(Vector)，會發生什麼事？
+          </p>
+          <p>
+            結果發現，這些人類看不懂的「亂碼向量」，往往比人類精心設計的 Prompt 效果更好。這為後來的 Prompt Tuning 技術奠定了基礎（我們將在第六章詳細討論）。
+          </p>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <a href="02-pre-trained-models.html" class="nav-link">← 上一章：預訓練模型的選擇</a>
+        <a href="04-answer-engineering.html" class="nav-link">下一章：答案工程 →</a>
+      </div>
+
+    </article>
+
+  </body>
+</html>
+

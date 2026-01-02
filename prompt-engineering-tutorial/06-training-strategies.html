@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chapter 06: 訓練策略 | AI Paper Archaeology</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Serif+TC:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../styles/global.css" />
+    <style>
+      body {
+        font-family: "Inter", "Microsoft JhengHei", sans-serif;
+        background: #FDFBF7;
+        color: #1a1a1a;
+        line-height: 1.8;
+      }
+
+      /* Chapter Header */
+      .chapter-header {
+        position: relative;
+        height: 60vh;
+        min-height: 500px;
+        display: flex;
+        align-items: flex-end;
+        padding-bottom: 60px;
+        overflow: hidden;
+      }
+
+      .header-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('images/soft_prompt_tuning.png');
+        background-size: cover;
+        background-position: center;
+        z-index: 1;
+      }
+
+      .header-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+        z-index: 2;
+      }
+
+      .header-content {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 40px;
+        color: white;
+      }
+
+      .chapter-num {
+        font-family: "Inter", sans-serif;
+        font-size: 0.9rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #C5A059;
+        margin-bottom: 10px;
+        display: block;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      }
+
+      .chapter-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin: 0 0 20px 0;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        color: #FFFFFF;
+      }
+
+      /* Content Container */
+      .content-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 80px 40px;
+      }
+
+      /* Typography */
+      p {
+        font-size: 1.125rem;
+        margin-bottom: 2rem;
+        color: #333;
+      }
+
+      h2 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2rem;
+        margin-top: 4rem;
+        margin-bottom: 1.5rem;
+        color: #000;
+        border-bottom: 2px solid #C5A059;
+        padding-bottom: 10px;
+        display: inline-block;
+      }
+
+      /* Deep Dive Block */
+      .deep-dive-block {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin: 60px 0;
+        align-items: start;
+      }
+
+      .original-text {
+        background: #f5f5f5;
+        padding: 25px;
+        border-radius: 8px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.9rem;
+        color: #444;
+        line-height: 1.6;
+        border-left: 4px solid #999;
+      }
+
+      .analysis-text {
+        font-size: 1.05rem;
+        color: #333;
+      }
+
+      .analysis-text strong {
+        color: #C5A059;
+      }
+
+      .chatgpt-insight {
+        margin-top: 20px;
+        background: #F0F7FF;
+        border: 1px solid #CCE5FF;
+        padding: 15px;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        color: #00509E;
+      }
+
+      .chatgpt-badge {
+        display: inline-block;
+        background: #0070f3;
+        color: white;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Strategy Table */
+      .strategy-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 40px 0;
+        font-size: 0.9rem;
+      }
+
+      .strategy-table th, .strategy-table td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+      }
+
+      .strategy-table th {
+        background-color: #f5f5f5;
+        font-weight: 600;
+        color: #333; /* 強制深色文字 */
+      }
+
+      .status-frozen { color: #0070f3; font-weight: bold; }
+      .status-tuned { color: #d32f2f; font-weight: bold; }
+
+      .nav-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 100px;
+        padding-top: 40px;
+        border-top: 1px solid #eee;
+      }
+
+      .nav-link {
+        color: #000;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      @media (max-width: 900px) {
+        .deep-dive-block { grid-template-columns: 1fr; gap: 20px; }
+        .content-container { padding: 40px 20px; }
+        .strategy-table { display: block; overflow-x: auto; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <header class="chapter-header">
+      <div class="header-bg"></div>
+      <div class="header-overlay"></div>
+      <div class="header-content">
+        <span class="chapter-num">Chapter 06</span>
+        <h1 class="chapter-title">訓練策略</h1>
+        <p style="font-size: 1.2rem; color: rgba(255,255,255,0.9); max-width: 600px;">
+          四兩撥千斤的藝術：如何在不動用巨大算力的情況下，讓模型聽你的話？
+        </p>
+      </div>
+    </header>
+
+    <article class="content-container">
+      
+      <p style="font-size: 1.2rem; color: #666; margin-bottom: 60px;">
+        當模型變得越來越大（如 175B 的 GPT-3），重新訓練它幾乎是不可能的任務。這章探討了 5 種策略，告訴我們如何在「參數效率」與「模型效果」之間取得平衡。
+      </p>
+
+      <figure style="margin: 40px 0;">
+        <img src="images/comic_training.png" alt="Training Strategies Comic: Fine-tuning, Prompting, Soft Prompt" style="width: 100%; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        <figcaption style="text-align: center; font-size: 0.9rem; color: #666; margin-top: 10px;">
+          訓練策略三部曲：微調是動大腦手術，提示是心理諮商，軟提示是戴上魔法眼鏡
+        </figcaption>
+      </figure>
+
+      <h2>1. 五種策略總覽</h2>
+
+      <table class="strategy-table">
+        <thead>
+          <tr>
+            <th>策略名稱</th>
+            <th>模型參數 (LM)</th>
+            <th>提示參數 (Prompt)</th>
+            <th>現代類比</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Promptless Fine-tuning</td>
+            <td class="status-tuned">Tuned (微調)</td>
+            <td>-</td>
+            <td>傳統 BERT 微調</td>
+          </tr>
+          <tr>
+            <td><strong>Tuning-free Prompting</strong></td>
+            <td class="status-frozen">Frozen (凍結)</td>
+            <td class="status-frozen">Frozen (手寫)</td>
+            <td><strong>GPT-3 / ChatGPT</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Fixed-LM Prompt Tuning</strong></td>
+            <td class="status-frozen">Frozen (凍結)</td>
+            <td class="status-tuned">Tuned (訓練)</td>
+            <td><strong>LoRA / PEFT</strong></td>
+          </tr>
+          <tr>
+            <td>Fixed-prompt LM Tuning</td>
+            <td class="status-tuned">Tuned (微調)</td>
+            <td class="status-frozen">Frozen (手寫)</td>
+            <td>PET (Few-shot)</td>
+          </tr>
+          <tr>
+            <td>Prompt+LM Tuning</td>
+            <td class="status-tuned">Tuned (微調)</td>
+            <td class="status-tuned">Tuned (訓練)</td>
+            <td>P-Tuning</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>2. 零樣本學習 (Tuning-free Prompting)</h2>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "Tuning-free prompting directly generates the answers without changing the parameters of the pre-trained LMs based only on a prompt... This is traditionally called the zero-shot setting."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>不訓練，直接問</strong>
+          </p>
+          <p>
+            這是目前最主流的用法。我們完全不改動 GPT-4 的任何參數，只靠我們寫的 Prompt 來引導它。
+          </p>
+          <p>
+            優點是方便、便宜、不會有「災難性遺忘」（Catastrophic Forgetting）。缺點是你需要很強的 Prompt Engineering 技巧（就是我們正在學的這個）。
+          </p>
+        </div>
+      </div>
+
+      <h2>3. 軟提示微調 (Fixed-LM Prompt Tuning)</h2>
+
+      <div class="deep-dive-block">
+        <div class="original-text">
+          "Fixed-LM prompt tuning updates only the prompts' parameters... while keeping the entire pre-trained LM unchanged. Typical examples are Prefix-Tuning and WARP."
+        </div>
+        <div class="analysis-text">
+          <p>
+            <strong>凍結大腦，只換眼鏡</strong>
+          </p>
+          <p>
+            這是這篇論文最前瞻的部分之一。如果手寫 Prompt 效果不好，能不能讓 AI 自己「學」出一個最好的 Prompt？
+          </p>
+          <p>
+            這裡的 Prompt 不再是人類看得懂的文字（Discrete），而是機器看得懂的向量（Continuous/Soft）。我們凍結模型的大腦（參數），只在輸入端加一層可訓練的「濾鏡」。
+          </p>
+
+          <div class="chatgpt-insight">
+            <span class="chatgpt-badge">現代使用對照</span>
+            <p><strong>這就是 LoRA 的精神。</strong></p>
+            <p>雖然現在我們更多使用 LoRA (Low-Rank Adaptation) 來微調大模型，但它的核心精神與 Prompt Tuning 是一致的：<strong>Parameter-Efficient Fine-Tuning (PEFT)</strong>。我們不想動大模型的 1000 億個參數，我們只想訓練那 0.1% 的外掛參數，就能讓模型適應特定任務。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 技術解密區塊 -->
+      <div style="background: #2a2a2a; color: #fff; padding: 40px; border-radius: 12px; margin: 40px 0;">
+        <h3 style="color: #C5A059; margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 15px;">🛠️ 技術解密：如何「注入」向量？</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 20px;">
+          <div>
+            <h4 style="color: #aaa; font-size: 0.9rem; text-transform: uppercase;">1. 正常流程</h4>
+            <div style="background: #333; padding: 15px; border-radius: 6px; font-family: monospace; margin-bottom: 20px;">
+              文字 "Love" <br>
+              ↓ <br>
+              ID [2356] <br>
+              ↓ <br>
+              <span style="color: #4ADE80">向量 [0.1, -0.5, ...] (查表)</span> <br>
+              ↓ <br>
+              模型
+            </div>
+            <p style="font-size: 0.9rem; color: #ccc;">一般文字必須先查字典（Embedding Table）轉換成固定的向量。</p>
+          </div>
+
+          <div>
+            <h4 style="color: #aaa; font-size: 0.9rem; text-transform: uppercase;">2. Soft Prompt 流程</h4>
+            <div style="background: #333; padding: 15px; border-radius: 6px; font-family: monospace; margin-bottom: 20px;">
+              <span style="color: #F472B6">可訓練向量 P1 [x, y, z...]</span> <br>
+              + <br>
+              <span style="color: #4ADE80">固定向量 Input [0.1, -0.5, ...]</span> <br>
+              ↓ <br>
+              模型
+            </div>
+            <p style="font-size: 0.9rem; color: #ccc;">我們跳過查表，直接在輸入層「強行插入」一組可變數值 P1。訓練時，模型不動，只調整 P1 的數值，直到它能完美觸發模型輸出。</p>
+          </div>
+        </div>
+
+        <!-- 新增 Q&A -->
+        <div style="border-top: 1px solid #444; margin-top: 30px; padding-top: 20px;">
+          <h4 style="color: #fff; margin-bottom: 10px;">Q: 我能在 ChatGPT 裡輸入這些向量嗎？</h4>
+          <p style="color: #ccc; font-size: 0.95rem; margin-bottom: 10px;">
+            <strong>不行。</strong> ChatGPT 的網頁或 API 介面只接受「文字」（Text/Token）。你無法直接輸入 <code>[0.132, -0.998]</code> 這樣的數值給模型大腦。
+          </p>
+          <p style="color: #ccc; font-size: 0.95rem; margin-bottom: 0;">
+            這就是為什麼 <strong>Prompt Engineering (硬提示)</strong> 這麼重要——我們是在嘗試用「人類語言」去逼近那些「完美的向量」。
+            <br>
+            <span style="color: #C5A059;">• Soft Prompt (向量)</span>：直接用電極刺激大腦特定區域（只有醫生/開發者能做）。
+            <br>
+            <span style="color: #C5A059;">• Hard Prompt (文字)</span>：對著耳朵說話，試圖引發同樣的大腦反應（一般使用者能做）。
+          </p>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <a href="05-multi-prompt-learning.html" class="nav-link">← 上一章：多重提示學習</a>
+        <a href="07-applications-and-future.html" class="nav-link">下一章：應用與未來 →</a>
+      </div>
+
+    </article>
+
+  </body>
+</html>
+
