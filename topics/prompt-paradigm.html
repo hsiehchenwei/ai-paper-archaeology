@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>第四範式：Prompt 如何改變 AI 的對話方式 | AI Paper Archaeology</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../styles/global.css" />
+    <style>
+      * { box-sizing: border-box; }
+      
+      body {
+        font-family: "Inter", "Microsoft JhengHei", sans-serif;
+        background: #FDFBF7; /* 溫暖的紙張白 */
+        color: #1a1a1a;
+        line-height: 1.8;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Navigation - Minimal */
+      .nav-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 20px 40px;
+        z-index: 100;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .nav-logo {
+        color: white; /* 在深色圖片上顯示 */
+        font-weight: 700;
+        text-decoration: none;
+        letter-spacing: 0.05em;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      }
+
+      /* Cinematic Hero Section */
+      .hero-section {
+        position: relative;
+        height: 100vh; /* 全螢幕衝擊 */
+        min-height: 600px;
+        overflow: hidden;
+        display: flex;
+        align-items: flex-end; /* 內容置底 */
+        padding-bottom: 80px;
+      }
+
+      .hero-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('../images/creation_of_ai.png');
+        background-size: cover;
+        background-position: center;
+        z-index: 1;
+      }
+
+      .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          to bottom, 
+          rgba(0,0,0,0.3) 0%, 
+          rgba(0,0,0,0.5) 50%,
+          rgba(0,0,0,0.8) 100%
+        );
+        z-index: 2;
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 40px;
+        color: white;
+      }
+
+      .hero-tag {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+      }
+
+      .hero-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: 4.5rem; /* 超大標題 */
+        font-weight: 700;
+        line-height: 1.1;
+        margin: 0 0 20px 0;
+        color: #FFFFFF;
+        text-shadow: 0 4px 30px rgba(0,0,0,0.8);
+      }
+
+      .hero-subtitle {
+        font-size: 1.5rem;
+        font-weight: 300;
+        opacity: 0.95;
+        max-width: 700px;
+        line-height: 1.5;
+        color: #FFFFFF;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+      }
+
+      /* Storytelling Lead */
+      .story-container {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 100px 40px 60px;
+        position: relative;
+      }
+
+      .drop-cap::first-letter {
+        float: left;
+        font-family: "Noto Serif TC", serif;
+        font-size: 6rem;
+        line-height: 0.8;
+        padding-right: 20px;
+        padding-top: 4px;
+        color: #000;
+        font-weight: 700;
+      }
+
+      .story-text {
+        font-size: 1.25rem;
+        color: #333;
+        margin-bottom: 2rem;
+        font-family: "Noto Serif TC", serif; /* 用襯線體講故事 */
+      }
+      
+      h3 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-top: 3rem;
+        margin-bottom: 1.5rem;
+        color: #000;
+      }
+
+      /* Section Dividers */
+      .divider {
+        width: 60px;
+        height: 2px;
+        background: #000;
+        margin: 80px auto;
+      }
+      
+      /* Alchemy Section (Black Magic) */
+      .alchemy-section {
+        background: #1a1a1a;
+        color: #f0f0f0;
+        padding: 80px 40px;
+        margin: 60px 0;
+        border-radius: 8px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      }
+      
+      .alchemy-title {
+        font-family: "Noto Serif TC", serif;
+        color: #C5A059; /* Gold */
+        font-size: 2rem;
+        margin-bottom: 1rem;
+      }
+      
+      .spell-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+      }
+      
+      .spell-card {
+        background: rgba(255,255,255,0.05);
+        padding: 25px;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 6px;
+      }
+      
+      .spell-code {
+        font-family: monospace;
+        color: #4ADE80; /* Green */
+        background: rgba(0,0,0,0.5);
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        display: block;
+        font-size: 0.9rem;
+      }
+
+      /* Paradigm Section - Clean & Modern */
+      .paradigm-section {
+        background: white;
+        padding: 100px 0;
+      }
+
+      .section-header {
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto 80px;
+        padding: 0 20px;
+      }
+
+      .section-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+      }
+
+      .paradigm-grid {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 40px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px;
+      }
+
+      .paradigm-card {
+        padding: 40px;
+        border-top: 1px solid #eee;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .paradigm-card:hover {
+        background: #F8FAFC;
+        transform: translateY(-5px);
+      }
+
+      .paradigm-meta {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: #999;
+        margin-bottom: 15px;
+        display: block;
+      }
+
+      .paradigm-card.highlight .paradigm-meta {
+        color: #0070f3;
+        font-weight: 700;
+      }
+
+      .paradigm-name-en {
+        font-family: "Inter", sans-serif;
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 4px;
+        display: block;
+      }
+
+      .paradigm-name-cn {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #000;
+        margin-bottom: 20px;
+        display: block;
+      }
+
+      .paradigm-desc {
+        color: #555;
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+
+      /* Interactive Highlight for Current Paradigm */
+      .paradigm-card.highlight {
+        border-top: 4px solid #0070f3;
+        background: linear-gradient(to bottom, #F0F7FF 0%, white 100%);
+      }
+      
+      /* Future Analysis Box */
+      .future-box {
+        background: #F0F7FF;
+        border-left: 5px solid #0070f3;
+        padding: 40px;
+        margin: 60px 0;
+      }
+
+      /* Quote */
+      .quote-section {
+        background: #000;
+        color: white;
+        padding: 120px 40px;
+        text-align: center;
+        margin-top: 100px;
+      }
+
+      .quote-text {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2.5rem;
+        line-height: 1.4;
+        max-width: 900px;
+        margin: 0 auto 40px;
+      }
+
+      .quote-author {
+        font-size: 1rem;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      /* Footer */
+      .article-footer {
+        padding: 80px 40px;
+        text-align: center;
+        background: #FDFBF7;
+      }
+
+      .footer-links a {
+        color: #000;
+        text-decoration: none;
+        border-bottom: 1px solid #000;
+        padding-bottom: 2px;
+        font-weight: 600;
+        transition: opacity 0.2s;
+      }
+
+      .footer-links a:hover {
+        opacity: 0.6;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .hero-title { font-size: 2.8rem; }
+        .paradigm-grid { grid-template-columns: 1fr; }
+        .quote-text { font-size: 1.8rem; }
+        .spell-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Navigation -->
+    <nav class="nav-header">
+      <a href="../index.html" class="nav-logo">← AI Paper Archaeology</a>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-bg"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <span class="hero-tag">The Fourth Paradigm</span>
+        <h1 class="hero-title">當機器學會<br>聽懂你的話</h1>
+        <p class="hero-subtitle">
+          2020 年的一個深夜，AI 的歷史被改寫了。<br>
+          這是一場關於語言、機率與人類智慧的考古之旅。
+        </p>
+      </div>
+    </section>
+
+    <!-- Storytelling -->
+    <article class="story-container">
+      <div class="citation" style="margin-bottom: 60px; font-size: 0.9rem; color: #666; border-left: 2px solid #000; padding-left: 20px;">
+        <strong style="color: #000;">ARCHAEOLOGY NOTES</strong><br>
+        Source: Liu et al. (2021) "Pre-train, Prompt, and Predict"<br>
+        Location: Carnegie Mellon University
+      </div>
+
+      <p class="story-text drop-cap">
+        2020 年 5 月，舊金山的霧氣還未散去，OpenAI 的實驗室裡卻燈火通明。工程師們正盯著螢幕上跳動的游標，試圖理解剛剛發生的一切。
+      </p>
+      <p class="story-text">
+        他們正在測試最新的模型 GPT-3。在那個年代（2020），AI 開發的標準流程是嚴謹而繁瑣的：如果要讓 AI 翻譯一段法文，你需要準備數萬對的中法語料，然後進行漫長的微調（Fine-tuning）。
+      </p>
+      <p class="story-text">
+        但今天，有人嘗試了一件瘋狂的事：他沒有更新任何參數，只是在輸入框裡寫了一句簡單的指令：
+      </p>
+      <p class="story-text" style="font-family: 'Inter', sans-serif; background: #eee; padding: 20px; border-radius: 4px; font-size: 1rem;">
+        > Translate the following English text to French: "The era of prompting has begun."
+      </p>
+      <p class="story-text">
+        游標閃爍了一下，然後吐出了完美的法文。
+      </p>
+      <p class="story-text">
+        那一刻，房間裡的空氣凝固了。這不只是一個技術突破，這是一種全新的「溝通方式」。人類第一次發現，我們不需要像教小孩那樣手把手教機器（微調），我們只需要像對待同事一樣，用自然語言給出指示（提示）。
+      </p>
+      <p class="story-text">
+        這個現象在 2021 年被卡內基梅隆大學的研究者們正式命名。他們稱之為：<strong>第四範式（The Fourth Paradigm）</strong>。
+      </p>
+
+      <!-- Alchemy Era -->
+      <div class="alchemy-section">
+        <h3 class="alchemy-title">🕯️ 2020-2022：黑魔法時代</h3>
+        <p style="color: #ccc; margin-bottom: 30px;">
+          在理論尚未完備的初期，Prompt Engineering 更像是一種玄學（Alchemy）。工程師們在 Discord 和 GitHub 上交換著各種神秘的「咒語」，試圖馴服這個不穩定的巨獸。
+        </p>
+        
+        <div class="spell-grid">
+          <div class="spell-card">
+            <span class="spell-code">Let's think step by step</span>
+            <p style="font-size: 0.9rem; margin-top: 10px;">
+              <strong>思維鏈的雛形：</strong><br>
+              這句簡單的咒語，竟能讓 AI 的數學解題能力暴增。它強迫模型展現推理過程，而非直接瞎猜答案。
+            </p>
+          </div>
+          
+          <div class="spell-card">
+            <span class="spell-code">I will tip you $200</span>
+            <p style="font-size: 0.9rem; margin-top: 10px;">
+              <strong>賄賂與情緒勒索：</strong><br>
+              人們發現 AI 似乎有「情緒」。告訴它「這對我很重要」或「我會給你小費」，有時會得到更詳細的回答。
+            </p>
+          </div>
+          
+          <div class="spell-card">
+            <span class="spell-code">Act as a Python Expert...</span>
+            <p style="font-size: 0.9rem; margin-top: 10px;">
+              <strong>角色扮演 (Role-play)：</strong><br>
+              賦予 AI 一個身分（Persona），能顯著改變它的說話風格與專業度。這成為了後來 System Prompt 的基礎。
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+    </article>
+
+    <!-- Paradigm Section -->
+    <section class="paradigm-section">
+      <div class="section-header">
+        <h2 class="section-title">NLP 演進史：四座里程碑</h2>
+        <p style="color: #666; font-size: 1.1rem;">
+          如果把 AI 的發展看作是一場接力賽，那麼這四個階段代表了我們如何將「語言」的火炬傳遞給機器。
+        </p>
+      </div>
+
+      <div class="paradigm-grid">
+        <!-- Paradigm 1 -->
+        <div class="paradigm-card">
+          <span class="paradigm-meta">Phase 01</span>
+          <span class="paradigm-name-en">Feature Engineering</span>
+          <span class="paradigm-name-cn">特徵工程</span>
+          <p class="paradigm-desc">
+            <strong>人工規則時代。</strong><br>
+            語言學家像工匠一樣，手寫出一條條規則（正規表達式、詞性標註）。我們試圖教會機器什麼是「主詞」、什麼是「動詞」。
+          </p>
+        </div>
+
+        <!-- Paradigm 2 -->
+        <div class="paradigm-card">
+          <span class="paradigm-meta">Phase 02</span>
+          <span class="paradigm-name-en">Architecture Engineering</span>
+          <span class="paradigm-name-cn">架構工程</span>
+          <p class="paradigm-desc">
+            <strong>深度學習崛起。</strong><br>
+            我們不再教機器規則，而是設計大腦（CNN, RNN, LSTM）。讓神經網路自己去觀察數據中的規律。
+          </p>
+        </div>
+
+        <!-- Paradigm 3 -->
+        <div class="paradigm-card">
+          <span class="paradigm-meta">Phase 03</span>
+          <span class="paradigm-name-en">Objective Engineering</span>
+          <span class="paradigm-name-cn">目標工程</span>
+          <p class="paradigm-desc">
+            <strong>預訓練時代 (BERT)。</strong><br>
+            先讓模型閱讀海量書籍（Pre-train），再針對考試題目進行特訓（Fine-tune）。這一度是 NLP 的黃金標準。
+          </p>
+        </div>
+
+        <!-- Paradigm 4 -->
+        <div class="paradigm-card highlight">
+          <span class="paradigm-meta">Phase 04 • Current Era</span>
+          <span class="paradigm-name-en">Prompt Engineering</span>
+          <span class="paradigm-name-cn">提示工程</span>
+          <p class="paradigm-desc">
+            <strong>大模型時代 (GPT-3)。</strong><br>
+            我們不再改變模型，而是改變問題。所有的任務都被偽裝成「填空題」。我們學會了用 AI 的母語——機率——來與它對話。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Emotional Image Break -->
+    <figure style="margin: 100px auto; max-width: 1000px; padding: 0 20px;">
+      <img src="../images/mind_melding.png" alt="Harmony of Human and AI Minds" style="width: 100%; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+      <figcaption style="text-align: center; margin-top: 20px; font-family: 'Noto Serif TC', serif; color: #666; font-style: italic;">
+        從單向的指令，到雙向的共鳴。我們正在見證思維邊界的消融。
+      </figcaption>
+    </figure>
+
+    <!-- Future Analysis -->
+    <article class="story-container" style="padding-top: 0;">
+      <h3 style="text-align: center; margin-top: 0;">2026 現狀與未來分析</h3>
+      
+      <p class="story-text">
+        站在 2026 年回望，我們會發現那個充滿「咒語」的時代已經逐漸遠去。隨著模型能力（如 Gemini 3 Pro, GPT-5）的飛躍，Prompt 正在經歷一場<strong>「隱形化」</strong>的革命。
+      </p>
+
+      <div class="future-box">
+        <h4 style="margin-top: 0; color: #0070f3;">🔮 預言：Prompt 的終結？</h4>
+        <p style="margin-bottom: 20px;">
+          Prompt 並不會消失，但它將不再是使用者的負擔。我們正在進入<strong>「後提示時代」(Post-Prompt Era)</strong>：
+        </p>
+        <ul style="padding-left: 20px; line-height: 1.8; color: #333;">
+          <li><strong>意圖理解 (Intent Understanding)：</strong> AI 不再需要你字斟句酌。它能從你模糊的指令中，推斷出真實的意圖。</li>
+          <li><strong>隱性提示 (Implicit Prompting)：</strong> 系統會自動將使用者的簡單指令，即時編譯成複雜的高效 Prompt。</li>
+          <li><strong>從「指令」到「協作」：</strong> 我們不再是指揮官，而是協作者。未來的重點將從 Prompt Engineering 轉向 <strong>Agent Orchestration（代理編排）</strong>。</li>
+        </ul>
+      </div>
+
+      <p class="story-text">
+        Prompt 是人類與矽基智慧溝通的「過渡語言」。終有一天，語言將不再是障礙，意念即指令。
+      </p>
+    </article>
+
+    <!-- Quote Section -->
+    <section class="quote-section">
+      <p class="quote-text">
+        "Prompt 是人類寫給機器的情書，<br>
+        也是我們理解自己思維方式的鏡子。"
+      </p>
+      <span class="quote-author">AI Paper Archaeology • 2026</span>
+    </section>
+
+    <!-- Footer -->
+    <footer class="article-footer">
+      <div class="footer-links">
+        <a href="../index.html">← 返回首頁 (Back to Home)</a>
+      </div>
+      <p style="margin-top: 40px; color: #999; font-size: 0.8rem;">
+        © 2026 AI Paper Archaeology • Visualizing the History of Intelligence
+      </p>
+    </footer>
+
+  </body>
+</html>
