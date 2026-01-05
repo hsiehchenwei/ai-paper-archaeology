@@ -126,23 +126,26 @@
           <span class="updates-title">最新更新</span>
         </div>
         <div class="updates-list">
+          <a
+            href="articles/embedding-matrix-visual-guide.html"
+            class="update-item"
+          >
+            <span class="update-date">2026-01-05</span>
+            <span class="update-text"
+              >向量的真相：字母'A'的768個數字 - Token Embed 完全解析</span
+            >
+            <span class="update-badge">NEW</span>
+          </a>
           <a href="llm-visualization-zh/index.html" class="update-item">
             <span class="update-date">2026-01-05</span>
             <span class="update-text"
               >LLM 視覺化完整教學 - 從 nano-gpt 理解 GPT 運作原理</span
             >
-            <span class="update-badge">NEW</span>
           </a>
           <a href="prompt-engineering-tutorial/index.html" class="update-item">
             <span class="update-date">2026-01-02</span>
             <span class="update-text"
               >Prompt 提示詞範式革命 - 第四範式的理論正名</span
-            >
-          </a>
-          <a href="articles/gpt3-inference-detailed.html" class="update-item">
-            <span class="update-date">2026-01-02</span>
-            <span class="update-text"
-              >GPT-3 推理流程詳解 - 96 層 Transformer 運作機制</span
             >
           </a>
         </div>
@@ -479,10 +482,44 @@
           </div>
 
           <div class="magazine-grid">
-            <!-- Article 1: Featured (GPT-3 Inference) -->
+            <!-- Featured Article: Embedding Vector Guide -->
+            <a
+              href="articles/embedding-matrix-visual-guide.html"
+              class="magazine-card featured-article"
+            >
+              <div class="card-image-wrapper">
+                <img
+                  src="images/vector_decomposition.png"
+                  alt="Embedding Vector Guide Cover"
+                />
+              </div>
+              <div class="card-content">
+                <span
+                  class="card-tag"
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      #ffd700 0%,
+                      #ffed4e 100%
+                    );
+                    color: #1a1a1a;
+                  "
+                  >🔥 最新力作</span
+                >
+                <h3>向量的真相：字母'A'的768個數字</h3>
+                <p>
+                  從 GPT-2 的 Token Embed 出發，完整解析文字如何變成 768
+                  個真實的數字。 揭開 Embedding、Position
+                  Encoding、向量相加的秘密， 用真實數據帶你看懂高維向量空間。
+                </p>
+                <span class="read-more">深度閱讀 →</span>
+              </div>
+            </a>
+
+            <!-- Article 1: GPT-3 Inference -->
             <a
               href="articles/gpt3-inference-detailed.html"
-              class="magazine-card featured-article"
+              class="magazine-card"
             >
               <div class="card-image-wrapper">
                 <img
@@ -491,7 +528,14 @@
                 />
               </div>
               <div class="card-content">
-                <span class="card-tag">最新文章</span>
+                <span
+                  class="card-tag"
+                  style="
+                    background: var(--primary-light);
+                    color: var(--primary-color);
+                  "
+                  >推理流程</span
+                >
                 <h3>GPT-3 推理流程詳解</h3>
                 <p>
                   完整拆解 ChatGPT 回答問題時，背後發生的每一步：從 Tokenization
