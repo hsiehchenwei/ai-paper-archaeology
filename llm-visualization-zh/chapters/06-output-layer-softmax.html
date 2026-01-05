@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第七章：Output Layer 與 Softmax | nano-gpt 視覺化教學</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --hero-bg: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%);
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --deep-blue: #0f1419;
+            --matrix-green: #00ff41;
+            --purple: #9333ea;
+            --output-green: #32cd32;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.8;
+            color: #2c3e50;
+            background: #ffffff;
+        }
+
+        .hero-section {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--hero-bg);
+            overflow: hidden;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                180deg,
+                rgba(10, 14, 39, 0.3) 0%,
+                rgba(10, 14, 39, 0.85) 60%,
+                rgba(10, 14, 39, 0.95) 100%
+            );
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 0 20px;
+            max-width: 1000px;
+        }
+
+        .nano-gpt-badge {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid var(--gold);
+            padding: 10px 30px;
+            border-radius: 50px;
+            color: var(--gold);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            letter-spacing: 0.1em;
+        }
+
+        .hero-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 900;
+            color: #FFFFFF;
+            margin-bottom: 30px;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.8), 0 0 60px rgba(255, 215, 0, 0.3);
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            color: var(--gold);
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+            margin-bottom: 20px;
+        }
+
+        .story-container {
+            background: #ffffff;
+            margin-top: -50px;
+            position: relative;
+            z-index: 10;
+            border-radius: 30px 30px 0 0;
+            padding: 80px 40px;
+        }
+
+        .content-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .breadcrumb {
+            padding: 20px 40px;
+            background: rgba(10, 14, 39, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--gold);
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            opacity: 0.8;
+        }
+
+        .story-lead {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.5rem;
+            line-height: 2;
+            color: #1a1a1a;
+            margin: 40px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-left: 5px solid var(--gold);
+            border-radius: 10px;
+        }
+
+        h2 {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0a0e27;
+            margin: 60px 0 30px 0;
+            border-bottom: 3px solid var(--gold);
+            padding-bottom: 15px;
+        }
+
+        h3 {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.8rem;
+            color: #1a1f3a;
+            margin: 40px 0 20px 0;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+            border: 2px solid var(--gold);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+
+        .info-box-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.3rem;
+            color: var(--gold);
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .matrix-box {
+            background: #1a1f3a;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .matrix-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.3rem;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .code-visualization {
+            background: #1e1e1e;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .code-visualization pre {
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #d4d4d4;
+            margin: 0;
+        }
+
+        .code-comment { color: #6a9955; }
+        .code-keyword { color: #569cd6; }
+        .code-string { color: #ce9178; }
+        .code-number { color: #b5cea8; }
+
+        .step-box {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--gold);
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: var(--gold);
+            color: #0a0e27;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .step-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.4rem;
+            color: #0a0e27;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .pull-quote {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.8rem;
+            font-style: italic;
+            color: #0a0e27;
+            padding: 40px;
+            margin: 60px 0;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+            border-left: 5px solid var(--gold);
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .pull-quote::before {
+            content: '"';
+            position: absolute;
+            left: 15px;
+            top: 10px;
+            font-size: 4rem;
+            color: var(--gold);
+            opacity: 0.3;
+            font-family: Georgia, serif;
+        }
+
+        figure {
+            margin: 60px 0;
+            text-align: center;
+        }
+
+        figure img {
+            max-width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+        }
+
+        figcaption {
+            margin-top: 20px;
+            font-size: 1rem;
+            color: #666;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #fff8dc 0%, #fffaed 100%);
+            border: 2px solid var(--gold);
+            border-radius: 15px;
+            padding: 40px;
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .formula-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.3rem;
+            color: #0a0e27;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            color: #0a0e27;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        .formula-desc {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 20px;
+            line-height: 1.8;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .comparison-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-top: 4px solid var(--gold);
+            transition: transform 0.3s ease;
+        }
+
+        .comparison-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.2rem;
+            color: #0a0e27;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .footer-quote {
+            background: var(--hero-bg);
+            padding: 80px 40px;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .footer-quote-text {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 2rem;
+            color: var(--gold);
+            max-width: 800px;
+            margin: 0 auto 30px;
+            line-height: 1.8;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+        }
+
+        .footer-quote-author {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.2rem;
+            color: var(--silver);
+            font-weight: 300;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .story-container {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="breadcrumb">
+        <a href="../../index.html">🏠 首頁</a>
+        <span style="margin: 0 10px; color: #999;">/</span>
+        <a href="../index.html">📚 LLM 視覺化教學</a>
+        <span style="margin: 0 10px; color: #999;">/</span>
+        <span style="color: #666;">第七章：Output Layer 與 Softmax</span>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="nano-gpt-badge">nano-gpt · 最終輸出階段</div>
+            <h1 class="hero-title">Output Layer<br>與 Softmax</h1>
+            <p class="hero-subtitle">從向量到機率：預測下一個 Token</p>
+            <p style="font-size: 1rem; color: var(--silver); margin-top: 20px;">
+                Linear Projection → Softmax → Probability Distribution
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="story-container">
+        <div class="content-wrapper">
+            
+            <h2 style="border: none; margin-top: 0; text-align: center; color: var(--gold);">🗺️ 本章在架構中的位置</h2>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.08) 100%); border-color: var(--gold); margin: 40px 0 60px 0;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="display: inline-block; padding: 15px 40px; background: rgba(255, 215, 0, 0.2); border: 2px solid var(--gold); border-radius: 50px; font-size: 1.2rem; font-weight: 700; color: var(--gold);">
+                        📍 第七章：Output Layer 與 Softmax
+                    </div>
+                </div>
+                
+                <figure style="margin: 30px 0;">
+                    <img src="../../images/output_layer_focus_20260105223418.png" alt="Output Layer 架構特寫" style="max-width: 100%; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                    <figcaption style="margin-top: 20px; font-size: 1rem; color: #666; line-height: 1.8;">
+                        <strong style="color: #0a0e27;">Output Layer 位置</strong><br>
+                        這是模型的<span style="color: #ffd700; font-weight: 700;">最後階段</span>：<br>
+                        將 Transformer 的輸出轉換為下一個 token 的機率預測
+                    </figcaption>
+                </figure>
+
+                <div style="background: rgba(255, 255, 255, 0.6); padding: 25px; border-radius: 12px; margin-top: 30px;">
+                    <p style="margin: 0; text-align: center; color: #2c3e50; line-height: 1.9;">
+                        <strong style="color: #ffd700;">🎯 這是整個旅程的終點</strong><br>
+                        從輸入的文字，經過 Embedding、Transformer Blocks，<br>
+                        最終產生<strong>下一個 token 的機率分佈</strong>。
+                    </p>
+                </div>
+            </div>
+            
+            <div class="story-lead">
+                經過所有 Transformer Blocks 的處理，我們現在有了一個 <strong>[6 × 48]</strong> 的矩陣。<br><br>
+                現在的任務是：將每個位置的 48 維向量轉換為<strong>下一個 token 的機率預測</strong>。
+            </div>
+
+            <h2>🎯 Output Layer 的目標</h2>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>🎯</span>
+                    <span>從向量到預測</span>
+                </div>
+                <p><strong>我們有：</strong>每個位置的 48 維向量（來自 Transformer）</p>
+                <p><strong>我們要：</strong>每個位置對詞彙表中每個 token 的機率</p>
+                <p style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.8); border-radius: 10px;">
+                    <strong>nano-gpt 的詞彙表：</strong><br>
+                    • 只有 3 個 tokens：A (0)、B (1)、C (2)<br>
+                    • 目標：對每個位置，預測下一個 token 是 A、B、還是 C 的機率
+                </p>
+            </div>
+
+            <h2>🔄 Output Layer 的兩個步驟</h2>
+
+            <div class="matrix-box">
+                <div class="matrix-title">完整流程</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 輸入：Transformer Block 的輸出</span>
+transformer_output = [<span class="code-number">6</span> × <span class="code-number">48</span>]
+
+<span class="code-comment"># 步驟 1：LM Head（Language Model Head）</span>
+<span class="code-comment">#         線性投影到詞彙表大小</span>
+logits = LM_Head @ transformer_output
+<span class="code-comment">#  [3 × 48] @ [6 × 48]ᵀ = [6 × 3]</span>
+
+<span class="code-comment"># 步驟 2：Softmax</span>
+<span class="code-comment">#         將 logits 轉換為機率分佈</span>
+probabilities = softmax(logits)  <span class="code-comment"># [6 × 3]</span>
+
+<span class="code-comment"># 結果：每個位置有 3 個機率值（和為 1.0）</span>
+<span class="code-comment"># 例如位置 5：[P(A), P(B), P(C)] = [0.05, 0.30, 0.65]</span></pre>
+                </div>
+            </div>
+
+            <h2>📍 步驟 1：LM Head（語言模型頭）</h2>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">1</span>
+                    <span class="step-title">線性投影到詞彙表大小</span>
+                </div>
+                <p>LM Head 是一個簡單的線性層（沒有偏差），將 48 維向量投影到<strong>詞彙表大小</strong>（3）。</p>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-title">LM Head 投影</div>
+                <div class="formula" style="font-size: 1.5rem;">
+                    logits = W_lm @ x
+                </div>
+                <div class="formula-desc">
+                    W_lm: [3 × 48] 權重矩陣（LM Head Weights）<br>
+                    x: [48] 輸入向量<br>
+                    logits: [3] 輸出向量（未正規化的分數）
+                </div>
+            </div>
+
+            <div class="matrix-box">
+                <div class="matrix-title">LM Head 處理</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 處理單個 token（最後一個位置，t = 5）</span>
+
+input_vector = transformer_output[<span class="code-number">5</span>, :]  <span class="code-comment"># [48]</span>
+
+<span class="code-comment"># LM Head 權重矩陣</span>
+LM_Head_Weights = [<span class="code-number">3</span> × <span class="code-number">48</span>]  <span class="code-comment"># 訓練學習的權重</span>
+                   <span class="code-comment">↑    ↑</span>
+                   <span class="code-comment">vocab C</span>
+                   <span class="code-comment">size</span>
+
+<span class="code-comment"># 矩陣-向量乘法</span>
+logits = LM_Head_Weights @ input_vector
+
+<span class="code-comment"># 維度變化</span>
+[<span class="code-number">3</span> × <span class="code-number">48</span>] @ [<span class="code-number">48</span>] = [<span class="code-number">3</span>]
+ ^^^^      ^^      ^
+ vocab     C       vocab
+ size              size
+
+<span class="code-comment"># 結果：3 個數字（logits）</span>
+logits = [<span class="code-number">0.3</span>, <span class="code-number">1.8</span>, <span class="code-number">2.5</span>]
+          <span class="code-comment">↑    ↑    ↑</span>
+          <span class="code-comment">A    B    C</span>
+
+<span class="code-comment"># 這些是「未正規化」的分數</span>
+<span class="code-comment"># 數值越大 = 模型認為該 token 越可能是下一個</span></pre>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%); border-color: var(--purple);">
+                <div class="info-box-title" style="color: var(--purple);">
+                    <span>🤔</span>
+                    <span>什麼是 Logits？</span>
+                </div>
+                <p><strong>Logits</strong> 是神經網絡在 Softmax 之前的<strong>原始輸出分數</strong>。</p>
+                <ul style="margin-left: 20px; line-height: 2; margin-top: 15px;">
+                    <li><strong>可以是任何實數</strong>：正數、負數、零</li>
+                    <li><strong>沒有固定範圍</strong>：可能是 -10、0.5、100 等任何值</li>
+                    <li><strong>相對大小有意義</strong>：數值越大 = 模型越「確信」該選項</li>
+                    <li><strong>不是機率</strong>：不會加總到 1.0</li>
+                </ul>
+                <p style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.8); border-radius: 10px;">
+                    <strong>例如：</strong><br>
+                    logits = [0.3, 1.8, 2.5]<br>
+                    → 模型認為 C (2.5) 最可能，B (1.8) 其次，A (0.3) 最不可能<br>
+                    → 但這些不是機率！需要 Softmax 轉換
+                </p>
+            </div>
+
+            <h3>🔢 nano-gpt 的 LM Head 參數</h3>
+
+            <div class="matrix-box">
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># LM Head 參數統計</span>
+
+LM_Head_Weights: [<span class="code-number">3</span> × <span class="code-number">48</span>] = <span class="code-number">144</span> 個參數
+
+<span class="code-comment"># 注意：LM Head 通常沒有偏差（bias）</span>
+<span class="code-comment"># 因為 Softmax 會正規化，偏差沒有意義</span>
+
+<span class="code-comment">## 配置</span>
+Vocab Size (詞彙表大小)：<span class="code-number">3</span>
+C (模型維度)：<span class="code-number">48</span></pre>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(255, 87, 51, 0.1) 0%, rgba(255, 87, 51, 0.05) 100%); border-color: #ff5733;">
+                <div class="info-box-title" style="color: #ff5733;">
+                    <span>🔍</span>
+                    <span>實際模型的詞彙表大小</span>
+                </div>
+                <p>nano-gpt 只有 3 個 tokens (A, B, C)，但實際模型的詞彙表要大得多：</p>
+                <ul style="margin-left: 20px; line-height: 2; margin-top: 15px;">
+                    <li><strong>GPT-2</strong>：50,257 個 tokens</li>
+                    <li><strong>GPT-3</strong>：50,257 個 tokens</li>
+                    <li><strong>LLaMA</strong>：32,000 個 tokens</li>
+                    <li><strong>GPT-4</strong>：~100,000 個 tokens（估計）</li>
+                </ul>
+                <p style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.8); border-radius: 10px;">
+                    <strong>這意味著：</strong><br>
+                    GPT-2 的 LM Head 是 [50,257 × 768] = <strong>38,597,376 參數</strong>！<br>
+                    這是整個模型中<strong>參數量最大的單一層</strong>。
+                </p>
+            </div>
+
+            <h2>📍 步驟 2：Softmax 正規化</h2>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">2</span>
+                    <span class="step-title">將 Logits 轉換為機率分佈</span>
+                </div>
+                <p>Softmax 的目標：將任意實數向量轉換為<strong>機率分佈</strong>（所有值為正，總和為 1.0）。</p>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-title">Softmax 函數</div>
+                <div class="formula" style="font-size: 1.3rem;">
+                    P(i) = exp(x_i) / Σ exp(x_j)
+                </div>
+                <div class="formula-desc">
+                    對向量中的每個元素：<br>
+                    1. 計算指數 exp(x_i)<br>
+                    2. 除以所有指數的總和
+                </div>
+            </div>
+
+            <div class="pull-quote">
+                Softmax 不只是「除以總和」，<br>
+                而是<strong>先指數化，再正規化</strong>。
+            </div>
+
+            <h3>🔢 Softmax 的三個步驟</h3>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">a</span>
+                    <span class="step-title" style="color: #0a0e27;">步驟 A：數值穩定化（減去最大值）</span>
+                </div>
+                <p>為了避免數值溢位（overflow），先減去向量中的最大值。</p>
+                <p style="margin-top: 15px;"><strong>重要性質：</strong>減去常數不會改變 Softmax 的結果！</p>
+            </div>
+
+            <div class="matrix-box">
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 原始 logits</span>
+logits = [<span class="code-number">0.3</span>, <span class="code-number">1.8</span>, <span class="code-number">2.5</span>]
+
+<span class="code-comment"># 找到最大值</span>
+max_value = <span class="code-keyword">max</span>(logits) = <span class="code-number">2.5</span>
+
+<span class="code-comment"># 減去最大值（數值穩定化）</span>
+shifted = logits - max_value
+        = [<span class="code-number">0.3</span> - <span class="code-number">2.5</span>, <span class="code-number">1.8</span> - <span class="code-number">2.5</span>, <span class="code-number">2.5</span> - <span class="code-number">2.5</span>]
+        = [<span class="code-number">-2.2</span>, <span class="code-number">-0.7</span>, <span class="code-number">0.0</span>]
+
+<span class="code-comment"># 現在最大值是 0，不會有數值溢位問題</span></pre>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">b</span>
+                    <span class="step-title" style="color: #0a0e27;">步驟 B：指數化</span>
+                </div>
+                <p>對每個元素應用指數函數 exp()，使所有值變為正數。</p>
+            </div>
+
+            <div class="matrix-box">
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 指數化</span>
+exponentials = exp(shifted)
+             = [<span class="code-keyword">exp</span>(<span class="code-number">-2.2</span>), <span class="code-keyword">exp</span>(<span class="code-number">-0.7</span>), <span class="code-keyword">exp</span>(<span class="code-number">0.0</span>)]
+             = [<span class="code-number">0.111</span>, <span class="code-number">0.497</span>, <span class="code-number">1.000</span>]
+
+<span class="code-comment"># 所有值都是正數了！</span>
+<span class="code-comment"># exp() 的特性：</span>
+<span class="code-comment"># - exp(0) = 1</span>
+<span class="code-comment"># - exp(負數) < 1</span>
+<span class="code-comment"># - exp(正數) > 1</span></pre>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">c</span>
+                    <span class="step-title" style="color: #0a0e27;">步驟 C：正規化（除以總和）</span>
+                </div>
+                <p>將每個指數值除以所有指數值的總和，確保結果總和為 1.0。</p>
+            </div>
+
+            <div class="matrix-box">
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 計算總和</span>
+sum_exp = <span class="code-keyword">sum</span>(exponentials)
+        = <span class="code-number">0.111</span> + <span class="code-number">0.497</span> + <span class="code-number">1.000</span>
+        = <span class="code-number">1.608</span>
+
+<span class="code-comment"># 正規化</span>
+probabilities = exponentials / sum_exp
+              = [<span class="code-number">0.111</span> / <span class="code-number">1.608</span>, <span class="code-number">0.497</span> / <span class="code-number">1.608</span>, <span class="code-number">1.000</span> / <span class="code-number">1.608</span>]
+              = [<span class="code-number">0.069</span>, <span class="code-number">0.309</span>, <span class="code-number">0.622</span>]
+
+<span class="code-comment"># 驗證：總和 = 1.0</span>
+<span class="code-keyword">sum</span>(probabilities) = <span class="code-number">0.069</span> + <span class="code-number">0.309</span> + <span class="code-number">0.622</span> = <span class="code-number">1.000</span> ✓
+
+<span class="code-comment"># 結果：有效的機率分佈！</span>
+P(A) = <span class="code-number">0.069</span> = <span class="code-number">6.9%</span>
+P(B) = <span class="code-number">0.309</span> = <span class="code-number">30.9%</span>
+P(C) = <span class="code-number">0.622</span> = <span class="code-number">62.2%</span></pre>
+                </div>
+            </div>
+
+            <figure>
+                <img src="../../images/softmax_process_20260105223516.png" alt="Softmax 運算詳細流程">
+                <figcaption>
+                    視覺化：Softmax 的三個步驟（穩定化 → 指數化 → 正規化）
+                </figcaption>
+            </figure>
+
+            <h3>🤔 為什麼要指數化？</h3>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>💡</span>
+                    <span>指數化的作用</span>
+                </div>
+                <p><strong>如果只是「除以總和」：</strong></p>
+                <div class="matrix-box" style="margin-top: 20px;">
+                    <div class="code-visualization">
+                        <pre>logits = [<span class="code-number">0.3</span>, <span class="code-number">1.8</span>, <span class="code-number">2.5</span>]
+sum = <span class="code-number">0.3</span> + <span class="code-number">1.8</span> + <span class="code-number">2.5</span> = <span class="code-number">4.6</span>
+
+simple_normalize = [<span class="code-number">0.3</span>/<span class="code-number">4.6</span>, <span class="code-number">1.8</span>/<span class="code-number">4.6</span>, <span class="code-number">2.5</span>/<span class="code-number">4.6</span>]
+                 = [<span class="code-number">0.065</span>, <span class="code-number">0.391</span>, <span class="code-number">0.543</span>]
+
+<span class="code-comment"># 問題：如果有負數怎麼辦？</span>
+logits2 = [<span class="code-number">-2.0</span>, <span class="code-number">1.0</span>, <span class="code-number">3.0</span>]
+sum2 = <span class="code-number">-2.0</span> + <span class="code-number">1.0</span> + <span class="code-number">3.0</span> = <span class="code-number">2.0</span>
+simple_normalize2 = [<span class="code-number">-2.0</span>/<span class="code-number">2.0</span>, <span class="code-number">1.0</span>/<span class="code-number">2.0</span>, <span class="code-number">3.0</span>/<span class="code-number">2.0</span>]
+                  = [<span class="code-number">-1.0</span>, <span class="code-number">0.5</span>, <span class="code-number">1.5</span>]
+<span class="code-comment"># ❌ 負數機率？不合理！</span></pre>
+                    </div>
+                </div>
+
+                <p style="margin-top: 20px;"><strong>使用指數化的 Softmax：</strong></p>
+                <div class="matrix-box" style="margin-top: 20px;">
+                    <div class="code-visualization">
+                        <pre>logits2 = [<span class="code-number">-2.0</span>, <span class="code-number">1.0</span>, <span class="code-number">3.0</span>]
+
+<span class="code-comment"># 指數化（所有值變正）</span>
+exp_values = [<span class="code-keyword">exp</span>(<span class="code-number">-2.0</span>), <span class="code-keyword">exp</span>(<span class="code-number">1.0</span>), <span class="code-keyword">exp</span>(<span class="code-number">3.0</span>)]
+           = [<span class="code-number">0.135</span>, <span class="code-number">2.718</span>, <span class="code-number">20.086</span>]
+
+sum_exp = <span class="code-number">0.135</span> + <span class="code-number">2.718</span> + <span class="code-number">20.086</span> = <span class="code-number">22.939</span>
+
+softmax = [<span class="code-number">0.135</span>/<span class="code-number">22.939</span>, <span class="code-number">2.718</span>/<span class="code-number">22.939</span>, <span class="code-number">20.086</span>/<span class="code-number">22.939</span>]
+        = [<span class="code-number">0.006</span>, <span class="code-number">0.118</span>, <span class="code-number">0.876</span>]
+<span class="code-comment"># ✅ 所有值都是正數，總和為 1.0！</span></pre>
+                    </div>
+                </div>
+
+                <p style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.8); border-radius: 10px;">
+                    <strong>指數化的額外好處：</strong><br>
+                    • <strong>強調差異</strong>：大的值變得更大，小的值變得更小<br>
+                    • <strong>平滑分佈</strong>：不像 argmax 那樣「hard」（只選一個）<br>
+                    • <strong>可微分</strong>：可以反向傳播計算梯度
+                </p>
+            </div>
+
+            <h3>🔄 Softmax 在 Self-Attention 中的應用</h3>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(0, 255, 65, 0.1) 0%, rgba(0, 255, 65, 0.05) 100%); border-color: var(--matrix-green);">
+                <div class="info-box-title" style="color: var(--matrix-green);">
+                    <span>🔁</span>
+                    <span>Softmax 在模型中出現兩次</span>
+                </div>
+                <p><strong>1️⃣ 在 Self-Attention 層：</strong></p>
+                <p style="margin-left: 20px;">正規化 Attention 分數（每一列）</p>
+                <div class="matrix-box" style="margin: 15px 0;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># Attention Matrix [6 × 6]</span>
+<span class="code-comment"># 對每一列應用 Softmax</span>
+attention_scores = Q @ Kᵀ / sqrt(head_dim)
+attention_weights = softmax(attention_scores, dim=<span class="code-number">-1</span>)</pre>
+                    </div>
+                </div>
+
+                <p style="margin-top: 20px;"><strong>2️⃣ 在 Output Layer：</strong></p>
+                <p style="margin-left: 20px;">正規化最終的 logits（詞彙表維度）</p>
+                <div class="matrix-box" style="margin: 15px 0;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># Logits [6 × 3]</span>
+<span class="code-comment"># 對每一列應用 Softmax</span>
+logits = LM_Head @ transformer_output
+probabilities = softmax(logits, dim=<span class="code-number">-1</span>)</pre>
+                    </div>
+                </div>
+
+                <p style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.8); border-radius: 10px;">
+                    <strong>共同點：</strong><br>
+                    兩者都是將一組分數轉換為機率分佈，<br>
+                    但<strong>應用的維度不同</strong>。
+                </p>
+            </div>
+
+            <h2>🎲 從機率到 Token：取樣（Sampling）</h2>
+
+            <div class="pull-quote">
+                有了機率分佈，<br>
+                我們如何選擇<strong>實際輸出的 token</strong>？
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>🎯</span>
+                    <span>取樣策略</span>
+                </div>
+                <p>我們有機率分佈 [P(A)=0.069, P(B)=0.309, P(C)=0.622]，現在要選一個 token。</p>
+                
+                <h4 style="margin-top: 25px; color: #0a0e27; font-size: 1.2rem;">1️⃣ Greedy Sampling（貪婪取樣）</h4>
+                <p style="margin-left: 20px;">直接選機率最高的 token。</p>
+                <div class="matrix-box" style="margin: 15px 0;">
+                    <div class="code-visualization">
+                        <pre>probabilities = [<span class="code-number">0.069</span>, <span class="code-number">0.309</span>, <span class="code-number">0.622</span>]
+selected = argmax(probabilities) = <span class="code-number">2</span>  <span class="code-comment"># C</span>
+
+<span class="code-comment"># 優點：確定性，可重現</span>
+<span class="code-comment"># 缺點：無變化，可能重複</span></pre>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 25px; color: #0a0e27; font-size: 1.2rem;">2️⃣ Random Sampling（隨機取樣）</h4>
+                <p style="margin-left: 20px;">根據機率分佈隨機選擇。</p>
+                <div class="matrix-box" style="margin: 15px 0;">
+                    <div class="code-visualization">
+                        <pre>probabilities = [<span class="code-number">0.069</span>, <span class="code-number">0.309</span>, <span class="code-number">0.622</span>]
+selected = random_choice([A, B, C], p=probabilities)
+
+<span class="code-comment"># 可能選 C (62.2% 機率)</span>
+<span class="code-comment"># 也可能選 B (30.9% 機率)</span>
+<span class="code-comment"># 甚至可能選 A (6.9% 機率)</span>
+
+<span class="code-comment"># 優點：多樣性，創意</span>
+<span class="code-comment"># 缺點：可能不連貫</span></pre>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 25px; color: #0a0e27; font-size: 1.2rem;">3️⃣ Temperature Sampling（溫度取樣）</h4>
+                <p style="margin-left: 20px;">調整機率分佈的「銳利度」。</p>
+                <div class="matrix-box" style="margin: 15px 0;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># Temperature (T) 控制隨機性</span>
+
+<span class="code-comment"># 步驟 1：除以溫度</span>
+scaled_logits = logits / T
+
+<span class="code-comment"># 步驟 2：Softmax</span>
+probabilities = softmax(scaled_logits)
+
+<span class="code-comment"># T = 1.0：原始分佈</span>
+<span class="code-comment"># T < 1.0：更確定（銳利）</span>
+<span class="code-comment"># T > 1.0：更隨機（平滑）</span>
+
+<span class="code-comment">═══════════════════════════════════════</span>
+<span class="code-comment"># 範例：logits = [0.3, 1.8, 2.5]</span>
+
+<span class="code-comment"># T = 0.5（低溫，更確定）</span>
+scaled = [<span class="code-number">0.6</span>, <span class="code-number">3.6</span>, <span class="code-number">5.0</span>]
+probs = [<span class="code-number">0.003</span>, <span class="code-number">0.065</span>, <span class="code-number">0.932</span>]  <span class="code-comment"># C 機率 93%！</span>
+
+<span class="code-comment"># T = 1.0（原始）</span>
+probs = [<span class="code-number">0.069</span>, <span class="code-number">0.309</span>, <span class="code-number">0.622</span>]
+
+<span class="code-comment"># T = 2.0（高溫，更隨機）</span>
+scaled = [<span class="code-number">0.15</span>, <span class="code-number">0.9</span>, <span class="code-number">1.25</span>]
+probs = [<span class="code-number">0.184</span>, <span class="code-number">0.390</span>, <span class="code-number">0.426</span>]  <span class="code-comment"># 更平均</span></pre>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 25px; color: #0a0e27; font-size: 1.2rem;">4️⃣ Top-k Sampling</h4>
+                <p style="margin-left: 20px;">只考慮機率最高的 k 個 tokens。</p>
+                <div class="matrix-box" style="margin: 15px 0;">
+                    <div class="code-visualization">
+                        <pre>probabilities = [<span class="code-number">0.069</span>, <span class="code-number">0.309</span>, <span class="code-number">0.622</span>]
+
+<span class="code-comment"># Top-k = 2</span>
+<span class="code-comment"># 保留前 2 個最高機率，其他設為 0</span>
+top_k_probs = [<span class="code-number">0.0</span>, <span class="code-number">0.309</span>, <span class="code-number">0.622</span>]
+
+<span class="code-comment"># 重新正規化</span>
+renormalized = [<span class="code-number">0.0</span>, <span class="code-number">0.332</span>, <span class="code-number">0.668</span>]
+
+<span class="code-comment"># 從 {B, C} 中選擇</span></pre>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 25px; color: #0a0e27; font-size: 1.2rem;">5️⃣ Top-p (Nucleus) Sampling</h4>
+                <p style="margin-left: 20px;">選擇累積機率達到 p 的最小 token 集合。</p>
+                <div class="matrix-box" style="margin: 15px 0;">
+                    <div class="code-visualization">
+                        <pre>probabilities = [<span class="code-number">0.069</span>, <span class="code-number">0.309</span>, <span class="code-number">0.622</span>]
+sorted_probs = [<span class="code-number">0.622</span>, <span class="code-number">0.309</span>, <span class="code-number">0.069</span>]  <span class="code-comment"># C, B, A</span>
+
+<span class="code-comment"># Top-p = 0.9</span>
+<span class="code-comment"># 累積：C (0.622) + B (0.309) = 0.931 ≥ 0.9</span>
+<span class="code-comment"># 保留 {C, B}，移除 A</span>
+
+nucleus_probs = [<span class="code-number">0.0</span>, <span class="code-number">0.309</span>, <span class="code-number">0.622</span>]
+renormalized = [<span class="code-number">0.0</span>, <span class="code-number">0.332</span>, <span class="code-number">0.668</span>]</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="comparison-card" style="border-top-color: #4169e1;">
+                    <div class="card-title">Greedy</div>
+                    <p style="font-size: 0.95rem; color: #666; line-height: 1.8;">
+                        ✓ 確定性<br>
+                        ✓ 可重現<br>
+                        ✗ 無變化<br>
+                        <strong>適用：</strong>需要精確答案
+                    </p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: #ff6347;">
+                    <div class="card-title">Temperature</div>
+                    <p style="font-size: 0.95rem; color: #666; line-height: 1.8;">
+                        ✓ 可調隨機性<br>
+                        ✓ 簡單直觀<br>
+                        ✗ 可能太隨機<br>
+                        <strong>適用：</strong>創意寫作
+                    </p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: #32cd32;">
+                    <div class="card-title">Top-k</div>
+                    <p style="font-size: 0.95rem; color: #666; line-height: 1.8;">
+                        ✓ 避免低機率<br>
+                        ✓ 可控範圍<br>
+                        ✗ k 難以選擇<br>
+                        <strong>適用：</strong>平衡品質
+                    </p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: #ffd700;">
+                    <div class="card-title">Top-p</div>
+                    <p style="font-size: 0.95rem; color: #666; line-height: 1.8;">
+                        ✓ 動態調整<br>
+                        ✓ 最常用<br>
+                        ✓ 效果最好<br>
+                        <strong>適用：</strong>通用場景
+                    </p>
+                </div>
+            </div>
+
+            <h2>🔁 對所有位置重複</h2>
+
+            <div class="matrix-box">
+                <div class="matrix-title">完整的 Output 處理</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 輸入：Transformer Block 輸出 [6 × 48]</span>
+
+<span class="code-comment"># LM Head</span>
+logits = LM_Head_Weights @ transformer_output.T
+<span class="code-comment"># [3 × 48] @ [48 × 6] = [3 × 6]，然後轉置 → [6 × 3]</span>
+
+<span class="code-comment"># 對每一列應用 Softmax</span>
+<span class="code-keyword">for</span> t <span class="code-keyword">in</span> <span class="code-keyword">range</span>(<span class="code-number">6</span>):
+    <span class="code-comment"># 位置 t 的 logits</span>
+    logits_t = logits[t]  <span class="code-comment"># [3]</span>
+    
+    <span class="code-comment"># Softmax</span>
+    probs_t = softmax(logits_t)  <span class="code-comment"># [3]</span>
+    
+    <span class="code-comment"># 取樣</span>
+    next_token = sample(probs_t)
+
+<span class="code-comment">═══════════════════════════════════════</span>
+<span class="code-comment"># 範例輸出</span>
+<span class="code-comment">═══════════════════════════════════════</span>
+位置 <span class="code-number">0</span>: P(A)=<span class="code-number">0.10</span>, P(B)=<span class="code-number">0.35</span>, P(C)=<span class="code-number">0.55</span> → 預測 C
+位置 <span class="code-number">1</span>: P(A)=<span class="code-number">0.70</span>, P(B)=<span class="code-number">0.20</span>, P(C)=<span class="code-number">0.10</span> → 預測 A
+位置 <span class="code-number">2</span>: P(A)=<span class="code-number">0.15</span>, P(B)=<span class="code-number">0.75</span>, P(C)=<span class="code-number">0.10</span> → 預測 B
+位置 <span class="code-number">3</span>: P(A)=<span class="code-number">0.80</span>, P(B)=<span class="code-number">0.15</span>, P(C)=<span class="code-number">0.05</span> → 預測 A
+位置 <span class="code-number">4</span>: P(A)=<span class="code-number">0.85</span>, P(B)=<span class="code-number">0.10</span>, P(C)=<span class="code-number">0.05</span> → 預測 A
+位置 <span class="code-number">5</span>: P(A)=<span class="code-number">0.07</span>, P(B)=<span class="code-number">0.31</span>, P(C)=<span class="code-number">0.62</span> → 預測 C</pre>
+                </div>
+            </div>
+
+            <h2>🎯 nano-gpt 的目標：排序</h2>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>🎯</span>
+                    <span>回到 nano-gpt 的任務</span>
+                </div>
+                <p>nano-gpt 的目標是將 "CBABBC" 排序成 "ABBBCC"。</p>
+                
+                <div class="matrix-box" style="margin-top: 20px;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># 輸入序列</span>
+input  = [C, B, A, B, B, C]
+         [<span class="code-number">2</span>, <span class="code-number">1</span>, <span class="code-number">0</span>, <span class="code-number">1</span>, <span class="code-number">1</span>, <span class="code-number">2</span>]
+
+<span class="code-comment"># 目標輸出（下一個 token）</span>
+target = [A, B, B, B, C, C]
+         [<span class="code-number">0</span>, <span class="code-number">1</span>, <span class="code-number">1</span>, <span class="code-number">1</span>, <span class="code-number">2</span>, <span class="code-number">2</span>]
+
+<span class="code-comment"># 模型預測</span>
+位置 <span class="code-number">0</span>: 看到 [C]          → 應預測 A
+位置 <span class="code-number">1</span>: 看到 [C, B]       → 應預測 B
+位置 <span class="code-number">2</span>: 看到 [C, B, A]    → 應預測 B
+位置 <span class="code-number">3</span>: 看到 [C, B, A, B] → 應預測 B
+位置 <span class="code-number">4</span>: 看到 [C, B, A, B, B] → 應預測 C
+位置 <span class="code-number">5</span>: 看到 [C, B, A, B, B, C] → 應預測 C
+
+<span class="code-comment"># 如果訓練良好，模型應該輸出：</span>
+<span class="code-comment"># ABBBCC（排序後的序列）</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <h2>🎓 完整的參數統計</h2>
+
+            <div class="matrix-box">
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># nano-gpt 完整模型參數</span>
+
+<span class="code-comment">══════════════════════════════════════════════</span>
+<span class="code-comment"># Embedding 層</span>
+<span class="code-comment">══════════════════════════════════════════════</span>
+Token Embedding:    [<span class="code-number">3</span> × <span class="code-number">48</span>]     = <span class="code-number">144</span> 參數
+Position Embedding: [<span class="code-number">6</span> × <span class="code-number">48</span>]     = <span class="code-number">288</span> 參數
+小計：<span class="code-number">432</span> 參數
+
+<span class="code-comment">══════════════════════════════════════════════</span>
+<span class="code-comment"># Transformer Block（假設 3 層）</span>
+<span class="code-comment">══════════════════════════════════════════════</span>
+每個 Block：
+  Layer Norm 1:              <span class="code-number">96</span> 參數
+  Multi-Head Attention:      <span class="code-number">9,408</span> 參數
+  Layer Norm 2:              <span class="code-number">96</span> 參數
+  MLP:                       <span class="code-number">18,672</span> 參數
+  ────────────────────────────────────
+  每個 Block 小計：          <span class="code-number">28,272</span> 參數
+
+3 層 Blocks：<span class="code-number">28,272</span> × <span class="code-number">3</span> = <span class="code-number">84,816</span> 參數
+
+<span class="code-comment">══════════════════════════════════════════════</span>
+<span class="code-comment"># 最終 Layer Norm</span>
+<span class="code-comment">══════════════════════════════════════════════</span>
+Final Layer Norm:           <span class="code-number">96</span> 參數
+
+<span class="code-comment">══════════════════════════════════════════════</span>
+<span class="code-comment"># Output Layer</span>
+<span class="code-comment">══════════════════════════════════════════════</span>
+LM Head:        [<span class="code-number">3</span> × <span class="code-number">48</span>]     = <span class="code-number">144</span> 參數
+
+<span class="code-comment">══════════════════════════════════════════════</span>
+<span class="code-comment"># 總計</span>
+<span class="code-comment">══════════════════════════════════════════════</span>
+<span class="code-number">432</span> + <span class="code-number">84,816</span> + <span class="code-number">96</span> + <span class="code-number">144</span> = <span class="code-number">85,488</span> 參數
+
+<span class="code-comment"># 接近官方的 85,584 參數！</span>
+<span class="code-comment"># （差異可能來自具體實作細節）</span></pre>
+                </div>
+            </div>
+
+            <h2>🌟 旅程完成！</h2>
+
+            <div class="pull-quote">
+                從輸入的文字 "CBABBC"，<br>
+                到最終的機率預測 [P(A), P(B), P(C)]，<br>
+                我們完整走過了<strong>整個 LLM 的處理流程</strong>！
+            </div>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%); border-color: var(--gold);">
+                <div class="info-box-title" style="color: var(--gold);">
+                    <span>✅</span>
+                    <span>完整流程回顧</span>
+                </div>
+                <div class="matrix-box" style="margin-top: 20px;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># 完整的 nano-gpt 流程</span>
+
+<span class="code-comment">1️⃣ 輸入</span>
+tokens = [<span class="code-string">"C"</span>, <span class="code-string">"B"</span>, <span class="code-string">"A"</span>, <span class="code-string">"B"</span>, <span class="code-string">"B"</span>, <span class="code-string">"C"</span>]
+indices = [<span class="code-number">2</span>, <span class="code-number">1</span>, <span class="code-number">0</span>, <span class="code-number">1</span>, <span class="code-number">1</span>, <span class="code-number">2</span>]
+
+<span class="code-comment">2️⃣ Embedding</span>
+input_embed = token_embed + position_embed  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment">3️⃣ Transformer Blocks（重複 N 次）</span>
+x = input_embed
+<span class="code-keyword">for</span> block <span class="code-keyword">in</span> transformer_blocks:
+    <span class="code-comment"># Self-Attention</span>
+    x = x + Multi_Head_Attention(LayerNorm(x))
+    <span class="code-comment"># MLP</span>
+    x = x + MLP(LayerNorm(x))
+
+<span class="code-comment">4️⃣ Final Layer Norm</span>
+x = LayerNorm(x)
+
+<span class="code-comment">5️⃣ Output Layer</span>
+logits = LM_Head @ x  <span class="code-comment"># [6 × 3]</span>
+
+<span class="code-comment">6️⃣ Softmax</span>
+probabilities = softmax(logits)  <span class="code-comment"># [6 × 3]</span>
+
+<span class="code-comment">7️⃣ 取樣</span>
+next_tokens = sample(probabilities)
+
+<span class="code-comment">8️⃣ 輸出</span>
+output = [<span class="code-string">"A"</span>, <span class="code-string">"B"</span>, <span class="code-string">"B"</span>, <span class="code-string">"B"</span>, <span class="code-string">"C"</span>, <span class="code-string">"C"</span>]  <span class="code-comment"># 排序完成！</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 80px;">🗺️ 回顧完整架構</h2>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%); border-color: var(--gold);">
+                <div class="info-box-title" style="color: var(--gold);">
+                    <span>🏁</span>
+                    <span>Output Layer：旅程的終點</span>
+                </div>
+                <figure style="margin: 20px 0 0 0;">
+                    <img src="../../images/llm_architecture_full_20260105210724.png" alt="LLM 完整架構" style="max-width: 100%; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                    <figcaption style="margin-top: 20px; font-size: 1rem; color: #666; line-height: 1.8;">
+                        完整架構圖：我們剛剛完成了 <span style="color: #ffd700; font-weight: 700;">最後的 Output Layer 與 Softmax</span>！<br>
+                        從輸入到輸出，整個 LLM 的處理流程現在完全透明了。
+                    </figcaption>
+                </figure>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="../index.html" style="display: inline-block; padding: 15px 40px; background: var(--gold); color: #0a0e27; text-decoration: none; border-radius: 50px; font-weight: 700; transition: transform 0.3s ease;">
+                        ← 返回教學首頁查看所有章節
+                    </a>
+                </div>
+            </div>
+
+            <h2>🎓 你學到了什麼？</h2>
+
+            <div class="comparison-grid" style="margin-top: 40px;">
+                <div class="comparison-card" style="border-top-color: var(--gold);">
+                    <div class="card-title">✅ LM Head</div>
+                    <p>線性投影：從模型維度到詞彙表大小</p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: var(--gold);">
+                    <div class="card-title">✅ Logits</div>
+                    <p>未正規化的分數，反映模型的「信心」</p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: var(--gold);">
+                    <div class="card-title">✅ Softmax</div>
+                    <p>穩定化 → 指數化 → 正規化</p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: var(--gold);">
+                    <div class="card-title">✅ 取樣策略</div>
+                    <p>Greedy、Temperature、Top-k、Top-p</p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: var(--gold);">
+                    <div class="card-title">✅ 完整流程</div>
+                    <p>從文字輸入到機率輸出的完整旅程</p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: var(--gold);">
+                    <div class="card-title">✅ 參數統計</div>
+                    <p>nano-gpt 總共 85,488 參數</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Chapter Navigation -->
+    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 60px 40px; margin-top: 80px;">
+        <div style="max-width: 900px; margin: 0 auto;">
+            
+            <h2 style="font-family: 'Noto Serif TC', serif; font-size: 2rem; color: #0a0e27; text-align: center; margin-bottom: 40px; border: none; padding: 0;">
+                🎯 本章重點回顧
+            </h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; margin-bottom: 50px;">
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🎯</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">LM Head 投影</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">[48] → [3] 轉換到詞彙表大小</div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">📊</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">Logits 未正規化分數</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">反映模型對各 token 的信心</div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🔢</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">Softmax 三步驟</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">穩定化 → 指數化 → 正規化</div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🎲</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">取樣策略</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">Greedy、Temperature、Top-k、Top-p</div>
+                </div>
+            </div>
+
+            <div style="border-top: 2px solid #dee2e6; padding-top: 40px; margin-top: 40px;">
+                <h3 style="font-family: 'Noto Serif TC', serif; font-size: 1.5rem; color: #0a0e27; text-align: center; margin-bottom: 30px;">
+                    📚 章節導航
+                </h3>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                    <a href="05-feed-forward-mlp.html" style="display: flex; align-items: center; gap: 15px; padding: 25px; background: white; border-radius: 15px; text-decoration: none; color: #0a0e27; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <div style="font-size: 2rem;">⬅️</div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">上一章</div>
+                            <div style="font-weight: 700; font-size: 1.1rem;">Feed-Forward Network</div>
+                            <div style="font-size: 0.9rem; color: #999; margin-top: 3px;">擴展-激活-壓縮</div>
+                        </div>
+                    </a>
+
+                    <a href="../index.html" style="display: flex; align-items: center; justify-content: flex-end; gap: 15px; padding: 25px; background: linear-gradient(135deg, #ffd700 0%, #f0c000 100%); border-radius: 15px; text-decoration: none; color: #0a0e27; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);">
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">完成旅程</div>
+                            <div style="font-weight: 700; font-size: 1.1rem;">返回教學首頁</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9; margin-top: 5px;">查看所有章節</div>
+                        </div>
+                        <div style="font-size: 2rem;">🏠</div>
+                    </a>
+                </div>
+
+                <div style="text-align: center; padding: 20px; background: rgba(255, 215, 0, 0.1); border-radius: 12px; border: 2px dashed var(--gold);">
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.8;">
+                        <strong style="color: #0a0e27;">🎉 旅程完成！</strong><br>
+                        從輸入文字到機率預測，你已經完整理解了 LLM 的處理流程。<br>
+                        回到首頁查看所有章節，或重新閱讀任何感興趣的部分。
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer Quote -->
+    <div class="footer-quote">
+        <p class="footer-quote-text">
+            「從 Embedding 到 Softmax，<br>
+            從文字到機率，<br>
+            我們完成了整個 LLM 的旅程。」
+        </p>
+        <p class="footer-quote-author">— LLM 視覺化教學 · 2026</p>
+    </div>
+
+</body>
+</html>
+

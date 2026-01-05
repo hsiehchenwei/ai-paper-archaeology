@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第六章：Feed-Forward Network (MLP) | nano-gpt 視覺化教學</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --hero-bg: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%);
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --deep-blue: #0f1419;
+            --matrix-green: #00ff41;
+            --purple: #9333ea;
+            --mlp-blue: #87ceeb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.8;
+            color: #2c3e50;
+            background: #ffffff;
+        }
+
+        .hero-section {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--hero-bg);
+            overflow: hidden;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                180deg,
+                rgba(10, 14, 39, 0.3) 0%,
+                rgba(10, 14, 39, 0.85) 60%,
+                rgba(10, 14, 39, 0.95) 100%
+            );
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 0 20px;
+            max-width: 1000px;
+        }
+
+        .nano-gpt-badge {
+            display: inline-block;
+            background: rgba(135, 206, 235, 0.2);
+            border: 2px solid var(--mlp-blue);
+            padding: 10px 30px;
+            border-radius: 50px;
+            color: var(--mlp-blue);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            letter-spacing: 0.1em;
+        }
+
+        .hero-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 900;
+            color: #FFFFFF;
+            margin-bottom: 30px;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.8), 0 0 60px rgba(135, 206, 235, 0.3);
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            color: var(--mlp-blue);
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+            margin-bottom: 20px;
+        }
+
+        .story-container {
+            background: #ffffff;
+            margin-top: -50px;
+            position: relative;
+            z-index: 10;
+            border-radius: 30px 30px 0 0;
+            padding: 80px 40px;
+        }
+
+        .content-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .breadcrumb {
+            padding: 20px 40px;
+            background: rgba(10, 14, 39, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--mlp-blue);
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            opacity: 0.8;
+        }
+
+        .story-lead {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.5rem;
+            line-height: 2;
+            color: #1a1a1a;
+            margin: 40px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-left: 5px solid var(--mlp-blue);
+            border-radius: 10px;
+        }
+
+        h2 {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0a0e27;
+            margin: 60px 0 30px 0;
+            border-bottom: 3px solid var(--mlp-blue);
+            padding-bottom: 15px;
+        }
+
+        h3 {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.8rem;
+            color: #1a1f3a;
+            margin: 40px 0 20px 0;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(135, 206, 235, 0.1) 0%, rgba(135, 206, 235, 0.05) 100%);
+            border: 2px solid var(--mlp-blue);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+
+        .info-box-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.3rem;
+            color: var(--mlp-blue);
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .matrix-box {
+            background: #1a1f3a;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            border: 2px solid rgba(135, 206, 235, 0.2);
+        }
+
+        .matrix-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.3rem;
+            color: var(--mlp-blue);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .code-visualization {
+            background: #1e1e1e;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .code-visualization pre {
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #d4d4d4;
+            margin: 0;
+        }
+
+        .code-comment { color: #6a9955; }
+        .code-keyword { color: #569cd6; }
+        .code-string { color: #ce9178; }
+        .code-number { color: #b5cea8; }
+
+        .step-box {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--mlp-blue);
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: var(--mlp-blue);
+            color: #0a0e27;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .step-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.4rem;
+            color: #0a0e27;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .pull-quote {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.8rem;
+            font-style: italic;
+            color: #0a0e27;
+            padding: 40px;
+            margin: 60px 0;
+            background: linear-gradient(135deg, rgba(135, 206, 235, 0.1) 0%, rgba(135, 206, 235, 0.05) 100%);
+            border-left: 5px solid var(--mlp-blue);
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .pull-quote::before {
+            content: '"';
+            position: absolute;
+            left: 15px;
+            top: 10px;
+            font-size: 4rem;
+            color: var(--mlp-blue);
+            opacity: 0.3;
+            font-family: Georgia, serif;
+        }
+
+        figure {
+            margin: 60px 0;
+            text-align: center;
+        }
+
+        figure img {
+            max-width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+        }
+
+        figcaption {
+            margin-top: 20px;
+            font-size: 1rem;
+            color: #666;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #e1f5fe 0%, #f1f8fb 100%);
+            border: 2px solid var(--mlp-blue);
+            border-radius: 15px;
+            padding: 40px;
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .formula-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.3rem;
+            color: #0a0e27;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            color: #0a0e27;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        .formula-desc {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 20px;
+            line-height: 1.8;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .comparison-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-top: 4px solid var(--mlp-blue);
+            transition: transform 0.3s ease;
+        }
+
+        .comparison-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.2rem;
+            color: #0a0e27;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .footer-quote {
+            background: var(--hero-bg);
+            padding: 80px 40px;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .footer-quote-text {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 2rem;
+            color: var(--mlp-blue);
+            max-width: 800px;
+            margin: 0 auto 30px;
+            line-height: 1.8;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+        }
+
+        .footer-quote-author {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.2rem;
+            color: var(--silver);
+            font-weight: 300;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .story-container {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="breadcrumb">
+        <a href="../../index.html">🏠 首頁</a>
+        <span style="margin: 0 10px; color: #999;">/</span>
+        <a href="../index.html">📚 LLM 視覺化教學</a>
+        <span style="margin: 0 10px; color: #999;">/</span>
+        <span style="color: #666;">第六章：Feed-Forward Network (MLP)</span>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="nano-gpt-badge">nano-gpt · Transformer Block 第二組件</div>
+            <h1 class="hero-title">Feed-Forward Network<br>(MLP)</h1>
+            <p class="hero-subtitle">擴展、激活、壓縮：簡單卻強大的神經網絡</p>
+            <p style="font-size: 1rem; color: var(--silver); margin-top: 20px;">
+                Linear → GELU → Linear
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="story-container">
+        <div class="content-wrapper">
+            
+            <h2 style="border: none; margin-top: 0; text-align: center; color: var(--mlp-blue);">🗺️ 本章在架構中的位置</h2>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(135, 206, 235, 0.15) 0%, rgba(135, 206, 235, 0.08) 100%); border-color: var(--mlp-blue); margin: 40px 0 60px 0;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="display: inline-block; padding: 15px 40px; background: rgba(135, 206, 235, 0.2); border: 2px solid var(--mlp-blue); border-radius: 50px; font-size: 1.2rem; font-weight: 700; color: var(--mlp-blue);">
+                        📍 第六章：Feed-Forward Network (MLP)
+                    </div>
+                </div>
+                
+                <figure style="margin: 30px 0;">
+                    <img src="../../images/mlp_chapter_focus_20260105222426.png" alt="MLP 章節架構特寫" style="max-width: 100%; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                    <figcaption style="margin-top: 20px; font-size: 1rem; color: #666; line-height: 1.8;">
+                        <strong style="color: #0a0e27;">MLP 位置</strong><br>
+                        本章聚焦於<span style="color: #87ceeb; font-weight: 700;"> 淺藍色區域</span>：<br>
+                        Transformer Block 的第二個主要組件
+                    </figcaption>
+                </figure>
+
+                <div style="background: rgba(255, 255, 255, 0.6); padding: 25px; border-radius: 12px; margin-top: 30px;">
+                    <p style="margin: 0; text-align: center; color: #2c3e50; line-height: 1.9;">
+                        <strong style="color: #87ceeb;">🔵 MLP 是 Transformer 的「深度處理」階段</strong><br>
+                        Self-Attention 讓 tokens 互相溝通，<br>
+                        MLP 則對每個 token <strong>獨立進行</strong>深度轉換。
+                    </p>
+                </div>
+            </div>
+            
+            <div class="story-lead">
+                Transformer Block 的後半部分，在 Self-Attention 之後，是 <strong>MLP</strong>（Multi-Layer Perceptron，多層感知機）。<br><br>
+                名字聽起來很複雜，但這裡它只是一個<strong>簡單的兩層神經網絡</strong>。
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>🎯</span>
+                    <span>MLP 的角色</span>
+                </div>
+                <p><strong>Self-Attention</strong> 讓不同位置的 tokens 互相溝通。</p>
+                <p><strong>MLP (Feed-Forward Network)</strong> 則對每個 token <strong>獨立</strong>進行非線性轉換，增強模型的表徵能力。</p>
+                <p style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.8); border-radius: 10px;">
+                    <strong>類比：</strong><br>
+                    • Self-Attention 像是「團隊會議」：大家交流資訊<br>
+                    • MLP 像是「個人深度思考」：每個人獨立處理接收到的資訊
+                </p>
+            </div>
+
+            <h2>🔄 MLP 的完整流程</h2>
+
+            <div class="pull-quote">
+                與 Self-Attention 一樣，<br>
+                我們在向量進入 MLP 之前，<br>
+                先進行<strong>Layer Normalization</strong>。
+            </div>
+
+            <div class="matrix-box">
+                <div class="matrix-title">MLP 的三個步驟</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 輸入：[6 × 48] 矩陣（來自 Self-Attention + Residual）</span>
+
+<span class="code-comment"># 0. Layer Normalization（前處理）</span>
+normalized = layer_norm(input)  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># 對每一列（每個 token）獨立處理</span>
+<span class="code-keyword">for</span> t <span class="code-keyword">in</span> <span class="code-keyword">range</span>(<span class="code-number">6</span>):
+    vector = normalized[t]  <span class="code-comment"># [48]</span>
+    
+    <span class="code-comment"># 1. 線性轉換：擴展到 4C</span>
+    expanded = W1 @ vector + b1  <span class="code-comment"># [192] = 4 × 48</span>
+    
+    <span class="code-comment"># 2. GELU 激活函數（非線性）</span>
+    activated = GELU(expanded)  <span class="code-comment"># [192]</span>
+    
+    <span class="code-comment"># 3. 線性轉換：壓縮回 C</span>
+    output[t] = W2 @ activated + b2  <span class="code-comment"># [48]</span>
+
+<span class="code-comment"># 4. Residual Connection</span>
+final_output = output + input  <span class="code-comment"># [6 × 48]</span></pre>
+                </div>
+            </div>
+
+            <h2>📍 步驟 0：Layer Normalization</h2>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">0</span>
+                    <span class="step-title">預處理：正規化</span>
+                </div>
+                <p>在進入 MLP 之前，先對輸入進行 Layer Normalization（就像進入 Self-Attention 前一樣）。</p>
+            </div>
+
+            <div class="matrix-box">
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 輸入：來自 Self-Attention + Residual 的矩陣</span>
+input = attention_output + attention_input  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># Layer Normalization（第二次）</span>
+normalized = layer_norm(input)  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># 這個正規化後的矩陣進入 MLP</span></pre>
+                </div>
+            </div>
+
+            <h2>📍 步驟 1：第一層線性轉換（擴展）</h2>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">1</span>
+                    <span class="step-title">擴展到 4C 維度</span>
+                </div>
+                <p>首先，我們透過矩陣-向量乘法加上偏差，將向量從長度 C = 48 擴展到 <strong>4 × C = 192</strong>。</p>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-title">第一層線性轉換</div>
+                <div class="formula" style="font-size: 1.5rem;">
+                    expanded = W₁ @ x + b₁
+                </div>
+                <div class="formula-desc">
+                    W₁: [192 × 48] 權重矩陣<br>
+                    x: [48] 輸入向量<br>
+                    b₁: [192] 偏差<br>
+                    expanded: [192] 輸出向量
+                </div>
+            </div>
+
+            <div class="matrix-box">
+                <div class="matrix-title">擴展過程</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 處理單個 token（第 4 個位置，t = 3）</span>
+
+input_vector = normalized[<span class="code-number">3</span>, :]  <span class="code-comment"># [48]</span>
+
+<span class="code-comment"># 第一層權重矩陣</span>
+W1 = [<span class="code-number">192</span> × <span class="code-number">48</span>]  <span class="code-comment"># 訓練學習的權重</span>
+b1 = [<span class="code-number">192</span>]        <span class="code-comment"># 偏差</span>
+
+<span class="code-comment"># 矩陣-向量乘法</span>
+expanded = W1 @ input_vector + b1
+
+<span class="code-comment"># 維度變化</span>
+[<span class="code-number">192</span> × <span class="code-number">48</span>] @ [<span class="code-number">48</span>] + [<span class="code-number">192</span>] = [<span class="code-number">192</span>]
+ ^^^^^^      ^^      ^^^^      ^^^^
+ 權重        輸入    偏差      輸出
+
+<span class="code-comment"># 向量從 48 維擴展到 192 維！</span></pre>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%); border-color: var(--gold);">
+                <div class="info-box-title" style="color: var(--gold);">
+                    <span>❓</span>
+                    <span>為什麼要擴展到 4C？</span>
+                </div>
+                <p><strong>這是一個經驗性的設計選擇：</strong></p>
+                <ul style="margin-left: 20px; line-height: 2; margin-top: 15px;">
+                    <li><strong>增加容量</strong>：更多維度 = 更多表徵能力</li>
+                    <li><strong>瓶頸架構</strong>：擴展 → 壓縮，強制模型學習重要特徵</li>
+                    <li><strong>經驗法則</strong>：4× 是 Transformer 論文中使用的比例</li>
+                    <li><strong>平衡</strong>：太小沒效果，太大浪費計算資源</li>
+                </ul>
+                <p style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.8); border-radius: 10px;">
+                    <strong>其他模型：</strong><br>
+                    • GPT-2：768 → 3072 (4×)<br>
+                    • BERT：768 → 3072 (4×)<br>
+                    • GPT-3：12288 → 49152 (4×)<br>
+                    4× 是業界標準！
+                </p>
+            </div>
+
+            <h2>📍 步驟 2：GELU 激活函數</h2>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">2</span>
+                    <span class="step-title">非線性激活</span>
+                </div>
+                <p>接下來，我們對向量的<strong>每個元素</strong>應用 GELU 激活函數。</p>
+                <p style="margin-top: 15px;">這是神經網絡的關鍵部分，引入<strong>非線性</strong>到模型中。</p>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-title">GELU 激活函數</div>
+                <div class="formula" style="font-size: 1.3rem;">
+                    GELU(x) = x · Φ(x)
+                </div>
+                <div class="formula-desc">
+                    Φ(x) 是標準正態分佈的累積分佈函數<br>
+                    GELU = Gaussian Error Linear Unit<br>
+                    「高斯誤差線性單元」
+                </div>
+            </div>
+
+            <div class="matrix-box">
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># GELU 是 element-wise 操作</span>
+
+expanded = [<span class="code-number">192</span>]  <span class="code-comment"># 從步驟 1</span>
+
+<span class="code-comment"># 對每個元素應用 GELU</span>
+activated = []
+<span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-keyword">range</span>(<span class="code-number">192</span>):
+    activated[i] = GELU(expanded[i])
+
+<span class="code-comment"># 例如</span>
+GELU(<span class="code-number">-1.5</span>) ≈ <span class="code-number">-0.15</span>
+GELU(<span class="code-number">0.0</span>)  ≈ <span class="code-number">0.0</span>
+GELU(<span class="code-number">1.5</span>)  ≈ <span class="code-number">1.43</span>
+GELU(<span class="code-number">3.0</span>)  ≈ <span class="code-number">2.99</span>
+
+<span class="code-comment"># 維度不變：[192] → [192]</span></pre>
+                </div>
+            </div>
+
+            <h3>🆚 GELU vs ReLU</h3>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>📊</span>
+                    <span>為什麼使用 GELU 而不是 ReLU？</span>
+                </div>
+                <p><strong>ReLU（Rectified Linear Unit）：</strong></p>
+                <div class="formula-box" style="margin: 15px 0;">
+                    <div class="formula">ReLU(x) = max(0, x)</div>
+                    <div class="formula-desc">簡單但在 x=0 處有尖角</div>
+                </div>
+
+                <p><strong>GELU（Gaussian Error Linear Unit）：</strong></p>
+                <div class="formula-box" style="margin: 15px 0;">
+                    <div class="formula">GELU(x) = x · Φ(x)</div>
+                    <div class="formula-desc">平滑曲線，沒有尖角</div>
+                </div>
+            </div>
+
+            <figure>
+                <img src="../../images/gelu_activation_20260105222509.png" alt="GELU vs ReLU 比較">
+                <figcaption>
+                    視覺化：GELU（平滑綠色曲線）vs ReLU（紅色折線）
+                </figcaption>
+            </figure>
+
+            <div class="comparison-grid">
+                <div class="comparison-card" style="border-top-color: #dc143c;">
+                    <div class="card-title" style="color: #dc143c;">ReLU</div>
+                    <ul style="font-size: 0.95rem; color: #666; line-height: 1.8;">
+                        <li>✓ 計算簡單快速</li>
+                        <li>✓ 避免梯度消失</li>
+                        <li>✗ 在 0 處不可微</li>
+                        <li>✗ "死亡 ReLU" 問題</li>
+                    </ul>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: #32cd32;">
+                    <div class="card-title" style="color: #32cd32;">GELU</div>
+                    <ul style="font-size: 0.95rem; color: #666; line-height: 1.8;">
+                        <li>✓ 處處平滑可微</li>
+                        <li>✓ 更好的訓練穩定性</li>
+                        <li>✓ 實驗效果更好</li>
+                        <li>✗ 計算稍慢</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(135, 206, 235, 0.1) 0%, rgba(135, 206, 235, 0.05) 100%); border-color: var(--mlp-blue);">
+                <div class="info-box-title" style="color: var(--mlp-blue);">
+                    <span>💡</span>
+                    <span>為什麼需要激活函數？</span>
+                </div>
+                <p><strong>沒有激活函數：</strong></p>
+                <p style="margin-left: 20px; margin-top: 10px;">
+                    多層線性變換 = 一層線性變換<br>
+                    Layer2(Layer1(x)) = W2(W1·x) = (W2·W1)·x = W_combined·x
+                </p>
+                <p style="margin-top: 20px;"><strong>有激活函數：</strong></p>
+                <p style="margin-left: 20px; margin-top: 10px;">
+                    引入非線性，讓模型能學習複雜的模式<br>
+                    Layer2(GELU(Layer1(x))) ≠ 簡單的線性組合
+                </p>
+            </div>
+
+            <h2>📍 步驟 3：第二層線性轉換（壓縮）</h2>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">3</span>
+                    <span class="step-title">壓縮回 C 維度</span>
+                </div>
+                <p>然後，我們用另一個矩陣-向量乘法加偏差，將向量從 192 維壓縮回 <strong>C = 48</strong> 維。</p>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-title">第二層線性轉換</div>
+                <div class="formula" style="font-size: 1.5rem;">
+                    output = W₂ @ activated + b₂
+                </div>
+                <div class="formula-desc">
+                    W₂: [48 × 192] 權重矩陣<br>
+                    activated: [192] 激活後的向量<br>
+                    b₂: [48] 偏差<br>
+                    output: [48] 最終輸出
+                </div>
+            </div>
+
+            <div class="matrix-box">
+                <div class="matrix-title">壓縮過程</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># activated 向量：[192]</span>
+
+<span class="code-comment"># 第二層權重矩陣</span>
+W2 = [<span class="code-number">48</span> × <span class="code-number">192</span>]  <span class="code-comment"># 訓練學習的權重</span>
+b2 = [<span class="code-number">48</span>]         <span class="code-comment"># 偏差</span>
+
+<span class="code-comment"># 矩陣-向量乘法</span>
+output = W2 @ activated + b2
+
+<span class="code-comment"># 維度變化</span>
+[<span class="code-number">48</span> × <span class="code-number">192</span>] @ [<span class="code-number">192</span>] + [<span class="code-number">48</span>] = [<span class="code-number">48</span>]
+ ^^^^^^      ^^^      ^^      ^^
+ 權重        輸入     偏差    輸出
+
+<span class="code-comment"># 向量從 192 維壓縮回 48 維！</span>
+<span class="code-comment"># 回到原始的模型維度 C</span></pre>
+                </div>
+            </div>
+
+            <div class="pull-quote">
+                擴展 → 激活 → 壓縮<br><br>
+                這種「瓶頸」架構強制模型學習<br>
+                <strong>濃縮的、有用的表徵</strong>。
+            </div>
+
+            <h2>📍 步驟 4：Residual Connection</h2>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">4</span>
+                    <span class="step-title">與原始輸入相加</span>
+                </div>
+                <p>就像在 Self-Attention + Projection 部分，我們將 MLP 的結果與其<strong>輸入</strong>進行逐元素相加。</p>
+            </div>
+
+            <div class="matrix-box">
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># MLP 的輸入（Self-Attention 的輸出）</span>
+mlp_input = attention_output + attention_input  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># MLP 處理後的輸出</span>
+mlp_output = MLP(layer_norm(mlp_input))  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># Residual Connection</span>
+final_output = mlp_output + mlp_input  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># 這就是整個 Transformer Block 的輸出！</span></pre>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(0, 255, 65, 0.1) 0%, rgba(0, 255, 65, 0.05) 100%); border-color: var(--matrix-green);">
+                <div class="info-box-title" style="color: var(--matrix-green);">
+                    <span>🔄</span>
+                    <span>Transformer Block 的兩個 Residual Connections</span>
+                </div>
+                <p>一個完整的 Transformer Block 有<strong>兩個</strong> Residual Connections：</p>
+                <div class="matrix-box" style="margin-top: 20px;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># 第一個 Residual：Self-Attention</span>
+x1 = x0 + Self_Attention(LayerNorm(x0))
+
+<span class="code-comment"># 第二個 Residual：MLP</span>
+x2 = x1 + MLP(LayerNorm(x1))
+
+<span class="code-comment"># x2 就是 Transformer Block 的輸出</span>
+<span class="code-comment"># 準備傳遞給下一個 Block（如果有的話）</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <h2>🔁 對所有 Tokens 重複</h2>
+
+            <div class="matrix-box">
+                <div class="matrix-title">完整的 MLP 處理</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 輸入：[6 × 48] 矩陣</span>
+input_matrix = [<span class="code-number">6</span> × <span class="code-number">48</span>]
+
+<span class="code-comment"># Layer Normalization（對整個矩陣）</span>
+normalized = layer_norm(input_matrix)  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># 對每一列（每個 token）獨立處理</span>
+output_matrix = []
+<span class="code-keyword">for</span> t <span class="code-keyword">in</span> <span class="code-keyword">range</span>(<span class="code-number">6</span>):
+    <span class="code-comment"># 1. 擴展</span>
+    expanded = W1 @ normalized[t] + b1      <span class="code-comment"># [48] → [192]</span>
+    
+    <span class="code-comment"># 2. 激活</span>
+    activated = GELU(expanded)              <span class="code-comment"># [192]</span>
+    
+    <span class="code-comment"># 3. 壓縮</span>
+    compressed = W2 @ activated + b2        <span class="code-comment"># [192] → [48]</span>
+    
+    output_matrix[t] = compressed
+
+<span class="code-comment"># 4. Residual Connection</span>
+final = output_matrix + input_matrix  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># 這就是 MLP 完成了！</span></pre>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>🔑</span>
+                    <span>關鍵特性：獨立處理</span>
+                </div>
+                <p>與 Self-Attention 不同，MLP 對每個 token <strong>完全獨立</strong>處理：</p>
+                <ul style="margin-left: 20px; line-height: 2; margin-top: 15px;">
+                    <li><strong>Self-Attention</strong>：tokens 之間會互相影響（Query·Key）</li>
+                    <li><strong>MLP</strong>：每個 token 用<strong>同樣的</strong>權重矩陣，<strong>獨立</strong>轉換</li>
+                </ul>
+                <p style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.8); border-radius: 10px;">
+                    這種設計的好處：<br>
+                    • Self-Attention 負責「溝通」<br>
+                    • MLP 負責「深度處理」<br>
+                    • 兩者分工明確，各司其職
+                </p>
+            </div>
+
+            <h2>🎓 nano-gpt 的參數統計</h2>
+
+            <div class="matrix-box">
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># MLP 層參數統計</span>
+
+<span class="code-comment">## 第一層（擴展）</span>
+W1: [<span class="code-number">192</span> × <span class="code-number">48</span>] = <span class="code-number">9,216</span> 個參數
+b1: [<span class="code-number">192</span>] = <span class="code-number">192</span> 個參數
+第一層總計：<span class="code-number">9,408</span> 個參數
+
+<span class="code-comment">## 第二層（壓縮）</span>
+W2: [<span class="code-number">48</span> × <span class="code-number">192</span>] = <span class="code-number">9,216</span> 個參數
+b2: [<span class="code-number">48</span>] = <span class="code-number">48</span> 個參數
+第二層總計：<span class="code-number">9,264</span> 個參數
+
+<span class="code-comment">═══════════════════════════════════════</span>
+<span class="code-comment"># MLP 總參數</span>
+<span class="code-number">9,408</span> + <span class="code-number">9,264</span> = <span class="code-number">18,672</span> 個參數
+
+<span class="code-comment">## 配置</span>
+C (模型維度)：<span class="code-number">48</span>
+擴展維度：<span class="code-number">192</span> (4 × C)
+序列長度：<span class="code-number">6</span></pre>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(255, 87, 51, 0.1) 0%, rgba(255, 87, 51, 0.05) 100%); border-color: #ff5733;">
+                <div class="info-box-title" style="color: #ff5733;">
+                    <span>📊</span>
+                    <span>完整的 Transformer Block 參數分佈</span>
+                </div>
+                <div class="matrix-box" style="margin-top: 20px;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># 一個完整 Transformer Block 的參數</span>
+
+Layer Norm 1：<span class="code-number">96</span> 參數 (γ + β)
+Multi-Head Attention：<span class="code-number">9,408</span> 參數
+Layer Norm 2：<span class="code-number">96</span> 參數 (γ + β)
+MLP：<span class="code-number">18,672</span> 參數
+────────────────────────────────────
+Transformer Block 總計：<span class="code-number">28,272</span> 個參數
+
+<span class="code-comment"># 參數分佈</span>
+Attention：<span class="code-number">33.3%</span>
+MLP：      <span class="code-number">66.0%</span>
+LayerNorm：<span class="code-number">0.7%</span>
+
+<span class="code-comment"># MLP 佔了大部分參數！</span></pre>
+                    </div>
+                </div>
+                <p style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.8); border-radius: 10px;">
+                    <strong>💡 有趣的觀察：</strong><br>
+                    雖然 Attention 是 Transformer 的「明星」機制，<br>
+                    但 MLP 實際上佔了<strong>更多的參數</strong>（約 2/3）！<br>
+                    MLP 是模型容量的主要來源。
+                </p>
+            </div>
+
+            <h2>🌟 MLP 完成了！</h2>
+
+            <div class="pull-quote">
+                現在我們有了 Transformer Block 的輸出，<br>
+                它已經準備好傳遞到<strong>下一個 Block</strong>。
+            </div>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(135, 206, 235, 0.1) 0%, rgba(135, 206, 235, 0.05) 100%); border-color: var(--mlp-blue);">
+                <div class="info-box-title" style="color: var(--mlp-blue);">
+                    <span>✅</span>
+                    <span>Transformer Block 完整流程回顧</span>
+                </div>
+                <div class="matrix-box" style="margin-top: 20px;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># 完整的 Transformer Block</span>
+
+x = input_embedding  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># ═══ Part 1: Self-Attention ═══</span>
+x = x + Multi_Head_Attention(LayerNorm(x))
+
+<span class="code-comment"># ═══ Part 2: MLP ═══</span>
+x = x + MLP(LayerNorm(x))
+
+<span class="code-comment"># 其中 MLP(x) =</span>
+<span class="code-comment">#   1. W1 @ x + b1  (擴展到 4C)</span>
+<span class="code-comment">#   2. GELU()       (非線性激活)</span>
+<span class="code-comment">#   3. W2 @ x + b2  (壓縮回 C)</span>
+
+output = x  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># 這個輸出可以：</span>
+<span class="code-comment"># - 傳遞給下一個 Transformer Block</span>
+<span class="code-comment"># - 或者（如果這是最後一層）傳遞給輸出層</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <h2>🚀 下一步</h2>
+
+            <p>在 nano-gpt 中，Transformer Block 的輸出會：</p>
+
+            <div class="comparison-grid">
+                <div class="comparison-card" style="border-top-color: var(--gold);">
+                    <div class="card-title">→ 第七章</div>
+                    <p><strong>輸出層與預測</strong></p>
+                    <p>將最終的向量轉換為下一個 token 的機率分佈</p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: var(--matrix-green);">
+                    <div class="card-title">→ 完整理解</div>
+                    <p><strong>端到端流程</strong></p>
+                    <p>從輸入文字到輸出預測的完整旅程</p>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 80px;">🗺️ 回顧架構全貌</h2>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(135, 206, 235, 0.1) 0%, rgba(135, 206, 235, 0.05) 100%); border-color: var(--mlp-blue);">
+                <div class="info-box-title" style="color: var(--mlp-blue);">
+                    <span>📍</span>
+                    <span>MLP 在完整架構中的位置</span>
+                </div>
+                <figure style="margin: 20px 0 0 0;">
+                    <img src="../../images/llm_architecture_full_20260105210724.png" alt="LLM 完整架構" style="max-width: 100%; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                    <figcaption style="margin-top: 20px; font-size: 1rem; color: #666; line-height: 1.8;">
+                        完整架構圖：我們剛剛完成了 <span style="color: #87ceeb; font-weight: 700;">MLP (Feed-Forward Network)</span>，<br>
+                        Transformer Block 的第二個主要組件
+                    </figcaption>
+                </figure>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="../index.html" style="display: inline-block; padding: 15px 40px; background: var(--mlp-blue); color: #0a0e27; text-decoration: none; border-radius: 50px; font-weight: 700; transition: transform 0.3s ease;">
+                        ← 返回教學首頁查看所有章節
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Chapter Navigation -->
+    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 60px 40px; margin-top: 80px;">
+        <div style="max-width: 900px; margin: 0 auto;">
+            
+            <h2 style="font-family: 'Noto Serif TC', serif; font-size: 2rem; color: #0a0e27; text-align: center; margin-bottom: 40px; border: none; padding: 0;">
+                🎯 本章重點回顧
+            </h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; margin-bottom: 50px;">
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">📈</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">擴展到 4C (192維)</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">第一層線性轉換增加容量</div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">⚡</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">GELU 非線性激活</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">平滑曲線，比 ReLU 更穩定</div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">📉</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">壓縮回 C (48維)</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">第二層線性轉換回到原維度</div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">💎</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">18,672 參數 (佔 2/3)</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">MLP 是模型容量的主要來源</div>
+                </div>
+            </div>
+
+            <div style="border-top: 2px solid #dee2e6; padding-top: 40px; margin-top: 40px;">
+                <h3 style="font-family: 'Noto Serif TC', serif; font-size: 1.5rem; color: #0a0e27; text-align: center; margin-bottom: 30px;">
+                    📚 章節導航
+                </h3>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                    <a href="04-multihead-projection-residual.html" style="display: flex; align-items: center; gap: 15px; padding: 25px; background: white; border-radius: 15px; text-decoration: none; color: #0a0e27; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <div style="font-size: 2rem;">⬅️</div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">上一章</div>
+                            <div style="font-weight: 700; font-size: 1.1rem;">Multi-Head & Projection</div>
+                            <div style="font-size: 0.9rem; color: #999; margin-top: 3px;">合併與投影</div>
+                        </div>
+                    </a>
+
+                    <a href="06-output-layer-softmax.html" style="display: flex; align-items: center; justify-content: flex-end; gap: 15px; padding: 25px; background: linear-gradient(135deg, #ffd700 0%, #f0c000 100%); border-radius: 15px; text-decoration: none; color: #0a0e27; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);">
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">下一章</div>
+                            <div style="font-weight: 700; font-size: 1.1rem;">Output Layer & Softmax</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9; margin-top: 5px;">最終預測</div>
+                        </div>
+                        <div style="font-size: 2rem;">➡️</div>
+                    </a>
+                </div>
+
+                <div style="text-align: center; padding: 20px; background: rgba(255, 215, 0, 0.1); border-radius: 12px; border: 2px dashed var(--gold);">
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.8;">
+                        <strong style="color: #0a0e27;">💡 下一步學什麼？</strong><br>
+                        Transformer Block 完成！經過 Self-Attention 和 MLP 的處理，<br>
+                        現在要將最終的向量轉換為<strong style="color: var(--gold);">下一個 token 的機率預測</strong>。
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer Quote -->
+    <div class="footer-quote">
+        <p class="footer-quote-text">
+            「簡單的兩層網絡，<br>
+            卻承載了模型三分之二的參數。」
+        </p>
+        <p class="footer-quote-author">— LLM 視覺化教學 · 2026</p>
+    </div>
+
+</body>
+</html>
+

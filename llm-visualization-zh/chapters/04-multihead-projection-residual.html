@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第五章：Multi-Head Attention、Projection 與 Residual Connection | nano-gpt 視覺化教學</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --hero-bg: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%);
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --deep-blue: #0f1419;
+            --matrix-green: #00ff41;
+            --purple: #9333ea;
+            --attention-brown: #daa520;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.8;
+            color: #2c3e50;
+            background: #ffffff;
+        }
+
+        .hero-section {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--hero-bg);
+            overflow: hidden;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                180deg,
+                rgba(10, 14, 39, 0.3) 0%,
+                rgba(10, 14, 39, 0.85) 60%,
+                rgba(10, 14, 39, 0.95) 100%
+            );
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 0 20px;
+            max-width: 1000px;
+        }
+
+        .nano-gpt-badge {
+            display: inline-block;
+            background: rgba(147, 51, 234, 0.2);
+            border: 2px solid var(--purple);
+            padding: 10px 30px;
+            border-radius: 50px;
+            color: var(--purple);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            letter-spacing: 0.1em;
+        }
+
+        .hero-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 900;
+            color: #FFFFFF;
+            margin-bottom: 30px;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.8), 0 0 60px rgba(147, 51, 234, 0.3);
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            color: var(--purple);
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+            margin-bottom: 20px;
+        }
+
+        .story-container {
+            background: #ffffff;
+            margin-top: -50px;
+            position: relative;
+            z-index: 10;
+            border-radius: 30px 30px 0 0;
+            padding: 80px 40px;
+        }
+
+        .content-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .breadcrumb {
+            padding: 20px 40px;
+            background: rgba(10, 14, 39, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--purple);
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            opacity: 0.8;
+        }
+
+        .story-lead {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.5rem;
+            line-height: 2;
+            color: #1a1a1a;
+            margin: 40px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-left: 5px solid var(--purple);
+            border-radius: 10px;
+        }
+
+        h2 {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0a0e27;
+            margin: 60px 0 30px 0;
+            border-bottom: 3px solid var(--purple);
+            padding-bottom: 15px;
+        }
+
+        h3 {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.8rem;
+            color: #1a1f3a;
+            margin: 40px 0 20px 0;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%);
+            border: 2px solid var(--purple);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+
+        .info-box-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.3rem;
+            color: var(--purple);
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .matrix-box {
+            background: #1a1f3a;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            border: 2px solid rgba(147, 51, 234, 0.2);
+        }
+
+        .matrix-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.3rem;
+            color: var(--purple);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .code-visualization {
+            background: #1e1e1e;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .code-visualization pre {
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #d4d4d4;
+            margin: 0;
+        }
+
+        .code-comment { color: #6a9955; }
+        .code-keyword { color: #569cd6; }
+        .code-string { color: #ce9178; }
+        .code-number { color: #b5cea8; }
+
+        .step-box {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--purple);
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: var(--purple);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .step-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.4rem;
+            color: #0a0e27;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .pull-quote {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.8rem;
+            font-style: italic;
+            color: #0a0e27;
+            padding: 40px;
+            margin: 60px 0;
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%);
+            border-left: 5px solid var(--purple);
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .pull-quote::before {
+            content: '"';
+            position: absolute;
+            left: 15px;
+            top: 10px;
+            font-size: 4rem;
+            color: var(--purple);
+            opacity: 0.3;
+            font-family: Georgia, serif;
+        }
+
+        figure {
+            margin: 60px 0;
+            text-align: center;
+        }
+
+        figure img {
+            max-width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+        }
+
+        figcaption {
+            margin-top: 20px;
+            font-size: 1rem;
+            color: #666;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #f3e5f5 0%, #faf3fb 100%);
+            border: 2px solid var(--purple);
+            border-radius: 15px;
+            padding: 40px;
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .formula-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.3rem;
+            color: #0a0e27;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            color: #0a0e27;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        .formula-desc {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 20px;
+            line-height: 1.8;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .comparison-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-top: 4px solid var(--purple);
+            transition: transform 0.3s ease;
+        }
+
+        .comparison-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.2rem;
+            color: #0a0e27;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .footer-quote {
+            background: var(--hero-bg);
+            padding: 80px 40px;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .footer-quote-text {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 2rem;
+            color: var(--purple);
+            max-width: 800px;
+            margin: 0 auto 30px;
+            line-height: 1.8;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+        }
+
+        .footer-quote-author {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.2rem;
+            color: var(--silver);
+            font-weight: 300;
+        }
+
+        /* Stack Visual */
+        .stack-visual {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .stack-grid {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .vector-box {
+            background: linear-gradient(135deg, #00ff41 0%, #00cc33 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 700;
+            box-shadow: 0 5px 15px rgba(0,255,65,0.3);
+        }
+
+        .arrow-symbol {
+            font-size: 3rem;
+            color: var(--purple);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .story-container {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="breadcrumb">
+        <a href="../../index.html">🏠 首頁</a>
+        <span style="margin: 0 10px; color: #999;">/</span>
+        <a href="../index.html">📚 LLM 視覺化教學</a>
+        <span style="margin: 0 10px; color: #999;">/</span>
+        <span style="color: #666;">第五章：Multi-Head、Projection 與 Residual</span>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="nano-gpt-badge">nano-gpt · 多頭合併與殘差連接</div>
+            <h1 class="hero-title">Multi-Head Attention<br>Projection & Residual</h1>
+            <p class="hero-subtitle">合併多個視角、投影輸出、保留原始資訊</p>
+            <p style="font-size: 1rem; color: var(--silver); margin-top: 20px;">
+                Concatenation · Projection · Residual Connection
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="story-container">
+        <div class="content-wrapper">
+            
+            <h2 style="border: none; margin-top: 0; text-align: center; color: var(--purple);">🗺️ 本章在架構中的位置</h2>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(147, 51, 234, 0.08) 100%); border-color: var(--purple); margin: 40px 0 60px 0;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="display: inline-block; padding: 15px 40px; background: rgba(147, 51, 234, 0.2); border: 2px solid var(--purple); border-radius: 50px; font-size: 1.2rem; font-weight: 700; color: var(--purple);">
+                        📍 第五章：Multi-Head Attention 輸出處理
+                    </div>
+                </div>
+                
+                <figure style="margin: 30px 0;">
+                    <img src="../../images/multihead_residual_focus_20260105214048.png" alt="Multi-Head Attention 與 Residual Connection 特寫" style="max-width: 100%; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                    <figcaption style="margin-top: 20px; font-size: 1rem; color: #666; line-height: 1.8;">
+                        <strong style="color: #0a0e27;">Multi-Head 輸出處理位置</strong><br>
+                        本章聚焦於<span style="color: #9333ea; font-weight: 700;"> 紫色的 Projection 層</span>與<span style="color: #00ff41; font-weight: 700;"> 綠色的 Residual Connection</span>
+                    </figcaption>
+                </figure>
+
+                <div style="background: rgba(255, 255, 255, 0.6); padding: 25px; border-radius: 12px; margin-top: 30px;">
+                    <p style="margin: 0; text-align: center; color: #2c3e50; line-height: 1.9;">
+                        <strong style="color: #9333ea;">🟣 將多個 heads 的輸出合併並投影</strong><br>
+                        <strong style="color: #00ff41;">🟢 透過 Residual Connection 保留原始資訊</strong>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="story-lead">
+                經過 Self-Attention 處理後，我們從每個 head 得到了輸出。<br>
+                這些輸出是經過適當混合的 V 向量，受到 Q 和 K 向量的影響。<br><br>
+                現在，我們需要：<br>
+                1️⃣ 合併多個 heads 的輸出<br>
+                2️⃣ 透過 Projection 轉換維度<br>
+                3️⃣ 使用 Residual Connection 保留原始資訊
+            </div>
+
+            <h2>📚 回顧：Multi-Head Attention 的概念</h2>
+
+            <p>在前面的章節中，我們詳細探索了<strong>單個 head</strong> 的 Self-Attention。實際上，Transformer 會<strong>平行運行多個 heads</strong>。</p>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>💡</span>
+                    <span>為什麼需要多個 Heads？</span>
+                </div>
+                <ul style="margin-left: 20px; line-height: 2;">
+                    <li><strong>不同的關注模式</strong>：每個 head 可以學習不同類型的關係</li>
+                    <li><strong>豐富的表徵</strong>：捕捉多層次的語義資訊</li>
+                    <li><strong>穩定訓練</strong>：降低單一視角的風險</li>
+                </ul>
+                <p style="margin-top: 20px; font-style: italic; color: #666;">
+                    例如：Head 1 可能關注文法關係，Head 2 關注語義相似性，Head 3 關注長距離依賴。
+                </p>
+            </div>
+
+            <div class="matrix-box">
+                <div class="matrix-title">nano-gpt 的 Multi-Head 配置</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># nano-gpt 使用 3 個 attention heads</span>
+
+C (模型維度)：<span class="code-number">48</span>
+num_heads：<span class="code-number">3</span>
+head_dim (A)：<span class="code-number">16</span>  <span class="code-comment"># C / num_heads = 48 / 3</span>
+
+<span class="code-comment"># 每個 head 的輸入/輸出</span>
+輸入：[<span class="code-number">6</span> × <span class="code-number">48</span>] → 分配給 3 個 heads
+Head 1 輸出：[<span class="code-number">6</span> × <span class="code-number">16</span>]
+Head 2 輸出：[<span class="code-number">6</span> × <span class="code-number">16</span>]
+Head 3 輸出：[<span class="code-number">6</span> × <span class="code-number">16</span>]</pre>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>🔑</span>
+                    <span>重要提醒：每個 Head 有獨立的權重</span>
+                </div>
+                <p>還記得在第三章學到的嗎？每個 head 都有自己<strong>獨立的 Q/K/V 權重矩陣</strong>：</p>
+                <div class="matrix-box" style="margin-top: 20px;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># 每個 head 的獨立權重</span>
+Head 1: Q_weights[<span class="code-number">16</span>×<span class="code-number">48</span>], K_weights[<span class="code-number">16</span>×<span class="code-number">48</span>], V_weights[<span class="code-number">16</span>×<span class="code-number">48</span>]
+Head 2: Q_weights[<span class="code-number">16</span>×<span class="code-number">48</span>], K_weights[<span class="code-number">16</span>×<span class="code-number">48</span>], V_weights[<span class="code-number">16</span>×<span class="code-number">48</span>]
+Head 3: Q_weights[<span class="code-number">16</span>×<span class="code-number">48</span>], K_weights[<span class="code-number">16</span>×<span class="code-number">48</span>], V_weights[<span class="code-number">16</span>×<span class="code-number">48</span>]
+
+<span class="code-comment"># 這些權重都是透過訓練學習而來！</span>
+<span class="code-comment"># 因為獨立，所以能學習不同的關注模式</span></pre>
+                    </div>
+                </div>
+                <p style="margin-top: 15px;">這就是為什麼不同的 heads 能捕捉不同層次的關係：它們用不同的「眼光」（權重）看待相同的輸入。</p>
+            </div>
+
+            <h2>🔗 步驟 1：合併 Heads 的輸出（Concatenation）</h2>
+
+            <p>要合併多個 heads 的輸出向量，我們只需將它們<strong>垂直堆疊</strong>（concatenate）。</p>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">1</span>
+                    <span class="step-title">堆疊向量</span>
+                </div>
+                <p>對於時間步 t = 4，我們從 3 個長度為 A = 16 的向量，合併成 1 個長度為 C = 48 的向量。</p>
+            </div>
+
+            <figure>
+                <img src="../../images/multihead_projection_20260105213907.png" alt="Multi-Head 輸出合併與 Projection">
+                <figcaption>
+                    視覺化：3 個 heads 的輸出堆疊成一個向量，然後經過 Projection
+                </figcaption>
+            </figure>
+
+            <div class="stack-visual">
+                <h3 style="text-align: center; color: #0a0e27; margin-bottom: 30px;">📊 Concatenation 視覺化（t = 4）</h3>
+                <div class="stack-grid">
+                    <div>
+                        <div class="vector-box" style="margin-bottom: 10px;">
+                            Head 1<br>[16]
+                        </div>
+                        <div class="vector-box" style="margin-bottom: 10px;">
+                            Head 2<br>[16]
+                        </div>
+                        <div class="vector-box">
+                            Head 3<br>[16]
+                        </div>
+                    </div>
+                    
+                    <div class="arrow-symbol">→</div>
+                    
+                    <div class="vector-box" style="height: 200px; display: flex; flex-direction: column; justify-content: center; padding: 40px;">
+                        <div>Concatenated</div>
+                        <div style="font-size: 2rem; margin: 10px 0;">[48]</div>
+                        <div style="font-size: 0.9rem; opacity: 0.9;">(16 + 16 + 16)</div>
+                    </div>
+                </div>
+                <p style="text-align: center; color: #666; margin-top: 20px;">
+                    簡單的向量堆疊，沒有任何計算
+                </p>
+            </div>
+
+            <div class="matrix-box">
+                <div class="matrix-title">Concatenation 代碼</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 對於時間步 t = 4</span>
+
+head1_output[<span class="code-number">4</span>] = [<span class="code-number">16</span> 個浮點數]  <span class="code-comment"># 來自 Head 1</span>
+head2_output[<span class="code-number">4</span>] = [<span class="code-number">16</span> 個浮點數]  <span class="code-comment"># 來自 Head 2</span>
+head3_output[<span class="code-number">4</span>] = [<span class="code-number">16</span> 個浮點數]  <span class="code-comment"># 來自 Head 3</span>
+
+<span class="code-comment"># Concatenate（堆疊）</span>
+concatenated[<span class="code-number">4</span>] = [
+    head1_output[<span class="code-number">4</span>],  <span class="code-comment"># 元素 0-15</span>
+    head2_output[<span class="code-number">4</span>],  <span class="code-comment"># 元素 16-31</span>
+    head3_output[<span class="code-number">4</span>]   <span class="code-comment"># 元素 32-47</span>
+]
+
+<span class="code-comment"># 結果：[48] 向量</span>
+
+<span class="code-comment"># 對所有 6 個時間步重複此過程</span>
+<span class="code-comment"># 最終得到：[6 × 48] 矩陣</span></pre>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%); border-color: var(--purple);">
+                <div class="info-box-title" style="color: var(--purple);">
+                    <span>🎯</span>
+                    <span>維度設計的巧妙之處</span>
+                </div>
+                <p>在 GPT 中，head 內部的向量長度（A）等於 <code>C / num_heads</code>。</p>
+                <div class="formula-box" style="margin: 20px 0;">
+                    <div class="formula">
+                        A = C / num_heads
+                    </div>
+                    <div class="formula-desc">
+                        nano-gpt：A = 48 / 3 = 16
+                    </div>
+                </div>
+                <p><strong>好處：</strong>當我們堆疊回去時，正好回到原始長度 C。這確保了維度匹配，簡化了架構設計。</p>
+            </div>
+
+            <h2>🎯 步驟 2：Projection（投影）</h2>
+
+            <p>從這裡開始，我們執行<strong>投影</strong>（projection）來產生該層的輸出。</p>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">2</span>
+                    <span class="step-title">矩陣-向量乘法 + Bias</span>
+                </div>
+                <p>這是一個簡單的線性變換，按<strong>列</strong>（per-column）進行，並加上偏差。</p>
+            </div>
+
+            <div class="matrix-box">
+                <div class="matrix-title">Projection 計算過程</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 輸入：concatenated 矩陣 [6 × 48]</span>
+
+<span class="code-comment"># Projection Weights：[48 × 48]</span>
+<span class="code-comment"># - 將 48 維向量轉換回 48 維</span>
+<span class="code-comment"># - 這是一個「學習如何組合多個 heads 資訊」的矩陣</span>
+
+<span class="code-comment"># 對每一列（每個時間步）</span>
+<span class="code-keyword">for</span> t <span class="code-keyword">in</span> <span class="code-keyword">range</span>(<span class="code-number">6</span>):
+    <span class="code-comment"># 矩陣-向量乘法</span>
+    output[t] = Projection_Weights @ concatenated[t] + Projection_Bias
+    
+    <span class="code-comment"># 輸入：[48]</span>
+    <span class="code-comment"># 權重：[48 × 48]</span>
+    <span class="comment"># 輸出：[48]</span>
+
+<span class="code-comment"># 最終輸出：[6 × 48] 矩陣</span>
+<span class="code-comment"># 這就是 Self-Attention 層的輸出！</span></pre>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-title">Projection 公式</div>
+                <div class="formula" style="font-size: 1.5rem;">
+                    output = W<sub>proj</sub> × concat + b<sub>proj</sub>
+                </div>
+                <div class="formula-desc">
+                    W<sub>proj</sub>: [48 × 48] 權重矩陣<br>
+                    concat: [48] 合併後的向量<br>
+                    b<sub>proj</sub>: [48] 偏差向量
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>🔍</span>
+                    <span>為什麼需要 Projection？</span>
+                </div>
+                <ul style="margin-left: 20px; line-height: 2;">
+                    <li><strong>整合資訊</strong>：學習如何最佳地組合多個 heads 的輸出</li>
+                    <li><strong>非線性轉換</strong>：提供額外的表徵能力</li>
+                    <li><strong>維度匹配</strong>：確保輸出維度與輸入相同（都是 C = 48）</li>
+                </ul>
+            </div>
+
+            <h3>🎓 nano-gpt 的 Projection 參數</h3>
+
+            <div class="matrix-box">
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># Projection 層參數統計</span>
+
+Projection_Weights：[<span class="code-number">48</span> × <span class="code-number">48</span>] = <span class="code-number">2,304</span> 個參數
+Projection_Bias：[<span class="code-number">48</span>] = <span class="code-number">48</span> 個參數
+────────────────────────────────────
+總計：<span class="code-number">2,352</span> 個參數
+
+<span class="code-comment"># 完整 Multi-Head Self-Attention 的參數</span>
+3 個 heads 的 Q/K/V：<span class="code-number">2,352</span> × <span class="code-number">3</span> = <span class="code-number">7,056</span>
+Projection：<span class="code-number">2,352</span>
+────────────────────────────────────
+Multi-Head Attention 總計：<span class="code-number">9,408</span> 個參數</pre>
+                </div>
+            </div>
+
+            <h2>🔄 步驟 3：Residual Connection（殘差連接）</h2>
+
+            <p>現在我們有了 Self-Attention 層的輸出。但是，我們<strong>不會</strong>直接將這個輸出傳遞到下一階段。</p>
+
+            <div class="pull-quote">
+                相反，我們將輸出與<strong>原始輸入</strong>進行<br>
+                <strong>逐元素相加</strong>（element-wise addition）。<br><br>
+                這個過程稱為<strong>殘差連接</strong>（Residual Connection）<br>
+                或<strong>殘差路徑</strong>（Residual Pathway）。
+            </div>
+
+            <figure>
+                <img src="../../images/residual_connection_20260105213945.png" alt="Residual Connection 視覺化">
+                <figcaption>
+                    視覺化：Self-Attention 輸出與原始輸入相加
+                </figcaption>
+            </figure>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">3</span>
+                    <span class="step-title">Element-wise Addition</span>
+                </div>
+                <p>將 Self-Attention 的輸出與進入這層<strong>之前</strong>的輸入相加。</p>
+            </div>
+
+            <div class="matrix-box">
+                <div class="matrix-title">Residual Connection 計算</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 輸入：來自 Layer Norm 的正規化矩陣 [6 × 48]</span>
+input_to_attention = normalized_input  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># Self-Attention 的完整流程</span>
+<span class="code-comment"># 1. Multi-Head Self-Attention</span>
+attention_output = multi_head_attention(input_to_attention)  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># 2. Projection</span>
+projected_output = projection(attention_output)  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># 3. Residual Connection（關鍵！）</span>
+<span class="code-comment"># 將輸出與「原始輸入」相加</span>
+final_output = projected_output + input_to_attention  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># 逐元素相加範例</span>
+<span class="code-comment"># projected[0][0] + input[0][0] → final[0][0]</span>
+<span class="code-comment"># projected[0][1] + input[0][1] → final[0][1]</span>
+<span class="code-comment"># ... 所有 6×48 = 288 個元素都這樣相加</span></pre>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-title">Residual Connection 公式</div>
+                <div class="formula" style="font-size: 1.5rem;">
+                    output = x + F(x)
+                </div>
+                <div class="formula-desc">
+                    x: 原始輸入<br>
+                    F(x): Self-Attention 的輸出<br>
+                    output: 相加後的結果
+                </div>
+            </div>
+
+            <h3>🎯 為什麼需要 Residual Connection？</h3>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(0, 255, 65, 0.1) 0%, rgba(0, 255, 65, 0.05) 100%); border-color: var(--matrix-green);">
+                <div class="info-box-title" style="color: var(--matrix-green);">
+                    <span>🌟</span>
+                    <span>Residual Connection 的重要性</span>
+                </div>
+                <p>與 Layer Normalization 一樣，Residual Connection 對於<strong>深度神經網絡的有效學習</strong>至關重要。</p>
+                
+                <h4 style="margin-top: 30px; color: #0a0e27; font-size: 1.2rem;">主要優點：</h4>
+                <ul style="margin-left: 20px; line-height: 2; margin-top: 15px;">
+                    <li><strong>解決梯度消失問題</strong>：讓梯度能直接流回前面的層</li>
+                    <li><strong>保留原始資訊</strong>：確保重要資訊不會在層層傳遞中丟失</li>
+                    <li><strong>更容易訓練</strong>：網絡可以學習「調整」而非「重建」</li>
+                    <li><strong>允許更深的網絡</strong>：使得訓練 100+ 層的模型成為可能</li>
+                </ul>
+
+                <p style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.8); border-radius: 10px;">
+                    <strong>💡 直覺理解：</strong><br>
+                    想像你在編輯一張照片。Residual Connection 讓模型說：<br>
+                    「保留原圖，我只添加一些<strong>調整</strong>」<br>
+                    而不是「丟掉原圖，重新畫一張」。
+                </p>
+            </div>
+
+            <div class="matrix-box" style="background: linear-gradient(135deg, #1e3a2f 0%, #0f1e18 100%);">
+                <div class="matrix-title" style="color: var(--matrix-green);">數學角度：為何有效？</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 沒有 Residual Connection</span>
+Layer_n_output = F<sub>n</sub>(F<sub>n-1</sub>(...F<sub>2</sub>(F<sub>1</sub>(x))))
+
+<span class="code-comment"># 梯度需要經過所有層：容易消失</span>
+∂Loss/∂x = ∂F<sub>n</sub>/∂F<sub>n-1</sub> × ... × ∂F<sub>2</sub>/∂F<sub>1</sub> × ∂F<sub>1</sub>/∂x
+
+<span class="code-comment"># 有 Residual Connection</span>
+Layer_n_output = x + F<sub>n</sub>(x + F<sub>n-1</sub>(x + ...))
+
+<span class="code-comment"># 梯度有「捷徑」直達前層：</span>
+∂Loss/∂x = <span class="code-number">1</span> + ∂F<sub>n</sub>/∂x  <span class="code-comment"># 「1」提供直接路徑！</span></pre>
+                </div>
+            </div>
+
+            <h2>🔄 完整流程總結</h2>
+
+            <div class="matrix-box">
+                <div class="matrix-title">Self-Attention 層的完整流程</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 輸入：[6 × 48] 正規化矩陣</span>
+input = layer_norm_output
+
+<span class="code-comment"># ═══════════════════════════════════════</span>
+<span class="code-comment"># 步驟 1: Multi-Head Self-Attention</span>
+<span class="code-comment"># ═══════════════════════════════════════</span>
+
+<span class="code-comment"># 每個 head 獨立運算</span>
+head1_out = self_attention_head1(input)  <span class="code-comment"># [6 × 16]</span>
+head2_out = self_attention_head2(input)  <span class="code-comment"># [6 × 16]</span>
+head3_out = self_attention_head3(input)  <span class="code-comment"># [6 × 16]</span>
+
+<span class="code-comment"># ═══════════════════════════════════════</span>
+<span class="code-comment"># 步驟 2: Concatenation</span>
+<span class="code-comment"># ═══════════════════════════════════════</span>
+
+concatenated = concat([head1_out, head2_out, head3_out])  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># ═══════════════════════════════════════</span>
+<span class="code-comment"># 步驟 3: Projection</span>
+<span class="code-comment"># ═══════════════════════════════════════</span>
+
+projected = W_proj @ concatenated + b_proj  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># ═══════════════════════════════════════</span>
+<span class="code-comment"># 步驟 4: Residual Connection</span>
+<span class="code-comment"># ═══════════════════════════════════════</span>
+
+output = projected + input  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment"># 這個輸出現在準備好進入下一階段：</span>
+<span class="comment"># Feed-Forward Network</span></pre>
+                </div>
+            </div>
+
+            <h2>🎓 nano-gpt 完整統計</h2>
+
+            <div class="matrix-box">
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># Multi-Head Self-Attention 層（完整）</span>
+
+<span class="code-comment">## 輸入/輸出形狀</span>
+輸入：[<span class="code-number">6</span> × <span class="code-number">48</span>] 正規化矩陣
+輸出：[<span class="code-number">6</span> × <span class="code-number">48</span>] attention residual
+
+<span class="code-comment">## 參數統計</span>
+Head 1 (Q/K/V)：<span class="code-number">2,352</span> 參數
+Head 2 (Q/K/V)：<span class="code-number">2,352</span> 參數
+Head 3 (Q/K/V)：<span class="code-number">2,352</span> 參數
+Projection：<span class="code-number">2,352</span> 參數
+────────────────────────────────────
+總計：<span class="code-number">9,408</span> 個參數
+
+<span class="code-comment">## 配置</span>
+num_heads：<span class="code-number">3</span>
+head_dim：<span class="code-number">16</span> (C / num_heads)
+model_dim (C)：<span class="code-number">48</span>
+sequence_length (T)：<span class="code-number">6</span></pre>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(255, 87, 51, 0.1) 0%, rgba(255, 87, 51, 0.05) 100%); border-color: #ff5733;">
+                <div class="info-box-title" style="color: #ff5733;">
+                    <span>🔍</span>
+                    <span>參數詳細分解</span>
+                </div>
+                
+                <h4 style="margin-top: 20px; color: #0a0e27; font-size: 1.2rem;">每個 Head 的參數 (2,352)</h4>
+                <div class="matrix-box" style="margin-top: 15px;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># 單個 head 的參數構成</span>
+
+Q_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 個參數
+K_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 個參數
+V_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 個參數
+Q_bias: [<span class="code-number">16</span>] = <span class="code-number">16</span> 個參數
+K_bias: [<span class="code-number">16</span>] = <span class="code-number">16</span> 個參數
+V_bias: [<span class="code-number">16</span>] = <span class="code-number">16</span> 個參數
+────────────────────────────
+總計：<span class="code-number">2,352</span> 個參數
+
+<span class="code-comment"># 3 個 heads × 2,352 = 7,056 參數</span></pre>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 30px; color: #0a0e27; font-size: 1.2rem;">Projection 層的參數 (2,352)</h4>
+                <div class="matrix-box" style="margin-top: 15px;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># Projection 層參數構成</span>
+
+Projection_Weights: [<span class="code-number">48</span> × <span class="code-number">48</span>] = <span class="code-number">2,304</span> 個參數
+Projection_Bias: [<span class="code-number">48</span>] = <span class="code-number">48</span> 個參數
+────────────────────────────
+總計：<span class="code-number">2,352</span> 個參數</pre>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 30px; color: #0a0e27; font-size: 1.2rem;">完整計算</h4>
+                <div class="matrix-box" style="margin-top: 15px;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># Multi-Head Self-Attention 總參數</span>
+
+3 個 heads 的 Q/K/V：<span class="code-number">2,352</span> × <span class="code-number">3</span> = <span class="code-number">7,056</span>
+Projection 層：      = <span class="code-number">2,352</span>
+═════════════════════════════
+Multi-Head Attention：= <span class="code-number">9,408</span> 個參數
+
+<span class="code-comment"># 這些參數都是透過訓練學習而來！</span>
+<span class="code-comment"># 訓練完成後保存在模型文件中</span></pre>
+                    </div>
+                </div>
+
+                <p style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.8); border-radius: 10px;">
+                    <strong>💡 實際意義：</strong><br>
+                    這 9,408 個參數就是這個 Multi-Head Self-Attention 層的「知識」。<br>
+                    nano-gpt 整個模型有 85,000 個參數，這一層就佔了約 11%！<br>
+                    可見 Attention 機制的重要性。
+                </p>
+            </div>
+
+            <h2>🚀 下一步：Feed-Forward Network</h2>
+
+            <p>現在我們手中有了 Self-Attention 的結果（加上 residual），可以將它傳遞到 Transformer 的下一個部分：</p>
+
+            <div class="pull-quote">
+                <strong>Feed-Forward Network</strong>（前饋神經網絡）<br><br>
+                Transformer Block 的第二個主要組件
+            </div>
+
+            <div class="comparison-grid">
+                <div class="comparison-card" style="border-top-color: #87ceeb;">
+                    <div class="card-title">→ 第六章</div>
+                    <p><strong>Feed-Forward Network</strong></p>
+                    <p>兩層全連接網絡，對每個 token 獨立處理</p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: var(--matrix-green);">
+                    <div class="card-title">→ 第七章</div>
+                    <p><strong>第二個 Residual Connection</strong></p>
+                    <p>Feed-Forward 之後的另一個殘差連接</p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: var(--gold);">
+                    <div class="card-title">→ 第八章</div>
+                    <p><strong>Output & Prediction</strong></p>
+                    <p>從向量到機率分佈</p>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 80px;">🗺️ 回顧架構全貌</h2>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%); border-color: var(--purple);">
+                <div class="info-box-title" style="color: var(--purple);">
+                    <span>📍</span>
+                    <span>Multi-Head Attention 完整流程在架構中的位置</span>
+                </div>
+                <figure style="margin: 20px 0 0 0;">
+                    <img src="../../images/llm_architecture_full_20260105210724.png" alt="LLM 完整架構" style="max-width: 100%; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                    <figcaption style="margin-top: 20px; font-size: 1rem; color: #666; line-height: 1.8;">
+                        完整架構圖：我們剛剛完成了 <span style="color: #9333ea; font-weight: 700;">Multi-Head Attention 的輸出處理與 Residual Connection</span><br>
+                        接下來進入 Feed-Forward Network
+                    </figcaption>
+                </figure>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="../index.html" style="display: inline-block; padding: 15px 40px; background: var(--purple); color: white; text-decoration: none; border-radius: 50px; font-weight: 700; transition: transform 0.3s ease;">
+                        ← 返回教學首頁查看所有章節
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Chapter Navigation -->
+    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 60px 40px; margin-top: 80px;">
+        <div style="max-width: 900px; margin: 0 auto;">
+            
+            <h2 style="font-family: 'Noto Serif TC', serif; font-size: 2rem; color: #0a0e27; text-align: center; margin-bottom: 40px; border: none; padding: 0;">
+                🎯 本章重點回顧
+            </h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; margin-bottom: 50px;">
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">📚</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">堆疊 Heads 輸出</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">3 個 [16] 向量 → 1 個 [48] 向量</div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🔀</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">Projection 矩陣</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">[48×48] 權重矩陣轉換</div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🔄</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">Residual Connection</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">保留原始輸入資訊</div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">📊</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">9,408 參數</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">Multi-Head Attention 總參數</div>
+                </div>
+            </div>
+
+            <div style="border-top: 2px solid #dee2e6; padding-top: 40px; margin-top: 40px;">
+                <h3 style="font-family: 'Noto Serif TC', serif; font-size: 1.5rem; color: #0a0e27; text-align: center; margin-bottom: 30px;">
+                    📚 章節導航
+                </h3>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                    <a href="03b-self-attention-computation.html" style="display: flex; align-items: center; gap: 15px; padding: 25px; background: white; border-radius: 15px; text-decoration: none; color: #0a0e27; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <div style="font-size: 2rem;">⬅️</div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">上一章</div>
+                            <div style="font-weight: 700; font-size: 1.1rem;">Self-Attention: 計算</div>
+                            <div style="font-size: 0.9rem; color: #999; margin-top: 3px;">注意力機制</div>
+                        </div>
+                    </a>
+
+                    <a href="05-feed-forward-mlp.html" style="display: flex; align-items: center; justify-content: flex-end; gap: 15px; padding: 25px; background: linear-gradient(135deg, #ffd700 0%, #f0c000 100%); border-radius: 15px; text-decoration: none; color: #0a0e27; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);">
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">下一章</div>
+                            <div style="font-weight: 700; font-size: 1.1rem;">Feed-Forward Network</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9; margin-top: 5px;">MLP 深度轉換</div>
+                        </div>
+                        <div style="font-size: 2rem;">➡️</div>
+                    </a>
+                </div>
+
+                <div style="text-align: center; padding: 20px; background: rgba(255, 215, 0, 0.1); border-radius: 12px; border: 2px dashed var(--gold);">
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.8;">
+                        <strong style="color: #0a0e27;">💡 下一步學什麼？</strong><br>
+                        Self-Attention 完成！Transformer Block 的第一部分已經讓 tokens 互相溝通了。<br>
+                        接下來的<strong style="color: var(--gold);"> MLP </strong>會對每個 token <strong>獨立</strong>進行深度非線性轉換。
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer Quote -->
+    <div class="footer-quote">
+        <p class="footer-quote-text">
+            「多頭合併，投影轉換，殘差保留——<br>
+            Transformer 的優雅設計。」
+        </p>
+        <p class="footer-quote-author">— LLM 視覺化教學 · 2026</p>
+    </div>
+
+</body>
+</html>
+

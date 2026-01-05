@@ -26,13 +26,18 @@
     />
 
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-70B8N72F6F"></script>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-70B8N72F6F"
+    ></script>
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
 
-      gtag('config', 'G-70B8N72F6F');
+      gtag("config", "G-70B8N72F6F");
     </script>
 
     <!-- Open Graph / Facebook -->
@@ -114,6 +119,35 @@
         </div>
       </div>
 
+      <!-- Latest Updates Section -->
+      <div class="latest-updates">
+        <div class="updates-header">
+          <span class="updates-icon">🔔</span>
+          <span class="updates-title">最新更新</span>
+        </div>
+        <div class="updates-list">
+          <a href="llm-visualization-zh/index.html" class="update-item">
+            <span class="update-date">2026-01-05</span>
+            <span class="update-text"
+              >LLM 視覺化完整教學 - 從 nano-gpt 理解 GPT 運作原理</span
+            >
+            <span class="update-badge">NEW</span>
+          </a>
+          <a href="prompt-engineering-tutorial/index.html" class="update-item">
+            <span class="update-date">2026-01-02</span>
+            <span class="update-text"
+              >Prompt 提示詞範式革命 - 第四範式的理論正名</span
+            >
+          </a>
+          <a href="articles/gpt3-inference-detailed.html" class="update-item">
+            <span class="update-date">2026-01-02</span>
+            <span class="update-text"
+              >GPT-3 推理流程詳解 - 96 層 Transformer 運作機制</span
+            >
+          </a>
+        </div>
+      </div>
+
       <!-- Tab Navigation -->
       <div class="tab-container" id="featured">
         <div class="tab-nav">
@@ -132,9 +166,49 @@
         <!-- Tab 2: Topics (Bento Grid) -->
         <div id="topics" class="tab-content">
           <div class="bento-grid">
-            <!-- Featured Card: NLP Trilogy -->
+            <!-- Featured Card: LLM Visualization Tutorial -->
             <div
               class="bento-card featured"
+              onclick="location.href='llm-visualization-zh/index.html'"
+              style="cursor: pointer"
+            >
+              <div
+                class="card-icon"
+                style="
+                  background: transparent;
+                  width: 100px;
+                  height: 100px;
+                  margin-bottom: 20px;
+                  padding: 0;
+                "
+              >
+                <img
+                  src="images/llm_architecture_full_20260105210724.png"
+                  alt="LLM Visualization Icon"
+                  style="
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    border-radius: 10px;
+                  "
+                />
+              </div>
+              <h3>LLM 視覺化完整教學</h3>
+              <p>
+                從 nano-gpt 的 85,000 個參數開始，逐步深入理解 GPT 的運作原理。
+                完整解析 Embedding、Self-Attention、Multi-Head Attention、Layer
+                Normalization、 Feed-Forward Network、Softmax 等核心機制。
+              </p>
+              <div class="card-meta">
+                <span>2026 最新</span>
+                <span>•</span>
+                <span>6 章完整教學</span>
+              </div>
+            </div>
+
+            <!-- Featured Card: NLP Trilogy -->
+            <div
+              class="bento-card"
               onclick="location.href='topics/nlp-trilogy.html'"
               style="cursor: pointer"
             >
@@ -191,9 +265,8 @@
               </div>
               <h3>Prompt 提示詞的範式革命</h3>
               <p>
-                從 GPT-3 的驚人發現，到 2021 年「第四範式」的理論正名。
-                深入理解 Prompt 如何從一種黑魔法技巧，
-                演變成現代 AI 的核心開發範式。
+                從 GPT-3 的驚人發現，到 2021 年「第四範式」的理論正名。 深入理解
+                Prompt 如何從一種黑魔法技巧， 演變成現代 AI 的核心開發範式。
               </p>
               <div class="card-meta">
                 <span>2020-2021</span>
@@ -348,9 +421,12 @@
                       margin-top: 8px;
                     "
                   >
-                    將 Prompt 從黑魔法變成系統科學，奠定了 In-Context Learning 的理論基礎。
+                    將 Prompt 從黑魔法變成系統科學，奠定了 In-Context Learning
+                    的理論基礎。
                   </p>
-                  <a href="prompt-engineering-tutorial/index.html" class="quick-link"
+                  <a
+                    href="prompt-engineering-tutorial/index.html"
+                    class="quick-link"
                     >深度解析 →</a
                   >
                 </div>

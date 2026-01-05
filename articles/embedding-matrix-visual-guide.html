@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>向量的真相：字母'A'的768個數字 | AI Paper Archaeology</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles/global.css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+    <style>
+      :root {
+        --hero-bg: linear-gradient(
+          135deg,
+          #0a0e27 0%,
+          #1a1f3a 50%,
+          #0f1419 100%
+        );
+        --gold: #ffd700;
+        --silver: #c0c0c0;
+        --deep-blue: #0f1419;
+        --matrix-green: #00ff41;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.8;
+        color: #2c3e50;
+        background: var(--deep-blue);
+      }
+
+      /* Hero Section */
+      .hero-section {
+        position: relative;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--hero-bg);
+        overflow: hidden;
+      }
+
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(10, 14, 39, 0.3) 0%,
+          rgba(10, 14, 39, 0.85) 60%,
+          rgba(10, 14, 39, 0.95) 100%
+        );
+        z-index: 1;
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        padding: 0 20px;
+        max-width: 1000px;
+      }
+
+      .hero-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: clamp(2.5rem, 6vw, 5rem);
+        font-weight: 900;
+        color: #ffffff;
+        margin-bottom: 30px;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8),
+          0 0 60px rgba(255, 215, 0, 0.3);
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+
+      .hero-subtitle {
+        font-family: "Inter", sans-serif;
+        font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+        color: var(--gold);
+        font-weight: 300;
+        letter-spacing: 0.05em;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+        margin-bottom: 20px;
+      }
+
+      .hero-meta {
+        font-size: 1rem;
+        color: var(--silver);
+        font-weight: 400;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+      }
+
+      /* Story Container */
+      .story-container {
+        background: #ffffff;
+        margin-top: -50px;
+        position: relative;
+        z-index: 10;
+        border-radius: 30px 30px 0 0;
+        padding: 80px 40px;
+      }
+
+      .content-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      /* Typography */
+      .story-lead {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.5rem;
+        line-height: 2;
+        color: #1a1a1a;
+        margin: 40px 0;
+        padding: 40px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-left: 5px solid var(--gold);
+        border-radius: 10px;
+      }
+
+      h2 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #0a0e27;
+        margin: 60px 0 30px 0;
+        border-bottom: 3px solid var(--gold);
+        padding-bottom: 15px;
+      }
+
+      h3 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.8rem;
+        color: #1a1f3a;
+        margin: 40px 0 20px 0;
+      }
+
+      p {
+        font-size: 1.1rem;
+        line-height: 1.9;
+        margin-bottom: 20px;
+        color: #2c3e50;
+      }
+
+      /* Visual Break */
+      .visual-break {
+        margin: 80px 0;
+        padding: 60px 0;
+        background: var(--hero-bg);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .visual-break::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(255, 215, 0, 0.1) 0%,
+          transparent 70%
+        );
+      }
+
+      .visual-break-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        padding: 40px;
+        color: white;
+      }
+
+      .visual-quote {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2rem;
+        font-style: italic;
+        color: var(--gold);
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+        margin-bottom: 20px;
+      }
+
+      /* Matrix Visualization */
+      .matrix-box {
+        background: #1a1f3a;
+        border-radius: 20px;
+        padding: 40px;
+        margin: 40px 0;
+        box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255, 215, 0, 0.2);
+      }
+
+      .matrix-title {
+        font-family: "Inter", sans-serif;
+        font-size: 1.3rem;
+        color: var(--gold);
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .matrix-visual {
+        display: grid;
+        gap: 30px;
+        margin: 30px 0;
+      }
+
+      .matrix-item {
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 215, 0, 0.3);
+        border-radius: 15px;
+        padding: 30px;
+        backdrop-filter: blur(10px);
+      }
+
+      .matrix-label {
+        font-family: "Inter", sans-serif;
+        font-size: 1.2rem;
+        color: var(--silver);
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+
+      .matrix-dimension {
+        font-family: "Courier New", monospace;
+        font-size: 2rem;
+        color: var(--matrix-green);
+        margin: 10px 0;
+        text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+      }
+
+      .matrix-description {
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.6;
+      }
+
+      /* Comparison Table */
+      .comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin: 40px 0;
+      }
+
+      .comparison-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        border-top: 4px solid var(--gold);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .comparison-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .card-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.3rem;
+        color: #0a0e27;
+        margin-bottom: 15px;
+        font-weight: 700;
+      }
+
+      .card-value {
+        font-family: "Courier New", monospace;
+        font-size: 1.8rem;
+        color: var(--gold);
+        margin: 15px 0;
+      }
+
+      /* Code Block */
+      .code-visualization {
+        background: #1e1e1e;
+        border-radius: 15px;
+        padding: 30px;
+        margin: 40px 0;
+        overflow-x: auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .code-visualization pre {
+        font-family: "Courier New", monospace;
+        font-size: 1rem;
+        line-height: 1.8;
+        color: #d4d4d4;
+        margin: 0;
+      }
+
+      .code-comment {
+        color: #6a9955;
+      }
+      .code-keyword {
+        color: #569cd6;
+      }
+      .code-string {
+        color: #ce9178;
+      }
+      .code-number {
+        color: #b5cea8;
+      }
+      .code-function {
+        color: #dcdcaa;
+      }
+
+      /* Pull Quote */
+      .pull-quote {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.8rem;
+        font-style: italic;
+        color: #0a0e27;
+        padding: 40px;
+        margin: 60px 0;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 215, 0, 0.1) 0%,
+          rgba(255, 215, 0, 0.05) 100%
+        );
+        border-left: 5px solid var(--gold);
+        border-radius: 10px;
+        position: relative;
+      }
+
+      .pull-quote::before {
+        content: '"';
+        position: absolute;
+        left: 15px;
+        top: 10px;
+        font-size: 4rem;
+        color: var(--gold);
+        opacity: 0.3;
+        font-family: Georgia, serif;
+      }
+
+      /* Timeline */
+      .timeline-item {
+        position: relative;
+        padding-left: 50px;
+        margin: 40px 0;
+        border-left: 3px solid var(--gold);
+      }
+
+      .timeline-item::before {
+        content: "";
+        position: absolute;
+        left: -8px;
+        top: 0;
+        width: 15px;
+        height: 15px;
+        background: var(--gold);
+        border-radius: 50%;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      }
+
+      .timeline-title {
+        font-family: "Inter", sans-serif;
+        font-size: 1.2rem;
+        color: #0a0e27;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      /* Breadcrumb */
+      .breadcrumb {
+        padding: 20px 40px;
+        background: rgba(10, 14, 39, 0.05);
+        font-size: 0.9rem;
+      }
+
+      .breadcrumb a {
+        color: var(--gold);
+        text-decoration: none;
+        transition: opacity 0.3s;
+      }
+
+      .breadcrumb a:hover {
+        opacity: 0.8;
+      }
+
+      /* Footer Quote */
+      .footer-quote {
+        background: var(--hero-bg);
+        padding: 80px 40px;
+        text-align: center;
+        margin-top: 100px;
+      }
+
+      .footer-quote-text {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2rem;
+        color: var(--gold);
+        max-width: 800px;
+        margin: 0 auto 30px;
+        line-height: 1.8;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+      }
+
+      .footer-quote-author {
+        font-family: "Inter", sans-serif;
+        font-size: 1.2rem;
+        color: var(--silver);
+        font-weight: 300;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .hero-title {
+          font-size: 2rem;
+        }
+
+        .story-container {
+          padding: 40px 20px;
+        }
+
+        .comparison-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="breadcrumb">
+      <a href="../index.html">🏠 首頁</a>
+      <span style="margin: 0 10px; color: #999">/</span>
+      <span style="color: #666"
+        >🔬 深度專題：向量的真相 - Token Embed 完全解析</span
+      >
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <h1 class="hero-title">向量的真相</h1>
+        <p class="hero-subtitle">字母 'A' 在模型眼中是什麼樣子？</p>
+        <p class="hero-meta">揭開 768 個數字背後的秘密</p>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="story-container">
+      <div class="content-wrapper">
+        <div class="story-lead">
+          「字母 'A' 在電腦裡到底長什麼樣子？<br />
+          當模型『看到』'A' 的時候，它真正看到的是什麼？」<br /><br />
+          讓我們以 GPT-2 為例，看看文字如何變成 768 個真實的數字。
+        </div>
+
+        <div
+          class="matrix-box"
+          style="
+            background: linear-gradient(
+              135deg,
+              rgba(255, 215, 0, 0.1) 0%,
+              rgba(255, 215, 0, 0.05) 100%
+            );
+            border: 2px solid var(--gold);
+            margin: 40px 0;
+          "
+        >
+          <div class="matrix-title" style="color: #0a0e27">⚠️ 重要說明</div>
+          <div style="padding: 20px; color: #2c3e50; line-height: 1.8">
+            <p style="margin: 0 0 15px 0">
+              <strong>本文使用 GPT-2 作為範例</strong>，其向量維度是
+              <strong>768</strong>。
+            </p>
+            <p style="margin: 0 0 15px 0">不同模型的維度不同：</p>
+            <ul style="margin: 0; padding-left: 20px">
+              <li><strong>GPT-2 Small:</strong> 768 維</li>
+              <li><strong>GPT-3:</strong> 12,288 維</li>
+              <li><strong>BERT Base:</strong> 768 維</li>
+              <li><strong>BERT Large:</strong> 1,024 維</li>
+            </ul>
+            <p style="margin: 15px 0 0 0; color: #666; font-size: 0.95rem">
+              💡 維度越大，模型能表達的語義越豐富，但計算成本也越高。
+            </p>
+          </div>
+        </div>
+
+        <h2>🔍 真相：字母不是字母，是 768 個數字</h2>
+
+        <p>
+          當你輸入字母 'A' 到 GPT-2
+          時，模型並不是看到一個字母。模型看到的是這樣的東西：
+        </p>
+
+        <div class="code-visualization">
+          <pre><span class="code-comment"># 字母 'A' 的真實面貌（GPT-2）</span>
+<span class="code-string">"A"</span> → [<span class="code-number">0.2341</span>, <span class="code-number">-0.5123</span>, <span class="code-number">0.8234</span>, <span class="code-number">-0.1234</span>, <span class="code-number">0.5677</span>, <span class="code-number">-0.3421</span>, <span class="code-number">0.7654</span>, ...]
+     <span class="code-comment">↑</span>
+     <span class="code-comment">這只是前 7 個數字，總共有 768 個！</span></pre>
+        </div>
+
+        <p>
+          是的，<strong>768 個小數</strong
+          >。有些是正數，有些是負數。這就是向量（Vector）。
+        </p>
+
+        <figure style="margin: 60px 0; text-align: center">
+          <img
+            src="../images/vector_decomposition.png"
+            alt="字元分解成向量"
+            style="
+              max-width: 100%;
+              border-radius: 20px;
+              box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+            "
+          />
+          <figcaption
+            style="
+              margin-top: 20px;
+              font-size: 1rem;
+              color: #666;
+              font-style: italic;
+            "
+          >
+            視覺化：字母 'A' 分解成 768 個發光的數字點，每個點代表一個維度
+          </figcaption>
+        </figure>
+
+        <h2>🎨 為什麼需要 768 個數字？</h2>
+
+        <p>
+          你可能會問：為什麼 GPT-2 用 768 個數字？為什麼不能用 1 個數字代表
+          'A'？比如 A=1, B=2, C=3？
+        </p>
+
+        <div class="pull-quote">
+          因為語言太複雜了。<br />
+          一個數字無法表達「'A' 和 'apple' 的關係」、「'A'
+          在不同語境的意思」。<br />
+          我們需要一個<strong>高維空間</strong>來容納這些細微差異。
+        </div>
+
+        <h3>💡 向量的魔法：相似的字，向量也相似</h3>
+
+        <p>在 GPT-2 的 768 維空間中，有個神奇的特性：</p>
+
+        <div class="matrix-box">
+          <div class="code-visualization">
+            <pre><span class="code-comment"># 相似詞語的向量也很接近（在 GPT-2 的 768 維空間中）</span>
+
+<span class="code-string">"king"</span>   → [<span class="code-number">0.23</span>, <span class="code-number">0.56</span>, <span class="code-number">-0.12</span>, ...]  <span class="code-comment">← 768 維向量</span>
+<span class="code-string">"queen"</span>  → [<span class="code-number">0.25</span>, <span class="code-number">0.54</span>, <span class="code-number">-0.11</span>, ...]  <span class="code-comment">← 跟 king 很接近！</span>
+
+<span class="code-string">"apple"</span>  → [<span class="code-number">-0.89</span>, <span class="code-number">0.12</span>, <span class="code-number">0.76</span>, ...]  <span class="code-comment">← 跟 king 很遠</span>
+
+<span class="code-comment"># 甚至可以做「向量算術」：</span>
+<span class="code-keyword">king</span> - <span class="code-keyword">man</span> + <span class="code-keyword">woman</span> ≈ <span class="code-keyword">queen</span>  <span class="code-comment">← 真的可以算出來！</span>
+
+<span class="code-comment"># 不同模型的維度不同，但原理相同：</span>
+<span class="code-comment"># GPT-2: 768 維 | GPT-3: 12,288 維 | BERT: 768/1,024 維</span></pre>
+          </div>
+        </div>
+
+        <figure style="margin: 60px 0; text-align: center">
+          <img
+            src="../images/vector_space.png"
+            alt="向量空間視覺化"
+            style="
+              max-width: 100%;
+              border-radius: 20px;
+              box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+            "
+          />
+          <figcaption
+            style="
+              margin-top: 20px;
+              font-size: 1rem;
+              color: #666;
+              font-style: italic;
+            "
+          >
+            視覺化：768 維向量空間中，相似詞語聚集在一起形成星雲
+          </figcaption>
+        </figure>
+
+        <h2>📚 Token Embed：模型的「向量字典」</h2>
+
+        <p>現在你知道每個字都是 768 個數字，那模型怎麼「記住」這些向量呢？</p>
+
+        <p><strong>答案：用一個巨大的表格！</strong></p>
+
+        <div class="matrix-box">
+          <div class="matrix-title">GPT-2 的向量字典</div>
+          <div class="code-visualization">
+            <pre><span class="code-comment"># Token Embed Table: [50,257 × 768]</span>
+
+Token ID    Token     向量 (768 個數字)
+────────────────────────────────────────────────────────────
+<span class="code-number">0</span>          <span class="code-string">"!"</span>       [<span class="code-number">0.123</span>, <span class="code-number">-0.456</span>, <span class="code-number">0.789</span>, ...]
+<span class="code-number">1</span>          <span class="code-string">"\""</span>      [<span class="code-number">-0.234</span>, <span class="code-number">0.567</span>, <span class="code-number">-0.890</span>, ...]
+<span class="code-number">2</span>          <span class="code-string">"#"</span>       [<span class="code-number">0.345</span>, <span class="code-number">-0.678</span>, <span class="code-number">0.123</span>, ...]
+...
+<span class="code-number">65</span>         <span class="code-string">"A"</span>       [<span class="code-number">0.234</span>, <span class="code-number">-0.512</span>, <span class="code-number">0.823</span>, ...]  <span class="code-comment">← 'A' 在這裡！</span>
+<span class="code-number">66</span>         <span class="code-string">"B"</span>       [<span class="code-number">0.456</span>, <span class="code-number">-0.234</span>, <span class="code-number">0.678</span>, ...]
+<span class="code-number">67</span>         <span class="code-string">"C"</span>       [<span class="code-number">-0.123</span>, <span class="code-number">0.789</span>, <span class="code-number">-0.456</span>, ...]
+...
+<span class="code-number">50,256</span>     <span class="code-string">"🎉"</span>      [<span class="code-number">0.987</span>, <span class="code-number">-0.321</span>, <span class="code-number">0.654</span>, ...]
+
+<span class="code-comment"># 總共 50,257 種 tokens，每個都有 768 個數字</span>
+<span class="code-comment"># 矩陣大小：[50,257 行 × 768 列] = 38,597,376 個數字！</span></pre>
+          </div>
+        </div>
+
+        <div class="pull-quote">
+          這張表格就是模型的「記憶」。<br />
+          訓練過程就是調整這 3800 萬個數字，<br />
+          讓相似的詞有相似的向量。
+        </div>
+
+        <h2>🔍 從輸入到向量：查找過程</h2>
+
+        <p>當你輸入 <code>CBABBC</code> 時，模型做了什麼？</p>
+
+        <h3>步驟 1：Tokenization</h3>
+
+        <div class="code-visualization">
+          <pre><span class="code-comment"># 輸入文字</span>
+<span class="code-string">"CBABBC"</span>
+
+<span class="code-comment"># 切分成 tokens（這個例子每個字母是一個 token）</span>
+Tokens: [<span class="code-string">"C"</span>, <span class="code-string">"B"</span>, <span class="code-string">"A"</span>, <span class="code-string">"B"</span>, <span class="code-string">"B"</span>, <span class="code-string">"C"</span>]
+
+<span class="code-comment"># 查詢每個 token 的 ID</span>
+Token IDs: [<span class="code-number">67</span>, <span class="code-number">66</span>, <span class="code-number">65</span>, <span class="code-number">66</span>, <span class="code-number">66</span>, <span class="code-number">67</span>]</pre>
+        </div>
+
+        <h3>步驟 2：查找向量</h3>
+
+        <div class="code-visualization">
+          <pre><span class="code-comment"># 從 Token Embed 表格查找每個 ID 對應的向量</span>
+
+Position 0: ID=<span class="code-number">67</span> (<span class="code-string">"C"</span>) → 查表 → [<span class="code-number">-0.123</span>, <span class="code-number">0.789</span>, <span class="code-number">-0.456</span>, ... <span class="code-comment">(768個數字)</span>]
+Position 1: ID=<span class="code-number">66</span> (<span class="code-string">"B"</span>) → 查表 → [<span class="code-number">0.456</span>, <span class="code-number">-0.234</span>, <span class="code-number">0.678</span>, ... <span class="code-comment">(768個數字)</span>]
+Position 2: ID=<span class="code-number">65</span> (<span class="code-string">"A"</span>) → 查表 → [<span class="code-number">0.234</span>, <span class="code-number">-0.512</span>, <span class="code-number">0.823</span>, ... <span class="code-comment">(768個數字)</span>]
+Position 3: ID=<span class="code-number">66</span> (<span class="code-string">"B"</span>) → 查表 → [<span class="code-number">0.456</span>, <span class="code-number">-0.234</span>, <span class="code-number">0.678</span>, ... <span class="code-comment">(768個數字)</span>]
+Position 4: ID=<span class="code-number">66</span> (<span class="code-string">"B"</span>) → 查表 → [<span class="code-number">0.456</span>, <span class="code-number">-0.234</span>, <span class="code-number">0.678</span>, ... <span class="code-comment">(768個數字)</span>]
+Position 5: ID=<span class="code-number">67</span> (<span class="code-string">"C"</span>) → 查表 → [<span class="code-number">-0.123</span>, <span class="code-number">0.789</span>, <span class="code-number">-0.456</span>, ... <span class="code-comment">(768個數字)</span>]
+
+<span class="code-comment"># 結果：得到 [6 × 768] 矩陣</span>
+<span class="code-comment"># 6 行 = 6 個 tokens</span>
+<span class="code-comment"># 768 列 = 每個向量有 768 個數字</span></pre>
+        </div>
+
+        <figure style="margin: 60px 0; text-align: center">
+          <img
+            src="../images/token_lookup_process.png"
+            alt="Token 查找過程"
+            style="
+              max-width: 100%;
+              border-radius: 20px;
+              box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+            "
+          />
+          <figcaption
+            style="
+              margin-top: 20px;
+              font-size: 1rem;
+              color: #666;
+              font-style: italic;
+            "
+          >
+            視覺化：從 Token Embed 字典查找每個字元的向量
+          </figcaption>
+        </figure>
+
+        <div class="pull-quote">
+          注意！雖然 "B" 出現了 3 次（位置 1, 3, 4），<br />
+          但它們查的都是<strong>同一個向量</strong> [0.456, -0.234, 0.678,
+          ...]<br />
+          就像查字典，"貓" 出現 10 次，都查同一個定義。
+        </div>
+      </div>
+    </div>
+
+    <!-- Visual Break -->
+    <div class="visual-break">
+      <div class="visual-break-content">
+        <p class="visual-quote">
+          「從文字到向量，<br />
+          每個字都變成了 768 個真實的數字，<br />
+          在高維空間中舞蹈。」
+        </p>
+      </div>
+    </div>
+
+    <!-- Continue Content -->
+    <div class="story-container" style="padding-top: 0">
+      <div class="content-wrapper">
+        <h2>📍 Position Embed：位置也是向量</h2>
+
+        <p>
+          現在我們有了每個字的「意思」（語義向量），但還缺少一個重要資訊：<strong>順序</strong>。
+        </p>
+
+        <p>
+          想想看，「貓吃魚」和「魚吃貓」是完全不同的意思，雖然用的是同樣的三個字！
+        </p>
+
+        <h3>🎯 位置編碼也是 768 個數字</h3>
+
+        <div class="code-visualization">
+          <pre><span class="code-comment"># Position Embed：每個位置也有自己的向量</span>
+
+位置 0: [<span class="code-number">0.0000</span>, <span class="code-number">1.0000</span>, <span class="code-number">0.0000</span>, <span class="code-number">1.0000</span>, ...]  <span class="code-comment">← 768 個數字</span>
+位置 1: [<span class="code-number">0.8415</span>, <span class="code-number">0.5403</span>, <span class="code-number">0.0100</span>, <span class="code-number">0.9999</span>, ...]  <span class="code-comment">← 768 個數字</span>
+位置 2: [<span class="code-number">0.9093</span>, <span class="code-number">-0.4161</span>, <span class="code-number">0.0200</span>, <span class="code-number">0.9998</span>, ...]  <span class="code-comment">← 768 個數字</span>
+位置 3: [<span class="code-number">0.1411</span>, <span class="code-number">-0.9900</span>, <span class="code-number">0.0300</span>, <span class="code-number">0.9996</span>, ...]  <span class="code-comment">← 768 個數字</span>
+位置 4: [<span class="code-number">-0.7568</span>, <span class="code-number">-0.6536</span>, <span class="code-number">0.0400</span>, <span class="code-number">0.9992</span>, ...]  <span class="code-comment">← 768 個數字</span>
+位置 5: [<span class="code-number">-0.9589</span>, <span class="code-number">0.2837</span>, <span class="code-number">0.0500</span>, <span class="code-number">0.9988</span>, ...]  <span class="code-comment">← 768 個數字</span>
+
+<span class="code-comment"># 這些數字是用正弦和餘弦函數計算出來的（Sinusoidal Encoding）</span>
+<span class="code-comment"># 不同位置的向量都不一樣，這樣模型就能分辨位置</span></pre>
+        </div>
+
+        <div class="pull-quote">
+          位置編碼不是「1, 2, 3, 4, 5」這麼簡單。<br />
+          它也是 768 個精心設計的數字，<br />
+          讓模型能理解「遠近關係」和「相對位置」。
+        </div>
+
+        <h2>🎨 Input Embed：向量相加</h2>
+
+        <p>現在我們有了兩組向量：</p>
+        <ol>
+          <li><strong>Token 序列向量</strong>：每個字的語義 [6 × 768]</li>
+          <li><strong>Position 向量</strong>：每個位置的編碼 [6 × 768]</li>
+        </ol>
+
+        <p>接下來，模型會把這兩組向量<strong>逐元素相加</strong>！</p>
+
+        <div class="matrix-box">
+          <div class="matrix-title">向量相加：真實的數字運算</div>
+          <div class="code-visualization">
+            <pre><span class="code-comment"># 位置 0 的 Token 是 "C"</span>
+
+Token "C" 的向量:     [<span class="code-number">-0.123</span>, <span class="code-number">0.789</span>, <span class="code-number">-0.456</span>, ...]
+                      <span class="code-keyword">+</span>
+Position 0 的向量:    [<span class="code-number">0.000</span>, <span class="code-number">1.000</span>, <span class="code-number">0.000</span>, ...]
+                      <span class="code-keyword">=</span>
+Input Embed (位置0):  [<span class="code-number">-0.123</span>, <span class="code-number">1.789</span>, <span class="code-number">-0.456</span>, ...]
+                       <span class="code-comment">↑</span>
+                       <span class="code-comment">-0.123 + 0.000 = -0.123</span>
+                       <span class="code-comment">0.789 + 1.000 = 1.789</span>
+                       <span class="code-comment">-0.456 + 0.000 = -0.456</span>
+
+<span class="code-comment"># 位置 1 的 Token 是 "B"</span>
+
+Token "B" 的向量:     [<span class="code-number">0.456</span>, <span class="code-number">-0.234</span>, <span class="code-number">0.678</span>, ...]
+                      <span class="code-keyword">+</span>
+Position 1 的向量:    [<span class="code-number">0.842</span>, <span class="code-number">0.540</span>, <span class="code-number">0.010</span>, ...]
+                      <span class="code-keyword">=</span>
+Input Embed (位置1):  [<span class="code-number">1.298</span>, <span class="code-number">0.306</span>, <span class="code-number">0.688</span>, ...]
+
+<span class="code-comment"># 重要！雖然位置 1, 3, 4 都是 "B"，但因為位置不同：</span>
+B@位置1 的 Input = [<span class="code-number">1.298</span>, <span class="code-number">0.306</span>, <span class="code-number">0.688</span>, ...]
+B@位置3 的 Input = [<span class="code-number">0.597</span>, <span class="code-number">-1.224</span>, <span class="code-number">0.708</span>, ...]  <span class="code-comment">← 不同！</span>
+B@位置4 的 Input = [<span class="code-number">-0.301</span>, <span class="code-number">-0.888</span>, <span class="code-number">0.718</span>, ...]  <span class="code-comment">← 不同！</span></pre>
+          </div>
+        </div>
+
+        <figure style="margin: 60px 0; text-align: center">
+          <img
+            src="../images/matrix_stacking.png"
+            alt="矩陣堆疊視覺化"
+            style="
+              max-width: 100%;
+              border-radius: 20px;
+              box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+            "
+          />
+          <figcaption
+            style="
+              margin-top: 20px;
+              font-size: 1rem;
+              color: #666;
+              font-style: italic;
+            "
+          >
+            視覺化：Token 向量 + Position 向量 = Input 向量（三層矩陣相加）
+          </figcaption>
+        </figure>
+
+        <div class="pull-quote">
+          這就是為什麼「貓吃魚」和「魚吃貓」能被區分：<br />
+          雖然用同樣的字，但加上不同位置的向量後，<br />
+          最終的 768 個數字就完全不同了。
+        </div>
+
+        <h2>📊 完整流程總結</h2>
+
+        <div class="timeline-item">
+          <div class="timeline-title">步驟 1：Token Embed 查找</div>
+          <p>從 [50,257 × 768] 的字典中查找每個字的向量</p>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-title">步驟 2：得到 Token 序列</div>
+          <p>[6 × 768] 矩陣 - 6 個字，每個都是 768 個實數</p>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-title">步驟 3：Position Embed</div>
+          <p>[6 × 768] 矩陣 - 6 個位置，每個都是 768 個實數</p>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-title">步驟 4：向量相加</div>
+          <p>Token + Position = Input Embed [6 × 768]</p>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-title">步驟 5：Transformer 處理</div>
+          <p>12 層神經網絡，每層都在調整這 6×768=4,608 個數字</p>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-title">步驟 6：輸出預測</div>
+          <p>最後的 768 個數字轉換成 50,257 個機率，選最大的</p>
+        </div>
+
+        <h2>🎓 關鍵理解</h2>
+
+        <div class="matrix-box">
+          <div class="matrix-title">向量的真相</div>
+          <div class="code-visualization">
+            <pre><span class="code-comment"># Q: Token Embed 為什麼不同高度？</span>
+<span class="code-keyword">A:</span> 因為是<strong>字典</strong> [50,257 × 768]
+   50,257 種 tokens，每種存一個 768 維向量
+
+<span class="code-comment"># Q: Input Embed 為什麼有不同高度？</span>
+<span class="code-keyword">A:</span> 因為是<strong>句子</strong> [輸入長度 × 768]
+   你輸入多少字，就有多少行
+   
+<span class="code-comment"># Q: 768 是什麼？</span>
+<span class="code-keyword">A:</span> 是<strong>向量維度</strong>
+   每個字/位置都用 768 個實數表示
+   
+<span class="code-comment"># Q: 這些數字從哪來？</span>
+<span class="code-keyword">A:</span> 從<strong>訓練</strong>中學到
+   模型看了數十億個字，調整這些數字
+   讓相似的字有相似的向量</pre>
+          </div>
+        </div>
+
+        <h2>🌟 真實世界的規模</h2>
+
+        <p>讓我們用真實的數字感受一下向量的規模：</p>
+
+        <div class="comparison-grid">
+          <div class="comparison-card" style="border-top-color: #95e1d3">
+            <div class="card-title">🤖 GPT-2 Small</div>
+            <div class="card-value">38M</div>
+            <p><strong>Token Embed:</strong> [50,257 × 768]</p>
+            <p>= 38,597,376 個數字</p>
+            <p>每個數字都是小數（如 -0.51234）</p>
+          </div>
+
+          <div class="comparison-card" style="border-top-color: #4ecdc4">
+            <div class="card-title">🚀 GPT-3</div>
+            <div class="card-value">617M</div>
+            <p><strong>Token Embed:</strong> [50,257 × 12,288]</p>
+            <p>= 617,558,016 個數字</p>
+            <p>更高維度的向量空間！</p>
+          </div>
+
+          <div class="comparison-card" style="border-top-color: var(--gold)">
+            <div class="card-title">💾 儲存大小</div>
+            <div class="card-value">~2.4GB</div>
+            <p>GPT-3 的 Token Embed</p>
+            <p>每個數字用 float32 (4 bytes)</p>
+            <p>617M × 4 = 2.47GB</p>
+          </div>
+        </div>
+
+        <h3>💡 一個實際的例子</h3>
+
+        <div class="matrix-box">
+          <div class="code-visualization">
+            <pre><span class="code-comment"># 當你在 ChatGPT 輸入 100 個中文字：</span>
+
+<span class="code-keyword">中文文字</span>: 100 個字
+          ↓
+<span class="code-keyword">Token 化</span>: ~150 tokens  <span class="code-comment">← 中文平均 1.5 tokens/字</span>
+          ↓
+<span class="code-keyword">查找向量</span>: [150 × 12,288] = 1,843,200 個數字
+          ↓
+<span class="code-keyword">Position</span>: [150 × 12,288] = 1,843,200 個數字
+          ↓
+<span class="code-keyword">Input Embed</span>: [150 × 12,288] = 1,843,200 個數字
+          ↓
+<span class="code-keyword">96 層 Transformer</span>: 每層都在處理這 184 萬個數字
+          ↓
+<span class="code-keyword">輸出</span>: 逐字生成回應
+
+<span class="code-comment"># 這就是為什麼需要強大的 GPU！</span>
+<span class="code-comment"># 每次對話都在處理數百萬個浮點數運算</span></pre>
+          </div>
+        </div>
+
+        <h2>🎯 向量的意義</h2>
+
+        <div class="pull-quote">
+          768 個數字不是隨機的。<br />
+          它們是語言的「座標」，<br />
+          在這個高維空間中：<br /><br />
+          <strong>相似的詞聚在一起</strong><br />
+          <strong>相反的詞在對面</strong><br />
+          <strong>關聯的詞形成軌跡</strong>
+        </div>
+
+        <h3>🔮 為什麼是 768 維？</h3>
+
+        <p>GPT-2 選擇 768 維是有原因的：</p>
+
+        <ul>
+          <li><strong>語義豐富度</strong>：768 個維度足以捕捉詞語的細微差別</li>
+          <li>
+            <strong>計算效率</strong>：768 = 12 個 attention heads × 64
+            維（方便平行計算）
+          </li>
+          <li><strong>經驗設計</strong>：在表達力和計算成本間的最佳平衡點</li>
+          <li>
+            <strong>可視化極限</strong>：人類只能理解 3
+            維，但模型可以「看見」768 維
+          </li>
+        </ul>
+
+        <div class="comparison-grid">
+          <div class="comparison-card" style="border-top-color: #95e1d3">
+            <div class="card-title">🤖 GPT-2</div>
+            <div class="card-value">768 維</div>
+            <p>12 heads × 64 = 768</p>
+            <p>平衡效能與速度</p>
+          </div>
+
+          <div class="comparison-card" style="border-top-color: #4ecdc4">
+            <div class="card-title">🚀 GPT-3</div>
+            <div class="card-value">12,288 維</div>
+            <p>96 heads × 128 = 12,288</p>
+            <p>更豐富的語義表達</p>
+          </div>
+
+          <div class="comparison-card" style="border-top-color: var(--gold)">
+            <div class="card-title">📊 維度 vs 能力</div>
+            <div class="card-value">正相關</div>
+            <p>維度越高</p>
+            <p>語義理解越細膩</p>
+          </div>
+        </div>
+
+        <p>
+          更大的模型（如 GPT-3）使用 12,288
+          維，可以表達更複雜、更細膩的語義關係。但計算成本也高 16 倍！
+        </p>
+
+        <h2>🎬 結語：向量的詩意</h2>
+
+        <div class="pull-quote">
+          每個字都是一個向量，<br />
+          每個向量都是 768 個真實的數字，<br />
+          這些數字在高維空間中舞蹈，<br />
+          構成了語言的幾何學。<br /><br />
+
+          當你在 ChatGPT 看到文字逐字浮現，<br />
+          你正在見證數百萬個數字的協奏曲，<br />
+          從抽象的向量空間，<br />
+          翻譯成你能理解的人類語言。
+        </div>
+
+        <p>現在你知道了：</p>
+        <ol>
+          <li>字母不是字母，是 768 個小數</li>
+          <li>Token Embed 是巨大的向量字典</li>
+          <li>Position Embed 也是向量，用來標記位置</li>
+          <li>Input Embed 是兩種向量的相加</li>
+          <li>整個過程都是實數運算，沒有魔法</li>
+        </ol>
+
+        <div class="pull-quote">
+          從 "A" 到 [0.234, -0.512, 0.823, ...]<br />
+          從文字到向量，從語言到幾何，<br />
+          這是人類與機器對話的基礎。
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Quote -->
+    <div class="footer-quote">
+      <p class="footer-quote-text">
+        「在高維向量空間中，<br />
+        每個字都是一個座標，<br />
+        語言的幾何學，在 768 個數字中展開。」
+      </p>
+      <p class="footer-quote-author">— AI Paper Archaeology · 2026</p>
+    </div>
+  </body>
+</html>

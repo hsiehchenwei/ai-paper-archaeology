@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第三章：Self-Attention（上）- Q/K/V 向量 | nano-gpt 視覺化教學</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --hero-bg: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%);
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --deep-blue: #0f1419;
+            --matrix-green: #00ff41;
+            --purple: #9333ea;
+            --attention-brown: #daa520;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.8;
+            color: #2c3e50;
+            background: #ffffff;
+        }
+
+        /* 使用與 Layer Normalization 相同的樣式 */
+        .hero-section {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--hero-bg);
+            overflow: hidden;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                180deg,
+                rgba(10, 14, 39, 0.3) 0%,
+                rgba(10, 14, 39, 0.85) 60%,
+                rgba(10, 14, 39, 0.95) 100%
+            );
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 0 20px;
+            max-width: 1000px;
+        }
+
+        .nano-gpt-badge {
+            display: inline-block;
+            background: rgba(218, 165, 32, 0.2);
+            border: 2px solid var(--attention-brown);
+            padding: 10px 30px;
+            border-radius: 50px;
+            color: var(--attention-brown);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            letter-spacing: 0.1em;
+        }
+
+        .hero-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 900;
+            color: #FFFFFF;
+            margin-bottom: 30px;
+            text-shadow: 0 4px 30px rgba(0,0,0,0.8), 0 0 60px rgba(218, 165, 32, 0.3);
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            color: var(--attention-brown);
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+            margin-bottom: 20px;
+        }
+
+        /* Story Container */
+        .story-container {
+            background: #ffffff;
+            margin-top: -50px;
+            position: relative;
+            z-index: 10;
+            border-radius: 30px 30px 0 0;
+            padding: 80px 40px;
+        }
+
+        .content-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            padding: 20px 40px;
+            background: rgba(10, 14, 39, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--attention-brown);
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            opacity: 0.8;
+        }
+
+        /* Typography */
+        .story-lead {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.5rem;
+            line-height: 2;
+            color: #1a1a1a;
+            margin: 40px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-left: 5px solid var(--attention-brown);
+            border-radius: 10px;
+        }
+
+        h2 {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0a0e27;
+            margin: 60px 0 30px 0;
+            border-bottom: 3px solid var(--attention-brown);
+            padding-bottom: 15px;
+        }
+
+        h3 {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.8rem;
+            color: #1a1f3a;
+            margin: 40px 0 20px 0;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%);
+            border: 2px solid var(--purple);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+
+        .info-box-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.3rem;
+            color: var(--purple);
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Matrix Box */
+        .matrix-box {
+            background: #1a1f3a;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            border: 2px solid rgba(218, 165, 32, 0.2);
+        }
+
+        .matrix-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.3rem;
+            color: var(--attention-brown);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* Code Block */
+        .code-visualization {
+            background: #1e1e1e;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .code-visualization pre {
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #d4d4d4;
+            margin: 0;
+        }
+
+        .code-comment { color: #6a9955; }
+        .code-keyword { color: #569cd6; }
+        .code-string { color: #ce9178; }
+        .code-number { color: #b5cea8; }
+
+        /* Step Box */
+        .step-box {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--attention-brown);
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: var(--attention-brown);
+            color: #0a0e27;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .step-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.4rem;
+            color: #0a0e27;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        /* Pull Quote */
+        .pull-quote {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.8rem;
+            font-style: italic;
+            color: #0a0e27;
+            padding: 40px;
+            margin: 60px 0;
+            background: linear-gradient(135deg, rgba(218, 165, 32, 0.1) 0%, rgba(218, 165, 32, 0.05) 100%);
+            border-left: 5px solid var(--attention-brown);
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .pull-quote::before {
+            content: '"';
+            position: absolute;
+            left: 15px;
+            top: 10px;
+            font-size: 4rem;
+            color: var(--attention-brown);
+            opacity: 0.3;
+            font-family: Georgia, serif;
+        }
+
+        /* Figure */
+        figure {
+            margin: 60px 0;
+            text-align: center;
+        }
+
+        figure img {
+            max-width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+        }
+
+        figcaption {
+            margin-top: 20px;
+            font-size: 1rem;
+            color: #666;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        /* Formula Box */
+        .formula-box {
+            background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
+            border: 2px solid var(--attention-brown);
+            border-radius: 15px;
+            padding: 40px;
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .formula-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.3rem;
+            color: #0a0e27;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            color: #0a0e27;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+
+        .formula-desc {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 20px;
+            line-height: 1.8;
+        }
+
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .comparison-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-top: 4px solid var(--attention-brown);
+            transition: transform 0.3s ease;
+        }
+
+        .comparison-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.2rem;
+            color: #0a0e27;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        /* Footer */
+        .footer-quote {
+            background: var(--hero-bg);
+            padding: 80px 40px;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .footer-quote-text {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 2rem;
+            color: var(--attention-brown);
+            max-width: 800px;
+            margin: 0 auto 30px;
+            line-height: 1.8;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+        }
+
+        .footer-quote-author {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.2rem;
+            color: var(--silver);
+            font-weight: 300;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .story-container {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="breadcrumb">
+        <a href="../../index.html">🏠 首頁</a>
+        <span style="margin: 0 10px; color: #999;">/</span>
+        <a href="../index.html">📚 LLM 視覺化教學</a>
+        <span style="margin: 0 10px; color: #999;">/</span>
+        <span style="color: #666;">第三章：Self-Attention（上）</span>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="nano-gpt-badge">nano-gpt · Transformer 的心臟</div>
+            <h1 class="hero-title">Self-Attention (上)</h1>
+            <p class="hero-subtitle">讓 Tokens 「對話」：Q/K/V 向量的誕生</p>
+            <p style="font-size: 1rem; color: var(--silver); margin-top: 20px;">
+                Query · Key · Value
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="story-container">
+        <div class="content-wrapper">
+            
+            <h2 style="border: none; margin-top: 0; text-align: center; color: var(--attention-brown);">🗺️ 本章在架構中的位置</h2>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(218, 165, 32, 0.15) 0%, rgba(218, 165, 32, 0.08) 100%); border-color: var(--attention-brown); margin: 40px 0 60px 0;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="display: inline-block; padding: 15px 40px; background: rgba(218, 165, 32, 0.2); border: 2px solid var(--attention-brown); border-radius: 50px; font-size: 1.2rem; font-weight: 700; color: var(--attention-brown);">
+                        📍 第三章：Self-Attention（上半部）
+                    </div>
+                </div>
+                
+                <figure style="margin: 30px 0;">
+                    <img src="../../images/self_attention_chapter_focus_20260105212400.png" alt="Self-Attention 章節架構特寫" style="max-width: 100%; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                    <figcaption style="margin-top: 20px; font-size: 1rem; color: #666; line-height: 1.8;">
+                        <strong style="color: #0a0e27;">Self-Attention 位置</strong><br>
+                        本章聚焦於<span style="color: #daa520; font-weight: 700;"> 米色區域</span>：<br>
+                        Transformer 的核心 - Self-Attention 機制
+                    </figcaption>
+                </figure>
+
+                <div style="background: rgba(255, 255, 255, 0.6); padding: 25px; border-radius: 12px; margin-top: 30px;">
+                    <p style="margin: 0; text-align: center; color: #2c3e50; line-height: 1.9;">
+                        <strong style="color: #daa520;">🟤 Self-Attention 是 Transformer 的心臟</strong><br>
+                        這是列（tokens）之間「對話」的階段。<br>
+                        在此之前和之後的所有階段，列都是獨立處理的。
+                    </p>
+                </div>
+            </div>
+            
+            <div class="story-lead">
+                「Self-Attention 層可以說是 Transformer 和 GPT 的<strong>心臟</strong>。<br>
+                這是 Input Embedding 矩陣中的列（columns）彼此『對話』的階段。<br><br>
+                到目前為止，以及在所有其他階段，<br>
+                列都可以被<strong>獨立</strong>看待。」
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>💡</span>
+                    <span>為什麼 Self-Attention 如此重要？</span>
+                </div>
+                <ul style="margin-left: 20px; line-height: 2;">
+                    <li><strong>唯一的「溝通」階段</strong>：讓不同位置的 tokens 能互相影響</li>
+                    <li><strong>捕捉上下文</strong>：理解「銀行」在「河岸」或「金融」的不同含義</li>
+                    <li><strong>長距離依賴</strong>：讓第 100 個字能「看到」第 1 個字的資訊</li>
+                    <li><strong>動態權重</strong>：根據內容決定哪些 tokens 重要</li>
+                </ul>
+            </div>
+
+            <h2>🎯 Self-Attention 的整體流程</h2>
+
+            <p>Self-Attention 層由多個 <strong>heads</strong>（頭）組成，我們先聚焦在<strong>其中一個 head</strong>。</p>
+
+            <div class="matrix-box">
+                <div class="matrix-title">Self-Attention 三大步驟</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 步驟 1：生成 Q/K/V 向量</span>
+<span class="code-keyword">for</span> each column <span class="code-keyword">in</span> input_matrix:
+    Q_vector = Q_weights @ column + Q_bias
+    K_vector = K_weights @ column + K_bias
+    V_vector = V_weights @ column + V_bias
+
+<span class="code-comment"># 步驟 2：計算注意力分數</span>
+<span class="code-keyword">for</span> each query:
+    scores = Q @ K.T / sqrt(d_k)
+    attention = softmax(scores)  <span class="code-comment"># 正規化為機率</span>
+
+<span class="code-comment"># 步驟 3：產生輸出</span>
+output = attention @ V</pre>
+                </div>
+            </div>
+
+            <div class="pull-quote">
+                本章（上半部）專注於<strong>步驟 1</strong>：<br>
+                如何從輸入產生 Q、K、V 三種向量。<br><br>
+                下一章將探索如何使用這些向量計算注意力。
+            </div>
+
+            <h2>📍 步驟 1：生成 Q/K/V 向量</h2>
+
+            <p>第一步是為正規化後的 Input Embedding 矩陣的每一列（T 個列）產生三個向量：</p>
+
+            <div class="comparison-grid">
+                <div class="comparison-card" style="border-top-color: #4169e1;">
+                    <div class="card-title" style="color: #4169e1;">Q: Query 向量</div>
+                    <p style="font-size: 0.95rem; color: #666;">「查詢」向量</p>
+                    <p style="font-size: 0.9rem; color: #999; margin-top: 10px;">
+                        用來詢問：<br>
+                        「我需要什麼資訊？」
+                    </p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: #2e8b57;">
+                    <div class="card-title" style="color: #2e8b57;">K: Key 向量</div>
+                    <p style="font-size: 0.95rem; color: #666;">「鍵」向量</p>
+                    <p style="font-size: 0.9rem; color: #999; margin-top: 10px;">
+                        用來回答：<br>
+                        「我提供什麼資訊？」
+                    </p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: #dc143c;">
+                    <div class="card-title" style="color: #dc143c;">V: Value 向量</div>
+                    <p style="font-size: 0.95rem; color: #666;">「值」向量</p>
+                    <p style="font-size: 0.9rem; color: #999; margin-top: 10px;">
+                        用來傳遞：<br>
+                        「實際的內容是什麼？」
+                    </p>
+                </div>
+            </div>
+
+            <h3>🔧 如何產生這些向量？</h3>
+
+            <p>要產生其中一個向量，我們執行<strong>矩陣-向量乘法</strong>並加上偏差（bias）。</p>
+
+            <figure>
+                <img src="../../images/qkv_generation_20260105212439.png" alt="Q/K/V 向量生成過程">
+                <figcaption>
+                    視覺化：使用權重矩陣和 Dot Product 生成 Q/K/V 向量
+                </figcaption>
+            </figure>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">1</span>
+                    <span class="step-title">矩陣-向量乘法</span>
+                </div>
+                <p>例如對於 Q 向量，我們用 Q 權重矩陣的<strong>一列</strong>與輸入矩陣的<strong>一行</strong>進行點積（dot product）。</p>
+                
+                <div class="formula-box">
+                    <div class="formula-title">Dot Product（點積）運算</div>
+                    <div class="formula">
+                        a·b = a₁b₁ + a₂b₂ + ... + aₙbₙ
+                    </div>
+                    <div class="formula-desc">
+                        將兩個向量對應元素相乘，然後全部加起來
+                    </div>
+                </div>
+
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># Dot Product 範例</span>
+vector_a = [<span class="code-number">0.2</span>, <span class="code-number">-0.5</span>, <span class="code-number">0.8</span>]
+vector_b = [<span class="code-number">0.1</span>, <span class="code-number">0.3</span>, <span class="code-number">-0.2</span>]
+
+result = (<span class="code-number">0.2</span> * <span class="code-number">0.1</span>) + (<span class="code-number">-0.5</span> * <span class="code-number">0.3</span>) + (<span class="code-number">0.8</span> * <span class="code-number">-0.2</span>)
+       = <span class="code-number">0.02</span> + (<span class="code-number">-0.15</span>) + (<span class="code-number">-0.16</span>)
+       = <span class="code-number">-0.29</span></pre>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(218, 165, 32, 0.1) 0%, rgba(218, 165, 32, 0.05) 100%); border-color: var(--attention-brown);">
+                <div class="info-box-title" style="color: var(--attention-brown);">
+                    <span>🔍</span>
+                    <span>為什麼使用 Dot Product？</span>
+                </div>
+                <p>這是一種簡單而通用的方式，確保<strong>每個輸出元素都能被輸入向量的所有元素影響</strong>（影響程度由權重決定）。</p>
+                <p style="margin-top: 15px;">因此，Dot Product 在神經網絡中頻繁出現。</p>
+            </div>
+
+            <h3>📐 完整的 Q 向量生成</h3>
+
+            <div class="matrix-box">
+                <div class="matrix-title">生成 Q 向量的完整過程</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 輸入：正規化後的列向量（來自 Layer Norm）</span>
+input_column = [<span class="code-number">48</span> 個浮點數]  <span class="code-comment"># 長度 C = 48</span>
+
+<span class="code-comment"># Q 權重矩陣：[16 × 48]</span>
+<span class="code-comment"># - 16 行：Q 向量的長度（head 的維度）</span>
+<span class="code-comment"># - 48 列：與輸入向量長度匹配</span>
+
+<span class="code-comment"># 計算 Q 向量的每個元素</span>
+Q_vector = []
+<span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-keyword">range</span>(<span class="code-number">16</span>):
+    <span class="code-comment"># 取 Q 權重矩陣的第 i 列</span>
+    weight_row = Q_weights[i]  <span class="code-comment"># [48 個權重]</span>
+    
+    <span class="code-comment"># 與輸入列向量做點積</span>
+    dot_product = <span class="code-keyword">sum</span>(weight_row[j] * input_column[j] 
+                      <span class="code-keyword">for</span> j <span class="code-keyword">in</span> <span class="code-keyword">range</span>(<span class="code-number">48</span>))
+    
+    <span class="code-comment"># 加上偏差</span>
+    Q_vector[i] = dot_product + Q_bias[i]
+
+<span class="code-comment"># 結果：Q 向量 [16 個浮點數]</span></pre>
+                </div>
+            </div>
+
+            <h2>🔢 關鍵問題：維度的秘密</h2>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(255, 87, 51, 0.1) 0%, rgba(255, 87, 51, 0.05) 100%); border-color: #ff5733;">
+                <div class="info-box-title" style="color: #ff5733;">
+                    <span>❓</span>
+                    <span>為什麼權重矩陣是 [16 × 48]？</span>
+                </div>
+                <p style="font-size: 1.2rem; line-height: 2;">讓我們逐一拆解這兩個數字的含義：</p>
+            </div>
+
+            <h3>📊 維度 1：為何是 16？</h3>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">?</span>
+                    <span class="step-title" style="color: #ff5733;">16 代表輸出向量的長度（head 的維度）</span>
+                </div>
+                
+                <div class="matrix-box" style="margin-top: 20px;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># 為何是 16？這是設計選擇！</span>
+
+C (模型維度) = <span class="code-number">48</span>
+num_heads = <span class="code-number">3</span>
+
+head_dim = C / num_heads = <span class="code-number">48</span> / <span class="code-number">3</span> = <span class="code-number">16</span>
+
+<span class="code-comment"># 16 不是魔法數字，而是根據：</span>
+<span class="code-comment"># 1. 模型維度 C（這是架構師的選擇）</span>
+<span class="code-comment"># 2. 要用幾個 heads（也是架構師的選擇）</span>
+<span class="code-comment"># 3. 確保 C 能被 num_heads 整除</span>
+
+<span class="code-comment"># 如果換成 GPT-2：</span>
+<span class="code-comment"># C = 768, num_heads = 12</span>
+<span class="code-comment"># head_dim = 768 / 12 = 64</span></pre>
+                    </div>
+                </div>
+
+                <p style="margin-top: 20px;"><strong>簡單來說：</strong></p>
+                <ul style="margin-left: 20px; line-height: 2;">
+                    <li><strong>16</strong> 是每個 head 的輸出維度</li>
+                    <li>這個數字由<strong>模型設計</strong>決定（C ÷ num_heads）</li>
+                    <li>對於 nano-gpt：48 ÷ 3 = 16</li>
+                    <li>對於 GPT-2：768 ÷ 12 = 64</li>
+                </ul>
+            </div>
+
+            <h3>📊 維度 2：為何是 48？</h3>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">?</span>
+                    <span class="step-title" style="color: #ff5733;">48 代表輸入向量的長度（模型維度 C）</span>
+                </div>
+                
+                <div class="matrix-box" style="margin-top: 20px;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># 為何是 48？這也是設計選擇！</span>
+
+<span class="code-comment"># nano-gpt 的架構師選擇：</span>
+C (model dimension) = <span class="code-number">48</span>
+
+<span class="code-comment"># 這意味著：</span>
+<span class="code-comment"># - 每個 token 用 48 個數字表示</span>
+<span class="code-comment"># - Input Embedding 矩陣是 [T × 48]</span>
+<span class="code-comment"># - 權重矩陣必須匹配這個維度</span>
+
+<span class="code-comment"># 權重矩陣的第二個維度（48）必須等於輸入維度</span>
+<span class="code-comment"># 這樣才能做矩陣乘法！</span>
+
+<span class="code-comment"># [16 × 48] @ [48 × 1] = [16 × 1] ✅</span>
+<span class="code-comment">#  ^^^^      ^^^^         ^^^^</span>
+<span class="code-comment">#  輸出     必須匹配      輸出</span></pre>
+                    </div>
+                </div>
+
+                <p style="margin-top: 20px;"><strong>簡單來說：</strong></p>
+                <ul style="margin-left: 20px; line-height: 2;">
+                    <li><strong>48</strong> 是模型的「語言」維度</li>
+                    <li>所有 token 都用 48 維向量表示</li>
+                    <li>權重矩陣的列數<strong>必須</strong>等於 48，才能處理這些向量</li>
+                    <li>這是<strong>固定的</strong>，在訓練時就確定了</li>
+                </ul>
+            </div>
+
+            <h3>🔑 核心問題：權重為何是固定的，但序列長度可變？</h3>
+
+            <div class="pull-quote">
+                這是 Transformer 設計的精妙之處！<br><br>
+                <strong>權重矩陣 [16 × 48] 是固定的</strong>，<br>
+                但它可以處理<strong>任意長度</strong>的輸入序列。
+            </div>
+
+            <figure>
+                <img src="../../images/weight_matrix_dimensions_20260105220906.png" alt="權重矩陣維度與序列長度關係">
+                <figcaption>
+                    視覺化：固定的權重矩陣可以處理不同長度的輸入序列
+                </figcaption>
+            </figure>
+
+            <div class="matrix-box" style="background: linear-gradient(135deg, #1e3a2f 0%, #0f1e18 100%);">
+                <div class="matrix-title" style="color: var(--matrix-green);">權重固定 vs 序列長度可變</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 權重矩陣：固定不變</span>
+Q_weights = [<span class="code-number">16</span> × <span class="code-number">48</span>]  <span class="code-comment"># 永遠是這個大小</span>
+
+<span class="code-comment">═══════════════════════════════════════</span>
+<span class="code-comment"># 場景 1：輸入 3 個 tokens</span>
+<span class="code-comment">═══════════════════════════════════════</span>
+input = [<span class="code-number">3</span> × <span class="code-number">48</span>]  <span class="code-comment"># 3 個 tokens，每個 48 維</span>
+
+<span class="code-comment"># 對每個 token 分別處理</span>
+Q[<span class="code-number">0</span>] = Q_weights @ input[<span class="code-number">0</span>]  <span class="code-comment"># [16×48] @ [48] = [16]</span>
+Q[<span class="code-number">1</span>] = Q_weights @ input[<span class="code-number">1</span>]  <span class="code-comment"># [16×48] @ [48] = [16]</span>
+Q[<span class="code-number">2</span>] = Q_weights @ input[<span class="code-number">2</span>]  <span class="code-comment"># [16×48] @ [48] = [16]</span>
+
+output = [<span class="code-number">3</span> × <span class="code-number">16</span>]  <span class="code-comment"># 3 個 Q 向量</span>
+
+<span class="code-comment">═══════════════════════════════════════</span>
+<span class="code-comment"># 場景 2：輸入 6 個 tokens（nano-gpt）</span>
+<span class="code-comment">═══════════════════════════════════════</span>
+input = [<span class="code-number">6</span> × <span class="code-number">48</span>]  <span class="code-comment"># 6 個 tokens，每個 48 維</span>
+
+<span class="code-comment"># 同樣的權重，處理 6 個 tokens</span>
+Q[<span class="code-number">0</span>] = Q_weights @ input[<span class="code-number">0</span>]  <span class="code-comment"># [16×48] @ [48] = [16]</span>
+Q[<span class="code-number">1</span>] = Q_weights @ input[<span class="code-number">1</span>]  <span class="code-comment"># [16×48] @ [48] = [16]</span>
+...
+Q[<span class="code-number">5</span>] = Q_weights @ input[<span class="code-number">5</span>]  <span class="code-comment"># [16×48] @ [48] = [16]</span>
+
+output = [<span class="code-number">6</span> × <span class="code-number">16</span>]  <span class="code-comment"># 6 個 Q 向量</span>
+
+<span class="code-comment">═══════════════════════════════════════</span>
+<span class="code-comment"># 場景 3：輸入 100 個 tokens</span>
+<span class="code-comment">═══════════════════════════════════════</span>
+input = [<span class="code-number">100</span> × <span class="code-number">48</span>]  <span class="code-comment"># 100 個 tokens，每個 48 維</span>
+
+<span class="code-comment"># 同樣的權重，處理 100 個 tokens！</span>
+<span class="code-keyword">for</span> t <span class="code-keyword">in</span> <span class="code-keyword">range</span>(<span class="code-number">100</span>):
+    Q[t] = Q_weights @ input[t]  <span class="code-comment"># [16×48] @ [48] = [16]</span>
+
+output = [<span class="code-number">100</span> × <span class="code-number">16</span>]  <span class="code-comment"># 100 個 Q 向量</span>
+
+<span class="code-comment">═══════════════════════════════════════</span>
+<span class="code-comment"># 關鍵：權重矩陣 [16 × 48] 從未改變！</span>
+<span class="code-comment"># 它是「per-token」處理，不管有幾個 tokens</span>
+<span class="code-comment">═══════════════════════════════════════</span></pre>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%); border-color: var(--gold);">
+                <div class="info-box-title" style="color: var(--gold);">
+                    <span>💡</span>
+                    <span>理解關鍵點</span>
+                </div>
+                
+                <h4 style="margin-top: 20px; color: #0a0e27; font-size: 1.3rem;">1️⃣ 權重矩陣處理的是「單個 token」</h4>
+                <p>權重矩陣 [16 × 48] 每次處理<strong>一個</strong> [48] 維的 token 向量，輸出<strong>一個</strong> [16] 維的向量。</p>
+                <div class="formula-box" style="margin: 20px 0;">
+                    <div class="formula">
+                        [16 × 48] @ [48] = [16]
+                    </div>
+                    <div class="formula-desc">
+                        這是單次操作的維度
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 30px; color: #0a0e27; font-size: 1.3rem;">2️⃣ 對每個 token 重複相同操作</h4>
+                <p>不管輸入有 3 個、6 個、還是 100 個 tokens，<strong>每個 token 都用同樣的權重矩陣</strong>處理。</p>
+                <div class="formula-box" style="margin: 20px 0;">
+                    <div class="formula" style="font-size: 1.3rem;">
+                        Input [T × 48] → Output [T × 16]
+                    </div>
+                    <div class="formula-desc">
+                        T 是序列長度，可以變化<br>
+                        48（輸入維度）和 16（輸出維度）固定
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 30px; color: #0a0e27; font-size: 1.3rem;">3️⃣ 為什麼可以這樣設計？</h4>
+                <ul style="margin-left: 20px; line-height: 2; margin-top: 15px;">
+                    <li><strong>權重共享</strong>：同樣的轉換邏輯適用於所有 tokens</li>
+                    <li><strong>參數效率</strong>：不需要為每個位置準備不同的權重</li>
+                    <li><strong>泛化能力</strong>：訓練時看過的序列長度，推理時可以處理其他長度</li>
+                </ul>
+
+                <h4 style="margin-top: 30px; color: #0a0e27; font-size: 1.3rem;">4️⃣ 實際限制</h4>
+                <p>雖然權重矩陣可以處理任意長度，但實際上有限制：</p>
+                <ul style="margin-left: 20px; line-height: 2; margin-top: 10px;">
+                    <li><strong>Position Embedding 限制</strong>：只預訓練了固定長度的位置編碼</li>
+                    <li><strong>計算資源限制</strong>：序列越長，Attention 計算量越大（O(T²)）</li>
+                    <li><strong>上下文窗口</strong>：模型設計時會設定最大序列長度（如 GPT-2 是 1024）</li>
+                </ul>
+            </div>
+
+            <h3>📐 矩陣運算的數學</h3>
+
+            <div class="matrix-box">
+                <div class="matrix-title">完整的矩陣運算維度追蹤</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># nano-gpt 的實際數值</span>
+
+<span class="code-comment">══════════════════════════════════════════════</span>
+<span class="code-comment"># 輸入階段</span>
+<span class="code-comment">══════════════════════════════════════════════</span>
+tokens = [<span class="code-string">"C"</span>, <span class="code-string">"B"</span>, <span class="code-string">"A"</span>, <span class="code-string">"B"</span>, <span class="code-string">"B"</span>, <span class="code-string">"C"</span>]  <span class="code-comment"># 6 個 tokens</span>
+token_indices = [<span class="code-number">2</span>, <span class="code-number">1</span>, <span class="code-number">0</span>, <span class="code-number">1</span>, <span class="code-number">1</span>, <span class="code-number">2</span>]
+
+<span class="code-comment"># Token Embedding + Position Embedding</span>
+input_embedding = [<span class="code-number">6</span> × <span class="code-number">48</span>]
+                   <span class="code-comment">↑    ↑</span>
+                   <span class="code-comment">T    C</span>
+                   <span class="code-comment">序列  模型</span>
+                   <span class="code-comment">長度  維度</span>
+
+<span class="code-comment">══════════════════════════════════════════════</span>
+<span class="code-comment"># Layer Normalization</span>
+<span class="code-comment">══════════════════════════════════════════════</span>
+normalized = layer_norm(input_embedding)  <span class="code-comment"># [6 × 48]</span>
+
+<span class="code-comment">══════════════════════════════════════════════</span>
+<span class="code-comment"># Q/K/V 生成（以 Q 為例）</span>
+<span class="code-comment">══════════════════════════════════════════════</span>
+Q_weights = [<span class="code-number">16</span> × <span class="code-number">48</span>]
+             <span class="code-comment">↑     ↑</span>
+             <span class="code-comment">head  輸入</span>
+             <span class="code-comment">維度  維度</span>
+
+<span class="code-comment"># 處理每個 token（按列）</span>
+<span class="code-keyword">for</span> t <span class="code-keyword">in</span> <span class="code-keyword">range</span>(<span class="code-number">6</span>):
+    input_vector = normalized[t, :]  <span class="code-comment"># [48]（第 t 個 token）</span>
+    
+    <span class="code-comment"># 矩陣-向量乘法</span>
+    Q[t] = Q_weights @ input_vector + Q_bias
+           <span class="code-comment">↓</span>
+           [<span class="code-number">16</span> × <span class="code-number">48</span>] @ [<span class="code-number">48</span>] + [<span class="code-number">16</span>] = [<span class="code-number">16</span>]
+
+<span class="code-comment"># 結果</span>
+Q = [<span class="code-number">6</span> × <span class="code-number">16</span>]
+     <span class="code-comment">↑    ↑</span>
+     <span class="code-comment">T    head_dim</span>
+     <span class="code-comment">序列  (C/num_heads)</span>
+     <span class="code-comment">長度</span>
+
+<span class="code-comment">══════════════════════════════════════════════</span>
+<span class="code-comment"># 關鍵觀察</span>
+<span class="code-comment">══════════════════════════════════════════════</span>
+<span class="code-comment"># 輸入：[T × 48]  ← T 可變（3, 6, 100...）</span>
+<span class="code-comment"># 權重：[16 × 48] ← 固定不變</span>
+<span class="code-comment"># 輸出：[T × 16]  ← T 跟著輸入變</span>
+
+<span class="code-comment"># 第一維（T）：序列長度，可變</span>
+<span class="code-comment"># 第二維（48 → 16）：由權重矩陣決定，固定</span></pre>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">2</span>
+                    <span class="step-title">對所有輸出單元格重複</span>
+                </div>
+                <p>我們對 Q、K、V 向量中的每個輸出單元格重複這個操作：</p>
+            </div>
+
+            <div class="matrix-box">
+                <div class="matrix-title">為所有 6 列生成 Q/K/V 向量</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 輸入：正規化後的矩陣 [6 × 48]</span>
+
+Position   Input (48維)    →    Q (16維)    K (16維)    V (16維)
+───────────────────────────────────────────────────────────────
+   0       [48個數]        →    [16個數]    [16個數]    [16個數]
+   1       [48個數]        →    [16個數]    [16個數]    [16個數]
+   2       [48個數]        →    [16個數]    [16個數]    [16個數]
+   3       [48個數]        →    [16個數]    [16個數]    [16個數]
+   4       [48個數]        →    [16個數]    [16個數]    [16個數]
+   5       [48個數]        →    [16個數]    [16個數]    [16個數]
+
+<span class="code-comment"># 每個 token 現在都有自己的 Q、K、V 向量</span>
+<span class="code-comment"># Q/K/V 向量長度 = 16（這是 head 的維度，C/num_heads = 48/3）</span></pre>
+                </div>
+            </div>
+
+            <h2>🎓 nano-gpt 的具體數值</h2>
+
+            <div class="matrix-box">
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># nano-gpt Self-Attention 配置（單個 head）</span>
+
+輸入維度（C）：<span class="code-number">48</span>
+Head 維度：    <span class="code-number">16</span> <span class="code-comment"># C / num_heads = 48 / 3</span>
+
+<span class="code-comment"># 權重矩陣大小</span>
+Q_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 個參數
+K_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 個參數
+V_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 個參數
+
+<span class="code-comment"># 偏差（bias）</span>
+Q_bias: [<span class="code-number">16</span>] = <span class="code-number">16</span> 個參數
+K_bias: [<span class="code-number">16</span>] = <span class="code-number">16</span> 個參數
+V_bias: [<span class="code-number">16</span>] = <span class="code-number">16</span> 個參數
+
+<span class="code-comment"># 單個 head 的總參數</span>
+Total = (<span class="code-number">768</span> + <span class="code-number">16</span>) * <span class="code-number">3</span> = <span class="code-number">2,352</span> 個參數
+
+<span class="code-comment"># 輸出向量</span>
+每個 token 的 Q/K/V 向量：[<span class="code-number">16</span>]
+所有 tokens 的 Q/K/V 矩陣：[<span class="code-number">6</span> × <span class="code-number">16</span>]</pre>
+                </div>
+            </div>
+
+            <h2>🔑 權重矩陣從何而來？</h2>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(255, 87, 51, 0.1) 0%, rgba(255, 87, 51, 0.05) 100%); border-color: #ff5733;">
+                <div class="info-box-title" style="color: #ff5733;">
+                    <span>🎯</span>
+                    <span>關鍵問題：這些權重是如何獲得的？</span>
+                </div>
+                <p style="font-size: 1.2rem; font-weight: 600; color: #0a0e27;">
+                    答案：透過<strong>訓練（Training）</strong>學習而來！
+                </p>
+            </div>
+
+            <h3>📚 權重的生命週期</h3>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">1</span>
+                    <span class="step-title">隨機初始化（Random Initialization）</span>
+                </div>
+                <p>在訓練開始前，所有權重都被賦予<strong>小的隨機值</strong>。</p>
+                
+                <div class="matrix-box" style="margin-top: 20px;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># 訓練前：隨機初始化</span>
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-comment"># Q 權重矩陣 [16 × 48]</span>
+Q_weights = np.random.randn(<span class="code-number">16</span>, <span class="code-number">48</span>) * <span class="code-number">0.02</span>
+<span class="code-comment"># 例如：</span>
+<span class="code-comment"># [[0.012, -0.008, 0.015, ...],</span>
+<span class="code-comment">#  [-0.003, 0.021, -0.011, ...],</span>
+<span class="code-comment">#  ...]</span>
+
+Q_bias = np.zeros(<span class="code-number">16</span>)  <span class="code-comment"># 偏差通常初始化為 0</span>
+
+<span class="code-comment"># K、V 權重也是類似的隨機初始化</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">2</span>
+                    <span class="step-title">訓練過程（Training）</span>
+                </div>
+                <p>模型在大量數據上訓練，透過<strong>梯度下降</strong>（Gradient Descent）不斷調整這些權重。</p>
+                
+                <div class="matrix-box" style="margin-top: 20px;">
+                    <div class="code-visualization">
+                        <pre><span class="code-comment"># 訓練循環（簡化版）</span>
+<span class="code-keyword">for</span> epoch <span class="code-keyword">in</span> <span class="code-keyword">range</span>(num_epochs):
+    <span class="code-keyword">for</span> batch <span class="code-keyword">in</span> training_data:
+        <span class="code-comment"># 1. 前向傳播（Forward Pass）</span>
+        predictions = model(batch)
+        
+        <span class="code-comment"># 2. 計算損失（Loss）</span>
+        loss = compute_loss(predictions, targets)
+        
+        <span class="code-comment"># 3. 反向傳播（Backward Pass）</span>
+        gradients = compute_gradients(loss)
+        
+        <span class="code-comment"># 4. 更新權重</span>
+        Q_weights = Q_weights - learning_rate * gradients[<span class="code-string">'Q_weights'</span>]
+        K_weights = K_weights - learning_rate * gradients[<span class="code-string">'K_weights'</span>]
+        V_weights = V_weights - learning_rate * gradients[<span class="code-string">'V_weights'</span>]
+        
+        <span class="code-comment"># 偏差也同樣更新</span>
+        Q_bias = Q_bias - learning_rate * gradients[<span class="code-string">'Q_bias'</span>]
+        <span class="code-comment"># ...</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <span class="step-number">3</span>
+                    <span class="step-title">訓練完成（Trained Weights）</span>
+                </div>
+                <p>經過數百萬次的更新後，權重已經「學會」了如何最好地提取資訊。</p>
+                <p style="margin-top: 15px;">這些訓練好的權重被<strong>保存</strong>下來，就是我們在推理（inference）時使用的模型參數。</p>
+            </div>
+
+            <h3>🔄 每個 Head 的權重都不同嗎？</h3>
+
+            <div class="pull-quote">
+                <strong>是的！每個 head 都有自己獨立的 Q/K/V 權重矩陣。</strong><br><br>
+                這就是為什麼多個 heads 能學習<strong>不同的關注模式</strong>。
+            </div>
+
+            <figure>
+                <img src="../../images/weights_structure_multihead_20260105214909.png" alt="Multi-Head 權重結構">
+                <figcaption>
+                    視覺化：3 個 heads 各自擁有獨立的權重矩陣
+                </figcaption>
+            </figure>
+
+            <div class="matrix-box">
+                <div class="matrix-title">nano-gpt 的完整權重結構</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># nano-gpt 有 3 個 attention heads</span>
+
+<span class="code-comment"># Head 1 的權重（獨立）</span>
+Head1_Q_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 參數
+Head1_K_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 參數
+Head1_V_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 參數
+Head1_biases: <span class="code-number">16</span> + <span class="code-number">16</span> + <span class="code-number">16</span> = <span class="code-number">48</span> 參數
+Head1 總計：<span class="code-number">2,352</span> 參數
+
+<span class="code-comment"># Head 2 的權重（獨立）</span>
+Head2_Q_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 參數
+Head2_K_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 參數
+Head2_V_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 參數
+Head2_biases: <span class="code-number">48</span> 參數
+Head2 總計：<span class="code-number">2,352</span> 參數
+
+<span class="code-comment"># Head 3 的權重（獨立）</span>
+Head3_Q_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 參數
+Head3_K_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 參數
+Head3_V_weights: [<span class="code-number">16</span> × <span class="code-number">48</span>] = <span class="code-number">768</span> 參數
+Head3_biases: <span class="code-number">48</span> 參數
+Head3 總計：<span class="code-number">2,352</span> 參數
+
+<span class="code-comment">═══════════════════════════════════════</span>
+<span class="code-comment"># 3 個 heads 的 Q/K/V 權重總計</span>
+<span class="code-number">2,352</span> × <span class="code-number">3</span> = <span class="code-number">7,056</span> 個參數
+
+<span class="code-comment"># 每個 head 的權重完全獨立！</span>
+<span class="code-comment"># 訓練時各自學習不同的特徵</span></pre>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>🎓</span>
+                    <span>為什麼需要獨立的權重？</span>
+                </div>
+                <ul style="margin-left: 20px; line-height: 2;">
+                    <li><strong>多樣性</strong>：每個 head 可以學習不同的關注模式
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Head 1 可能關注<strong>語法關係</strong>（主詞-動詞）</li>
+                            <li>Head 2 可能關注<strong>語義相似性</strong>（同義詞）</li>
+                            <li>Head 3 可能關注<strong>位置關係</strong>（相鄰詞彙）</li>
+                        </ul>
+                    </li>
+                    <li><strong>冗餘性</strong>：如果某個 head 學習失敗，其他 heads 可以彌補</li>
+                    <li><strong>豐富表徵</strong>：組合多個視角，獲得更完整的理解</li>
+                </ul>
+            </div>
+
+            <h3>🔍 權重的實際作用</h3>
+
+            <div class="matrix-box" style="background: linear-gradient(135deg, #1e3a2f 0%, #0f1e18 100%);">
+                <div class="matrix-title" style="color: var(--matrix-green);">權重如何影響 Q/K/V 向量</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 假設輸入向量代表「銀行」這個詞</span>
+input = [<span class="code-number">0.5</span>, <span class="code-number">-0.2</span>, <span class="code-number">0.8</span>, ...] <span class="code-comment"># [48 維]</span>
+
+<span class="code-comment"># Head 1 可能學會「問」：這是金融機構嗎？</span>
+Head1_Q_weights = [
+    [<span class="code-number">0.9</span>, <span class="code-number">0.1</span>, ...],  <span class="code-comment"># 強調「金融」特徵</span>
+    ...
+]
+Q1 = Head1_Q_weights @ input  <span class="code-comment"># 產生「金融語境」的 Query</span>
+
+<span class="code-comment"># Head 2 可能學會「問」：這是地理位置嗎？</span>
+Head2_Q_weights = [
+    [<span class="code-number">0.1</span>, <span class="code-number">0.8</span>, ...],  <span class="code-comment"># 強調「地理」特徵</span>
+    ...
+]
+Q2 = Head2_Q_weights @ input  <span class="code-comment"># 產生「地理語境」的 Query</span>
+
+<span class="code-comment"># 同一個輸入，不同的權重 → 不同的 Query！</span>
+<span class="code-comment"># 這就是多頭注意力的力量</span></pre>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%); border-color: var(--gold);">
+                <div class="info-box-title" style="color: var(--gold);">
+                    <span>💡</span>
+                    <span>總結：權重矩陣的本質</span>
+                </div>
+                <p style="font-size: 1.1rem; line-height: 2;">
+                    權重矩陣是模型的<strong>「知識」</strong>：<br>
+                </p>
+                <ul style="margin-left: 20px; line-height: 2; margin-top: 15px;">
+                    <li>📚 透過訓練從數據中<strong>學習</strong>而來</li>
+                    <li>🎯 每個 head 有<strong>獨立</strong>的權重矩陣</li>
+                    <li>🔄 訓練過程中不斷<strong>更新優化</strong></li>
+                    <li>💾 訓練完成後被<strong>保存</strong>在模型文件中</li>
+                    <li>🚀 推理時<strong>固定不變</strong>，用於生成預測</li>
+                </ul>
+                <p style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.8); border-radius: 10px;">
+                    <strong>實際例子：</strong><br>
+                    當你下載一個「GPT-2 模型文件」（例如 500MB），你下載的主要就是這些權重矩陣的數值！<br>
+                    模型的「智能」就儲存在這些數字裡。
+                </p>
+            </div>
+
+            <h2>💡 Q/K/V 的命名含義</h2>
+
+            <p>這些名稱來自軟體開發中的「字典」（dictionary）概念：</p>
+
+            <div class="matrix-box" style="background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);">
+                <div class="matrix-title" style="color: var(--attention-brown);">軟體類比</div>
+                <div class="code-visualization">
+                    <pre><span class="code-comment"># 軟體中的字典（Dictionary/Map）</span>
+
+<span class="code-comment"># 1. 建立查找表</span>
+table = {
+    <span class="code-string">"key0"</span>: <span class="code-string">"value0"</span>,
+    <span class="code-string">"key1"</span>: <span class="code-string">"value1"</span>,
+    <span class="code-string">"key2"</span>: <span class="code-string">"value2"</span>,
+}
+
+<span class="code-comment"># 2. 使用 query 查找</span>
+result = table[<span class="code-string">"key1"</span>]  <span class="code-comment"># 返回 "value1"</span></pre>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-box-title">
+                    <span>🔑</span>
+                    <span>Self-Attention 的「字典」</span>
+                </div>
+                <p>在 Self-Attention 中，概念類似但更靈活：</p>
+                <ul style="margin-left: 20px; line-height: 2; margin-top: 15px;">
+                    <li><strong>Key (K)</strong>：就像字典的鍵，標識「我有什麼資訊」</li>
+                    <li><strong>Value (V)</strong>：就像字典的值，存儲「實際的資訊內容」</li>
+                    <li><strong>Query (Q)</strong>：用來查詢，問「我需要哪些資訊」</li>
+                    <li><strong>差異</strong>：不是返回單一條目，而是返回所有條目的<strong>加權組合</strong></li>
+                </ul>
+            </div>
+
+            <h2>🎬 下一步：使用 Q/K/V</h2>
+
+            <p>現在我們已經為每個 token 生成了 Q、K、V 三個向量，接下來呢？</p>
+
+            <div class="pull-quote">
+                在下一章（Self-Attention 下半部），<br>
+                我們將學習如何使用這些向量：<br><br>
+                用 <strong>Q</strong> 查詢其他 tokens 的 <strong>K</strong>，<br>
+                找出相關性後，提取對應的 <strong>V</strong>。
+            </div>
+
+            <div class="comparison-grid">
+                <div class="comparison-card" style="border-top-color: #4682b4;">
+                    <div class="card-title">→ 第四章</div>
+                    <p><strong>Self-Attention（下）</strong></p>
+                    <p>計算 Attention Score、Softmax、產生輸出</p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: var(--purple);">
+                    <div class="card-title">→ 第五章</div>
+                    <p><strong>Multi-Head Attention</strong></p>
+                    <p>平行處理多個 attention heads</p>
+                </div>
+
+                <div class="comparison-card" style="border-top-color: #87ceeb;">
+                    <div class="card-title">→ 第六章</div>
+                    <p><strong>Feed Forward Network</strong></p>
+                    <p>Transformer Block 的第二個主要組件</p>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 80px;">🗺️ 回顧架構全貌</h2>
+
+            <div class="info-box" style="background: linear-gradient(135deg, rgba(218, 165, 32, 0.1) 0%, rgba(218, 165, 32, 0.05) 100%); border-color: var(--attention-brown);">
+                <div class="info-box-title" style="color: var(--attention-brown);">
+                    <span>📍</span>
+                    <span>Self-Attention（Q/K/V）在完整架構中的位置</span>
+                </div>
+                <figure style="margin: 20px 0 0 0;">
+                    <img src="../../images/llm_architecture_full_20260105210724.png" alt="LLM 完整架構" style="max-width: 100%; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                    <figcaption style="margin-top: 20px; font-size: 1rem; color: #666; line-height: 1.8;">
+                        完整架構圖：我們剛剛完成了 <span style="color: #daa520; font-weight: 700;">Self-Attention 的第一部分（Q/K/V 生成）</span>，<br>
+                        接下來將繼續 Self-Attention 的第二部分（Attention 計算）
+                    </figcaption>
+                </figure>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="../index.html" style="display: inline-block; padding: 15px 40px; background: var(--attention-brown); color: #0a0e27; text-decoration: none; border-radius: 50px; font-weight: 700; transition: transform 0.3s ease;">
+                        ← 返回教學首頁查看所有章節
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Chapter Navigation -->
+    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 60px 40px; margin-top: 80px;">
+        <div style="max-width: 900px; margin: 0 auto;">
+            
+            <h2 style="font-family: 'Noto Serif TC', serif; font-size: 2rem; color: #0a0e27; text-align: center; margin-bottom: 40px; border: none; padding: 0;">
+                🎯 本章重點回顧
+            </h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; margin-bottom: 50px;">
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">📊</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">Q/K/V 向量生成</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">透過矩陣-向量乘法生成三種向量</div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🔢</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">權重矩陣 [16×48]</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">固定權重處理可變長度輸入</div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🎲</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">權重隨機初始化</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">訓練過程中學習最佳權重</div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🔑</div>
+                    <div style="font-weight: 700; color: #0a0e27; margin-bottom: 8px;">每個 Head 獨立權重</div>
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.6;">增加表徵多樣性</div>
+                </div>
+            </div>
+
+            <div style="border-top: 2px solid #dee2e6; padding-top: 40px; margin-top: 40px;">
+                <h3 style="font-family: 'Noto Serif TC', serif; font-size: 1.5rem; color: #0a0e27; text-align: center; margin-bottom: 30px;">
+                    📚 章節導航
+                </h3>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                    <a href="02-layer-normalization.html" style="display: flex; align-items: center; gap: 15px; padding: 25px; background: white; border-radius: 15px; text-decoration: none; color: #0a0e27; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                        <div style="font-size: 2rem;">⬅️</div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">上一章</div>
+                            <div style="font-weight: 700; font-size: 1.1rem;">Layer Normalization</div>
+                            <div style="font-size: 0.9rem; color: #999; margin-top: 3px;">正規化與穩定性</div>
+                        </div>
+                    </a>
+
+                    <a href="03b-self-attention-computation.html" style="display: flex; align-items: center; justify-content: flex-end; gap: 15px; padding: 25px; background: linear-gradient(135deg, #ffd700 0%, #f0c000 100%); border-radius: 15px; text-decoration: none; color: #0a0e27; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);">
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">下一章</div>
+                            <div style="font-weight: 700; font-size: 1.1rem;">Self-Attention: 計算過程</div>
+                            <div style="font-size: 0.9rem; opacity: 0.9; margin-top: 5px;">計算注意力分數與加權和</div>
+                        </div>
+                        <div style="font-size: 2rem;">➡️</div>
+                    </a>
+                </div>
+
+                <div style="text-align: center; padding: 20px; background: rgba(255, 215, 0, 0.1); border-radius: 12px; border: 2px dashed var(--gold);">
+                    <div style="font-size: 0.95rem; color: #666; line-height: 1.8;">
+                        <strong style="color: #0a0e27;">💡 下一步學什麼？</strong><br>
+                        有了 Q/K/V 向量，接下來要計算它們的<strong style="color: var(--gold);">點積</strong>來產生注意力分數，<br>
+                        理解哪些 tokens 應該互相關注。這是 Self-Attention 的核心計算！
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer Quote -->
+    <div class="footer-quote">
+        <p class="footer-quote-text">
+            「Q/K/V：三個向量，<br>
+            開啟了 tokens 之間的對話之門。」
+        </p>
+        <p class="footer-quote-author">— LLM 視覺化教學 · 2026</p>
+    </div>
+
+</body>
+</html>
+
