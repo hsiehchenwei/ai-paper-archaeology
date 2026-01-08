@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-2 論文深度解析 - 學習路徑導覽</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <style>
+        .index-header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            margin-bottom: 40px;
+        }
+        .index-header h1 {
+            color: white;
+            margin-bottom: 10px;
+            border: none;
+            padding: 0;
+        }
+        .index-header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .chapter-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: var(--text-main);
+            display: block;
+            border: 2px solid transparent;
+        }
+        .chapter-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+        .chapter-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        .chapter-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+        .chapter-desc {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        .chapter-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85em;
+            color: var(--text-muted);
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .learning-path {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+        .learning-path h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        .path-list {
+            list-style: none;
+            padding: 0;
+        }
+        .path-list li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+        .path-list li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 40px;
+        }
+        .quick-link {
+            background: #f0f4ff;
+            color: #667eea;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .quick-link:hover {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <span class="current">🔗 GPT-2 教學</span>
+        </div>
+
+        <div class="index-header">
+            <h1>📖 Language Models are Unsupervised Multitask Learners</h1>
+            <p>GPT-2 論文深度解析 · 從 GPT 到 GPT-3 的關鍵橋樑</p>
+            <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.85;">
+                Zero-Shot Learning 的驗證 · 規模化效應的早期證據
+            </p>
+        </div>
+
+        <div class="learning-path">
+            <h3>🎯 建議學習路徑</h3>
+            <ul class="path-list">
+                <li><strong>第一次閱讀:</strong>按順序閱讀第 1-5 頁，建立完整概念框架</li>
+                <li><strong>深入理解:</strong>重點複習第 2 頁 (Zero-Shot Learning) 和第 3 頁 (模型架構)</li>
+                <li><strong>實務連結:</strong>理解 GPT-2 如何為 GPT-3 的 Few-Shot Learning 鋪路</li>
+                <li><strong>技術深化:</strong>與 GPT-3 對照閱讀，理解規模化的演進</li>
+            </ul>
+        </div>
+
+        <h2 style="margin-bottom: 24px;">📚 章節導覽</h2>
+        
+        <div class="chapter-grid">
+            <a href="01-abstract-and-introduction.html" class="chapter-card">
+                <span class="chapter-number">第 1 章</span>
+                <div class="chapter-title">📖 摘要與引言</div>
+                <div class="chapter-desc">
+                    理解 GPT-2 的核心主張：語言模型可以在沒有明確監督的情況下學習執行任務。探索 Zero-Shot Learning 的概念，以及為什麼需要 WebText 資料集。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 20 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="02-approach-and-dataset.html" class="chapter-card">
+                <span class="chapter-number">第 2 章</span>
+                <div class="chapter-title">🗂️ 方法論與訓練資料</div>
+                <div class="chapter-desc">
+                    深入了解 WebText 資料集的構建方式（800萬網頁，40GB文字）。學習如何透過語言模型實現無監督的多任務學習，以及與傳統方法的差異。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 25 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="03-model-architecture.html" class="chapter-card">
+                <span class="chapter-number">第 3 章</span>
+                <div class="chapter-title">⚙️ 模型架構與技術細節</div>
+                <div class="chapter-desc">
+                    解析 GPT-2 的四個版本（117M、345M、762M、1.5B），了解 BPE Tokenizer 的運作原理，以及 Transformer Decoder 的實作細節。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 25 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="04-experiments-and-results.html" class="chapter-card">
+                <span class="chapter-number">第 4 章</span>
+                <div class="chapter-title">🧪 實驗結果與效能評估</div>
+                <div class="chapter-desc">
+                    驚人的 Zero-Shot 表現！看 GPT-2 在語言模型、閱讀理解、摘要、翻譯等任務上的突破。理解規模與效能的 log-linear 關係。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 25 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="05-discussion-and-conclusion.html" class="chapter-card">
+                <span class="chapter-number">第 5 章</span>
+                <div class="chapter-title">💭 討論、限制與未來展望</div>
+                <div class="chapter-desc">
+                    理解 GPT-2 的侷限性（仍然 underfit WebText）、潛在風險（生成假新聞），以及如何為 GPT-3 鋪路。探討分階段發布策略的爭議。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 20 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="key-concept" style="margin-top: 40px;">
+            <h3>💡 學習重點提示</h3>
+            <ul>
+                <li><strong>Zero-Shot Learning:</strong>第 1 章建立概念，第 4 章看實際效果</li>
+                <li><strong>WebText 資料集:</strong>第 2 章詳細說明，理解高品質資料的重要性</li>
+                <li><strong>規模化效應:</strong>第 3 章看四個模型版本，第 4 章驗證效能提升</li>
+                <li><strong>Underfitting:</strong>第 5 章揭示 GPT-2 的潛力尚未完全發揮</li>
+                <li><strong>承先啟後:</strong>理解 GPT-2 如何繼承 GPT-1 並為 GPT-3 鋪路</li>
+            </ul>
+        </div>
+
+        <div class="solution" style="margin-top: 40px;">
+            <h3>🎓 完成指標</h3>
+            <p>當你能回答以下問題時，代表你已經掌握 GPT-2 論文：</p>
+            <ol>
+                <li><strong>核心創新:</strong>GPT-2 相較於 GPT-1 的主要進步是什麼？</li>
+                <li><strong>Zero-Shot Learning:</strong>為什麼 GPT-2 不需要任務特定的訓練就能執行任務？</li>
+                <li><strong>WebText 資料集:</strong>為什麼不直接使用 Common Crawl？</li>
+                <li><strong>規模效應:</strong>為什麼 1.5B 參數比 117M 參數效果好這麼多？</li>
+                <li><strong>承先啟後:</strong>GPT-2 如何為 GPT-3 的 Few-Shot Learning 鋪路？</li>
+                <li><strong>侷限性:</strong>為什麼說 GPT-2 仍然 underfit WebText？</li>
+            </ol>
+        </div>
+
+        <div class="quick-links">
+            <a href="../index.html" class="quick-link">
+                ← 回到首頁
+            </a>
+            <a href="01-abstract-and-introduction.html" class="quick-link">
+                🚀 開始學習 GPT-2
+            </a>
+            <a href="../gpt3-tutorial/index.html" class="quick-link">
+                下一步 → GPT-3
+            </a>
+        </div>
+        
+        <div class="quick-links" style="margin-top: 20px;">
+            <a href="02-approach-and-dataset.html" class="quick-link">
+                📐 直達核心章節
+            </a>
+            <a href="https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf" class="quick-link" target="_blank">
+                📄 原始論文 (PDF)
+            </a>
+            <a href="https://github.com/openai/gpt-2" class="quick-link" target="_blank">
+                💻 OpenAI GitHub
+            </a>
+        </div>
+
+        <div style="text-align: center; margin-top: 60px; padding: 40px; background: var(--bg-body); border-radius: 12px;">
+            <h3 style="color: #667eea;">📖 關於本教學</h3>
+            <p style="max-width: 600px; margin: 20px auto; line-height: 1.8; color: var(--text-secondary);">
+                本深度解析專注於理解 <strong>GPT-2 在 AI 發展史中的關鍵地位</strong>。
+                GPT-2 是第一個驗證「規模即能力」並展現 Zero-Shot Learning 潛力的模型，
+                為 GPT-3 的 Few-Shot Learning 奠定了理論與實務基礎。
+                理解 GPT-2，你就能理解現代大型語言模型的演進脈絡。
+            </p>
+            <p style="margin-top: 20px; font-size: 1.1em; font-weight: 600; color: #667eea;">
+                "Language Models are Unsupervised Multitask Learners"
+            </p>
+            <p style="margin-top: 10px; color: var(--text-muted);">
+                —— 一篇證明規模化力量的里程碑論文
+            </p>
+        </div>
+
+        <div style="margin-top: 40px; padding: 20px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <h4 style="color: #856404; margin-top: 0;">🔗 延伸閱讀</h4>
+            <p>建議學習順序：</p>
+            <p>
+                <strong><a href="../transformer-tutorial/index.html">Transformer (2017)</a></strong> → 
+                <strong><a href="../bert-tutorial/index.html">BERT (2018)</a></strong> → 
+                <strong>GPT-2 (2019) ← 你在這裡</strong> → 
+                <strong><a href="../gpt3-tutorial/index.html">GPT-3 (2020)</a></strong> → 
+                <strong><a href="../instructgpt-tutorial/index.html">InstructGPT (2022)</a></strong>
+            </p>
+            <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">
+                理解完整演進脈絡，掌握現代 LLM 的發展歷程！
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+

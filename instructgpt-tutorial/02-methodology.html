@@ -3,7 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>第 2 頁：RLHF 訓練三部曲 - InstructGPT 論文深度解析</title>
+
+    <!-- Primary Meta Tags -->
+    <title>RLHF 訓練三部曲：SFT → RM → PPO | InstructGPT 論文深度解析</title>
+    <meta name="title" content="RLHF 訓練三部曲：SFT → RM → PPO | InstructGPT 論文深度解析" />
+    <meta name="description" content="深入解析 InstructGPT 的 RLHF (Reinforcement Learning from Human Feedback) 三階段訓練流程：監督式微調 (SFT)、獎勵模型 (RM)、強化學習優化 (PPO)。這是現代 LLM 訓練的黃金標準架構，被 LLaMA、Claude 等模型採用。" />
+    <meta name="keywords" content="InstructGPT, RLHF, Reinforcement Learning from Human Feedback, SFT, Supervised Fine-Tuning, Reward Model, PPO, Proximal Policy Optimization, 強化學習, 人類回饋, 監督式微調, 獎勵模型, LLaMA, Claude, ChatGPT, 大型語言模型, AI 論文, 繁體中文" />
+    <meta name="author" content="謝承緯 (Chen Wei Hsieh)" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://hsiehchenwei.github.io/ai-paper-archaeology/instructgpt-tutorial/02-methodology.html" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://hsiehchenwei.github.io/ai-paper-archaeology/instructgpt-tutorial/02-methodology.html" />
+    <meta property="og:title" content="RLHF 訓練三部曲：SFT → RM → PPO | InstructGPT 論文深度解析" />
+    <meta property="og:description" content="深入解析 InstructGPT 的 RLHF 三階段訓練流程：監督式微調、獎勵模型、強化學習優化。現代 LLM 訓練的黃金標準架構。" />
+    <meta property="og:image" content="https://hsiehchenwei.github.io/ai-paper-archaeology/instructgpt-tutorial/images/original/InstructGPT_Diagram3.1.png" />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:site_name" content="AI Paper Archaeology" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://hsiehchenwei.github.io/ai-paper-archaeology/instructgpt-tutorial/02-methodology.html" />
+    <meta property="twitter:title" content="RLHF 訓練三部曲：SFT → RM → PPO | InstructGPT 論文深度解析" />
+    <meta property="twitter:description" content="深入解析 InstructGPT 的 RLHF 三階段訓練流程：監督式微調、獎勵模型、強化學習優化。現代 LLM 訓練的黃金標準架構。" />
+    <meta property="twitter:image" content="https://hsiehchenwei.github.io/ai-paper-archaeology/instructgpt-tutorial/images/original/InstructGPT_Diagram3.1.png" />
+
+    <!-- Structured Data / Schema.org -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "RLHF 訓練三部曲：SFT → RM → PPO | InstructGPT 論文深度解析",
+      "description": "深入解析 InstructGPT 的 RLHF (Reinforcement Learning from Human Feedback) 三階段訓練流程：監督式微調 (SFT)、獎勵模型 (RM)、強化學習優化 (PPO)。",
+      "image": "https://hsiehchenwei.github.io/ai-paper-archaeology/instructgpt-tutorial/images/original/InstructGPT_Diagram3.1.png",
+      "author": {
+        "@type": "Person",
+        "name": "謝承緯 (Chen Wei Hsieh)"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "AI Paper Archaeology",
+        "url": "https://hsiehchenwei.github.io/ai-paper-archaeology/"
+      },
+      "datePublished": "2022-03-04",
+      "dateModified": "2026-01-05",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://hsiehchenwei.github.io/ai-paper-archaeology/instructgpt-tutorial/02-methodology.html"
+      },
+      "about": [
+        { "@type": "Thing", "name": "InstructGPT" },
+        { "@type": "Thing", "name": "RLHF" },
+        { "@type": "Thing", "name": "Reinforcement Learning from Human Feedback" },
+        { "@type": "Thing", "name": "Supervised Fine-Tuning" },
+        { "@type": "Thing", "name": "Reward Model" },
+        { "@type": "Thing", "name": "PPO" },
+        { "@type": "Thing", "name": "Proximal Policy Optimization" }
+      ],
+      "inLanguage": "zh-TW"
+    }
+    </script>
+
     <link rel="stylesheet" href="style.css">
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>

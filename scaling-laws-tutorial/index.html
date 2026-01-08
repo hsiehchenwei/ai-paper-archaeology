@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaling Laws 論文深度解析 - AI Paper Archaeology</title>
+    <meta name="description" content="深入解析 Scaling Laws for Neural Language Models 論文，理解 AI 性能與規模的冪律關係，以及如何預言 GPT-3 的成功。">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    
+    <style>
+        /* Custom styles for Landing Page to match Main Index */
+        body {
+            background-color: #f8fafc;
+        }
+
+        /* Hero Section Override */
+        .tutorial-hero {
+            position: relative;
+            height: 60vh;
+            min-height: 500px;
+            background-image: url('images/chapter01_hero.png');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 60px;
+            color: white;
+        }
+        
+        .tutorial-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+        }
+
+        .hero-content-wrapper {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        .hero-tag {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 99px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .hero-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            font-weight: 300;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Bento Grid for Chapters */
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto 80px;
+        }
+
+        .chapter-card {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: var(--text-main);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .chapter-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .chapter-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20px;
+            bottom: 20px;
+            width: 4px;
+            background: #e5e7eb;
+            border-radius: 0 4px 4px 0;
+            transition: background 0.3s;
+        }
+
+        .chapter-card:hover::before {
+            background: var(--mag-primary);
+        }
+
+        .card-number {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding-left: 15px;
+        }
+
+        .card-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            padding-left: 15px;
+        }
+
+        .card-desc {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            flex-grow: 1;
+            padding-left: 15px;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 20px;
+            border-top: 1px solid #f3f4f6;
+            padding-left: 15px;
+        }
+
+        .read-time {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-arrow {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .chapter-card:hover .card-arrow {
+            background: var(--mag-primary);
+            color: white;
+        }
+
+        /* Essential Sections */
+        .section-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 60px auto 40px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--text-main) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .learning-path-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto 60px;
+            padding: 0 20px;
+        }
+
+        .path-step {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            background: #eff6ff;
+            color: var(--mag-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 15px;
+        }
+
+        /* Glass Nav */
+        .glass-nav {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 10px 24px;
+            border-radius: 99px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .nav-link {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-link:hover {
+            color: var(--mag-primary);
+        }
+
+        .nav-divider {
+            width: 1px;
+            height: 16px;
+            background: #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Glass Navigation -->
+    <nav class="glass-nav">
+        <a href="../index.html" class="nav-link">🏠 首頁</a>
+        <div class="nav-divider"></div>
+        <a href="../gpt2-tutorial/index.html" class="nav-link">← GPT-2</a>
+        <span class="nav-link" style="color: var(--mag-primary); font-weight: 700;">Scaling Laws</span>
+        <a href="../gpt3-tutorial/index.html" class="nav-link">GPT-3 →</a>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="tutorial-hero">
+        <div class="hero-content-wrapper">
+            <span class="hero-tag">AI Paper Archaeology</span>
+            <h1 class="hero-title">Scaling Laws for<br>Neural Language Models</h1>
+            <p class="hero-subtitle">大模型時代的科學預言 · 預見 GPT-3 成功的關鍵理論</p>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <a href="01-introduction.html" class="button" style="background: white; color: black; border-radius: 99px; padding: 12px 32px; font-weight: 600; text-decoration: none;">開始閱讀</a>
+                <a href="https://arxiv.org/abs/2001.08361" target="_blank" class="button" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 99px; padding: 12px 24px; font-weight: 500; text-decoration: none;">原始論文 ↗</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Learning Path Section -->
+    <section>
+        <div class="section-header">
+            <h2 class="section-title">學習路徑指引</h2>
+            <p style="color: var(--text-secondary);">如何循序漸進掌握這篇經典論文</p>
+        </div>
+        <div class="learning-path-grid">
+            <div class="path-step">
+                <div class="step-icon">👀</div>
+                <h3 style="margin-bottom: 10px;">初步瀏覽</h3>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">閱讀 <a href="01-introduction.html">第 1 章</a> 摘要與 <a href="07-discussion-and-conclusion.html">第 7 章</a> 結論，建立整體概念。</p>
+            </div>
+            <div class="path-step">
+                <div class="step-icon">📐</div>
+                <h3 style="margin-bottom: 10px;">核心冪律</h3>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">深入 <a href="03-empirical-power-laws.html">第 3 章</a> 理解性能與規模的三個基本冪律關係。</p>
+            </div>
+            <div class="path-step">
+                <div class="step-icon">⚖️</div>
+                <h3 style="margin-bottom: 10px;">過擬合與數據</h3>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">在 <a href="04-overfitting-and-data-limit.html">第 4 章</a> 學習數據量與模型大小的平衡藝術。</p>
+            </div>
+            <div class="path-step">
+                <div class="step-icon">💰</div>
+                <h3 style="margin-bottom: 10px;">最優分配</h3>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">研讀 <a href="06-optimal-compute-allocation.html">第 6 章</a>，理解訓練大模型並提前停止的關鍵策略。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chapters Grid -->
+    <section>
+        <div class="section-header">
+            <h2 class="section-title">章節導覽</h2>
+        </div>
+        
+        <div class="chapters-grid">
+            <!-- Chapter 1 -->
+            <a href="01-introduction.html" class="chapter-card">
+                <div class="card-number">CHAPTER 01</div>
+                <h3 class="card-title">摘要與核心發現</h3>
+                <p class="card-desc">理解 Scaling Laws 的核心主張：性能與規模呈現可預測的冪律關係。探索預言 GPT-3 成功的關鍵。</p>
+                <div class="card-meta">
+                    <div class="read-time">
+                        <span>⏱️</span> 25 min read
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- Chapter 2 -->
+            <a href="02-background-and-methods.html" class="chapter-card">
+                <div class="card-number">CHAPTER 02</div>
+                <h3 class="card-title">背景與方法論</h3>
+                <p class="card-desc">深入實驗設計：Transformer 參數計算、訓練流程。理解為什麼要排除 Embedding 參數。</p>
+                <div class="card-meta">
+                    <div class="read-time">
+                        <span>⏱️</span> 20 min read
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- Chapter 3 -->
+            <a href="03-empirical-power-laws.html" class="chapter-card">
+                <div class="card-number">CHAPTER 03</div>
+                <h3 class="card-title">實證結果與基本冪律</h3>
+                <p class="card-desc">核心發現：性能與模型大小、數據量、計算量的冪律關係。理解為什麼模型形狀影響很小。</p>
+                <div class="card-meta">
+                    <div class="read-time">
+                        <span>⏱️</span> 30 min read
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- Chapter 4 -->
+            <a href="04-overfitting-and-data-limit.html" class="chapter-card">
+                <div class="card-number">CHAPTER 04</div>
+                <h3 class="card-title">過擬合與數據極限</h3>
+                <p class="card-desc">探索過擬合的規律。理解關鍵公式 L(N,D)，以及為什麼增加 8 倍模型只需增加 5 倍數據。</p>
+                <div class="card-meta">
+                    <div class="read-time">
+                        <span>⏱️</span> 25 min read
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- Chapter 5 -->
+            <a href="05-scaling-with-training-time.html" class="chapter-card">
+                <div class="card-number">CHAPTER 05</div>
+                <h3 class="card-title">訓練時間的擴展法則</h3>
+                <p class="card-desc">如何從訓練早期預測最終性能。理解樣本效率，以及關鍵批次大小與訓練步數的關係。</p>
+                <div class="card-meta">
+                    <div class="read-time">
+                        <span>⏱️</span> 25 min read
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- Chapter 6 -->
+            <a href="06-optimal-compute-allocation.html" class="chapter-card">
+                <div class="card-number">CHAPTER 06</div>
+                <h3 class="card-title">計算預算的最優分配</h3>
+                <p class="card-desc">最關鍵的發現：固定計算預算下，應該訓練「非常大的模型」並「提前停止」。打破收斂迷思。</p>
+                <div class="card-meta">
+                    <div class="read-time">
+                        <span>⏱️</span> 30 min read
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- Chapter 7 -->
+            <a href="07-discussion-and-conclusion.html" class="chapter-card">
+                <div class="card-number">CHAPTER 07</div>
+                <h3 class="card-title">討論與結論</h3>
+                <p class="card-desc">總結所有冪律關係，探討 Scaling Laws 的理論意義與實務應用，以及對未來大模型發展的啟示。</p>
+                <div class="card-meta">
+                    <div class="read-time">
+                        <span>⏱️</span> 20 min read
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 60px 20px; color: var(--text-secondary); border-top: 1px solid #e5e7eb;">
+        <p>© 2026 AI Paper Archaeology</p>
+        <p style="font-size: 0.9rem; margin-top: 10px;">Made with ❤️ for AI Learners</p>
+    </footer>
+
+</body>
+</html>

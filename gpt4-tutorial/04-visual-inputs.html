@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-4 第 4 章：視覺輸入能力 - 多模態的突破</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter04_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>視覺與文字的融合</h1>
+            <p class="hero-subtitle">多模態 AI 的首次真正實現</p>
+            <p class="hero-meta">GPT-4 Technical Report 深度解析 · 第 4 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">GPT-4 教學</a>
+            <span>/</span>
+            <span class="current">第 4 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                GPT-4 最革命性的突破，莫過於<strong>多模態能力</strong>：
+                它不僅能處理文字，更能「看見」並「理解」圖像。
+                這是第一次，一個大語言模型真正實現了視覺與語言的統一理解。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                這意味著 GPT-4 可以：
+            </p>
+            <ul>
+                <li><strong>理解圖像內容</strong>：描述圖片、回答關於圖片的問題</li>
+                <li><strong>處理混合輸入</strong>：同時接受圖像和文字，理解它們之間的關係</li>
+                <li><strong>應用標準技術</strong>：Few-shot prompting、Chain-of-thought 等技術同樣有效</li>
+                <li><strong>跨領域應用</strong>：文檔、照片、圖表、截圖等各種視覺內容</li>
+            </ul>
+
+            <p>
+                雖然這份技術報告對視覺能力的描述相對簡短（報告提到會在後續工作中發布更多信息），
+                但已經展現了多模態 AI 的巨大潛力。
+            </p>
+        </div>
+
+        <h2>👁️ 多模態輸入能力</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    GPT-4 accepts prompts consisting of both images and text, which -- parallel to the text-only setting -- lets the user specify any vision or language task.
+                    Specifically, the model generates text outputs given inputs consisting of arbitrarily
+                    interlaced text and images.
+                    Over a range of domains -- including documents with text and photographs, diagrams, or screenshots -- GPT-4 exhibits similar capabilities as it does on text-only inputs. An example of GPT-4's visual input can be found in Table~\ref{table:visual_input}. The standard test-time techniques developed for language models (e.g. few-shot prompting, chain-of-thought, etc) are similarly effective when using both images and text - see Appendix~\ref{appendix:visual_input_examples} for examples.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    GPT-4 接受由圖像和文字組成的提示詞，這與純文字設置類似，
+                    讓用戶可以指定任何視覺或語言任務。
+                    具體來說，模型在給定由任意交錯的文字和圖像組成的輸入時生成文字輸出。
+                    在一系列領域中——包括帶有文字和照片的文檔、圖表或截圖——
+                    GPT-4 展現出與純文字輸入相似的能力。
+                    GPT-4 視覺輸入的範例可以在表~\ref{table:visual_input} 中找到。
+                    為語言模型開發的標準測試時技術（例如 few-shot prompting、chain-of-thought 等）
+                    在使用圖像和文字時同樣有效。
+                </p>
+            </div>
+
+            <div class="key-concept">
+                <h4>🔑 核心特點</h4>
+                <ul>
+                    <li><strong>任意交錯</strong>：圖像和文字可以任意混合，模型能理解它們的關係</li>
+                    <li><strong>跨領域應用</strong>：文檔、照片、圖表、截圖等各種視覺內容</li>
+                    <li><strong>技術通用性</strong>：Few-shot、Chain-of-thought 等技術同樣有效</li>
+                    <li><strong>文字輸出</strong>：雖然能「看見」圖像，但輸出仍然是文字</li>
+                </ul>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>為什麼多模態如此重要？</strong>
+                </p>
+                <ul>
+                    <li><strong>真實世界是多模態的</strong>：人類同時使用視覺和語言來理解世界</li>
+                    <li><strong>應用場景擴展</strong>：從純文字對話擴展到圖像理解、文檔分析、視覺問答等</li>
+                    <li><strong>統一理解</strong>：一個模型同時理解視覺和語言，避免了多模型協調的複雜性</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這為 AI 的應用開闢了全新的可能性，
+                    從視覺問答到文檔理解，從圖表分析到截圖解釋，
+                    GPT-4 的多模態能力正在改變我們與 AI 互動的方式。
+                </p>
+            </div>
+        </div>
+
+        <h2>📸 視覺輸入範例</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    <strong>Example of GPT-4 visual input:</strong>
+                </p>
+                <p>
+                    <strong>User:</strong> What is funny about this image? Describe it panel by panel.
+                </p>
+                <p>
+                    [Image: VGA connector comic]
+                </p>
+                <p>
+                    <strong>GPT-4:</strong> The image shows a package for a "Lightning Cable" adapter with three panels. 
+                    Panel 1: A smartphone with a VGA connector (a large, blue, 15-pin connector typically used for computer monitors) plugged into its charging port.
+                    Panel 2: The package for the "Lightning Cable" adapter with a picture of a VGA connector on it.
+                    Panel 3: A close-up of the VGA connector with a small Lightning connector (used for charging iPhones and other Apple devices) at the end.
+                    The humor in this image comes from the absurdity of plugging a large, outdated VGA connector into a small, modern smartphone charging port.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    <strong>GPT-4 視覺輸入範例：</strong>
+                </p>
+                <p>
+                    <strong>用戶：</strong> 這張圖片有趣的地方在哪裡？請逐格描述。
+                </p>
+                <p>
+                    [圖片：VGA 連接器漫畫]
+                </p>
+                <p>
+                    <strong>GPT-4：</strong> 圖片顯示了一個「Lightning Cable」適配器的包裝，有三個面板。
+                    面板 1：一部智慧型手機，充電口插著一個 VGA 連接器
+                    （一個大型、藍色、15 針的連接器，通常用於電腦顯示器）。
+                    面板 2：「Lightning Cable」適配器的包裝，上面有 VGA 連接器的圖片。
+                    面板 3：VGA 連接器的特寫，末端有一個小的 Lightning 連接器
+                    （用於為 iPhone 和其他 Apple 設備充電）。
+                    這張圖片的幽默之處在於將一個大型、過時的 VGA 連接器插入小型、現代的智慧型手機充電口的荒謬性。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>這個範例展示了什麼？</strong>
+                </p>
+                <ul>
+                    <li><strong>視覺理解</strong>：GPT-4 能夠準確描述圖像內容，包括細節（VGA 連接器的顏色、針數）</li>
+                    <li><strong>結構化描述</strong>：能夠按照「逐格」的要求，有條理地描述多格漫畫</li>
+                    <li><strong>幽默理解</strong>：能夠理解圖片的「有趣之處」，展現了對視覺內容的深層理解</li>
+                    <li><strong>上下文關聯</strong>：能夠將 VGA 連接器和 Lightning 連接器的技術細節與幽默點聯繫起來</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這意味著 GPT-4 不僅能「看見」圖像，
+                    更能「理解」圖像的內容、結構和意義，這為視覺問答、圖像描述等應用奠定了基礎。
+                </p>
+            </div>
+        </div>
+
+        <h2>📊 範例 2：圖表推理與計算</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    <strong>User:</strong> What is the sum of average daily meat consumption for Georgia and Western Asia? Provide a step-by-step reasoning before providing your answer.
+                </p>
+                <p>
+                    [Image: Meat consumption chart]
+                </p>
+                <p>
+                    <strong>GPT-4:</strong> To find the sum of average daily meat consumption for Georgia and Western Asia, we will follow these steps:
+                    <br>1. Identify the average daily meat consumption for Georgia.
+                    <br>2. Identify the average daily meat consumption for Western Asia.
+                    <br>3. Add the values from steps 1 and 2.
+                    <br><br>Step 1: From the provided chart, we see that the average daily meat consumption for Georgia is 79.84 grams per person per day.
+                    <br>Step 2: From the chart, we see that the average daily meat consumption for Western Asia is 69.62 grams per person per day.
+                    <br>Step 3: Add the values from steps 1 and 2.
+                    <br>79.84 g (Georgia) + 69.62 g (Western Asia) = 149.46 g
+                    <br><br>So, the sum of average daily meat consumption for Georgia and Western Asia is 149.46 grams per person per day.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    <strong>用戶：</strong> 喬治亞和西亞的平均每日肉類消費總和是多少？請在提供答案前進行逐步推理。
+                </p>
+                <p>
+                    <strong>GPT-4：</strong> 要找到喬治亞和西亞的平均每日肉類消費總和，我們將遵循以下步驟：
+                    <br>1. 識別喬治亞的平均每日肉類消費。
+                    <br>2. 識別西亞的平均每日肉類消費。
+                    <br>3. 將步驟 1 和 2 的值相加。
+                    <br><br>步驟 1：從提供的圖表中，我們看到喬治亞的平均每日肉類消費為每人每天 79.84 克。
+                    <br>步驟 2：從圖表中，我們看到西亞的平均每日肉類消費為每人每天 69.62 克。
+                    <br>步驟 3：將步驟 1 和 2 的值相加。
+                    <br>79.84 克（喬治亞）+ 69.62 克（西亞）= 149.46 克
+                    <br><br>因此，喬治亞和西亞的平均每日肉類消費總和為每人每天 149.46 克。
+                </p>
+            </div>
+
+            <div class="figure figure-generated">
+                <img src="images/generated/visual_chart_reasoning.png" alt="圖表推理範例">
+                <div class="caption">
+                    <strong>圖示：</strong> GPT-4 能夠閱讀和理解圖表，並進行多步驟計算推理。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>這個範例展示了什麼？</strong>
+                </p>
+                <ul>
+                    <li><strong>圖表閱讀</strong>：能夠準確讀取圖表中的數值（79.84 克、69.62 克）</li>
+                    <li><strong>多步驟推理</strong>：按照用戶要求，進行結構化的逐步推理</li>
+                    <li><strong>數學計算</strong>：能夠進行簡單的數學運算並給出準確結果</li>
+                    <li><strong>Chain-of-thought</strong>：展現了視覺輸入同樣適用於 Chain-of-thought 技術</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這對數據分析、商業報告理解、學術研究等場景非常有用。
+                    GPT-4 不僅能「看見」圖表，更能「理解」和「分析」其中的數據。
+                </p>
+            </div>
+        </div>
+
+        <h2>🔬 範例 3：學術問題求解</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    <strong>User:</strong> Answer question I.1.a. Think step-by-step.
+                </p>
+                <p>
+                    [Image: École Polytechnique physics exam question in French]
+                </p>
+                <p>
+                    <strong>GPT-4:</strong> To answer question I.1.a, we need to express the temperature T(x) in every point of the conductive bar, which is characterized by the abscissa x. We are given that T(0) = T0 and T(L) = Tb.
+                    <br><br>For a stationary regime, the heat equation for the one-dimensional heat conduction in the bar is:
+                    <br>d²T/dx² = 0
+                    <br><br>Integrating once, we get: dT/dx = C₁
+                    <br>Integrating a second time: T(x) = C₁x + C₂
+                    <br><br>To determine the constants C₁ and C₂, we use the boundary conditions:
+                    <br>T(0) = T0, which gives C₂ = T0
+                    <br>T(L) = Tb, which gives C₁ = (Tb - T0) / L
+                    <br><br>Finally, the expression for T(x) is:
+                    <br>T(x) = (Tb - T0) * (x / L) + T0
+                    <br>This represents a linear temperature profile along the conductive bar, with a slope of (Tb - T0) / L.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    <strong>用戶：</strong> 回答問題 I.1.a。請逐步思考。
+                </p>
+                <p>
+                    [圖片：École Polytechnique 法語物理考試題目]
+                </p>
+                <p>
+                    <strong>GPT-4：</strong> 要回答問題 I.1.a，我們需要表達導熱棒每一點的溫度 T(x)，該點由橫坐標 x 表示。我們知道 T(0) = T0 和 T(L) = Tb。
+                    <br><br>對於穩態情況，導熱棒中一維熱傳導的熱方程為：
+                    <br>d²T/dx² = 0
+                    <br><br>積分一次，我們得到：dT/dx = C₁
+                    <br>積分第二次：T(x) = C₁x + C₂
+                    <br><br>為了確定常數 C₁ 和 C₂，我們使用邊界條件：
+                    <br>T(0) = T0，得到 C₂ = T0
+                    <br>T(L) = Tb，得到 C₁ = (Tb - T0) / L
+                    <br><br>最後，T(x) 的表達式為：
+                    <br>T(x) = (Tb - T0) * (x / L) + T0
+                    <br>這表示沿著導熱棒的線性溫度分佈，斜率為 (Tb - T0) / L。
+                </p>
+            </div>
+
+            <div class="figure figure-generated">
+                <img src="images/generated/visual_physics_problem.png" alt="物理問題求解範例">
+                <div class="caption">
+                    <strong>圖示：</strong> GPT-4 能夠理解學術考試題目（包括圖表和法語文字），並進行逐步求解。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>這個範例展示了什麼？</strong>
+                </p>
+                <ul>
+                    <li><strong>跨語言理解</strong>：能夠理解法語物理題目（多模態 + 多語言）</li>
+                    <li><strong>圖表理解</strong>：能夠理解物理題目中的圖表和符號</li>
+                    <li><strong>學術推理</strong>：能夠進行物理問題的逐步求解</li>
+                    <li><strong>數學表達</strong>：能夠正確表達數學公式和推導過程</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這對教育、學術研究、技術文檔理解等場景非常有用。
+                    GPT-4 不僅能理解視覺內容，更能結合多種語言和學科知識進行專業分析。
+                </p>
+            </div>
+        </div>
+
+        <h2>🎨 範例 4：視覺場景理解</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    <strong>User:</strong> What is unusual about this image?
+                </p>
+                <p>
+                    [Image: A man ironing clothes on an ironing board attached to the roof of a moving taxi]
+                </p>
+                <p>
+                    <strong>GPT-4:</strong> The unusual thing about this image is that a man is ironing clothes on an ironing board attached to the roof of a moving taxi.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    <strong>用戶：</strong> 這張圖片有什麼不尋常的地方？
+                </p>
+                <p>
+                    [圖片：一個人在移動計程車車頂上的熨衣板上熨衣服]
+                </p>
+                <p>
+                    <strong>GPT-4：</strong> 這張圖片不尋常的地方在於，一個人在固定在移動計程車車頂上的熨衣板上熨衣服。
+                </p>
+            </div>
+
+            <div class="figure figure-generated">
+                <img src="images/generated/visual_unusual_scene.png" alt="不尋常場景理解範例">
+                <div class="caption">
+                    <strong>圖示：</strong> GPT-4 能夠識別視覺場景中的不尋常或幽默元素。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>這個範例展示了什麼？</strong>
+                </p>
+                <ul>
+                    <li><strong>常識推理</strong>：能夠識別違反常識的場景（在計程車上熨衣服）</li>
+                    <li><strong>複雜場景理解</strong>：能夠理解多個元素的組合（計程車、熨衣板、人）</li>
+                    <li><strong>簡潔回答</strong>：能夠準確、簡潔地指出關鍵不尋常之處</li>
+                    <li><strong>視覺幽默</strong>：展現了對視覺幽默的理解能力</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這對圖像審核、內容理解、視覺問答等場景非常有用。
+                    GPT-4 不僅能描述圖像，更能理解其中的常識、幽默和異常。
+                </p>
+            </div>
+        </div>
+
+        <h2>📄 範例 5：文檔閱讀與摘要</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    <strong>User:</strong> Below is part of the InstructGPT paper. Could you read and summarize it to me?
+                </p>
+                <p>
+                    [Images: Three pages from InstructGPT paper]
+                </p>
+                <p>
+                    <strong>GPT-4:</strong> The InstructGPT paper focuses on training large language models to follow instructions with human feedback. The authors note that making language models larger doesn't inherently make them better at following a user's intent. Large models can generate outputs that are untruthful, toxic, or simply unhelpful.
+                    <br><br>To address this issue, the authors fine-tune language models on a wide range of tasks using human feedback. They start with a set of labeler-written prompts and responses, then collect a dataset of labeler demonstrations of the desired model behavior. They fine-tune GPT-3 using supervised learning and then use reinforcement learning from human feedback to further fine-tune the model. The resulting model, called InstructGPT, shows improvements in truthfulness and reductions in toxic output generation while having minimal performance regressions on public NLP datasets.
+                    <br><br>The authors conclude that fine-tuning with human feedback is a promising direction for aligning language models with human intent.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    <strong>用戶：</strong> 以下是 InstructGPT 論文的部分內容。你能閱讀並摘要給我聽嗎？
+                </p>
+                <p>
+                    [圖片：InstructGPT 論文的三頁]
+                </p>
+                <p>
+                    <strong>GPT-4：</strong> InstructGPT 論文專注於訓練大型語言模型，使其能夠根據人類反饋遵循指令。作者指出，單純增大語言模型的規模並不能使其更好地遵循用戶意圖。大型模型可能產生不真實、有毒或無用的輸出。
+                    <br><br>為了解決這個問題，作者使用人類反饋對語言模型進行微調，涵蓋各種任務。他們從標註者編寫的提示詞和回應開始，然後收集標註者展示期望模型行為的數據集。他們使用監督學習微調 GPT-3，然後使用基於人類反饋的強化學習進一步微調模型。生成的模型稱為 InstructGPT，在真實性上有所改善，有毒輸出減少，同時在公開 NLP 數據集上的性能退化最小。
+                    <br><br>作者得出結論，使用人類反饋進行微調是使語言模型與人類意圖對齊的有前途的方向。
+                </p>
+            </div>
+
+            <div class="figure figure-generated">
+                <img src="images/generated/visual_document_reading.png" alt="文檔閱讀與摘要範例">
+                <div class="caption">
+                    <strong>圖示：</strong> GPT-4 能夠閱讀多頁學術論文並提取關鍵信息進行摘要。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>這個範例展示了什麼？</strong>
+                </p>
+                <ul>
+                    <li><strong>多頁文檔理解</strong>：能夠處理和理解多頁的學術論文</li>
+                    <li><strong>信息提取</strong>：能夠從複雜文檔中提取關鍵信息</li>
+                    <li><strong>摘要能力</strong>：能夠將長篇論文濃縮成簡潔的摘要</li>
+                    <li><strong>結構化理解</strong>：能夠理解論文的邏輯結構（問題、方法、結果、結論）</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這對文獻回顧、技術文檔理解、研究分析等場景非常有用。
+                    GPT-4 能夠顯著加速文檔閱讀和理解的過程。
+                </p>
+            </div>
+        </div>
+
+        <h2>🔮 與現在 LLM 使用經驗的對照</h2>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <h4>💡 從論文到現實</h4>
+                <p>
+                    當我們今天使用 ChatGPT Plus 的圖像輸入功能時，我們正在體驗這份報告中描述的多模態能力：
+                </p>
+                <ul>
+                    <li><strong>圖表分析</strong>：上傳數據圖表，ChatGPT 能夠讀取數值並進行計算，正是「圖表推理」範例的應用</li>
+                    <li><strong>學術問題</strong>：上傳題目圖片，ChatGPT 能夠理解並求解，正是「學術問題求解」範例的應用</li>
+                    <li><strong>場景識別</strong>：上傳日常照片，ChatGPT 能夠識別不尋常或有趣之處，正是「視覺場景理解」範例的應用</li>
+                    <li><strong>文檔摘要</strong>：上傳論文截圖，ChatGPT 能夠閱讀並摘要，正是「文檔閱讀」範例的應用</li>
+                    <li><strong>幽默理解</strong>：上傳漫畫或梗圖，ChatGPT 能夠解釋笑點，正是「視覺幽默理解」的體現</li>
+                </ul>
+                <p>
+                    <strong>理解多模態能力的意義</strong>：當我們理解 GPT-4 的多模態能力邊界和優勢，
+                    我們就能更好地利用這些功能：
+                </p>
+                <ul>
+                    <li>知道在什麼場景下上傳圖片能獲得最佳效果</li>
+                    <li>理解 GPT-4 不僅能「看見」圖像，更能「理解」和「分析」</li>
+                    <li>能夠設計更有效的多模態提示詞</li>
+                    <li>充分發揮視覺 + 語言的協同優勢</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            「GPT-4 的多模態能力不僅是技術突破，更是 AI 理解世界方式的根本改變。
+            從純文字到視覺與語言的統一，我們正在見證 AI 向更接近人類理解方式的方向演進。」
+        </div>
+
+        <div class="navigation">
+            <a href="03-capabilities.html" class="nav-link">← 上一章：能力展示</a>
+            <a href="05-limitations.html" class="nav-link">下一章：限制與挑戰 →</a>
+        </div>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-4 第 2 章：可預測擴展 - 從小模型預測大模型</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter02_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>可預測擴展的突破</h1>
+            <p class="hero-subtitle">從 1/1000 計算量預測 GPT-4 的性能</p>
+            <p class="hero-meta">GPT-4 Technical Report 深度解析 · 第 2 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">GPT-4 教學</a>
+            <span>/</span>
+            <span class="current">第 2 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                訓練 GPT-4 這樣的大模型需要巨大的計算資源，不可能像訓練小模型那樣進行大量的超參數調優和實驗。
+                因此，<strong>可預測擴展（Predictable Scaling）</strong>成為了 GPT-4 專案的核心挑戰：
+                如何從使用 1/1000 甚至 1/10000 計算量的小模型，準確預測 GPT-4 的性能？
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                這不僅是技術挑戰，更是<strong>安全與責任的體現</strong>：
+            </p>
+            <ul>
+                <li><strong>訓練前預測</strong>：在投入巨大資源訓練之前，就能預測模型的能力和風險</li>
+                <li><strong>安全規劃</strong>：提前了解模型可能的能力，為安全部署做準備</li>
+                <li><strong>資源優化</strong>：避免浪費計算資源在效果不佳的配置上</li>
+            </ul>
+
+            <p>
+                GPT-4 報告展示了兩個關鍵的可預測擴展成果：
+                <strong>損失預測</strong>和<strong>能力預測</strong>。
+                這驗證了 Scaling Laws 論文的預言，並將其推向了新的高度。
+            </p>
+        </div>
+
+        <h2>📐 損失預測 (Loss Prediction)</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    The final loss of properly-trained large language models is thought to be well approximated by power laws in the amount of compute used to train the model.
+                </p>
+                <p>
+                    To verify the scalability of our optimization infrastructure, we predicted GPT-4's final loss on our internal codebase (not part of the training set) by fitting a scaling law with an irreducible loss term (as in Henighan et al. 2020): $L(C) = aC^b + c,$ from models trained using the same methodology but using at most 10,000x less compute than GPT-4. This prediction was made shortly after the run started, without use of any partial results. The fitted scaling law predicted GPT-4's final loss with high accuracy (Figure \ref{fig:predictable_scaling_loss}).
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    經過適當訓練的大語言模型的最終損失被認為可以用訓練模型所用計算量的冪律來很好地近似。
+                </p>
+                <p>
+                    為了驗證我們優化基礎設施的可擴展性，我們通過擬合一個帶有不可約損失項的擴展定律
+                    （如 Henighan et al. 2020）：$L(C) = aC^b + c$，
+                    從使用相同方法但使用最多比 GPT-4 少 10,000 倍計算量的模型訓練中，
+                    預測了 GPT-4 在我們內部代碼庫（不屬於訓練集）上的最終損失。
+                    這個預測是在運行開始後不久做出的，沒有使用任何部分結果。
+                    擬合的擴展定律以高精度預測了 GPT-4 的最終損失。
+                </p>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/codebase_loss.png" alt="Loss Prediction">
+                <div class="caption">
+                    <strong>Figure:</strong> GPT-4 和較小模型的性能。
+                    指標是在我們內部代碼庫衍生的數據集上的最終損失。
+                    這是一個方便的大型代碼 token 數據集，不包含在訓練集中。
+                    我們選擇查看損失，因為它在不同訓練計算量下往往比其他指標噪音更小。
+                    對較小模型（不包括 GPT-4）的冪律擬合顯示為虛線；這個擬合準確預測了 GPT-4 的最終損失。
+                    x 軸是歸一化的訓練計算量，GPT-4 為 1。
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>📐 擴展定律公式</h4>
+                <div class="math-block">
+                    $$L(C) = aC^b + c$$
+                    <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">
+                        其中：
+                        <ul style="margin-top: 10px;">
+                            <li>$C$：訓練計算量</li>
+                            <li>$a, b$：冪律參數</li>
+                            <li>$c$：不可約損失（irreducible loss）</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>為什麼選擇代碼庫作為測試數據？</strong>
+                </p>
+                <ul>
+                    <li><strong>大規模且乾淨</strong>：代碼 token 數據集規模大，且不包含在訓練集中</li>
+                    <li><strong>損失指標穩定</strong>：損失在不同訓練計算量下比其他指標（如準確率）噪音更小</li>
+                    <li><strong>實務相關</strong>：代碼理解是 GPT-4 的重要應用場景</li>
+                </ul>
+                <p>
+                    <strong>預測精度</strong>：從使用 1/10,000 計算量的小模型，準確預測了 GPT-4 的最終損失。
+                    這證明了擴展定律的有效性，也為未來的大模型訓練提供了科學依據。
+                </p>
+            </div>
+        </div>
+
+        <h2>🎯 能力預測：HumanEval 案例</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    Having a sense of the capabilities of a model before training can improve decisions around alignment, safety, and deployment. In addition to predicting final loss, we developed methodology to predict more interpretable metrics of capability. One such metric is pass rate on the HumanEval dataset, which measures the ability to synthesize Python functions of varying complexity. We successfully predicted the pass rate on a subset of the HumanEval dataset by extrapolating from models trained with at most $1,000\times$ less compute (Figure \ref{fig:predictable_scaling_humaneval}).
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    在訓練前了解模型的能力可以改善關於對齊、安全和部署的決策。
+                    除了預測最終損失外，我們開發了預測更可解釋的能力指標的方法。
+                    其中一個指標是 HumanEval 數據集上的通過率，它衡量合成不同複雜度 Python 函數的能力。
+                    我們通過從使用最多 $1,000\times$ 更少計算量訓練的模型外推，
+                    成功預測了 HumanEval 數據集子集上的通過率。
+                </p>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/capability_pred.png" alt="Capability Prediction">
+                <div class="caption">
+                    <strong>Figure:</strong> GPT-4 和較小模型的性能。
+                    指標是 HumanEval 數據集子集上的平均對數通過率。
+                    對較小模型（不包括 GPT-4）的冪律擬合顯示為虛線；這個擬合準確預測了 GPT-4 的性能。
+                    x 軸是歸一化的訓練計算量，GPT-4 為 1。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>為什麼能力預測比損失預測更難？</strong>
+                </p>
+                <ul>
+                    <li><strong>離散性</strong>：通過率是離散的（0 或 1），不像損失是連續的</li>
+                    <li><strong>非單調性</strong>：某些問題的表現可能隨規模惡化（Inverse Scaling）</li>
+                    <li><strong>低通過率估計困難</strong>：當通過率很低時，很難準確估計</li>
+                </ul>
+                <p>
+                    <strong>解決方案</strong>：論文使用對數通過率 $-\mathrm{E}_{P}[\log(\mathrm{pass\_rate(C)})] = \alpha*\mathrm{C}^{-k}$，
+                    並限制在可以準確估計的問題子集上。這使得預測成為可能。
+                </p>
+            </div>
+        </div>
+
+        <h2>🔄 Inverse Scaling 的逆轉</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    Certain capabilities remain hard to predict. For example, the Inverse Scaling Prize proposed several tasks for which model performance decreases as a function of scale. Similarly to a recent result by Wei et al., we find that GPT-4 reverses this trend, as shown on one of the tasks called Hindsight Neglect in Figure \ref{fig:inverse_scaling}.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    某些能力仍然難以預測。例如，Inverse Scaling Prize 提出了幾個任務，
+                    其中模型性能隨規模而下降。與 Wei et al. 最近的結果類似，
+                    我們發現 GPT-4 逆轉了這一趨勢，如圖 \ref{fig:inverse_scaling} 中名為 Hindsight Neglect 的任務所示。
+                </p>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/inverse_scaling.png" alt="Inverse Scaling">
+                <div class="caption">
+                    <strong>Figure:</strong> GPT-4 和較小模型在 Hindsight Neglect 任務上的性能。
+                    準確率顯示在 y 軸上，越高越好。
+                    ada、babbage 和 curie 指的是通過 OpenAI API 可用的模型。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>Inverse Scaling 的意義</strong>：
+                </p>
+                <ul>
+                    <li><strong>小模型的問題</strong>：在某些任務上，模型越大表現越差</li>
+                    <li><strong>GPT-4 的突破</strong>：逆轉了這個趨勢，證明足夠大的模型可以克服這些問題</li>
+                    <li><strong>預測的挑戰</strong>：這種「逆轉」很難從小模型預測</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這提醒我們，可預測擴展有其邊界。
+                    某些「湧現能力」（Emergent Capabilities）可能無法從小模型預測，
+                    這為 AI 安全帶來了挑戰。
+                </p>
+            </div>
+        </div>
+
+        <h2>🔮 與現在 LLM 使用經驗的對照</h2>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <h4>💡 從論文到現實</h4>
+                <p>
+                    可預測擴展的技術不僅用於 GPT-4 的開發，也影響了我們今天使用的 AI 服務：
+                </p>
+                <ul>
+                    <li><strong>模型版本迭代</strong>：當 OpenAI 發布 GPT-4 Turbo、GPT-4o 等新版本時，他們可能使用了類似的可預測擴展技術來評估性能</li>
+                    <li><strong>API 定價策略</strong>：不同模型版本的定價可能基於可預測的性能差異</li>
+                    <li><strong>能力邊界理解</strong>：當我們使用 ChatGPT 時，理解其能力邊界（哪些任務做得好、哪些做不好）正是可預測擴展研究的應用</li>
+                    <li><strong>安全部署</strong>：在部署新模型前，通過小模型預測大模型的能力和風險，是負責任 AI 開發的體現</li>
+                </ul>
+                <p>
+                    <strong>理解這項技術的意義</strong>：可預測擴展不僅是技術突破，更是 AI 安全與責任的體現。
+                    它讓我們能夠在投入巨大資源之前，就了解模型的能力和風險，
+                    為負責任的 AI 開發奠定了基礎。
+                </p>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            「可預測擴展不僅是技術突破，更是 AI 安全與責任的體現。
+            它讓我們能夠在投入巨大資源之前，就了解模型的能力和風險。」
+        </div>
+
+        <div class="navigation">
+            <a href="01-introduction.html" class="nav-link">← 上一章：摘要與核心能力</a>
+            <a href="03-capabilities.html" class="nav-link">下一章：能力展示 →</a>
+        </div>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</body>
+</html>
+

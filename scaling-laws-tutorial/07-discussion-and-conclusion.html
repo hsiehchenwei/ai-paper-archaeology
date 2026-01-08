@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaling Laws 第7章：討論與結論 - 總結與展望</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter07_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>為大模型時代奠基</h1>
+            <p class="hero-subtitle">從理論預測到實際驗證</p>
+            <p class="hero-meta">Scaling Laws 論文深度解析 · 第 7 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Scaling Laws 教學</a>
+            <span>/</span>
+            <span class="current">第 7 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                這篇論文為「大模型時代」奠定了理論基礎。
+                它證明了語言模型性能的提升是<strong>平滑且可預測的</strong>，
+                為訓練決策提供了科學依據。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                5 個月後，GPT-3 完美驗證了這些預測。
+                這證明了 Scaling Laws 不僅是理論發現，更是實用的預測工具。
+            </p>
+        </div>
+
+        <h2>📊 所有冪律關係總結</h2>
+
+        <div class="paper-section">
+            <div class="key-concept">
+                <h4>🔑 三個核心公式</h4>
+                <ol>
+                    <li><strong>性能與模型大小</strong>：$L(N) = (N_c/N)^{\alpha_N}$，$\alpha_N \approx 0.076$</li>
+                    <li><strong>性能與數據量</strong>：$L(D) = (D_c/D)^{\alpha_D}$，$\alpha_D \approx 0.095$</li>
+                    <li><strong>性能與計算量</strong>：$L(C_{\rm min}) = (C_c^{\rm min}/C_{\rm min})^{\alpha_C^{\rm min}}$，$\alpha_C^{\rm min} \approx 0.050$</li>
+                </ol>
+            </div>
+
+            <div class="key-concept">
+                <h4>📐 統一公式</h4>
+                <ul>
+                    <li><strong>L(N,D)</strong>：性能與模型大小和數據量的統一公式</li>
+                    <li><strong>L(N,S)</strong>：性能與模型大小和訓練步數的統一公式</li>
+                    <li><strong>最優分配</strong>：$N \propto C^{0.73}$，$B \propto C^{0.24}$，$S \propto C^{0.03}$</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>🎯 核心發現回顧</h2>
+
+        <div class="paper-section">
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>1. 規模最重要</h4>
+                    <p>性能主要依賴模型大小、數據量、計算量，而非架構細節</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>2. 平滑的冪律</h4>
+                    <p>性能與三個規模因子呈現冪律關係，跨越超過六個數量級</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>3. 過擬合規律</h4>
+                    <p>每增加 8 倍模型，只需增加 5 倍數據即可避免過擬合</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>4. 樣本效率</h4>
+                    <p>大模型比小模型更樣本高效，用更少的步數和數據達到相同性能</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>5. 最優策略</h4>
+                    <p>應該訓練大模型並提前停止，而非小模型訓練到收斂</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>6. 可預測性</h4>
+                    <p>這些關係使得性能提升變得可預測，為訓練決策提供科學依據</p>
+                </div>
+            </div>
+        </div>
+
+        <h2>🔮 對未來的啟示</h2>
+
+        <div class="paper-section">
+            <div class="key-concept">
+                <h4>💡 理論意義</h4>
+                <ul>
+                    <li><strong>為大模型訓練提供科學基礎</strong>：不再是「猜測」，而是「計算」</li>
+                    <li><strong>預測性能提升</strong>：可以用公式預測更大模型的性能</li>
+                    <li><strong>優化資源分配</strong>：知道如何最優分配計算預算</li>
+                </ul>
+            </div>
+
+            <div class="key-concept">
+                <h4>🚀 實務應用</h4>
+                <ul>
+                    <li><strong>指導 GPT-3 訓練</strong>：這篇論文為 OpenAI 訓練 GPT-3 提供了理論支持</li>
+                    <li><strong>影響後續研究</strong>：所有後續大模型訓練都參考這些發現</li>
+                    <li><strong>降低訓練風險</strong>：可以預測性能，降低投資風險</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            「這些結果表明，語言模型性能隨著我們適當地擴展模型大小、數據和計算而平滑且可預測地提升。
+            我們預期更大的語言模型將比當前模型表現更好且更樣本高效。」
+        </div>
+
+        <h2>🎓 學習總結</h2>
+
+        <div class="paper-section">
+            <div class="solution">
+                <h3>✅ 你現在應該理解：</h3>
+                <ol>
+                    <li>為什麼性能與模型大小、數據量、計算量呈現冪律關係</li>
+                    <li>為什麼要排除 Embedding 參數才能得到清晰的擴展法則</li>
+                    <li>如何預測過擬合，以及如何避免過擬合</li>
+                    <li>為什麼大模型比小模型更樣本高效</li>
+                    <li>在固定計算預算下，如何最優分配資源</li>
+                    <li>這篇論文如何預測了 GPT-3 的成功</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <a href="06-optimal-compute-allocation.html" class="nav-link">← 上一章：計算預算的最優分配</a>
+            <a href="index.html" class="nav-link">回到目錄</a>
+        </div>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</body>
+</html>
+

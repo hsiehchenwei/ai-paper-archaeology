@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaling Laws 第3章：實證結果與基本冪律 - 核心發現</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter03_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>三個核心冪律的發現</h1>
+            <p class="hero-subtitle">性能與規模的可預測關係</p>
+            <p class="hero-meta">Scaling Laws 論文深度解析 · 第 3 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Scaling Laws 教學</a>
+            <span>/</span>
+            <span class="current">第 3 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                這是整篇論文的核心章節。在這裡，我們將看到三個關鍵發現：
+                <strong>性能與模型大小、數據量、計算量都呈現清晰的冪律關係</strong>。
+                這些關係跨越了超過六個數量級，沒有偏離跡象。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                論文的實驗設計非常全面：
+            </p>
+            <ul>
+                <li><strong>模型大小</strong>：從 768 個參數到 15 億參數（6 個數量級）</li>
+                <li><strong>數據量</strong>：從 2200 萬 tokens 到 230 億 tokens（3 個數量級）</li>
+                <li><strong>模型形狀</strong>：不同的深度、寬度、注意力頭數組合</li>
+                <li><strong>上下文長度</strong>：主要為 1024 tokens</li>
+                <li><strong>批次大小</strong>：主要為 $2^{19}$，但也變化以測量關鍵批次大小</li>
+            </ul>
+
+            <p>
+                這些實驗揭示了一個驚人的事實：<strong>語言模型的性能遵循可預測的數學規律</strong>。
+                這不是經驗法則，而是跨越多個數量級的嚴格冪律關係。
+            </p>
+        </div>
+
+        <h2>🔑 發現 1：模型形狀影響很小</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    Transformer performance depends very weakly on the shape parameters $n_{\rm layer}, n_{\rm heads}$, 
+                    and $d_{\rm ff}$ when we hold the total non-embedding parameter count $N$ fixed.
+                    The loss varies only a few percent over a wide range of shapes.
+                    Aspect ratio in particular can vary by a factor of 40 while only slightly impacting performance.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    當我們保持總非嵌入參數數量 $N$ 固定時，Transformer 性能對形狀參數 $n_{\rm layer}$、$n_{\rm heads}$ 和 $d_{\rm ff}$ 的依賴非常弱。
+                    在廣泛的形狀範圍內，損失僅變化幾個百分點。
+                    特別是，長寬比可以變化 40 倍，但對性能的影響很小。
+                </p>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/HyperparameterTuning.png" alt="Hyperparameter Tuning">
+                <div class="caption">
+                    <strong>Figure:</strong> 當總參數數量固定時，性能對模型形狀（深度 vs 寬度）的依賴很弱。
+                    例如，$(n_{\rm layer}, d_{\rm model}) = (6, 4288)$ 的模型與 $(48, 1600)$ 的模型性能相差不到 3%。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    這個發現非常重要：<strong>只要總參數數量相同，模型的深度和寬度如何分配並不重要</strong>。
+                </p>
+                <ul>
+                    <li>你可以用 6 層、每層 4288 維的模型</li>
+                    <li>或者用 48 層、每層 1600 維的模型</li>
+                    <li>只要總參數數量相同，性能幾乎一樣</li>
+                </ul>
+                <p>
+                    這意味著：<strong>性能主要取決於「有多少參數」，而非「參數如何組織」</strong>。
+                    這為模型設計提供了極大的靈活性。
+                </p>
+            </div>
+        </div>
+
+        <h2>📈 發現 2：性能與模型大小的冪律</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    We find a steady trend with non-embedding parameter count $N$, which can be fit to:
+                    $$L(N) \approx \left( \frac{N_c}{N} \right)^{\alpha_N}$$
+                    where $\alpha_N \sim 0.076$ and $N_c \sim 8.8 \times 10^{13}$.
+                </p>
+                <p>
+                    To observe these trends it is crucial to study performance as a function of $N$; if we instead use 
+                    the total parameter count (including the embedding parameters) the trend is somewhat obscured. 
+                    This suggests that the embedding matrix can be made smaller without impacting performance.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    我們發現非嵌入參數數量 $N$ 與性能呈現穩定趨勢，可以擬合為：
+                    $$L(N) \approx \left( \frac{N_c}{N} \right)^{\alpha_N}$$
+                    其中 $\alpha_N \sim 0.076$ 且 $N_c \sim 8.8 \times 10^{13}$。
+                </p>
+                <p>
+                    觀察這些趨勢的關鍵在於研究性能與 $N$ 的關係；如果我們使用總參數數量（包括嵌入參數），
+                    這個趨勢會有些模糊。這表明可以縮小嵌入矩陣而不影響性能。
+                </p>
+            </div>
+
+            <div class="key-concept">
+                <h4>📐 公式 1：性能與模型大小</h4>
+                <div class="math-block">
+                    $$L(N) = \left(\frac{N_c}{N}\right)^{\alpha_N}$$
+                    <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">
+                        其中 $\alpha_N \approx 0.076$，$N_c \approx 8.8 \times 10^{13}$（非嵌入參數）
+                    </p>
+                </div>
+            </div>
+
+            <div class="figure-grid">
+                <div class="figure figure-original">
+                    <img src="images/original/PerfVsModelSizeAllParams.png" alt="Performance vs All Parameters">
+                    <div class="caption">
+                        <strong>Figure (左):</strong> 包含 Embedding 參數時，性能似乎強烈依賴於層數。
+                    </div>
+                </div>
+                <div class="figure figure-original">
+                    <img src="images/original/PerfVsModelSizeNonEmbed.png" alt="Performance vs Model Size">
+                    <div class="caption">
+                        <strong>Figure (右):</strong> 排除 Embedding 參數後，不同深度的模型都遵循同一條冪律曲線。
+                    </div>
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 公式解讀</h4>
+                <ul>
+                    <li><strong>$\alpha_N = 0.076$</strong>：這是「冪律指數」，決定了性能提升的速度</li>
+                    <li><strong>每增加一倍參數</strong>：損失減少約 5%（$2^{-0.076} \approx 0.95$）</li>
+                    <li><strong>從 GPT-2 (1.5B) 到 GPT-3 (175B)</strong>：參數增加約 117 倍，損失應減少約 $117^{-0.076} \approx 0.68$ 倍</li>
+                </ul>
+                <p>
+                    <strong>關鍵發現</strong>：這個關係在 6 個數量級的範圍內都成立，沒有偏離跡象。
+                    這意味著我們可以用這個公式預測更大模型的性能。
+                </p>
+                <p>
+                    <strong>為什麼排除 Embedding？</strong>圖中左側顯示，如果包含 Embedding 參數，
+                    不同深度的模型會呈現不同的趨勢。但排除 Embedding 後（右側），所有模型都收斂到同一條曲線上。
+                    這證明 Embedding 矩陣的大小可以獨立優化，不影響模型的核心擴展規律。
+                </p>
+            </div>
+        </div>
+
+        <h2>📊 發現 3：性能與數據量的冪律</h2>
+
+        <div class="paper-section">
+            <div class="key-concept">
+                <h4>📐 公式 2：性能與數據量</h4>
+                <div class="math-block">
+                    $$L(D) = \left(\frac{D_c}{D}\right)^{\alpha_D}$$
+                    <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">
+                        其中 $\alpha_D \approx 0.095$，$D_c \approx 5.4 \times 10^{13}$（tokens）
+                    </p>
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 公式解讀</h4>
+                <ul>
+                    <li><strong>$\alpha_D = 0.095$</strong>：數據量的冪律指數（比模型大小的指數稍大）</li>
+                    <li><strong>每增加一倍數據</strong>：損失減少約 6.5%（$2^{-0.095} \approx 0.935$）</li>
+                    <li><strong>實驗方法</strong>：使用固定模型 $(n_{\rm layer}, d_{\rm model}) = (36, 1280)$，在 WebText2 的不同子集上訓練</li>
+                </ul>
+                <p>
+                    <strong>關鍵發現</strong>：當模型足夠大時，性能主要受數據量限制。
+                    這為「需要多少數據」提供了科學預測。
+                </p>
+            </div>
+        </div>
+
+        <h2>⚡ 發現 4：性能與計算量的冪律</h2>
+
+        <div class="paper-section">
+            <div class="key-concept">
+                <h4>📐 公式 3：性能與計算量</h4>
+                <div class="math-block">
+                    $$L(C) \approx \left(\frac{C_c}{C}\right)^{\alpha_C}$$
+                    <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">
+                        其中 $C = 6NB$（批次大小固定時）
+                    </p>
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 計算量估算</h4>
+                <p>
+                    訓練計算量估算為：
+                </p>
+                <div class="math-block">
+                    $$C = 6 N B S$$
+                </div>
+                <p>
+                    其中：
+                </p>
+                <ul>
+                    <li>$N$：非嵌入參數數量</li>
+                    <li>$B$：批次大小</li>
+                    <li>$S$：訓練步數</li>
+                    <li>因子 6：前向傳播約 $2N$，反向傳播約 $4N$</li>
+                </ul>
+                <p>
+                    <strong>重要說明</strong>：這裡的結果是在<strong>固定批次大小</strong>下得到的，並非真正最優。
+                    後續章節會使用調整後的 $C_{\rm min}$ 來得到更準確的趨勢。
+                </p>
+            </div>
+        </div>
+
+        <h2>🔄 LSTM vs Transformer 對比</h2>
+
+        <div class="paper-section">
+            <div class="figure figure-original">
+                <img src="images/original/LSTMvsTransformerSummary.png" alt="LSTM vs Transformer">
+                <div class="caption">
+                    <strong>Figure:</strong> LSTM 與 Transformer 性能對比。
+                    LSTM 在上下文早期表現與 Transformer 相當，但在後期無法匹配 Transformer 的性能。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 關鍵發現</h4>
+                <ul>
+                    <li><strong>上下文早期</strong>：LSTM 與 Transformer 性能相當</li>
+                    <li><strong>上下文後期</strong>：Transformer 明顯優於 LSTM</li>
+                    <li><strong>原因</strong>：Transformer 的 Self-Attention 機制能夠直接訪問所有位置的信息</li>
+                </ul>
+                <p>
+                    這證明了 Transformer 架構在處理長上下文時的優勢，
+                    這也是為什麼現代 LLM 都使用 Transformer 而非 LSTM。
+                </p>
+            </div>
+        </div>
+
+        <h2>🌐 泛化到其他數據分佈</h2>
+
+        <div class="paper-section">
+            <div class="figure figure-original">
+                <img src="images/original/GeneralizationVsModelSize.png" alt="Generalization">
+                <div class="caption">
+                    <strong>Figure:</strong> 在其他數據分佈上的測試損失也與模型大小呈現冪律關係，
+                    且冪律指數幾乎相同。泛化性能主要取決於訓練分佈的性能，而非訓練階段。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 關鍵發現</h4>
+                <ul>
+                    <li><strong>測試數據集</strong>：Books Corpus、Common Crawl、Wikipedia、Internet Books</li>
+                    <li><strong>冪律指數</strong>：與 WebText2 幾乎相同</li>
+                    <li><strong>泛化性能</strong>：只依賴訓練分佈的性能，與訓練階段無關</li>
+                </ul>
+                <p>
+                    <strong>重要啟示</strong>：這意味著提高訓練分佈的性能，就會自動提高在其他分佈上的性能。
+                    這為「通用語言模型」提供了理論支持。
+                </p>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            「這些關係跨越了超過六個數量級，沒有偏離跡象。
+            這表明語言模型性能的提升是平滑且可預測的。」
+        </div>
+
+        <div class="navigation">
+            <a href="02-background-and-methods.html" class="nav-link">← 上一章：背景與方法</a>
+            <a href="04-overfitting-and-data-limit.html" class="nav-link">下一章：過擬合與數據極限 →</a>
+        </div>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</body>
+</html>
+

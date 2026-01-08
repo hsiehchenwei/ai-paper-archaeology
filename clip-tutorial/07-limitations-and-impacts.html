@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLIP 第 7 章：限制、偏見與影響 - 負責任的 AI 開發</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter07_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>限制、偏見與影響</h1>
+            <p class="hero-subtitle">誠實面對挑戰，負責任地開發 AI</p>
+            <p class="hero-meta">CLIP 深度解析 · 第 7 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">CLIP 教學</a>
+            <span>/</span>
+            <span class="current">第 7 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                任何強大的技術都伴隨著責任。
+                本章將誠實探討 CLIP 的<strong>限制</strong>、<strong>偏見</strong>和<strong>社會影響</strong>，
+                這是負責任 AI 開發的重要組成部分。
+            </p>
+        </div>
+
+        <h2>⚠️ CLIP 的限制</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    CLIP still has many limitations. While it can perform many tasks well, its performance is far from perfect. On average, CLIP matches the performance of the original ResNet-50 on ImageNet, but this is far from state-of-the-art. On several datasets, zero-shot CLIP is significantly worse than even a simple linear classifier trained on the dataset.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    CLIP 仍有許多限制。
+                    雖然它可以很好地執行許多任務，但其性能遠非完美。
+                    平均而言，CLIP 在 ImageNet 上匹配原始 ResNet-50 的性能，
+                    但這遠非最先進的水平。
+                    在幾個資料集上，零樣本 CLIP 甚至比在資料集上訓練的簡單線性分類器差得多。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 主要限制</h4>
+                <ul>
+                    <li><strong>抽象概念</strong>：難以理解「數」的概念（如數圖像中的物體數量）</li>
+                    <li><strong>細粒度任務</strong>：在需要精確細節的任務上表現不佳</li>
+                    <li><strong>少樣本學習</strong>：在某些任務上，少樣本學習可能優於零樣本</li>
+                    <li><strong>計算成本</strong>：大模型需要大量計算資源</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>🎭 資料偏見問題</h2>
+
+        <div class="figure figure-original">
+            <img src="images/original/women_career.png" alt="Bias Analysis">
+            <div class="caption">
+                <strong>Figure:</strong> CLIP 在職業相關圖像上的性別偏見分析。
+            </div>
+        </div>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <h4>💡 偏見的來源</h4>
+                <ul>
+                    <li><strong>訓練數據</strong>：400M 圖文對反映網路上的偏見</li>
+                    <li><strong>性別刻板印象</strong>：某些職業與特定性別關聯</li>
+                    <li><strong>種族偏見</strong>：可能複製社會中的偏見</li>
+                </ul>
+
+                <div class="key-concept">
+                    <h6>🛡️ 緩解措施</h6>
+                    <ul>
+                        <li><strong>資料審查</strong>：識別和過濾偏見內容</li>
+                        <li><strong>公平性評估</strong>：定期測試模型的公平性</li>
+                        <li><strong>負責任部署</strong>：在敏感應用中謹慎使用</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2>🔒 監控與隱私</h2>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <h4>⚠️ 潛在風險</h4>
+                <ul>
+                    <li><strong>大規模監控</strong>：可能被用於大規模圖像分析</li>
+                    <li><strong>隱私侵犯</strong>：自動識別個人和地點</li>
+                    <li><strong>審查系統</strong>：可能被用於內容審查</li>
+                </ul>
+
+                <div class="key-concept">
+                    <h6>💡 負責任使用</h6>
+                    <ul>
+                        <li><strong>透明度</strong>：公開模型的限制和偏見</li>
+                        <li><strong>監管</strong>：在敏感應用中需要適當監管</li>
+                        <li><strong>倫理審查</strong>：部署前進行倫理評估</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2>📚 本章小結</h2>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <p>
+                    <strong>負責任 AI 開發的關鍵</strong>：
+                </p>
+                <ul>
+                    <li><strong>誠實面對限制</strong>：承認模型的弱點</li>
+                    <li><strong>識別偏見</strong>：主動發現和緩解偏見</li>
+                    <li><strong>考慮影響</strong>：評估技術的社會影響</li>
+                    <li><strong>負責任部署</strong>：在敏感應用中謹慎使用</li>
+                </ul>
+
+                <div class="quote-block">
+                    「強大的技術伴隨著巨大的責任。
+                    CLIP 的開發者選擇公開討論限制和偏見，
+                    這是負責任 AI 開發的重要範例。」
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="06-results-and-analysis.html" class="nav-button nav-button-prev">
+                ← 上一章：結果分析與穩健性
+            </a>
+            <a href="index.html" class="nav-button nav-button-next">
+                回到目錄 →
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+
+

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLIP 第 2 章：自然語言監督 - 從文字中學習視覺</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter02_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>自然語言監督</h1>
+            <p class="hero-subtitle">從 400M 圖文對中學習視覺概念</p>
+            <p class="hero-meta">CLIP 深度解析 · 第 2 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">CLIP 教學</a>
+            <span>/</span>
+            <span class="current">第 2 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                在第 1 章我們看到，CLIP 的核心突破是使用<strong>自然語言監督</strong>來學習視覺表徵。
+                但什麼是「自然語言監督」？為什麼它比傳統的類別標籤更強大？
+                本章將深入探討這個看似簡單但革命性的想法。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                傳統的計算機視覺方法依賴<strong>人工標註的類別標籤</strong>：
+            </p>
+            <ul>
+                <li><strong>ImageNet</strong>：每張圖片只有一個類別標籤（如 "dog"）</li>
+                <li><strong>固定格式</strong>：必須是 1-of-N 的「黃金標籤」格式</li>
+                <li><strong>昂貴且有限</strong>：需要大量人工標註，且只能表達預定義的概念</li>
+            </ul>
+
+            <p>
+                自然語言監督則完全不同：
+            </p>
+            <ul>
+                <li><strong>豐富的語義</strong>：「一隻橘貓在陽光下打盹」比「cat」包含更多資訊</li>
+                <li><strong>網路規模</strong>：互聯網上有數十億的圖文配對，無需人工標註</li>
+                <strong>開放詞彙</strong>：可以表達任何視覺概念，不受固定類別限制</li>
+                <li><strong>零樣本遷移</strong>：學習到的表徵與語言連接，可以直接用於新任務</li>
+            </ul>
+        </div>
+
+        <h2>📝 自然語言監督的定義</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    At the core of our approach is the idea of learning perception from supervision contained in natural language. As discussed in the introduction, this is not at all a new idea, however terminology used to describe work in this space is varied, even seemingly contradictory, and stated motivations are diverse. Zhang et al. (2020), Gomez et al. (2017), Joulin et al. (2016), and Desai et al. (2020) all introduce methods which learn visual representations from text paired with images but describe their approaches as unsupervised, self-supervised, weakly supervised, and supervised respectively.
+                </p>
+                <p>
+                    We emphasize that what is common across this line of work is not any of the details of the particular methods used but the appreciation of natural language as a training signal. All these approaches are learning from <em>natural language supervision</em>. Although early work wrestled with the complexity of natural language when using topic model and n-gram representations, improvements in deep contextual representation learning suggest we now have the tools to effectively leverage this abundant source of supervision.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    我們方法的核心是從自然語言中包含的監督中學習感知的想法。
+                    正如引言中討論的，這根本不是一個新想法，然而用於描述這個領域工作的術語是多樣的，
+                    甚至看似矛盾，陳述的動機也各不相同。
+                    Zhang 等人（2020）、Gomez 等人（2017）、Joulin 等人（2016）和 Desai 等人（2020）
+                    都引入了從與圖像配對的文字中學習視覺表徵的方法，
+                    但分別將他們的方法描述為無監督、自監督、弱監督和監督。
+                </p>
+                <p>
+                    我們強調，這一系列工作的共同點不是任何特定方法使用的細節，
+                    而是對自然語言作為訓練訊號的認識。
+                    所有這些方法都是從<em>自然語言監督</em>中學習。
+                    儘管早期工作在使用主題模型和 n-gram 表徵時與自然語言的複雜性作鬥爭，
+                    但深度上下文表徵學習的改進表明，我們現在有工具來有效利用這個豐富的監督來源。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察：術語的統一</h4>
+                <p>
+                    <strong>為何術語如此混亂？</strong>
+                </p>
+                <ul>
+                    <li><strong>無監督</strong>：因為沒有「人工標註的類別標籤」</li>
+                    <li><strong>自監督</strong>：因為從數據本身（文字）中提取監督</li>
+                    <li><strong>弱監督</strong>：因為文字標註不如精確的類別標籤「強」</li>
+                    <li><strong>監督</strong>：因為文字本身就是一種監督訊號</li>
+                </ul>
+
+                <p>
+                    <strong>CLIP 的觀點</strong>：
+                    這些術語的差異不重要，重要的是<strong>都使用自然語言作為訓練訊號</strong>。
+                    無論叫什麼名字，核心都是從圖片的文字描述中學習視覺概念。
+                </p>
+
+                <div class="key-concept">
+                    <h6>🎯 自然語言監督的定義</h6>
+                    <p>
+                        <strong>自然語言監督</strong> = 使用與圖像配對的自然語言文字作為訓練訊號，
+                        而不是人工標註的固定類別標籤。
+                    </p>
+                    <ul>
+                        <li><strong>來源</strong>：圖片的標題、描述、評論、標籤等</li>
+                        <li><strong>格式</strong>：自由形式的自然語言，不受固定格式限制</li>
+                        <li><strong>規模</strong>：可以擴展到網路規模的數據</li>
+                        <li><strong>語義</strong>：比類別標籤包含更豐富的語義資訊</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2>💪 自然語言監督的優勢</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    Learning from natural language has several potential strengths over other training methods. It's much easier to scale natural language supervision compared to standard crowd-sourced labeling for image classification since it does not require annotations to be in a classic "machine learning compatible format" such as the canonical 1-of-N majority vote "gold label". Instead, methods which work on natural language can learn passively from the supervision contained in the vast amount of text on the internet.
+                </p>
+                <p>
+                    Learning from natural language also has an important advantage over most unsupervised or self-supervised learning approaches in that it doesn't "just" learn a representation but also connects that representation to language which enables flexible zero-shot transfer.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    從自然語言學習相比其他訓練方法有幾個潛在優勢。
+                    與標準的群眾標註圖像分類相比，擴展自然語言監督要容易得多，
+                    因為它不需要標註採用經典的「機器學習兼容格式」，
+                    如規範的 1-of-N 多數投票「黃金標籤」。
+                    相反，處理自然語言的方法可以從互聯網上大量文字中包含的監督中被動學習。
+                </p>
+                <p>
+                    從自然語言學習相比大多數無監督或自監督學習方法還有一個重要優勢：
+                    它不僅僅學習表徵，還將該表徵與語言連接起來，從而實現靈活的零樣本遷移。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 三大核心優勢</h4>
+                
+                <h5>1️⃣ 可擴展性 (Scalability)</h5>
+                
+                <div class="figure figure-ai">
+                    <img src="images/generated/clip_museum_vs_library.png" alt="Museum vs Library Analogy">
+                    <div class="caption">
+                        <strong>💡 AI 圖解：</strong> 左邊是 ImageNet（博物館），標籤有限且僵硬；右邊是 CLIP（數位圖書館），自然語言描述豐富且無限。
+                    </div>
+                </div>
+
+                <div class="analogy">
+                    <h6>🌰 生活類比：圖書館 vs 博物館</h6>
+                    <p><strong>傳統方法（ImageNet）= 博物館</strong>：</p>
+                    <ul>
+                        <li>每件展品都需要專家精心標註和分類</li>
+                        <li>新增展品需要重新設計分類系統</li>
+                        <li>規模受限：只能展示有限數量的展品</li>
+                        <li>成本高昂：需要大量專業人員</li>
+                    </ul>
+
+                    <p><strong>自然語言監督（CLIP）= 圖書館</strong>：</p>
+                    <ul>
+                        <li>每本書都有自然語言描述（書名、摘要、評論）</li>
+                        <li>可以自動從網路收集數百萬本書的描述</li>
+                        <li>規模無限：可以擴展到整個互聯網</li>
+                        <li>成本低廉：文字描述已經存在，無需額外標註</li>
+                    </ul>
+                </div>
+
+                <h5>2️⃣ 語義豐富性 (Semantic Richness)</h5>
+                <div style="overflow-x: auto; margin: 20px 0;">
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; font-family: 'Inter', sans-serif;">
+                        <thead>
+                            <tr style="background: #f8fafc; color: #1e293b;">
+                                <th style="padding: 16px; text-align: left; font-weight: 700; border-bottom: 2px solid #e2e8f0; font-size: 0.95rem;">方法</th>
+                                <th style="padding: 16px; text-align: left; font-weight: 700; border-bottom: 2px solid #e2e8f0; font-size: 0.95rem;">標註格式</th>
+                                <th style="padding: 16px; text-align: left; font-weight: 700; border-bottom: 2px solid #e2e8f0; font-size: 0.95rem;">資訊量</th>
+                                <th style="padding: 16px; text-align: left; font-weight: 700; border-bottom: 2px solid #e2e8f0; font-size: 0.95rem;">範例</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: #fff; transition: background 0.2s;">
+                                <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; color: #334155; font-weight: 600;">ImageNet</td>
+                                <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; color: #475569;">單一類別標籤</td>
+                                <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; color: #475569;">1 bit <span style="font-size: 0.8em; color: #94a3b8;">(是/否)</span></td>
+                                <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; font-family: monospace; color: #ef4444; background: #fef2f2; border-radius: 6px;">"dog"</td>
+                            </tr>
+                            <tr style="background: #eff6ff; transition: background 0.2s;">
+                                <td style="padding: 16px; color: #1e40af; font-weight: 700;">CLIP</td>
+                                <td style="padding: 16px; color: #1e3a8a;">自然語言描述</td>
+                                <td style="padding: 16px; color: #1e3a8a;">數百 bits</td>
+                                <td style="padding: 16px; font-family: monospace; color: #059669; background: #ecfdf5; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">"一隻橘色的哈士奇在雪地裡奔跑，背景是雪山"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p><strong>語義豐富性的優勢</strong>：</p>
+                <ul>
+                    <li><strong>物體</strong>：不僅知道是「狗」，還知道是「哈士奇」</li>
+                    <li><strong>屬性</strong>：顏色（橘色）、環境（雪地）</li>
+                    <li><strong>動作</strong>：奔跑</li>
+                    <li><strong>關係</strong>：與背景（雪山）的關係</li>
+                    <li><strong>情境</strong>：整體場景的理解</li>
+                </ul>
+
+                <h5>3️⃣ 語言連接 (Language Connection)</h5>
+                <div class="key-concept">
+                    <h6>🔗 為何語言連接如此重要？</h6>
+                    <p>
+                        傳統的視覺表徵學習方法（如自監督學習）只學習圖像的表徵，
+                        但這個表徵與語言沒有連接，因此無法直接用於：
+                    </p>
+                    <ul>
+                        <li>❌ 零樣本分類（不知道類別名稱對應什麼）</li>
+                        <li>❌ 圖像搜尋（無法用文字查詢）</li>
+                        <li>❌ 視覺問答（無法理解問題）</li>
+                    </ul>
+
+                    <p>
+                        CLIP 的優勢：
+                    </p>
+                    <ul>
+                        <li>✅ 圖像表徵與文字表徵在同一個向量空間</li>
+                        <li>✅ 可以用文字描述任何視覺概念</li>
+                        <li>✅ 零樣本遷移：直接用文字描述新類別</li>
+                    </ul>
+                </div>
+
+                <div class="analogy">
+                    <h6>🌰 生活類比：多語言字典 vs 單語言詞典</h6>
+                    <p><strong>自監督學習 = 單語言詞典</strong>：</p>
+                    <ul>
+                        <li>只有圖像的「詞彙表」，沒有對應的文字</li>
+                        <li>可以比較圖像之間的相似度</li>
+                        <li>但無法用文字查詢或描述</li>
+                    </ul>
+
+                    <p><strong>CLIP = 多語言字典</strong>：</p>
+                    <ul>
+                        <li>圖像和文字在同一個「詞典」中</li>
+                        <li>可以從圖像查文字，也可以從文字查圖像</li>
+                        <li>可以用任何語言（自然語言）描述視覺概念</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2>🌐 構建 400M 圖文對資料集</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    Existing work has mainly used three datasets, MS-COCO, Visual Genome, and YFCC100M. While MS-COCO and Visual Genome are high quality crowd-labeled datasets, they are small by modern standards with approximately 100,000 training photos each. By comparison, other computer vision systems are trained on up to 3.5 <em>billion</em> Instagram photos.
+                </p>
+                <p>
+                    YFCC100M, at 100 million photos, is a possible alternative, but the metadata for each image is sparse and of varying quality. Many images use automatically generated filenames like <code>20160716_113957.JPG</code> as "titles" or contain "descriptions" of camera exposure settings. After filtering to keep only images with natural language titles and/or descriptions in English, the dataset shrunk by a factor of 6 to only 15 million photos. This is approximately the same size as ImageNet.
+                </p>
+                <p>
+                    A major motivation for natural language supervision is the large quantities of data of this form available publicly on the internet. Since existing datasets do not adequately reflect this possibility, considering results only on them would underestimate the potential of this line of research. To address this, we constructed a new dataset of 400 million (image, text) pairs collected from a variety of publicly available sources on the Internet.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    現有工作主要使用三個資料集：MS-COCO、Visual Genome 和 YFCC100M。
+                    雖然 MS-COCO 和 Visual Genome 是高品質的群眾標註資料集，
+                    但按現代標準來看它們很小，每個約有 10 萬張訓練照片。
+                    相比之下，其他計算機視覺系統在最多 35 <em>億</em>張 Instagram 照片上訓練。
+                </p>
+                <p>
+                    YFCC100M 有 1 億張照片，是一個可能的替代方案，
+                    但每張圖像的元數據稀疏且質量參差不齊。
+                    許多圖像使用自動生成的文件名（如 <code>20160716_113957.JPG</code>）作為「標題」，
+                    或包含相機曝光設置的「描述」。
+                    過濾後只保留有英文自然語言標題和/或描述的圖像，
+                    資料集縮小了 6 倍，只剩下 1500 萬張照片。這大約與 ImageNet 的大小相同。
+                </p>
+                <p>
+                    自然語言監督的一個主要動機是互聯網上公開可用的大量此類數據。
+                    由於現有資料集沒有充分反映這種可能性，
+                    僅在它們上考慮結果會低估這條研究路線的潛力。
+                    為了解決這個問題，我們構建了一個新的資料集，
+                    包含從互聯網上各種公開來源收集的 4 億（圖像，文字）對。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 資料集規模對比</h4>
+                
+                <div style="overflow-x: auto; margin: 20px 0;">
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; font-family: 'Inter', sans-serif;">
+                        <thead>
+                            <tr style="background: #f8fafc; color: #1e293b;">
+                                <th style="padding: 16px; text-align: left; font-weight: 700; border-bottom: 2px solid #e2e8f0; font-size: 0.95rem;">資料集</th>
+                                <th style="padding: 16px; text-align: center; font-weight: 700; border-bottom: 2px solid #e2e8f0; font-size: 0.95rem;">規模</th>
+                                <th style="padding: 16px; text-align: left; font-weight: 700; border-bottom: 2px solid #e2e8f0; font-size: 0.95rem;">特點</th>
+                                <th style="padding: 16px; text-align: left; font-weight: 700; border-bottom: 2px solid #e2e8f0; font-size: 0.95rem;">限制</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: #fff; border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 16px; font-weight: 600; color: #334155;">MS-COCO</td>
+                                <td style="padding: 16px; text-align: center; color: #64748b;">10 萬</td>
+                                <td style="padding: 16px; color: #475569;">高品質標註</td>
+                                <td style="padding: 16px; color: #ef4444; font-weight: 500;">規模太小</td>
+                            </tr>
+                            <tr style="background: #f8fafc; border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 16px; font-weight: 600; color: #334155;">Visual Genome</td>
+                                <td style="padding: 16px; text-align: center; color: #64748b;">10 萬</td>
+                                <td style="padding: 16px; color: #475569;">詳細的場景圖</td>
+                                <td style="padding: 16px; color: #ef4444; font-weight: 500;">規模太小</td>
+                            </tr>
+                            <tr style="background: #fff; border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 16px; font-weight: 600; color: #334155;">YFCC100M</td>
+                                <td style="padding: 16px; text-align: center; color: #64748b;">1 億 → 1500 萬</td>
+                                <td style="padding: 16px; color: #475569;">網路規模</td>
+                                <td style="padding: 16px; color: #ef4444; font-weight: 500;">文字質量差</td>
+                            </tr>
+                            <tr style="background: #f8fafc; border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 16px; font-weight: 600; color: #334155;">ImageNet</td>
+                                <td style="padding: 16px; text-align: center; color: #64748b;">128 萬</td>
+                                <td style="padding: 16px; color: #475569;">人工標註</td>
+                                <td style="padding: 16px; color: #ef4444; font-weight: 500;">固定類別</td>
+                            </tr>
+                            <tr style="background: #eff6ff;">
+                                <td style="padding: 16px; font-weight: 700; color: #1d4ed8; border-left: 4px solid #3b82f6;">CLIP (WIT)</td>
+                                <td style="padding: 16px; text-align: center; font-weight: 700; color: #1d4ed8; font-size: 1.1em;">4 億</td>
+                                <td style="padding: 16px; color: #1e40af; font-weight: 600;">網路規模 + 高品質文字</td>
+                                <td style="padding: 16px; color: #059669; font-weight: 700;">✅ 突破！</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h5>🔍 WIT 資料集的構建策略</h5>
+                <div class="key-concept">
+                    <h6>📊 構建流程</h6>
+                    <ol>
+                        <li><strong>查詢生成</strong>
+                            <ul>
+                                <li>基礎：英文維基百科中出現至少 100 次的詞</li>
+                                <li>擴展：高點互資訊的雙字組（bi-grams）</li>
+                                <li>擴展：所有超過一定搜尋量的維基百科文章名稱</li>
+                                <li>擴展：WordNet 同義詞集</li>
+                                <li><strong>總計：50 萬個查詢</strong></li>
+                            </ul>
+                        </li>
+                        <li><strong>圖文對收集</strong>
+                            <ul>
+                                <li>對每個查詢，搜尋包含該查詢的（圖像，文字）對</li>
+                                <li>每個查詢最多收集 20,000 對</li>
+                                <li>類別平衡：確保涵蓋廣泛的視覺概念</li>
+                            </ul>
+                        </li>
+                        <li><strong>質量控制</strong>
+                            <ul>
+                                <li>只保留有自然語言標題/描述的圖像</li>
+                                <li>過濾自動生成的文件名</li>
+                                <li>過濾相機設置等無意義描述</li>
+                            </ul>
+                        </li>
+                        <li><strong>最終資料集</strong>
+                            <ul>
+                                <li><strong>400M 圖文對</strong></li>
+                                <li>總字數與 GPT-2 的 WebText 資料集相似</li>
+                                <li>命名為 <strong>WIT (WebImageText)</strong></li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="analogy">
+                    <h6>🌰 生活類比：建立全球最大的圖書館</h6>
+                    <p><strong>傳統方法（ImageNet）= 小圖書館</strong>：</p>
+                    <ul>
+                        <li>需要專家精心挑選和分類每本書</li>
+                        <li>每本書只有一個固定的分類標籤</li>
+                        <li>規模受限：128 萬本書</li>
+                        <li>成本高昂：需要大量人工</li>
+                    </ul>
+
+                    <p><strong>CLIP 方法（WIT）= 全球數位圖書館</strong>：</p>
+                    <ul>
+                        <li>從整個互聯網自動收集圖書和描述</li>
+                        <li>每本書都有豐富的自然語言描述（標題、摘要、評論）</li>
+                        <li>規模巨大：4 億本書</li>
+                        <li>成本低廉：利用現有的網路內容</li>
+                        <li>多樣性：涵蓋所有可能的視覺概念</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2>📚 本章小結</h2>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <p>
+                    <strong>自然語言監督的核心價值</strong>：
+                </p>
+                <ul>
+                    <li><strong>可擴展性</strong>：網路規模的數據，無需人工標註</li>
+                    <li><strong>語義豐富性</strong>：比類別標籤包含更多資訊</li>
+                    <li><strong>語言連接</strong>：表徵與語言對齊，支援零樣本遷移</li>
+                </ul>
+
+                <p>
+                    <strong>WIT 資料集的突破</strong>：
+                </p>
+                <ul>
+                    <li><strong>400M 圖文對</strong>：遠超現有資料集的規模</li>
+                    <li><strong>50 萬查詢</strong>：確保涵蓋廣泛的視覺概念</li>
+                    <li><strong>質量控制</strong>：過濾無意義的文字，保留自然語言描述</li>
+                </ul>
+
+                <div class="key-concept">
+                    <h6>💡 下一章預告</h6>
+                    <p>
+                        在第 3 章，我們將深入探討<strong>對比學習</strong>的機制：
+                        如何從 400M 圖文對中學習圖像與文字的對齊？
+                        為何對比學習比生成式學習更高效？
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="01-introduction.html" class="nav-button nav-button-prev">
+                ← 上一章：引言與動機
+            </a>
+            <a href="03-contrastive-learning.html" class="nav-button nav-button-next">
+                下一章：對比式預訓練 →
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+
+

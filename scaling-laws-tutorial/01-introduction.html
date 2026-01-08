@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaling Laws 第1章：摘要與核心發現 - 預言 GPT-3 成功的數學理論</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter01_hero.png'); height: 100vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>2020 年 1 月的預言</h1>
+            <p class="hero-subtitle">當數學公式預測了 GPT-3 的成功</p>
+            <p class="hero-meta">Scaling Laws 論文深度解析 · 第 1 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Scaling Laws 教學</a>
+            <span>/</span>
+            <span class="current">第 1 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                2020 年 1 月，OpenAI 發表了一篇看似「純理論」的論文，卻在 5 個月後被 GPT-3 完美驗證。
+                這篇論文用數學公式證明了：<strong>語言模型的性能與模型大小、數據量、計算量呈現可預測的冪律關係</strong>。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                這不是事後諸葛。這是在 GPT-3 訓練之前就寫下的預言。
+                論文的核心發現可以用三個簡單的公式概括，而這些公式預測了：
+                當模型參數從 1.5B（GPT-2）增加到 175B（GPT-3）時，性能會如何提升。
+            </p>
+
+            <p>
+                在此之前，訓練大模型更像是一場「賭博」——沒有人知道投入更多計算資源是否真的會帶來更好的性能。
+                但這篇論文改變了一切：它提供了科學的預測工具，讓 OpenAI 敢於投資數百萬美元訓練 GPT-3。
+            </p>
+
+            <p>
+                <strong>這篇論文為「大模型時代」奠定了理論基礎，證明了「規模即智能」不是口號，而是可以被數學公式預測的科學事實。</strong>
+            </p>
+        </div>
+
+        <div class="key-concept">
+            <h4>🔗 演進脈絡</h4>
+            <div class="evolution-grid">
+                <div>
+                    <strong style="color: var(--mag-primary);">📍 本篇：Scaling Laws (2020-01)</strong>
+                    <p style="font-size: 0.95rem; margin: 8px 0 0 0;">理論預測<br>證明規模與性能的冪律關係</p>
+                </div>
+                <div>
+                    <strong>⏭️ 驗證：GPT-3 (2020-05)</strong>
+                    <p style="font-size: 0.95rem; margin: 8px 0 0 0;">實際驗證<br>175B 參數證明了預測</p>
+                </div>
+                <div style="opacity: 0.6;">
+                    <strong>⏭️ 應用：後續大模型</strong>
+                    <p style="font-size: 0.95rem; margin: 8px 0 0 0;">指導訓練<br>所有大模型都參考此論文</p>
+                </div>
+            </div>
+        </div>
+
+        <h2>📄 論文摘要</h2>
+        
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文摘要</strong>
+                <p>
+                    We study empirical scaling laws for language model performance on the cross-entropy loss.
+                    The loss scales as a power-law with model size, dataset size, and the amount of compute used for training, 
+                    with some trends spanning more than seven orders of magnitude.
+                    Other architectural details such as network width or depth have minimal effects within a wide range.
+                    Simple equations govern the dependence of overfitting on model/dataset size and the dependence of training speed on model size.
+                    These relationships allow us to determine the optimal allocation of a fixed compute budget.
+                    Larger models are significantly more sample-efficient, such that optimally compute-efficient training involves training 
+                    very large models on a relatively modest amount of data and stopping significantly before convergence.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    我們研究語言模型在交叉熵損失上的實證擴展法則。
+                    損失與模型大小、數據集大小和訓練使用的計算量呈現冪律關係，
+                    某些趨勢跨越了超過七個數量級。
+                    其他架構細節（如網絡寬度或深度）在廣泛範圍內影響很小。
+                    簡單的方程式控制著過擬合對模型/數據集大小的依賴性，以及訓練速度對模型大小的依賴性。
+                    這些關係使我們能夠確定固定計算預算的最優分配。
+                    更大的模型顯著更樣本高效，因此最優的計算效率訓練涉及在相對適量的數據上訓練非常大的模型，
+                    並在收斂之前顯著提前停止。
+                </p>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 核心發現</h4>
+                <ul>
+                    <li><strong>冪律關係</strong>：性能與模型大小、數據量、計算量呈現冪律關係（跨越 7 個數量級）</li>
+                    <li><strong>架構無關</strong>：模型形狀（深度 vs 寬度）影響很小</li>
+                    <li><strong>過擬合規律</strong>：簡單公式可以預測過擬合</li>
+                    <li><strong>樣本效率</strong>：大模型比小模型更樣本高效</li>
+                    <li><strong>最優策略</strong>：應該訓練大模型並提前停止，而非小模型訓練到收斂</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>🔑 三個關鍵公式</h2>
+
+        <div class="paper-section">
+            <p>
+                論文的精髓可以用三個公式概括。這些公式預測了語言模型的性能如何隨規模變化：
+            </p>
+
+            <div class="key-concept">
+                <h4>公式 1：性能與模型大小</h4>
+                <div class="math-block">
+                    $$L(N) = \left(\frac{N_c}{N}\right)^{\alpha_N}$$
+                    <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">
+                        其中 $\alpha_N \approx 0.076$，$N_c \approx 8.8 \times 10^{13}$（非嵌入參數）
+                    </p>
+                </div>
+                <p>
+                    <strong>含義</strong>：當數據量足夠大時，性能只依賴模型大小 $N$。
+                    每增加一倍參數，損失減少約 5%（$2^{-0.076} \approx 0.95$）。
+                </p>
+            </div>
+
+            <div class="key-concept">
+                <h4>公式 2：性能與數據量</h4>
+                <div class="math-block">
+                    $$L(D) = \left(\frac{D_c}{D}\right)^{\alpha_D}$$
+                    <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">
+                        其中 $\alpha_D \approx 0.095$，$D_c \approx 5.4 \times 10^{13}$（tokens）
+                    </p>
+                </div>
+                <p>
+                    <strong>含義</strong>：當模型足夠大時，性能只依賴數據量 $D$。
+                    每增加一倍數據，損失減少約 6.5%（$2^{-0.095} \approx 0.935$）。
+                </p>
+            </div>
+
+            <div class="key-concept">
+                <h4>公式 3：性能與計算量</h4>
+                <div class="math-block">
+                    $$L(C_{\rm min}) = \left(\frac{C_c^{\rm min}}{C_{\rm min}}\right)^{\alpha_C^{\rm min}}$$
+                    <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">
+                        其中 $\alpha_C^{\rm min} \approx 0.050$，$C_c^{\rm min} \approx 3.1 \times 10^8$（PF-days）
+                    </p>
+                </div>
+                <p>
+                    <strong>含義</strong>：在固定計算預算下，最優性能依賴總計算量 $C_{\rm min}$。
+                    每增加一倍計算，損失減少約 3.4%（$2^{-0.050} \approx 0.966$）。
+                </p>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            「這些關係跨越了八個數量級的計算量、六個數量級的模型大小，以及超過兩個數量級的數據量。
+            它們為大模型訓練提供了可預測的科學基礎。」
+        </div>
+
+        <h2>🎯 核心發現總結</h2>
+
+        <div class="paper-section">
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>1. 規模最重要</h4>
+                    <p>性能主要依賴模型大小、數據量、計算量，而非架構細節（深度 vs 寬度）</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>2. 平滑的冪律</h4>
+                    <p>性能與三個規模因子呈現冪律關係，跨越超過六個數量級，沒有偏離跡象</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>3. 過擬合的普遍性</h4>
+                    <p>每增加 8 倍模型，只需增加 5 倍數據即可避免過擬合（$N^{0.74}/D$ 比例）</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>4. 訓練的普遍性</h4>
+                    <p>訓練曲線遵循可預測的冪律，可以從早期訓練預測最終性能</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>5. 樣本效率</h4>
+                    <p>大模型比小模型更樣本高效，用更少的優化步數和數據點達到相同性能</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>6. 收斂是低效的</h4>
+                    <p>最優策略是訓練非常大的模型並提前停止，而非小模型訓練到收斂</p>
+                </div>
+            </div>
+        </div>
+
+        <h2>📊 原始論文圖表</h2>
+
+        <div class="paper-section">
+            <div class="figure figure-original">
+                <img src="images/original/SimplePowerLaws.png" alt="Figure 1: Basic Power Laws">
+                <div class="caption">
+                    <strong>Figure 1:</strong> 基本冪律關係。語言模型性能隨著模型大小、數據集大小和訓練計算量的增加而平滑提升。
+                    為了達到最優性能，這三個因子必須同時擴展。
+                    當不被其他兩個因子限制時，實證性能與每個單獨因子呈現冪律關係。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🖼️ 圖表解析</h4>
+                <p>
+                    這張圖展示了三個核心發現：
+                </p>
+                <ul>
+                    <li><strong>左圖（模型大小）</strong>：性能與模型大小呈現清晰的冪律關係，跨越 6 個數量級</li>
+                    <li><strong>中圖（數據量）</strong>：性能與數據量也呈現冪律關係</li>
+                    <li><strong>右圖（計算量）</strong>：在固定批次大小下，性能與計算量呈現冪律關係</li>
+                </ul>
+                <p>
+                    這些關係的關鍵在於它們是<strong>可預測的</strong>——你可以用這些公式預測更大模型的性能，
+                    而不需要實際訓練它們。這就是為什麼這篇論文能夠預測 GPT-3 的成功。
+                </p>
+            </div>
+        </div>
+
+        <div class="section-divider"><span>✦</span></div>
+
+        <h2>💡 生活類比：預測房價</h2>
+
+        <div class="analogy">
+            <h4>🏠 類比：房價預測模型</h4>
+            <p>
+                想像你是一個房地產分析師，想要預測房價。你發現：
+            </p>
+            <ul>
+                <li><strong>房屋面積</strong>（對應模型大小）：面積越大，價格越高，呈現冪律關係</li>
+                <li><strong>社區品質</strong>（對應數據品質）：社區越好，價格越高</li>
+                <li><strong>裝修投入</strong>（對應計算量）：投入越多，價格越高</li>
+            </ul>
+            <p>
+                更重要的是，你發現了一個<strong>可預測的公式</strong>：
+                只要知道房屋面積，你就能預測價格，誤差很小。
+                這就是 Scaling Laws 的核心：用數學公式預測性能，而不需要實際訓練模型。
+            </p>
+        </div>
+
+        <h2>🔧 工程類比：資料庫查詢優化</h2>
+
+        <div class="analogy">
+            <h4>💾 類比：資料庫性能預測</h4>
+            <p>
+                在資料庫系統中，查詢性能與以下因素相關：
+            </p>
+            <ul>
+                <li><strong>索引大小</strong>（對應模型大小）：索引越大，查詢越快</li>
+                <li><strong>數據量</strong>（對應數據量）：數據越多，需要更多時間處理</li>
+                <li><strong>計算資源</strong>（對應計算量）：CPU/記憶體越多，查詢越快</li>
+            </ul>
+            <p>
+                資料庫優化師發現，這些關係可以用公式預測。
+                同樣地，Scaling Laws 發現語言模型的性能也可以用公式預測，
+                這讓訓練決策從「猜測」變成了「科學計算」。
+            </p>
+        </div>
+
+        <div class="quote-block">
+            「這些結果表明，語言模型性能隨著我們適當地擴展模型大小、數據和計算而平滑且可預測地提升。
+            我們預期更大的語言模型將比當前模型表現更好且更樣本高效。」
+        </div>
+
+        <div class="navigation">
+            <a href="index.html" class="nav-link">← 回到目錄</a>
+            <a href="02-background-and-methods.html" class="nav-link">下一章：背景與方法 →</a>
+        </div>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</body>
+</html>
+

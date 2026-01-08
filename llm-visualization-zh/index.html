@@ -624,6 +624,112 @@
         opacity: 0.8;
       }
 
+      /* Latest Updates Section */
+      .latest-updates-section {
+        background: #ffffff;
+        margin-top: -50px;
+        position: relative;
+        z-index: 10;
+        padding: 40px 20px 0;
+      }
+
+      .latest-updates-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 215, 0, 0.05) 0%,
+          rgba(255, 165, 0, 0.05) 100%
+        );
+        border: 1px solid rgba(255, 215, 0, 0.2);
+        border-radius: 16px;
+        padding: 20px 28px;
+      }
+
+      .updates-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      }
+
+      .updates-icon {
+        font-size: 1.2rem;
+      }
+
+      .updates-title {
+        font-weight: 700;
+        font-size: 1rem;
+        color: #0a0e27;
+        letter-spacing: 0.02em;
+      }
+
+      .updates-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .update-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        background: white;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+      }
+
+      .update-item:hover {
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        border-color: rgba(255, 215, 0, 0.3);
+      }
+
+      .update-date {
+        font-size: 0.85rem;
+        color: #666;
+        font-weight: 600;
+        font-family: "Courier New", monospace;
+        min-width: 90px;
+        flex-shrink: 0;
+      }
+
+      .update-text {
+        flex: 1;
+        font-size: 0.95rem;
+        color: #0a0e27;
+        font-weight: 500;
+        line-height: 1.5;
+      }
+
+      .update-badge {
+        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        color: #1a1a1a;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        flex-shrink: 0;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.8;
+        }
+      }
+
       /* Responsive */
       @media (max-width: 768px) {
         .hero-title {
@@ -646,6 +752,33 @@
         .stats-grid {
           grid-template-columns: repeat(2, 1fr);
         }
+
+        .latest-updates-section {
+          padding: 30px 15px 0;
+        }
+
+        .latest-updates-wrapper {
+          padding: 16px 20px;
+        }
+
+        .update-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+        }
+
+        .update-date {
+          min-width: auto;
+          font-size: 0.75rem;
+        }
+
+        .update-text {
+          font-size: 0.9rem;
+        }
+
+        .update-badge {
+          align-self: flex-start;
+        }
       }
     </style>
   </head>
@@ -665,6 +798,37 @@
         </a>
       </div>
     </section>
+
+    <!-- Latest Updates Section -->
+    <div class="latest-updates-section">
+      <div class="latest-updates-wrapper">
+        <div class="updates-header">
+          <span class="updates-icon">🔔</span>
+          <span class="updates-title">最新更新</span>
+        </div>
+        <div class="updates-list">
+          <a href="../clip-tutorial/index.html" class="update-item">
+            <span class="update-date">2026-01-08</span>
+            <span class="update-text"
+              >CLIP 論文深度解析 - 連接視覺與語言的多模態 AI</span
+            >
+            <span class="update-badge">NEW</span>
+          </a>
+          <a href="../gpt4-tutorial/index.html" class="update-item">
+            <span class="update-date">2026-01-06</span>
+            <span class="update-text"
+              >GPT-4 Technical Report - 多模態與人類級性能的突破</span
+            >
+          </a>
+          <a href="../gpt2-tutorial/index.html" class="update-item">
+            <span class="update-date">2026-01-06</span>
+            <span class="update-text"
+              >GPT-2 論文深度解析 - Zero-Shot Learning 的關鍵突破</span
+            >
+          </a>
+        </div>
+      </div>
+    </div>
 
     <!-- Main Content -->
     <div class="main-content">

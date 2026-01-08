@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-4 第 6 章：風險與緩解 - 負責任的 AI 部署</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter06_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>AI 安全與責任</h1>
+            <p class="hero-subtitle">風險識別與緩解措施</p>
+            <p class="hero-meta">GPT-4 Technical Report 深度解析 · 第 6 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">GPT-4 教學</a>
+            <span>/</span>
+            <span class="current">第 6 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                GPT-4 的能力提升帶來了新的風險和挑戰。
+                這份技術報告最值得稱讚的地方，是它<strong>不僅展示了能力，更誠實地討論了風險</strong>，
+                並詳細說明了採取的緩解措施。這是負責任的 AI 開發應有的態度。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                報告中討論的主要風險和緩解措施包括：
+            </p>
+            <ul>
+                <li><strong>對抗測試</strong>：50+ 領域專家進行紅隊測試</li>
+                <li><strong>模型輔助安全流程</strong>：使用 RBRM（Rule-Based Reward Models）進行細粒度控制</li>
+                <li><strong>安全指標改進</strong>：有害內容生成減少 82%，敏感請求處理改進 29%</li>
+                <li><strong>持續監控</strong>：部署時安全技術和快速迭代改進流程</li>
+            </ul>
+        </div>
+
+        <h2>🔴 對抗測試：領域專家紅隊</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    GPT-4 poses similar risks as smaller language models, such as generating harmful advice, buggy code, or inaccurate information. However, the additional capabilities of GPT-4 lead to new risk surfaces. To understand the extent of these risks, we engaged over 50 experts from domains such as long-term AI alignment risks, cybersecurity, biorisk, and international security to adversarially test the model. Their findings specifically enabled us to test model behavior in high-risk areas which require niche expertise to evaluate, as well as assess risks that will become relevant for very advanced AIs such as power seeking.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    GPT-4 帶來與較小語言模型類似的風險，例如生成有害建議、有錯誤的代碼或不準確的信息。
+                    然而，GPT-4 的額外能力導致了新的風險面。
+                    為了了解這些風險的程度，我們聘請了 50 多名來自長期 AI 對齊風險、網絡安全、生物風險和國際安全等領域的專家對模型進行對抗性測試。
+                    他們的發現特別使我們能夠測試模型在需要專業知識評估的高風險領域中的行為，
+                    以及評估與非常先進的 AI（如權力尋求）相關的風險。
+                </p>
+            </div>
+
+            <div class="key-concept">
+                <h4>🔑 對抗測試的領域</h4>
+                <ul>
+                    <li><strong>長期 AI 對齊風險</strong>：評估未來 AI 系統可能帶來的風險</li>
+                    <li><strong>網絡安全</strong>：測試模型是否可能被用於網絡攻擊</li>
+                    <li><strong>生物風險</strong>：評估模型是否可能被用於合成危險化學品或生物製劑</li>
+                    <li><strong>國際安全</strong>：評估模型對國家安全的潛在影響</li>
+                </ul>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>為什麼需要領域專家？</strong>
+                </p>
+                <ul>
+                    <li><strong>專業知識</strong>：某些風險需要特定領域的專業知識才能識別和評估</li>
+                    <li><strong>對抗性思維</strong>：專家能夠從攻擊者的角度思考，發現潛在的濫用方式</li>
+                    <li><strong>前瞻性評估</strong>：不僅評估當前風險，更評估未來可能出現的風險</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這展示了負責任的 AI 開發需要多學科合作，
+                    不僅是技術專家，更需要安全專家、倫理學家、政策制定者等共同參與。
+                </p>
+            </div>
+        </div>
+
+        <h2>🛡️ 模型輔助安全流程</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    Our rule-based reward models (RBRMs) are a set of zero-shot GPT-4 classifiers. These classifiers provide an additional reward signal to the GPT-4 policy model during RLHF fine-tuning that targets correct behavior, such as refusing to generate harmful content or not refusing innocuous requests. The RBRM takes three inputs: the prompt (optional), the output from the policy model, and a human-written rubric (e.g., a set of rules in multiple-choice style) for how this output should be evaluated. Then, the RBRM classifies the output based on the rubric.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    我們的基於規則的獎勵模型（RBRMs）是一組零樣本 GPT-4 分類器。
+                    這些分類器在 RLHF 微調期間為 GPT-4 策略模型提供額外的獎勵信號，
+                    針對正確行為，例如拒絕生成有害內容或不拒絕無害請求。
+                    RBRM 接受三個輸入：提示詞（可選）、策略模型的輸出，
+                    以及用於評估此輸出的人類編寫的評分標準（例如，多選題風格的規則集）。
+                    然後，RBRM 根據評分標準對輸出進行分類。
+                </p>
+            </div>
+
+            <div class="key-concept">
+                <h4>🔑 RBRM 的工作原理</h4>
+                <ul>
+                    <li><strong>零樣本分類器</strong>：使用 GPT-4 本身作為分類器，無需額外訓練</li>
+                    <li><strong>評分標準驅動</strong>：基於人類編寫的明確規則進行分類</li>
+                    <li><strong>細粒度控制</strong>：可以區分「理想風格的拒絕」、「不理想風格的拒絕」、「包含禁止內容」、「安全非拒絕回應」等</li>
+                    <li><strong>雙向獎勵</strong>：獎勵拒絕有害請求，也獎勵不拒絕無害請求</li>
+                </ul>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>為什麼需要 RBRM？</strong>
+                </p>
+                <ul>
+                    <li><strong>RLHF 的局限性</strong>：RLHF 後，模型在安全輸入上可能過於謹慎，在危險輸入上可能仍然脆弱</li>
+                    <li><strong>細粒度控制</strong>：需要更細粒度的控制，而不僅僅是「拒絕」或「不拒絕」</li>
+                    <li><strong>模型即工具</strong>：使用模型本身作為工具來改進模型，這是一個有趣的「元學習」方法</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這展示了 AI 安全不僅是技術問題，更是系統工程問題。
+                    需要多層次的防護機制，從訓練時的安全措施到部署時的監控。
+                </p>
+            </div>
+        </div>
+
+        <h2>📊 安全指標的改進</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    Our mitigations have significantly improved many of GPT-4's safety properties. We've decreased the model's tendency to respond to requests for disallowed content (Table~\ref{table:safety_disallowed}) by 82\% compared to GPT-3.5, and GPT-4 responds to sensitive requests (e.g., medical advice and self-harm, Table \ref{table:safety_allowed}) in accordance with our policies 29\% more often (Figure~\ref{fig:safety_plots}). On the RealToxicityPrompts dataset, GPT-4 produces toxic generations only 0.73\% of the time, while GPT-3.5 generates toxic content 6.48\% of time.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    我們的緩解措施顯著改善了 GPT-4 的許多安全屬性。
+                    與 GPT-3.5 相比，我們將模型回應禁止內容請求的傾向降低了 82%，
+                    並且 GPT-4 按照我們的政策回應敏感請求（例如，醫療建議和自我傷害）的頻率提高了 29%。
+                    在 RealToxicityPrompts 數據集上，GPT-4 僅在 0.73% 的時間內產生有毒內容，
+                    而 GPT-3.5 在 6.48% 的時間內產生有毒內容。
+                </p>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/safety_headline_stats_incorrect_rate_qced.png" alt="Safety Metrics">
+                <div class="caption">
+                    <strong>Figure:</strong> 在敏感和禁止提示詞上的不正確行為率。數值越低越好。
+                    GPT-4 RLHF 的不正確行為率遠低於先前模型。
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>🏆 關鍵改進指標</h4>
+                <ul>
+                    <li><strong>禁止內容回應</strong>：減少 82%（相對於 GPT-3.5）</li>
+                    <li><strong>敏感請求處理</strong>：改進 29%（按照政策正確回應）</li>
+                    <li><strong>有毒內容生成</strong>：從 6.48% 降低到 0.73%（RealToxicityPrompts）</li>
+                </ul>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>安全改進的意義</strong>：
+                </p>
+                <ul>
+                    <li><strong>大幅改善</strong>：82% 的減少和 29% 的改進都是顯著的進步</li>
+                    <li><strong>雙向改進</strong>：不僅減少有害內容，也改進對無害請求的處理</li>
+                    <li><strong>持續努力</strong>：這些改進是持續努力的結果，包括對抗測試、RBRM、RLHF 等</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：當我們使用 ChatGPT 時，感受到的「更安全」、「更負責任」，
+                    正是這些安全改進的體現。但我們也需要理解，沒有完美的安全系統，
+                    持續監控和改進是必要的。
+                </p>
+            </div>
+        </div>
+
+        <h2>⚠️ 持續的挑戰</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    Overall, our model-level interventions increase the difficulty of eliciting bad behavior but doing so is still possible. For example, there still exist ``jailbreaks'' (e.g., adversarial system messages, see Figure 10 in the System Card for more details) to generate content which violate our usage guidelines. So long as these limitations exist, it's important to complement them with deployment-time safety techniques like monitoring for abuse as well as a pipeline for fast iterative model improvement.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    總體而言，我們的模型級干預增加了引發不良行為的難度，但這樣做仍然是可能的。
+                    例如，仍然存在「越獄」（例如，對抗性系統消息，詳見 System Card 中的圖 10）
+                    來生成違反我們使用指南的內容。
+                    只要這些限制存在，重要的是用部署時安全技術（如監控濫用）
+                    以及快速迭代模型改進流程來補充它們。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>為什麼安全是持續挑戰？</strong>
+                </p>
+                <ul>
+                    <li><strong>對抗性攻擊</strong>：攻擊者會不斷尋找新的方法來繞過安全措施</li>
+                    <li><strong>Jailbreak 的存在</strong>：即使有安全措施，仍然存在「越獄」方法</li>
+                    <li><strong>需要多層防護</strong>：模型級安全措施需要與部署時監控相結合</li>
+                    <li><strong>快速迭代</strong>：需要能夠快速識別和修復安全問題的流程</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這提醒我們，AI 安全不是一次性的工作，
+                    而是需要持續監控、快速響應和不斷改進的過程。
+                    這需要技術、政策和社會的共同努力。
+                </p>
+            </div>
+        </div>
+
+        <h2>🔮 與現在 LLM 使用經驗的對照</h2>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <h4>💡 從論文到現實</h4>
+                <p>
+                    當我們今天使用 ChatGPT 時，我們正在體驗這份報告中描述的安全措施：
+                </p>
+                <ul>
+                    <li><strong>拒絕有害請求</strong>：當你問 ChatGPT 如何製造危險物品時，它會拒絕回答。這正是報告中「82% 減少禁止內容回應」的體現</li>
+                    <li><strong>處理敏感請求</strong>：當你問 ChatGPT 醫療建議或心理健康問題時，它會提供有用的回應而不是簡單拒絕。這正是報告中「29% 改進敏感請求處理」的體現</li>
+                    <li><strong>減少有毒內容</strong>：ChatGPT 很少產生有毒或有害的內容，這正是報告中「0.73% 有毒內容生成率」的體現</li>
+                    <li><strong>持續改進</strong>：ChatGPT 會定期更新，修復安全問題，這正是報告中「快速迭代模型改進流程」的體現</li>
+                </ul>
+                <p>
+                    <strong>理解安全措施的意義</strong>：當我們理解 GPT-4 的安全措施和限制，
+                    我們就能：
+                </p>
+                <ul>
+                    <li>理解為什麼 ChatGPT 會拒絕某些請求</li>
+                    <li>理解如何更好地與 AI 互動以獲得有用回應</li>
+                    <li>理解 AI 安全的複雜性和持續性</li>
+                    <li>理解負責任使用 AI 的重要性</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            「AI 安全不是一次性的工作，而是需要持續監控、快速響應和不斷改進的過程。
+            這需要技術、政策和社會的共同努力。」
+        </div>
+
+        <h2>📝 結論</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    We characterize GPT-4, a large multimodal model with human-level performance on certain difficult professional and academic benchmarks. GPT-4 outperforms existing large language models on a collection of NLP tasks, and exceeds the vast majority of reported state-of-the-art systems (which often include task-specific fine-tuning). We find that improved capabilities, whilst usually measured in English, can be demonstrated in many different languages. We highlight how predictable scaling allowed us to make accurate predictions on the loss and capabilities of GPT-4.
+                </p>
+                <p>
+                    GPT-4 presents new risks due to increased capability, and we discuss some of the methods and results taken to understand and improve its safety and alignment. Though there remains much work to be done, GPT-4 represents a significant step towards broadly useful and safely deployed AI systems.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    我們描述了 GPT-4，這是一個在特定困難的專業和學術基準測試上達到人類級別性能的大型多模態模型。
+                    GPT-4 在一系列 NLP 任務上超越了現有的大語言模型，
+                    並超過了絕大多數報告的最先進系統（這些系統通常包括針對特定任務的微調）。
+                    我們發現，改進的能力雖然通常在英文中測量，但可以在許多不同語言中展現。
+                    我們強調了可預測擴展如何使我們能夠準確預測 GPT-4 的損失和能力。
+                </p>
+                <p>
+                    GPT-4 由於能力提升而帶來新風險，我們討論了一些用於理解和改進其安全性和對齊的方法和結果。
+                    儘管仍有許多工作要做，但 GPT-4 代表了向廣泛有用和安全部署的 AI 系統邁出的重要一步。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>GPT-4 的歷史意義</strong>：
+                </p>
+                <ul>
+                    <li><strong>能力突破</strong>：在多個領域達到人類級別性能，開啟了 AI 應用的新時代</li>
+                    <li><strong>技術創新</strong>：可預測擴展、多模態能力、更好的對齊，都是重要的技術突破</li>
+                    <li><strong>安全責任</strong>：誠實討論風險、積極採取緩解措施，展現了負責任的 AI 開發</li>
+                    <li><strong>持續改進</strong>：承認限制、持續監控、快速迭代，為未來 AI 發展奠定了基礎</li>
+                </ul>
+                <p>
+                    <strong>理解這份報告的意義</strong>：GPT-4 Technical Report 不僅是一份技術文檔，
+                    更是一份關於如何負責任地開發和部署 AI 系統的指南。
+                    它展示了能力與責任的平衡，為未來的 AI 發展提供了重要參考。
+                </p>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <a href="05-limitations.html" class="nav-link">← 上一章：限制與挑戰</a>
+            <a href="index.html" class="nav-link">回到目錄</a>
+        </div>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaling Laws 第2章：背景與方法論 - 實驗設計與參數計算</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter02_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>實驗設計的科學基礎</h1>
+            <p class="hero-subtitle">理解如何計算參數與計算量</p>
+            <p class="hero-meta">Scaling Laws 論文深度解析 · 第 2 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Scaling Laws 教學</a>
+            <span>/</span>
+            <span class="current">第 2 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                要理解 Scaling Laws，首先必須理解實驗是如何設計的。
+                這篇論文的核心創新之一，是發現了<strong>排除 Embedding 參數</strong>後，性能與模型大小的關係變得更加清晰。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                在深入研究三個核心公式之前，我們需要理解：
+            </p>
+            <ul>
+                <li><strong>如何計算模型參數數量</strong>（特別是為什麼要排除 Embedding）</li>
+                <li><strong>如何估算訓練計算量</strong>（FLOPs 的計算方法）</li>
+                <li><strong>實驗使用的資料集</strong>（WebText2 的構建方式）</li>
+                <li><strong>訓練流程</strong>（優化器、學習率調度等）</li>
+            </ul>
+
+            <p>
+                這些細節看似技術性，但卻是理解 Scaling Laws 的基礎。
+                只有理解了實驗設計，你才能真正理解為什麼這些公式能夠預測 GPT-3 的成功。
+            </p>
+        </div>
+
+        <h2>📊 資料集：WebText2</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    We train our models on an extended version of the WebText dataset described in \cite{radford2019language}. 
+                    The original WebText dataset was a web scrape of outbound links from Reddit through December 2017 which received at least 3 karma. 
+                    In the second version, WebText2, we added outbound Reddit links from the period of January to October 2018, 
+                    also with a minimum of 3 karma. The karma threshold served as a heuristic for whether people found the link interesting or useful.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    我們在 WebText 資料集的擴展版本上訓練模型（如 \cite{radford2019language} 所述）。
+                    原始 WebText 資料集是從 Reddit 外鏈抓取的網頁，時間範圍為 2017 年 12 月之前，且至少獲得 3 個 karma。
+                    在第二版 WebText2 中，我們添加了 2018 年 1 月至 10 月期間的 Reddit 外鏈，同樣要求至少 3 個 karma。
+                    Karma 閾值作為判斷人們是否認為連結有趣或有用的啟發式指標。
+                </p>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 關鍵數字</h4>
+                <ul>
+                    <li><strong>20.3M 文件</strong>：總共包含 2030 萬個文件</li>
+                    <li><strong>96 GB 文字</strong>：原始文字大小</li>
+                    <li><strong>1.62 × 10¹⁰ 詞</strong>：使用 <code>wc</code> 統計的詞數</li>
+                    <li><strong>2.29 × 10¹⁰ tokens</strong>：使用可逆 tokenizer 處理後的 token 數</li>
+                    <li><strong>6.6 × 10⁸ tokens</strong>：保留作為測試集</li>
+                </ul>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 為什麼選擇 Reddit 連結？</h4>
+                <p>
+                    Reddit 的 karma 系統提供了一個自然的「品質過濾器」：
+                    只有被社群認為有價值的內容才會獲得足夠的 karma。
+                    這比直接使用 Common Crawl 等未過濾的資料集更能保證資料品質。
+                </p>
+            </div>
+        </div>
+
+        <h2>🔢 參數計算：為什麼要排除 Embedding？</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    We use $N$ to denote the model size, which we define as the number of \emph{non-embedding} parameters.
+                    Our models also have $n_{\rm vocab} d_{{\rm model}}$ parameters in an embedding matrix, 
+                    and use $n_{\rm ctx} d_{{\rm model}}$ parameters for positional embeddings, 
+                    but we do not include these when discussing the `model size' $N$; 
+                    we will see that this produces significantly cleaner scaling laws.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    我們使用 $N$ 表示模型大小，定義為<strong>非嵌入參數</strong>的數量。
+                    我們的模型還包含 $n_{\rm vocab} d_{{\rm model}}$ 個參數的嵌入矩陣，
+                    以及 $n_{\rm ctx} d_{{\rm model}}$ 個參數的位置嵌入，
+                    但在討論「模型大小」$N$ 時，我們不包含這些參數；
+                    我們將看到，這會產生顯著更清晰的擴展法則。
+                </p>
+            </div>
+
+            <div class="key-concept">
+                <h4>📐 模型大小公式</h4>
+                <div class="math-block">
+                    $$N \approx 2d_{{\rm model}}n_{{\rm layer}}\left(2d_{{\rm attn}}+d_{{\rm ff}}\right)$$
+                    <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">
+                        使用標準配置 $d_{\rm attn} = d_{\rm ff}/4 = d_{{\rm model}}$ 時：
+                    </p>
+                    $$N = 12 n_{\rm layer} d_{{\rm model}}^2$$
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🤔 為什麼排除 Embedding？</h4>
+                <p>
+                    <strong>關鍵發現</strong>：當包含 Embedding 參數時，性能與總參數數量的關係會受到模型深度（層數）的強烈影響。
+                    但當只考慮非嵌入參數 $N$ 時，不同深度的模型都遵循同一條冪律曲線。
+                </p>
+                <p>
+                    這意味著：<strong>Embedding 參數對性能的貢獻與 Transformer 層的參數不同</strong>。
+                    排除它們後，我們得到了一個更「純粹」的擴展法則，只反映 Transformer 架構本身的擴展特性。
+                </p>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/PerfVsModelSizeNonEmbed.png" alt="Performance vs Model Size (Non-Embedding)">
+                <div class="caption">
+                    <strong>Figure:</strong> 排除 Embedding 參數後，不同深度的模型都遵循同一條冪律曲線。
+                </div>
+            </div>
+        </div>
+
+        <h2>⚙️ Transformer 參數與計算量詳解</h2>
+
+        <div class="paper-section">
+            <div class="key-concept">
+                <h4>📊 參數計算表</h4>
+                <table class="arch-table">
+                    <thead>
+                        <tr>
+                            <th>操作</th>
+                            <th>參數數量</th>
+                            <th>每 Token FLOPs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Embed</td>
+                            <td>$(n_{\rm vocab} + n_{\rm ctx})d_{\rm model}$</td>
+                            <td>$4d_{\rm model}$</td>
+                        </tr>
+                        <tr>
+                            <td>Attention: QKV</td>
+                            <td>$n_{\rm layer}d_{\rm model} \cdot 3d_{\rm attn}$</td>
+                            <td>$2n_{\rm layer}d_{\rm model} \cdot 3d_{\rm attn}$</td>
+                        </tr>
+                        <tr>
+                            <td>Attention: Mask</td>
+                            <td>---</td>
+                            <td>$2n_{\rm layer}n_{\rm ctx}d_{\rm attn}$</td>
+                        </tr>
+                        <tr>
+                            <td>Attention: Project</td>
+                            <td>$n_{\rm layer}d_{\rm attn}d_{\rm model}$</td>
+                            <td>$2n_{\rm layer}d_{\rm attn}d_{\rm model}$</td>
+                        </tr>
+                        <tr>
+                            <td>Feedforward</td>
+                            <td>$n_{\rm layer} \cdot 2d_{\rm model}d_{\rm ff}$</td>
+                            <td>$2n_{\rm layer} \cdot 2d_{\rm model}d_{\rm ff}$</td>
+                        </tr>
+                        <tr>
+                            <td>De-embed</td>
+                            <td>---</td>
+                            <td>$2d_{\rm model}n_{\rm vocab}$</td>
+                        </tr>
+                        <tr style="background: var(--accent-light); font-weight: 600;">
+                            <td><strong>Total (Non-Embedding)</strong></td>
+                            <td><strong>$N = 2d_{\rm model}n_{\rm layer}(2d_{\rm attn}+d_{\rm ff})$</strong></td>
+                            <td><strong>$C_{\rm forward} = 2N + 2n_{\rm layer}n_{\rm ctx}d_{\rm attn}$</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 計算量估算</h4>
+                <p>
+                    對於前向傳播，計算量約為：
+                </p>
+                <div class="math-block">
+                    $$C_{\rm forward} \approx 2N + 2n_{\rm layer}n_{\rm ctx}d_{{\rm model}}$$
+                </div>
+                <p>
+                    當 $d_{\rm model} \gg n_{\rm ctx}/12$ 時（這在我們研究的模型中通常成立），
+                    上下文相關的計算成本相對較小。
+                    因此，我們可以簡化為：
+                </p>
+                <div class="math-block">
+                    $$C \approx 6N \text{ FLOPs per training token}$$
+                </div>
+                <p>
+                    其中因子 6 來自：前向傳播約 $2N$，反向傳播約 $4N$（通常是前向的兩倍）。
+                </p>
+            </div>
+        </div>
+
+        <h2>🎯 訓練流程</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    Unless otherwise noted, we train models with the Adam optimizer for a fixed $2.5 \times 10^5$ steps 
+                    with a batch size of $512$ sequences of $1024$ tokens.
+                    Due to memory constraints, our largest models (more than 1B parameters) were trained with Adafactor.
+                    We found that results at convergence were largely independent of learning rate schedule.
+                    Unless otherwise noted, all training runs included in our data used a learning rate schedule 
+                    with a 3000 step linear warmup followed by a cosine decay to zero.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    除非另有說明，我們使用 Adam 優化器訓練模型，固定 $2.5 \times 10^5$ 步，
+                    批次大小為 $512$ 個序列，每個序列 $1024$ 個 tokens。
+                    由於記憶體限制，我們最大的模型（超過 10 億參數）使用 Adafactor 訓練。
+                    我們發現收斂時的結果在很大程度上與學習率調度無關。
+                    除非另有說明，所有訓練運行都使用學習率調度：
+                    3000 步線性預熱，然後餘弦衰減到零。
+                </p>
+            </div>
+
+            <div class="key-concept">
+                <h4>⚙️ 訓練配置總結</h4>
+                <ul>
+                    <li><strong>優化器</strong>：Adam（小模型）或 Adafactor（大模型 > 1B）</li>
+                    <li><strong>訓練步數</strong>：$2.5 \times 10^5$（25 萬步）</li>
+                    <li><strong>批次大小</strong>：$512$ 個序列 × $1024$ tokens = $524,288$ tokens/batch</li>
+                    <li><strong>上下文長度</strong>：$1024$ tokens（大多數實驗）</li>
+                    <li><strong>學習率調度</strong>：3000 步預熱 + 餘弦衰減</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>💡 生活類比：建築面積 vs 使用面積</h2>
+
+        <div class="analogy">
+            <h4>🏠 類比：房產面積計算</h4>
+            <p>
+                在房地產中，有「建築面積」和「使用面積」的區別：
+            </p>
+            <ul>
+                <li><strong>建築面積</strong>：包含公攤、電梯間等（對應總參數，包含 Embedding）</li>
+                <li><strong>使用面積</strong>：實際可用的居住空間（對應非嵌入參數 $N$）</li>
+            </ul>
+            <p>
+                同樣地，在語言模型中：
+            </p>
+            <ul>
+                <li><strong>總參數</strong>：包含 Embedding，但這部分參數對性能的貢獻方式不同</li>
+                <li><strong>非嵌入參數 $N$</strong>：真正反映 Transformer 架構的「核心能力」</li>
+            </ul>
+            <p>
+                就像房價主要取決於「使用面積」而非「建築面積」一樣，
+                語言模型的性能主要取決於「非嵌入參數」而非「總參數」。
+            </p>
+        </div>
+
+        <h2>🔧 工程類比：CPU 核心數 vs 總時脈</h2>
+
+        <div class="analogy">
+            <h4>💻 類比：CPU 性能指標</h4>
+            <p>
+                在 CPU 性能評估中：
+            </p>
+            <ul>
+                <li><strong>總時脈</strong>：所有核心的時脈總和（對應總參數）</li>
+                <li><strong>核心數 × 單核性能</strong>：更準確的性能指標（對應非嵌入參數）</li>
+            </ul>
+            <p>
+                同樣地，在語言模型中：
+            </p>
+            <ul>
+                <li><strong>總參數</strong>：包含 Embedding，但這部分參數的「計算效率」不同</li>
+                <li><strong>非嵌入參數 $N$</strong>：反映 Transformer 層的「核心計算能力」</li>
+            </ul>
+            <p>
+                就像 CPU 性能主要取決於「核心數 × 單核性能」而非「總時脈」一樣，
+                語言模型性能主要取決於「非嵌入參數」而非「總參數」。
+            </p>
+        </div>
+
+        <div class="quote-block">
+            「排除 Embedding 參數後，我們得到了一個更清晰的擴展法則，
+            這使得性能與模型大小的關係變得可預測且一致。」
+        </div>
+
+        <div class="navigation">
+            <a href="01-introduction.html" class="nav-link">← 上一章：摘要與核心發現</a>
+            <a href="03-empirical-power-laws.html" class="nav-link">下一章：實證結果與基本冪律 →</a>
+        </div>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</body>
+</html>
+

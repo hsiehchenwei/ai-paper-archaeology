@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLIP 第 5 章：零樣本遷移實驗 - 不需訓練就能分類</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter05_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>零樣本遷移實驗</h1>
+            <p class="hero-subtitle">在 30+ 資料集上不需訓練就能分類</p>
+            <p class="hero-meta">CLIP 深度解析 · 第 5 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">CLIP 教學</a>
+            <span>/</span>
+            <span class="current">第 5 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                這是 CLIP 最令人驚艷的時刻：<strong>零樣本遷移</strong>。
+                在 ImageNet 上，CLIP 零樣本達到 76.2% 的準確率，
+                匹敵需要 128 萬標註樣本訓練的 ResNet-50。
+                本章將深入探討這個「魔法」是如何實現的。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                零樣本遷移的核心優勢：
+            </p>
+            <ul>
+                <li><strong>不需訓練</strong>：直接在新資料集上測試，無需微調</li>
+                <li><strong>開放詞彙</strong>：可以識別任何用自然語言描述的類別</li>
+                <li><strong>即插即用</strong>：一個模型適用所有任務</li>
+            </ul>
+        </div>
+
+        <h2>🎯 零樣本遷移的機制</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    CLIP is pre-trained to predict if an image and a text snippet are paired together in its dataset. To perform zero-shot classification, we reuse this capability. For each dataset, we use the names of all the classes in the dataset as the set of potential text pairings and predict the most probable (image, text) pair according to CLIP.
+                </p>
+                <p>
+                    We first compute the feature embedding of the image and the feature embedding of the set of possible texts by their respective encoders. The cosine similarity of these embeddings is then calculated, scaled by a temperature parameter $\tau$, and normalized into a probability distribution via a softmax.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    CLIP 被預訓練來預測圖像和文字片段是否在其資料集中配對。
+                    為了執行零樣本分類，我們重用這個能力。
+                    對於每個資料集，我們使用資料集中所有類別的名稱作為潛在文字配對的集合，
+                    並根據 CLIP 預測最可能的（圖像，文字）配對。
+                </p>
+                <p>
+                    我們首先通過各自的編碼器計算圖像的特徵嵌入和可能文字集合的特徵嵌入。
+                    然後計算這些嵌入的餘弦相似度，用溫度參數 $\tau$ 縮放，
+                    並通過 softmax 正規化為概率分佈。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 零樣本分類的步驟</h4>
+                
+                <div class="key-concept">
+                    <h6>📊 流程圖</h6>
+                    <ol>
+                        <li><strong>準備類別文字</strong>
+                            <ul>
+                                <li>將類別名稱轉為文字描述（如 "A photo of a {class}"）</li>
+                                <li>範例：ImageNet 的 "dog" → "A photo of a dog"</li>
+                            </ul>
+                        </li>
+                        <li><strong>編碼</strong>
+                            <ul>
+                                <li>圖像編碼器：將測試圖像轉為向量 $I$</li>
+                                <li>文字編碼器：將所有類別描述轉為向量 $T_1, T_2, ..., T_N$</li>
+                            </ul>
+                        </li>
+                        <li><strong>計算相似度</strong>
+                            <ul>
+                                <li>計算 $I$ 與每個 $T_i$ 的餘弦相似度</li>
+                                <li>得到相似度分數 $S_1, S_2, ..., S_N$</li>
+                            </ul>
+                        </li>
+                        <li><strong>預測</strong>
+                            <ul>
+                                <li>使用 softmax 將相似度轉為概率</li>
+                                <li>選擇概率最高的類別作為預測</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="analogy">
+                    <h6>🌰 生活類比：多語言字典查詢</h6>
+                    <p>
+                        想像你有一本多語言字典，裡面有：
+                    </p>
+                    <ul>
+                        <li>圖像的「詞彙表」（圖像編碼器）</li>
+                        <li>文字的「詞彙表」（文字編碼器）</li>
+                        <li>兩者在同一個「語言空間」中</li>
+                    </ul>
+                    <p>
+                        <strong>零樣本分類就像：</strong>
+                    </p>
+                    <ul>
+                        <li>給你看一張新照片（測試圖像）</li>
+                        <li>你問：「這張照片最像哪個詞？」</li>
+                        <li>字典自動計算照片與所有詞的「相似度」</li>
+                        <li>返回最相似的詞（預測類別）</li>
+                    </ul>
+                    <p>
+                        <strong>關鍵優勢</strong>：即使這個詞（類別）在訓練時沒見過，只要能用自然語言描述，就能識別！
+                    </p>
+                </div>
+
+                <div class="analogy">
+                    <h6>💻 工程類比：動態生成分類器</h6>
+                    <p>
+                        傳統方法 = 固定分類器：
+                    </p>
+                    <pre style="background: #f9fafb; color: #1f2937; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: 'Consolas', monospace; font-size: 0.9em; line-height: 1.5;"><code># 傳統監督學習
+classifier = LinearClassifier(num_classes=1000)  # 固定 1000 個類別
+classifier.train(training_data)  # 需要標註數據訓練
+prediction = classifier.predict(image)  # 只能預測這 1000 個類別</code></pre>
+
+                    <p>
+                        CLIP = 動態生成分類器：
+                    </p>
+                    <pre style="background: #f9fafb; color: #1f2937; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: 'Consolas', monospace; font-size: 0.9em; line-height: 1.5;"><code># CLIP 零樣本
+class_names = ["dog", "cat", "bird", ...]  # 可以是任何類別！
+text_descriptions = [f"A photo of a {name}" for name in class_names]
+text_embeddings = text_encoder(text_descriptions)  # 動態生成分類器權重
+image_embedding = image_encoder(image)
+similarities = cosine_similarity(image_embedding, text_embeddings)
+prediction = class_names[argmax(similarities)]  # 可以是任何類別！</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <h2>📊 與 Visual N-Grams 的對比</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    The best CLIP model improves accuracy on ImageNet from a proof of concept 11.5% to 76.2% and matches the performance of the original ResNet-50 despite using none of the 1.28 million crowd-labeled training examples available for this dataset. Additionally, the top-5 accuracy of CLIP models are noticeably higher than their top-1, and this model has a 95% top-5 accuracy, matching Inception-V4.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    最佳 CLIP 模型將 ImageNet 的準確率從概念驗證的 11.5% 提升到 76.2%，
+                    並匹配原始 ResNet-50 的性能，儘管沒有使用該資料集可用的 128 萬個群眾標註訓練樣本。
+                    此外，CLIP 模型的 top-5 準確率明顯高於 top-1，
+                    該模型的 top-5 準確率為 95%，匹配 Inception-V4。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 突破性成果</h4>
+                
+                <div style="overflow-x: auto; margin: 20px 0;">
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; font-family: 'Inter', sans-serif;">
+                        <thead>
+                            <tr style="background: #f8fafc; color: #1e293b;">
+                                <th style="padding: 16px; text-align: left; font-weight: 700; border-bottom: 2px solid #e2e8f0;">方法</th>
+                                <th style="padding: 16px; text-align: center; font-weight: 700; border-bottom: 2px solid #e2e8f0;">ImageNet<br>Top-1</th>
+                                <th style="padding: 16px; text-align: center; font-weight: 700; border-bottom: 2px solid #e2e8f0;">ImageNet<br>Top-5</th>
+                                <th style="padding: 16px; text-align: left; font-weight: 700; border-bottom: 2px solid #e2e8f0;">說明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: #fff; border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 16px; font-weight: 600; color: #334155;">Visual N-Grams<br><span style="font-size:0.85em; color:#64748b">(2017)</span></td>
+                                <td style="padding: 16px; text-align: center; color: #64748b;">11.5%</td>
+                                <td style="padding: 16px; text-align: center; color: #64748b;">-</td>
+                                <td style="padding: 16px; color: #475569;">概念驗證</td>
+                            </tr>
+                            <tr style="background: #f8fafc; border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 16px; font-weight: 600; color: #334155;">ResNet-50<br><span style="font-size:0.85em; color:#64748b">(監督學習)</span></td>
+                                <td style="padding: 16px; text-align: center; color: #334155; font-weight: 600;">76.0%</td>
+                                <td style="padding: 16px; text-align: center; color: #334155;">~93%</td>
+                                <td style="padding: 16px; color: #475569;">需要 128 萬標註樣本</td>
+                            </tr>
+                            <tr style="background: #eff6ff;">
+                                <td style="padding: 16px; font-weight: 700; color: #1e3a8a; border-left: 4px solid #3b82f6;">CLIP<br><span style="font-size:0.85em; color:#60a5fa">(零樣本)</span></td>
+                                <td style="padding: 16px; text-align: center; color: #1e3a8a; font-weight: 700;">76.2%</td>
+                                <td style="padding: 16px; text-align: center; color: #1e3a8a; font-weight: 700;">95.0%</td>
+                                <td style="padding: 16px; color: #1e40af; font-weight: 700;">✅ 零樣本匹敵監督學習！</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="key-concept">
+                    <h6>🌟 關鍵突破</h6>
+                    <ul>
+                        <li><strong>從 11.5% 到 76.2%</strong>：提升了 6.6 倍！</li>
+                        <li><strong>匹敵 ResNet-50</strong>：零樣本達到監督學習的性能</li>
+                        <li><strong>Top-5 95%</strong>：匹配 Inception-V4</li>
+                        <li><strong>無需標註</strong>：不需要 ImageNet 的 128 萬標註樣本</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2>🤔 挑戰：單詞的侷限性</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    A common issue is polysemy. For example, in ImageNet, the class 'crane' refers to a construction crane, while in other datasets it might refer to a bird. Another issue is that it is relatively rare in our pre-training dataset for the text to be just a single word.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    一個常見的問題是「一詞多義」(polysemy)。例如在 ImageNet 中，'crane' 指的是建築起重機，而在其他資料集可能指鶴（鳥類）。另一個問題是，在我們的預訓練資料集中，文字僅為單個單詞的情況相對罕見。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 為什麼直接用標籤（Labels）不夠好？</h4>
+                <p>
+                    雖然零樣本遷移允許我們直接使用類別名稱，但簡單地將 "dog" 或 "boxer" 丟給文字編碼器會遇到兩個問題：
+                </p>
+                
+                <div class="key-concept">
+                    <h6>🚧 兩大難題</h6>
+                    <ul>
+                        <li><strong>1. 歧義性 (Ambiguity)</strong>
+                            <ul>
+                                <li><strong>例子</strong>："boxer" 是指「拳擊手」還是「拳師犬」？"crane" 是指「起重機」還是「鶴」？</li>
+                                <li><strong>後果</strong>：如果沒有上下文，模型無法確定你要找的是哪一種物體，導致預測錯誤。</li>
+                            </ul>
+                        </li>
+                        <li><strong>2. 分佈偏移 (Distribution Shift)</strong>
+                            <ul>
+                                <li><strong>訓練時</strong>：CLIP 閱讀的是網路上完整的句子（如 "A cute puppy playing in the park"）。</li>
+                                <li><strong>測試時</strong>：如果只給它一個單詞 "dog"，這跟它平時習慣的「閱讀格式」完全不同。</li>
+                                <li><strong>後果</strong>：模型表現下降，因為它不習慣處理孤立的單詞。</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                
+                <p style="margin-top: 20px; font-weight: 600; color: #4b5563;">
+                    這就是為什麼我們需要 "Prompt Engineering" —— 將單詞包裝成模型熟悉的句子格式。
+                </p>
+            </div>
+        </div>
+
+        <h2>🔧 Prompt Engineering</h2>
+
+        <div class="figure figure-original">
+            <img src="images/original/prompt-engineering.png" alt="Prompt Engineering">
+            <div class="caption">
+                <strong>Figure:</strong> Prompt engineering 和 ensembling 提升零樣本性能。
+                與使用無上下文的類別名稱基線相比，prompt engineering 和 ensembling 
+                在 36 個資料集上平均提升零樣本分類性能近 5 個百分點。
+            </div>
+        </div>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <h4>💡 Prompt Engineering 的威力</h4>
+                
+                <h5>📝 三種 Prompt 策略</h5>
+                <ol>
+                    <li><strong>無上下文（Baseline）</strong>
+                        <ul>
+                            <li>直接使用類別名稱："dog"</li>
+                            <li>問題：與訓練時的圖文對格式不一致</li>
+                        </ul>
+                    </li>
+                    <li><strong>Prompt Engineering</strong>
+                        <ul>
+                            <li>添加上下文："A photo of a dog"</li>
+                            <li>改進：與訓練數據格式一致</li>
+                            <li>提升：平均 +2.1%</li>
+                        </ul>
+                    </li>
+                    <li><strong>Ensembling</strong>
+                        <ul>
+                            <li>多個 prompt 的平均："A photo of a dog", "A picture of a dog", "A dog"</li>
+                            <li>改進：更穩健的預測</li>
+                            <li>提升：平均 +2.7%</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div class="key-concept">
+                    <h6>💡 為何 Prompt Engineering 有效？</h6>
+                    <ul>
+                        <li><strong>格式一致性</strong>：訓練時的圖文對通常是完整句子，而非單詞</li>
+                        <li><strong>語義豐富</strong>："A photo of a dog" 比 "dog" 包含更多上下文</li>
+                        <li><strong>減少歧義</strong>：明確指出這是「照片」而非「繪畫」或「雕塑」</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2>📈 30+ 資料集的全面評估</h2>
+
+        <div class="figure figure-original">
+            <img src="images/original/zero-shot-transfer.png" alt="Zero-shot Transfer Results">
+            <div class="caption">
+                <strong>Figure:</strong> CLIP 在 30+ 資料集上的零樣本遷移結果。
+            </div>
+        </div>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <h4>🔍 評估範圍</h4>
+                
+                <p>
+                    CLIP 在超過 30 個資料集上進行了零樣本評估，涵蓋：
+                </p>
+                <ul>
+                    <li><strong>通用分類</strong>：ImageNet, CIFAR-10, CIFAR-100</li>
+                    <li><strong>細粒度分類</strong>：Oxford-IIIT Pet, Flowers102</li>
+                    <li><strong>OCR</strong>：SVHN, IIIT5K</li>
+                    <li><strong>動作識別</strong>：UCF101, Kinetics700</li>
+                    <li><strong>地理定位</strong>：Country211</li>
+                    <li><strong>其他任務</strong>：食物分類、衛星圖像等</li>
+                </ul>
+
+                <div class="key-concept">
+                    <h6>🌟 關鍵發現</h6>
+                    <ul>
+                        <li><strong>廣泛適用</strong>：在大多數任務上表現良好</li>
+                        <li><strong>競爭力強</strong>：經常與任務特定的監督模型競爭</li>
+                        <li><strong>零樣本優勢</strong>：無需任何資料集特定的訓練</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2>📚 本章小結</h2>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <p>
+                    <strong>零樣本遷移的核心價值</strong>：
+                </p>
+                <ul>
+                    <li><strong>不需訓練</strong>：直接在新資料集上測試</li>
+                    <li><strong>開放詞彙</strong>：可以識別任何自然語言描述的類別</li>
+                    <li><strong>即插即用</strong>：一個模型適用所有任務</li>
+                </ul>
+
+                <p>
+                    <strong>CLIP 的突破性成果</strong>：
+                </p>
+                <ul>
+                    <li><strong>ImageNet 76.2%</strong>：零樣本匹敵 ResNet-50</li>
+                    <li><strong>30+ 資料集</strong>：廣泛的零樣本遷移能力</li>
+                    <li><strong>Prompt Engineering</strong>：簡單技巧提升 5% 性能</li>
+                </ul>
+
+                <div class="key-concept">
+                    <h6>💡 下一章預告</h6>
+                    <p>
+                        在第 6 章，我們將深入分析<strong>結果分析與穩健性</strong>：
+                        CLIP 在表徵學習上的表現如何？
+                        為何零樣本模型比監督模型更穩健？
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="04-model-architecture.html" class="nav-button nav-button-prev">
+                ← 上一章：模型架構與擴展
+            </a>
+            <a href="06-results-and-analysis.html" class="nav-button nav-button-next">
+                下一章：結果分析與穩健性 →
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+
+

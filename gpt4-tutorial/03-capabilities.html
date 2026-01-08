@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-4 第 3 章：能力展示 - 人類級別的性能</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter03_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>人類級別的性能</h1>
+            <p class="hero-subtitle">從律師考試到多語言理解</p>
+            <p class="hero-meta">GPT-4 Technical Report 深度解析 · 第 3 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">GPT-4 教學</a>
+            <span>/</span>
+            <span class="current">第 3 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                GPT-4 最令人震撼的成就，莫過於在各種專業和學術考試中達到人類級別的性能。
+                從律師考試的前 10%，到各種 AP 考試的高分，GPT-4 證明了：
+                <strong>大語言模型不僅能「理解」語言，更能「應用」知識解決複雜問題</strong>。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                這章節將深入探討 GPT-4 在以下方面的表現：
+            </p>
+            <ul>
+                <li><strong>專業考試</strong>：律師考試、LSAT、GRE、各種 AP 考試</li>
+                <li><strong>學術基準測試</strong>：MMLU、HellaSwag、ARC、HumanEval 等</li>
+                <li><strong>多語言能力</strong>：在 24/26 種語言上超越英文 SOTA</li>
+                <li><strong>用戶意圖理解</strong>：70.2% 的提示詞上優於 GPT-3.5</li>
+            </ul>
+        </div>
+
+        <h2>📊 專業考試表現</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    We tested GPT-4 on a diverse set of benchmarks, including simulating exams that were originally designed for humans. We did no specific training for these exams. A minority of the problems in the exams were seen by the model during training; for each exam we run a variant with these questions removed and report the lower score of the two. We believe the results to be representative.
+                </p>
+                <p>
+                    GPT-4 exhibits human-level performance on the majority of these professional and academic exams. Notably, it passes a simulated version of the Uniform Bar Examination with a score in the top 10% of test takers (Table~\ref{table:exams}, Figure~\ref{fig:exams}).
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    我們在各種基準測試上測試了 GPT-4，包括模擬原本為人類設計的考試。
+                    我們沒有針對這些考試進行特定訓練。
+                    考試中的少數問題在訓練期間被模型看到過；對於每個考試，我們運行一個移除這些問題的變體，
+                    並報告兩者中較低的分數。我們相信結果具有代表性。
+                </p>
+                <p>
+                    GPT-4 在大多數這些專業和學術考試中表現出人類級別的性能。
+                    值得注意的是，它在模擬版統一律師考試中以前 10% 考生的成績通過
+                    （表~\ref{table:exams}，圖~\ref{fig:exams}）。
+                </p>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/exam_perf.png" alt="Exam Performance">
+                <div class="caption">
+                    <strong>Figure:</strong> GPT 在學術和專業考試上的性能。
+                    在每種情況下，我們模擬真實考試的條件和評分。
+                    考試按 GPT-3.5 性能從低到高排序。
+                    GPT-4 在大多數測試的考試上優於 GPT-3.5。
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>🏆 關鍵成就</h4>
+                <ul>
+                    <li><strong>律師考試</strong>：298/400 分（約前 10%），對比 GPT-3.5 的 213/400（約後 10%）</li>
+                    <li><strong>LSAT</strong>：163 分（約第 88 百分位）</li>
+                    <li><strong>SAT 閱讀寫作</strong>：710/800（約第 93 百分位）</li>
+                    <li><strong>SAT 數學</strong>：700/800（約第 89 百分位）</li>
+                    <li><strong>GRE 語文</strong>：169/170（約第 99 百分位）</li>
+                    <li><strong>多種 AP 考試</strong>：獲得最高分 5 分</li>
+                </ul>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>為什麼這些成績如此重要？</strong>
+                </p>
+                <ul>
+                    <li><strong>真實世界能力</strong>：這些考試是為人類設計的，測試的是真實的知識應用能力</li>
+                    <li><strong>零樣本學習</strong>：GPT-4 沒有針對這些考試進行特定訓練，展現了真正的泛化能力</li>
+                    <li><strong>質的飛躍</strong>：從 GPT-3.5 的後 10% 到 GPT-4 的前 10%，這是能力的質變</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這意味著 GPT-4 不僅能「記住」知識，
+                    更能「理解」和「應用」知識，這為 AI 在專業領域的應用打開了大門。
+                </p>
+            </div>
+        </div>
+
+        <h2>📈 學術基準測試表現</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    GPT-4 considerably outperforms existing language models, as well as previously state-of-the-art (SOTA) systems which often have benchmark-specific crafting or additional training protocols.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    GPT-4 大幅超越現有的大語言模型，以及先前的最先進（SOTA）系統，
+                    這些系統通常有針對特定基準的手工工程或額外的訓練協議。
+                </p>
+            </div>
+
+            <div class="key-concept">
+                <h4>📊 關鍵基準測試結果</h4>
+                <ul>
+                    <li><strong>MMLU</strong>：86.4%（5-shot），超越 Flan-PaLM 的 75.2%</li>
+                    <li><strong>HellaSwag</strong>：95.3%（10-shot），常識推理</li>
+                    <li><strong>ARC</strong>：96.3%（25-shot），小學科學問題</li>
+                    <li><strong>HumanEval</strong>：67.0%（0-shot），Python 編程任務</li>
+                    <li><strong>GSM-8K</strong>：92.0%（5-shot chain-of-thought），小學數學</li>
+                </ul>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>為什麼這些結果令人印象深刻？</strong>
+                </p>
+                <ul>
+                    <li><strong>零樣本 vs 微調</strong>：GPT-4 使用 few-shot 提示，而許多 SOTA 系統使用針對特定基準的微調</li>
+                    <li><strong>通用能力</strong>：一個模型在多個不同領域都達到頂尖水平，展現了真正的通用智能</li>
+                    <li><strong>持續改進</strong>：從 GPT-3.5 到 GPT-4，每個基準都有顯著提升</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>🌍 多語言能力的突破</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    Many existing ML benchmarks are written in English. To gain an initial understanding of GPT-4's capabilities in other languages, we translated the MMLU benchmark -- a suite of multiple-choice problems spanning 57 subjects -- into a variety of languages using Azure Translate. We find that GPT-4 outperforms the English-language performance of GPT 3.5 and existing language models (Chinchilla and PaLM) for the majority of languages we tested, including low-resource languages such as Latvian, Welsh, and Swahili.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    許多現有的 ML 基準測試是用英文編寫的。
+                    為了初步了解 GPT-4 在其他語言中的能力，
+                    我們使用 Azure Translate 將 MMLU 基準測試
+                    （一個涵蓋 57 個學科的多選題套件）翻譯成多種語言。
+                    我們發現 GPT-4 在我們測試的大多數語言上超越了 GPT-3.5 和現有語言模型
+                    （Chinchilla 和 PaLM）的英文性能，包括低資源語言，如拉脫維亞語、威爾士語和斯瓦希里語。
+                </p>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/language_mmlu.png" alt="Multilingual MMLU">
+                <div class="caption">
+                    <strong>Figure:</strong> GPT-4 在多種語言中的性能與先前模型在英文上的性能比較。
+                    GPT-4 在我們測試的絕大多數語言上超越了現有語言模型的英文性能，
+                    包括低資源語言，如拉脫維亞語、威爾士語和斯瓦希里語。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>多語言能力的意義</strong>：
+                </p>
+                <ul>
+                    <li><strong>24/26 語言超越英文 SOTA</strong>：這意味著 GPT-4 不僅是「英文 AI」，更是真正的「多語言 AI」</li>
+                    <li><strong>低資源語言支持</strong>：即使在拉脫維亞語、威爾士語、斯瓦希里語等低資源語言上，GPT-4 也表現出色</li>
+                    <li><strong>零樣本多語言</strong>：無需針對特定語言進行微調，展現了強大的跨語言泛化能力</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這為 AI 的全球化應用奠定了基礎，
+                    使得 GPT-4 能夠服務於世界各地的用戶，而不僅僅是英語使用者。
+                </p>
+            </div>
+        </div>
+
+        <h2>👤 用戶意圖理解</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    GPT-4 substantially improves over previous models in the ability to follow user intent. On a dataset of 5,214 prompts submitted to ChatGPT and the OpenAI API, the responses generated by GPT-4 were preferred over the responses generated by GPT-3.5 on $70.2\%$ of prompts.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    GPT-4 在遵循用戶意圖的能力上大幅改進。
+                    在提交給 ChatGPT 和 OpenAI API 的 5,214 個提示詞數據集上，
+                    GPT-4 生成的回應在 $70.2\%$ 的提示詞上優於 GPT-3.5 生成的回應。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>用戶意圖理解的重要性</strong>：
+                </p>
+                <ul>
+                    <li><strong>實用性提升</strong>：70.2% 的偏好率意味著 GPT-4 在大多數情況下能更好地理解用戶想要什麼</li>
+                    <li><strong>RLHF 的成果</strong>：這主要歸功於 RLHF 後訓練，讓模型更好地對齊人類意圖</li>
+                    <li><strong>真實世界應用</strong>：這是用戶在使用 ChatGPT 時最直接感受到的改進</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：當我們今天使用 ChatGPT 時，
+                    感受到的「更懂我」、「回答更準確」、「更有用」，
+                    正是這 70.2% 偏好率的體現。
+                </p>
+            </div>
+        </div>
+
+        <h2>🔮 與現在 LLM 使用經驗的對照</h2>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <h4>💡 從論文到現實</h4>
+                <p>
+                    當我們今天使用 ChatGPT、Claude 或其他基於 GPT-4 的服務時，我們正在體驗這份報告中描述的能力：
+                </p>
+                <ul>
+                    <li><strong>專業級別回答</strong>：當你問 ChatGPT 複雜的法律、醫學或技術問題時，它展現的專業水準正是報告中「前 10% 律師考試成績」的體現</li>
+                    <li><strong>多語言支持</strong>：ChatGPT 能夠流暢處理多種語言，正是報告中「24/26 語言超越英文 SOTA」的體現</li>
+                    <li><strong>更好的理解</strong>：ChatGPT 能更好地理解你的意圖，提供更準確、更有用的回答，正是報告中「70.2% 偏好率」的體現</li>
+                    <li><strong>通用能力</strong>：一個模型能處理從編程到數學、從歷史到科學的各種問題，正是報告中「多個基準測試頂尖水平」的體現</li>
+                </ul>
+                <p>
+                    <strong>理解這些能力的意義</strong>：當我們理解 GPT-4 的能力邊界和優勢領域，
+                    我們就能更好地使用這些 AI 工具，知道在什麼場景下它們能發揮最大價值。
+                </p>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            「GPT-4 在模擬律師考試中達到前 10% 的成績，這不僅是性能的提升，更是能力的質變。
+            它證明了 AI 不僅能『理解』語言，更能『應用』知識解決複雜問題。」
+        </div>
+
+        <div class="navigation">
+            <a href="02-predictable-scaling.html" class="nav-link">← 上一章：可預測擴展</a>
+            <a href="04-visual-inputs.html" class="nav-link">下一章：視覺輸入能力 →</a>
+        </div>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</body>
+</html>
+

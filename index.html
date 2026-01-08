@@ -126,26 +126,23 @@
           <span class="updates-title">最新更新</span>
         </div>
         <div class="updates-list">
-          <a
-            href="articles/embedding-matrix-visual-guide.html"
-            class="update-item"
-          >
-            <span class="update-date">2026-01-05</span>
+          <a href="clip-tutorial/index.html" class="update-item">
+            <span class="update-date">2026-01-08</span>
             <span class="update-text"
-              >向量的真相：字母'A'的768個數字 - Token Embed 完全解析</span
+              >CLIP 論文深度解析 - 連接視覺與語言的多模態 AI</span
             >
             <span class="update-badge">NEW</span>
           </a>
-          <a href="llm-visualization-zh/index.html" class="update-item">
-            <span class="update-date">2026-01-05</span>
+          <a href="gpt4-tutorial/index.html" class="update-item">
+            <span class="update-date">2026-01-06</span>
             <span class="update-text"
-              >LLM 視覺化完整教學 - 從 nano-gpt 理解 GPT 運作原理</span
+              >GPT-4 Technical Report - 多模態與人類級性能的突破</span
             >
           </a>
-          <a href="prompt-engineering-tutorial/index.html" class="update-item">
-            <span class="update-date">2026-01-02</span>
+          <a href="gpt2-tutorial/index.html" class="update-item">
+            <span class="update-date">2026-01-06</span>
             <span class="update-text"
-              >Prompt 提示詞範式革命 - 第四範式的理論正名</span
+              >GPT-2 論文深度解析 - Zero-Shot Learning 的關鍵突破</span
             >
           </a>
         </div>
@@ -355,6 +352,93 @@
                 </div>
               </div>
 
+              <!-- 2019 GPT-2 -->
+              <div class="timeline-item right">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                  <div
+                    class="timeline-header"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 15px;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    <img
+                      src="images/gpt2_hero_20260106.png"
+                      style="
+                        width: 56px;
+                        height: 56px;
+                        object-fit: cover;
+                        border-radius: 8px;
+                      "
+                      alt="GPT-2 Icon"
+                    />
+                    <h3 style="margin: 0">2019 GPT-2</h3>
+                  </div>
+                  <strong>Zero-Shot Learning 的起源</strong>
+                  <p>意外發現：不用微調也能執行多任務。</p>
+                  <p
+                    style="
+                      font-size: 0.85rem;
+                      color: var(--text-secondary);
+                      margin-top: 8px;
+                    "
+                  >
+                    首次證明語言模型可以「零範例」執行任務。雖然效果不完美，但開啟了通往通用
+                    AI 的大門，為 GPT-3 的 Few-Shot Learning 奠定基礎。
+                  </p>
+                  <a href="gpt2-tutorial/index.html" class="quick-link"
+                    >深度解析 →</a
+                  >
+                </div>
+              </div>
+
+              <!-- 2020 Scaling Laws -->
+              <div class="timeline-item left">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                  <div
+                    class="timeline-header"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 15px;
+                      margin-bottom: 10px;
+                      justify-content: flex-end;
+                    "
+                  >
+                    <h3 style="margin: 0">2020 Scaling Laws</h3>
+                    <img
+                      src="scaling-laws-tutorial/images/chapter01_hero.png"
+                      style="
+                        width: 56px;
+                        height: 56px;
+                        object-fit: cover;
+                        border-radius: 8px;
+                      "
+                      alt="Scaling Laws Icon"
+                    />
+                  </div>
+                  <strong>大模型時代的科學預言</strong>
+                  <p>發現性能與規模的冪律關係，預言 GPT-3 成功。</p>
+                  <p
+                    style="
+                      font-size: 0.85rem;
+                      color: var(--text-secondary);
+                      margin-top: 8px;
+                    "
+                  >
+                    證明模型性能隨參數、數據、計算量呈現可預測的冪律增長。
+                    打破「收斂迷思」，提出訓練大模型並提前停止的最優策略。
+                  </p>
+                  <a href="scaling-laws-tutorial/index.html" class="quick-link"
+                    >深度解析 →</a
+                  >
+                </div>
+              </div>
+
               <!-- 2020 GPT-3 -->
               <div class="timeline-item right">
                 <div class="timeline-dot"></div>
@@ -375,8 +459,8 @@
                     />
                     <h3 style="margin: 0">2020 GPT-3</h3>
                   </div>
-                  <strong>規模奇蹟</strong>
-                  <p>175B 參數展現 Few-Shot Learning 能力。</p>
+                  <strong>Few-Shot Learning 的威力</strong>
+                  <p>承接 GPT-2，證明「給幾個範例」效果驚人。</p>
                   <p
                     style="
                       font-size: 0.85rem;
@@ -384,9 +468,9 @@
                       margin-top: 8px;
                     "
                   >
-                    這不僅是一篇關於規模的論文，它更開啟了「提示範式」（Prompting
-                    Paradigm）。它告訴我們，與其費心去重新訓練
-                    AI，不如精煉我們與 AI 對話的方式。
+                    175B
+                    參數讓模型從「幾個範例」中學會新任務，效果接近專業模型。GPT-2
+                    證明了「可行性」，GPT-3 證明了「實用性」。
                   </p>
                   <a href="gpt3-tutorial/index.html" class="quick-link"
                     >深度解析 →</a
@@ -415,8 +499,8 @@
                       alt="Prompt Paradigm Icon"
                     />
                   </div>
-                  <strong>Pre-train, Prompt, and Predict</strong>
-                  <p>正式宣告 NLP 進入「第四範式」。</p>
+                  <strong>理論正名：第四範式</strong>
+                  <p>將 Zero/Few-Shot 系統化成 NLP 新範式。</p>
                   <p
                     style="
                       font-size: 0.85rem;
@@ -424,8 +508,9 @@
                       margin-top: 8px;
                     "
                   >
-                    將 Prompt 從黑魔法變成系統科學，奠定了 In-Context Learning
-                    的理論基礎。
+                    為 GPT-2 和 GPT-3
+                    的實踐提供理論框架。將「Prompt」從技巧昇華為科學，正式宣告
+                    NLP 從「微調時代」進入「提示時代」。
                   </p>
                   <a
                     href="prompt-engineering-tutorial/index.html"
@@ -435,7 +520,7 @@
                 </div>
               </div>
 
-              <!-- 2022 InstructGPT -->
+              <!-- 2021 CLIP -->
               <div class="timeline-item right">
                 <div class="timeline-dot"></div>
                 <div class="timeline-card">
@@ -449,15 +534,103 @@
                     "
                   >
                     <img
+                      src="clip-tutorial/images/chapter01_hero.png"
+                      style="
+                        width: 56px;
+                        height: 56px;
+                        object-fit: cover;
+                        border-radius: 8px;
+                      "
+                      alt="CLIP Icon"
+                    />
+                    <h3 style="margin: 0">2021 CLIP</h3>
+                  </div>
+                  <strong>連接視覺與語言</strong>
+                  <p>從 400M 圖文對中學習，開啟多模態 AI 時代。</p>
+                  <p
+                    style="
+                      font-size: 0.85rem;
+                      color: var(--text-secondary);
+                      margin-top: 8px;
+                    "
+                  >
+                    零樣本在 ImageNet 上達到 76.2% 準確率，匹敵 ResNet-50。
+                    證明了圖像與文字可以在同一個向量空間中對齊， 為 DALL-E
+                    2、GPT-4 等多模態模型奠定基礎。
+                  </p>
+                  <a href="clip-tutorial/index.html" class="quick-link"
+                    >深度解析 →</a
+                  >
+                </div>
+              </div>
+
+              <!-- 2022 InstructGPT -->
+              <div class="timeline-item left">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                  <div
+                    class="timeline-header"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 15px;
+                      margin-bottom: 10px;
+                      justify-content: flex-end;
+                    "
+                  >
+                    <h3 style="margin: 0">2022 InstructGPT</h3>
+                    <img
                       src="images/user_generate_image_20260102041223_7eac_256.png"
                       style="width: 56px; height: 56px; object-fit: contain"
                       alt="InstructGPT Icon"
                     />
-                    <h3 style="margin: 0">2022 InstructGPT</h3>
                   </div>
                   <strong>對齊人類意圖</strong>
                   <p>RLHF 讓 AI 終於能聽懂並遵循指令。</p>
                   <a href="instructgpt-tutorial/index.html" class="quick-link"
+                    >深度解析 →</a
+                  >
+                </div>
+              </div>
+
+              <!-- 2023 GPT-4 -->
+              <div class="timeline-item right">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                  <div
+                    class="timeline-header"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 15px;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    <img
+                      src="gpt4-tutorial/images/chapter01_hero.png"
+                      style="
+                        width: 56px;
+                        height: 56px;
+                        object-fit: cover;
+                        border-radius: 8px;
+                      "
+                      alt="GPT-4 Icon"
+                    />
+                    <h3 style="margin: 0">2023 GPT-4</h3>
+                  </div>
+                  <strong>多模態與人類級性能</strong>
+                  <p>不僅能讀文字，還能看圖片，考試成績超越人類。</p>
+                  <p
+                    style="
+                      font-size: 0.85rem;
+                      color: var(--text-secondary);
+                      margin-top: 8px;
+                    "
+                  >
+                    在律師考試中取得前 10% 的成績，展現了真正的通用推理能力。
+                    引入「可預測擴展」法則，讓大模型訓練成為精確的科學。
+                  </p>
+                  <a href="gpt4-tutorial/index.html" class="quick-link"
                     >深度解析 →</a
                   >
                 </div>

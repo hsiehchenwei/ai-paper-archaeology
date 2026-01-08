@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-2 第3章：模型架構與技術細節</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/model_scaling.png'); height: 70vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>從 117M 到 1.5B</h1>
+            <p class="hero-subtitle">四個模型，一個目標：證明規模的力量</p>
+            <p class="hero-meta">GPT-2 論文深度解析 · 第 3 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">GPT-2 教學</a>
+            <span>/</span>
+            <span class="current">第 3 章</span>
+        </div>
+
+        <h2>2.3. Model（模型架構）</h2>
+
+        <div class="story-container">
+            <p class="drop-cap">
+                GPT-2 並沒有發明全新的架構，而是<strong>大規模擴展</strong>了 GPT-1 的架構。
+                但這個「擴展」並非隨意，而是精心設計的實驗：
+                訓練<strong>四個不同規模</strong>的模型，觀察規模如何影響 Zero-Shot 效能。
+            </p>
+            
+            <div class="section-divider"><span>✦</span></div>
+        </div>
+
+        <div class="original-quote">
+            <strong>📄 論文原文</strong><br><br>
+            "We use a <strong>Transformer (Vaswani et al., 2017) based architecture</strong> for our LMs. The model largely follows the details of the OpenAI GPT model (Radford et al., 2018) with a few modifications."
+            <br><br>
+            <strong>翻譯</strong>：我們為語言模型使用基於 <strong>Transformer (Vaswani et al., 2017)</strong> 的架構。模型在很大程度上遵循 OpenAI GPT 模型 (Radford et al., 2018) 的細節，但有一些修改。
+        </div>
+
+        <h3>🔧 GPT-2 的架構改進</h3>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>📄 論文原文（關鍵修改）</strong><br><br>
+                "<strong>Layer normalization (Ba et al., 2016) was moved to the input of each sub-block</strong>, similar to a pre-activation residual network (He et al., 2016), and an additional layer normalization was added after the final self-attention block. A modified initialization which accounts for the accumulation on the residual path with model depth is used. We scale the weights of residual layers at initialization by a factor of 1/√N where N is the number of residual layers. The vocabulary is expanded to 50,257. We also <strong>increase the context size from 512 to 1024 tokens</strong> and a larger batchsize of 512 is used."
+                <br><br>
+                <strong>翻譯</strong>：<strong>Layer normalization 被移到每個子區塊的輸入處</strong>，類似於預激活殘差網絡，並在最終的 self-attention 區塊後添加了額外的 layer normalization。使用修改後的初始化方法，該方法考慮了模型深度上殘差路徑的累積。我們在初始化時將殘差層的權重縮放 1/√N，其中 N 是殘差層的數量。詞彙表擴展到 50,257。我們還<strong>將 context size 從 512 增加到 1024 tokens</strong>，並使用更大的 batch size 512。
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 關鍵改進點</h4>
+                <ul>
+                    <li>✅ <strong>Pre-activation Layer Norm</strong>：移到輸入處，訓練更穩定</li>
+                    <li>✅ <strong>修改的初始化</strong>：考慮殘差路徑累積，防止梯度爆炸</li>
+                    <li>✅ <strong>擴大 Context Window</strong>：從 512 → 1024 tokens（2倍）</li>
+                    <li>✅ <strong>更大的 Batch Size</strong>：512（更穩定的訓練）</li>
+                    <li>✅ <strong>更大的詞彙表</strong>：50,257 tokens（Byte-Level BPE）</li>
+                </ul>
+            </div>
+        </div>
+
+        <h3>📊 Table 2: 四個模型規模的超參數</h3>
+
+        <div style="margin: 40px 0; text-align: center;">
+            <img src="images/gpt2_size_comparison.png" alt="GPT-2 四種尺寸對比" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12);">
+            <p class="image-caption">
+                GPT-2 的四種尺寸：從 117M 到 1.5B 參數，模型規模逐步擴大
+            </p>
+        </div>
+
+        <div class="original-quote">
+            <strong>📄 論文原文</strong><br><br>
+            "We train a series of language models on WebText that vary in size from 117 million to 1.5 billion parameters as summarized in Table 2. The smallest model is equivalent to the original GPT, and the second smallest equivalent to the largest model from BERT (Devlin et al., 2018). The largest model, which we call GPT-2, has over an order of magnitude more parameters than GPT."
+            <br><br>
+            <strong>翻譯</strong>：我們在 WebText 上訓練了一系列語言模型，參數規模從 1.17 億到 15 億不等，如表 2 所示。最小的模型等同於原始 GPT，第二小的模型等同於 BERT 的最大模型。我們稱為 GPT-2 的最大模型，其參數量比 GPT 多一個數量級以上。
+        </div>
+
+        <table class="arch-table">
+            <thead>
+                <tr>
+                    <th>模型名稱</th>
+                    <th>參數量 (Parameters)</th>
+                    <th>層數 (Layers)</th>
+                    <th>模型維度 (d_model)</th>
+                    <th>特殊說明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>GPT-2 Small</strong></td>
+                    <td>117M</td>
+                    <td>12</td>
+                    <td>768</td>
+                    <td>等同於原始 GPT</td>
+                </tr>
+                <tr>
+                    <td><strong>GPT-2 Medium</strong></td>
+                    <td>345M</td>
+                    <td>24</td>
+                    <td>1024</td>
+                    <td>等同於 BERT-Large</td>
+                </tr>
+                <tr>
+                    <td><strong>GPT-2 Large</strong></td>
+                    <td>762M</td>
+                    <td>36</td>
+                    <td>1280</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><strong>GPT-2 XL</strong></td>
+                    <td>1.5B (1542M)</td>
+                    <td>48</td>
+                    <td>1600</td>
+                    <td>最大模型，本論文主角</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="key-concept">
+            <h4>📐 模型規模的計算</h4>
+            <p>參數量主要由以下因素決定：</p>
+            <ul>
+                <li><strong>Layers（層數）</strong>：更多層 = 更深的網路 = 更強的表達能力</li>
+                <li><strong>d_model（模型維度）</strong>：更高維度 = 更豐富的表示</li>
+                <li><strong>詞彙表大小</strong>：50,257 tokens（所有模型相同）</li>
+                <li><strong>Context Window</strong>：1024 tokens（所有模型相同）</li>
+            </ul>
+            <p>粗略估算：<code>參數量 ≈ 12 × Layers × d_model²</code></p>
+        </div>
+
+        <h3>🔬 實驗設計：為什麼訓練四個模型？</h3>
+
+        <div class="story-container">
+            <p>
+                這不是浪費資源，而是<strong>精心設計的實驗</strong>。
+                OpenAI 想要回答一個關鍵問題：
+            </p>
+            <p style="font-size: 1.2rem; font-weight: 600; color: #667eea; text-align: center; margin: 30px 0;">
+                「規模化（Scaling）是否能持續提升 Zero-Shot 效能？」
+            </p>
+            <p>
+                答案在第 4 章的實驗結果中揭曉：<strong>是的，而且是 log-linear 關係</strong>！
+                這個發現直接促成了 GPT-3 的誕生。
+            </p>
+        </div>
+
+        <h3>⚙️ 訓練細節</h3>
+
+        <div class="technical-detail">
+            <h4>🔢 關鍵數據</h4>
+            <ul>
+                <li><strong>訓練資料</strong>：WebText（40 GB，800萬文件）</li>
+                <li><strong>Context Window</strong>：1024 tokens</li>
+                <li><strong>Batch Size</strong>：512</li>
+                <li><strong>詞彙表大小</strong>：50,257（Byte-Level BPE）</li>
+                <li><strong>優化器</strong>：Adam</li>
+                <li><strong>訓練時間</strong>：論文未明確說明（推測數週到數月）</li>
+            </ul>
+        </div>
+
+        <h3>🎯 為什麼 Context Window 很重要？</h3>
+
+        <div class="example">
+            <h4>🌰 Context Window = 短期記憶</h4>
+            <p>
+                GPT-2 的 1024 tokens 大約是 <strong>700-800 個英文單詞</strong>。
+                這意味著：
+            </p>
+            <ul>
+                <li>✅ 能處理中等長度的文章或對話</li>
+                <li>✅ 足以完成大多數 Zero-Shot 任務</li>
+                <li>❌ 無法處理超長文件（如整本書）</li>
+                <li>❌ 會「忘記」超出 1024 tokens 的內容</li>
+            </ul>
+            <p>
+                這也是為什麼 ChatGPT 會「忘記」對話開頭的內容——
+                Context Window 的限制一直延續到 GPT-3、GPT-4。
+            </p>
+        </div>
+
+        <h3>🔗 與 GPT-1 和 BERT 的比較</h3>
+
+        <div class="paradigm-grid">
+            <div class="paradigm-card">
+                <h4>GPT-1 (2018)</h4>
+                <p>117M 參數</p>
+                <p>12 層</p>
+                <p>768 維</p>
+                <p>512 Context Window</p>
+                <p><strong>需要 Fine-tuning</strong></p>
+            </div>
+            <div class="paradigm-card" style="border: 2px solid #667eea;">
+                <h4>GPT-2 (2019)</h4>
+                <p>1.5B 參數</p>
+                <p>48 層</p>
+                <p>1600 維</p>
+                <p>1024 Context Window</p>
+                <p><strong>Zero-Shot Learning</strong></p>
+            </div>
+            <div class="paradigm-card">
+                <h4>BERT-Large (2018)</h4>
+                <p>345M 參數</p>
+                <p>24 層</p>
+                <p>1024 維</p>
+                <p>512 Context Window</p>
+                <p><strong>雙向 Encoder</strong></p>
+            </div>
+        </div>
+
+        <div class="key-concept">
+            <h4>💡 關鍵差異</h4>
+            <ul>
+                <li><strong>GPT-2 vs GPT-1</strong>：規模擴大 13 倍，Context Window 擴大 2 倍</li>
+                <li><strong>GPT-2 vs BERT</strong>：參數量更大，但 BERT 是雙向（更適合理解任務）</li>
+                <li><strong>Zero-Shot 能力</strong>：GPT-2 的核心突破，BERT 和 GPT-1 都需要 Fine-tuning</li>
+            </ul>
+        </div>
+
+        <h2>🔮 為 GPT-3 鋪路的架構選擇</h2>
+
+        <div class="story-container">
+            <p>
+                GPT-2 的架構設計<strong>並非終點</strong>，而是通往 GPT-3 的橋樑。
+                透過訓練四個不同規模的模型，OpenAI 驗證了一個假設：
+            </p>
+            <p style="font-size: 1.1rem; font-weight: 600; color: #667eea; margin: 20px 0;">
+                「如果 1.5B 參數能帶來如此大的提升，<br>那 100B+ 參數會如何？」
+            </p>
+            <p>
+                這個問題的答案，在 2020 年 GPT-3 的 175B 參數中得到驗證。
+            </p>
+        </div>
+
+        <div class="quote-block">
+            「規模化不僅是一個工程問題，<br>更是通往通用 AI 的一條道路。」
+        </div>
+
+        <div class="navigation">
+            <a href="02-approach-and-dataset.html" class="nav-button">← 上一章：方法論與資料集</a>
+            <a href="04-experiments-and-results.html" class="nav-button">下一章：實驗結果 →</a>
+        </div>
+
+        <div class="chapter-summary">
+            <h3>📝 本章重點回顧</h3>
+            <ul>
+                <li><strong>基於 Transformer</strong>：沿用 GPT-1 架構，但有關鍵改進</li>
+                <li><strong>Pre-activation Layer Norm</strong>：移到輸入處，訓練更穩定</li>
+                <li><strong>擴大 Context Window</strong>：從 512 → 1024 tokens</li>
+                <li><strong>四個模型規模</strong>：117M、345M、762M、1.5B 參數</li>
+                <li><strong>實驗設計</strong>：驗證規模化效應的 log-linear 關係</li>
+                <li><strong>為 GPT-3 鋪路</strong>：證明更大規模 → 更強能力</li>
+            </ul>
+        </div>
+
+        <div class="key-concept" style="margin-top: 40px;">
+            <h3>🎓 理解模型規模的意義</h3>
+            <p>
+                GPT-2 的 1.5B 參數在 2019 年是<strong>非常大</strong>的模型。
+                相比之下：
+            </p>
+            <ul>
+                <li>BERT-Large：345M 參數</li>
+                <li>GPT-1：117M 參數</li>
+                <li>GPT-3（2020）：175B 參數（<strong>117 倍</strong>於 GPT-2）</li>
+                <li>GPT-4（2023）：參數量未公開（推測 >1T）</li>
+            </ul>
+            <p>
+                規模化的競賽，從 GPT-2 開始加速。
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+

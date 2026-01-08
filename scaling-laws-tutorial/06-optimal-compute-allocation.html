@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaling Laws 第6章：計算預算的最優分配 - 最關鍵的發現</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter06_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>最關鍵的發現</h1>
+            <p class="hero-subtitle">訓練大模型並提前停止，而非小模型訓練到收斂</p>
+            <p class="hero-meta">Scaling Laws 論文深度解析 · 第 6 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Scaling Laws 教學</a>
+            <span>/</span>
+            <span class="current">第 6 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                這是整篇論文<strong>最關鍵的發現</strong>，也是預測 GPT-3 成功的核心依據：
+                在固定計算預算下，應該訓練<strong>非常大的模型</strong>並<strong>提前停止</strong>，
+                而非訓練小模型到收斂。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                這個發現顛覆了傳統的訓練策略：
+            </p>
+            <ul>
+                <li><strong>傳統做法</strong>：訓練小模型到完全收斂</li>
+                <li><strong>最優做法</strong>：訓練大模型並提前停止</li>
+            </ul>
+
+            <p>
+                這意味著：<strong>收斂是低效的</strong>。最優的計算效率訓練比基於小模型收斂的預期要樣本高效得多。
+            </p>
+        </div>
+
+        <h2>💰 最優分配策略</h2>
+
+        <div class="paper-section">
+            <div class="key-concept">
+                <h4>📊 最優分配公式</h4>
+                <p>
+                    在固定計算預算 $C_{\rm min}$ 下，最優分配為：
+                </p>
+                <div class="math-block">
+                    $$N \propto C_{\rm min}^{0.73}$$
+                    $$B \propto C_{\rm min}^{0.24}$$
+                    $$S \propto C_{\rm min}^{0.03}$$
+                </div>
+                <p>
+                    <strong>關鍵發現</strong>：計算預算的增長應該主要用於增加模型大小，而非訓練時間或數據量。
+                </p>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/ContributionIllustration.png" alt="Optimal Allocation">
+                <div class="caption">
+                    <strong>Figure:</strong> 隨著計算量增加，我們可以選擇如何分配：訓練更大的模型、使用更大的批次、訓練更多步數。
+                    對於最優的計算效率訓練，大部分增長應該用於增加模型大小。
+                    只需要相對較小的數據增長來避免重複使用。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 數字解讀</h4>
+                <ul>
+                    <li><strong>模型大小</strong>：計算增加 10 倍，模型大小增加約 5.4 倍（$10^{0.73} \approx 5.4$）</li>
+                    <li><strong>批次大小</strong>：計算增加 10 倍，批次大小增加約 1.7 倍（$10^{0.24} \approx 1.7$）</li>
+                    <li><strong>訓練步數</strong>：計算增加 10 倍，步數僅增加約 1.07 倍（$10^{0.03} \approx 1.07$）</li>
+                </ul>
+                <p>
+                    <strong>結論</strong>：幾乎所有計算增長都應該用於增加模型大小，而非訓練時間。
+                </p>
+            </div>
+        </div>
+
+        <h2>⚡ 為什麼收斂是低效的？</h2>
+
+        <div class="paper-section">
+            <div class="figure figure-original">
+                <img src="images/original/SuboptimalModels.png" alt="Suboptimal Models">
+                <div class="caption">
+                    <strong>Figure:</strong> <strong>左圖</strong>：給定固定計算預算，存在一個最優模型大小，
+                    雖然稍大或稍小的模型可以用最少的額外計算進行訓練。
+                    <strong>右圖</strong>：大於計算效率最優大小的模型需要更少的步數來訓練，
+                    如果有足夠的額外並行性，允許更快的訓練。
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 樣本效率的發現</h4>
+                <p>
+                    論文發現：<strong>大模型比小模型更樣本高效</strong>。
+                </p>
+                <ul>
+                    <li>大模型用更少的優化步數達到相同性能</li>
+                    <li>大模型用更少的數據點達到相同性能</li>
+                    <li>因此，訓練大模型並提前停止，比訓練小模型到收斂更高效</li>
+                </ul>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 實際意義</h4>
+                <p>
+                    這意味著：
+                </p>
+                <ul>
+                    <li><strong>數據需求增長緩慢</strong>：$D \sim C^{0.27}$，遠慢於計算量的增長</li>
+                    <li><strong>訓練時間增長極慢</strong>：$S \sim C^{0.03}$，幾乎不增長</li>
+                    <li><strong>模型大小快速增長</strong>：$N \sim C^{0.73}$，是主要增長方向</li>
+                </ul>
+                <p>
+                    這為訓練超大模型（如 GPT-3）提供了理論支持。
+                </p>
+            </div>
+        </div>
+
+        <h2>📉 調整後的計算效率前沿</h2>
+
+        <div class="paper-section">
+            <div class="figure figure-original">
+                <img src="images/original/ComputeEfficientFrontierWithAdjustment.png" alt="Compute Efficient Frontier">
+                <div class="caption">
+                    <strong>Figure:</strong> 當調整性能以模擬遠低於關鍵批次大小的訓練時，
+                    與完全實證結果相比，我們發現 $L(C_{\rm min})$ 的冪律有所改變。
+                    在 $10^{-5}$ PF-days 處的明顯凸起標誌著從 1 層網絡到 2 層網絡的過渡。
+                </div>
+            </div>
+        </div>
+
+        <h2>📊 最優模型大小與訓練步數</h2>
+
+        <div class="paper-section">
+            <div class="figure-grid">
+                <div class="figure figure-original">
+                    <img src="images/original/ComputevsOptimalModelSize.png" alt="Optimal Model Size">
+                    <div class="caption">
+                        <strong>Figure (左):</strong> 每個計算預算 $C_{\rm min}$ 都有一個關聯的最優模型大小 $N$。
+                        最優模型大小隨著 $C_{\rm min}$ 非常快速地增長，計算每增加 10 倍，模型大小增加 5 倍。
+                    </div>
+                </div>
+                <div class="figure figure-original">
+                    <img src="images/original/ComputeEfficientSteps.png" alt="Efficient Steps">
+                    <div class="caption">
+                        <strong>Figure (右):</strong> 處理的數據量占計算增長的其餘部分，
+                        僅增長 2 倍。
+                    </div>
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 關鍵洞察</h4>
+                <ul>
+                    <li><strong>最優模型大小快速增長</strong>：$N \sim C^{0.73}$</li>
+                    <li><strong>數據需求增長緩慢</strong>：$D \sim C^{0.27}$</li>
+                    <li><strong>訓練步數幾乎不變</strong>：$S \sim C^{0.03}$</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>⚠️ 擴展法則的矛盾與極限</h2>
+
+        <div class="paper-section">
+            <div class="figure figure-original">
+                <img src="images/original/Contradiction.png" alt="Contradiction">
+                <div class="caption">
+                    <strong>Figure:</strong> 遠超出我們實證研究的模型大小，
+                    我們發現 $L(C_{\rm min})$ 和 $L(D)$ 方程之間存在矛盾，
+                    這是由於計算效率訓練所需數據增長緩慢造成的。
+                    交叉點標誌著我們預期預測將失效的點。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    論文誠實地指出了擴展法則的極限：
+                </p>
+                <ul>
+                    <li>數據需求增長太慢（$D \sim C^{0.27}$）</li>
+                    <li>最終會與 $L(D)$ 的冪律產生矛盾</li>
+                    <li>這個交叉點標誌著擴展法則失效的邊界</li>
+                </ul>
+                <p>
+                    <strong>科學精神</strong>：論文不僅給出預測公式，也指出其適用範圍和極限。
+                </p>
+            </div>
+        </div>
+
+        <h2>🎯 預測 GPT-3 的成功</h2>
+
+        <div class="paper-section">
+            <div class="key-concept">
+                <h4>📈 從公式到預測</h4>
+                <p>
+                    使用這些公式，論文可以預測：
+                </p>
+                <ul>
+                    <li>如果將模型從 GPT-2 (1.5B) 擴展到 GPT-3 (175B)，性能會如何提升</li>
+                    <li>需要多少計算資源</li>
+                    <li>需要多少數據</li>
+                    <li>需要訓練多少步</li>
+                </ul>
+                <p>
+                    <strong>這就是為什麼這篇論文能夠在 GPT-3 訓練之前就預測其成功</strong>。
+                </p>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            「在固定計算預算下，我們通過訓練非常大的模型並在收斂之前顯著提前停止來達到最優性能。
+            最大化的計算效率訓練因此比基於訓練小模型到收斂的預期要樣本高效得多。」
+        </div>
+
+        <div class="navigation">
+            <a href="05-scaling-with-training-time.html" class="nav-link">← 上一章：訓練時間的擴展法則</a>
+            <a href="07-discussion-and-conclusion.html" class="nav-link">下一章：討論與結論 →</a>
+        </div>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</body>
+</html>
+

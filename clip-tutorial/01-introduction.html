@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLIP 第 1 章：引言與動機 - 連接視覺與語言的橋樑</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter01_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>當圖像遇見文字</h1>
+            <p class="hero-subtitle">400M 圖文對，開啟多模態 AI 的新時代</p>
+            <p class="hero-meta">CLIP 深度解析 · 第 1 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">CLIP 教學</a>
+            <span>/</span>
+            <span class="current">第 1 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                2021 年 2 月，OpenAI 發表了 CLIP (Contrastive Language-Image Pre-training)。
+                這篇論文沒有複雜的新架構，沒有艱深的數學推導，
+                卻用一個簡單但強大的想法改變了計算機視覺的遊戲規則：
+                <strong>讓 AI 直接從互聯網上的 400M 圖文配對中學習視覺概念</strong>。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 1. 核心概念解碼：先建立直覺 -->
+            <div class="paper-section" style="background-color: var(--mag-bg-light); border-left: 5px solid var(--mag-primary);">
+                <h3>🚀 先修概念：CLIP 的世界觀</h3>
+                <p>在深入論文之前，我們需要先打破幾個傳統計算機視覺的舊觀念。CLIP 帶來了兩個核心轉變：</p>
+
+                <div class="key-concept">
+                    <h5>1️⃣ 從「分類標籤」到「自然語言監督」</h5>
+                    <p><strong>傳統 AI (ImageNet)</strong>：像是一個被強迫死記硬背的學生。老師給它 1000 張卡片，每張卡片背後只有一個詞：「狗」、「貓」、「飛機」。它只學會這 1000 個詞，除此之外一無所知。</p>
+                    <p><strong>CLIP</strong>：像是一個博覽群書的學生。它閱讀了網路上 4 億張帶有文字描述的圖片（如「一隻柴犬在草地上接飛盤」）。它不只學會了「狗」，還學會了「草地」、「接飛盤」以及它們之間的關係。這就是<strong>自然語言監督</strong>。</p>
+                </div>
+
+                <div class="key-concept">
+                    <h5>2️⃣ 從「重新訓練」到「零樣本遷移 (Zero-shot)」</h5>
+                    <p><strong>傳統 AI</strong>：如果你教會它認「貓」，現在想讓它認「老虎」，你必須收集老虎的照片，重新訓練模型。它無法舉一反三。</p>
+                    <p><strong>CLIP (Zero-shot)</strong>：它可以<strong>「沒看過考古題直接考試」</strong>。因為它已經讀過夠多關於老虎的文字描述和圖片，當你給它一張從沒見過的老虎照片，並問「這是老虎嗎？」，它可以依靠它對語言和圖像的通用理解直接回答，完全不需要針對「老虎」這個類別重新訓練。</p>
+                    <p><strong>💡 ChatGPT 用戶視角</strong>：就像你給 ChatGPT 一個它訓練時沒見過的冷門程式碼片段，它依然能解釋得頭頭是道，因為它學過的是通用的程式邏輯，而不是死記硬背。</p>
+                </div>
+            </div>
+
+            <!-- 2. 論文摘要 -->
+            <h2>📄 論文摘要 (Abstract)</h2>
+            <div class="paper-section">
+                <div class="original-quote">
+                    <strong>原文</strong>
+                    <p>
+                        State-of-the-art computer vision systems are trained to predict a fixed set of predetermined object categories. This restricted form of supervision limits their generality and usability since additional labeled data is needed to specify any other visual concept.
+                    </p>
+                    <p>
+                        Learning directly from raw text about images is a promising alternative which leverages a much broader source of supervision. We demonstrate that the simple pre-training task of predicting which caption goes with which image is an efficient and scalable way to learn SOTA image representations from scratch on a dataset of 400 million (image, text) pairs collected from the internet.
+                    </p>
+                </div>
+                
+                <div class="translation">
+                    <h4>📝 重點解讀</h4>
+                    <p>
+                        目前的視覺系統受限於「固定的類別列表」。CLIP 提出了一種替代方案：直接從原始文字中學習。
+                        通過一個簡單的任務——<strong>預測哪個文字配哪張圖</strong>——在 4 億組數據上從零開始學習。
+                        這讓模型具備了「零樣本遷移」的能力，在 30 多個不同的數據集上表現優異，甚至匹敵需要大量人工標註的 ResNet-50。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 3. 核心動機 -->
+            <h2>🎯 核心動機：為何視覺領域落後了？</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>
+                        在 NLP (自然語言處理) 領域，GPT-3 已經證明了「從海量網路文字中學習」可以產生強大的通用能力。
+                        但在視覺領域，大家還在用 ImageNet 這種人工標註的數據集（僅 128 萬張，1000 類）。
+                    </p>
+                    <p><strong>CLIP 的野心：</strong> 能否把 GPT 在文字上的成功，複製到視覺領域？</p>
+                    <p>為了做到這點，他們需要放棄「分類」這個舊任務，改用一種新的學習方式。</p>
+                </div>
+            </div>
+
+            <!-- 4. 核心架構 (Figure 1) -->
+            <h2>🏗️ 怎麼做：CLIP 的三部曲 (Architecture)</h2>
+
+            <div class="figure figure-original">
+                <img src="images/original/main-diagrams.png" alt="CLIP 架構圖">
+                <div class="caption">
+                    <strong>Figure 1:</strong> CLIP 運作的三個階段：(1) 對比式預訓練，(2) 從標籤建立分類器，(3) 進行零樣本預測。
+                </div>
+            </div>
+
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>🔍 架構圖深度解析：CLIP 如何運作？</h4>
+                    <p>這張圖不是在比較新舊方法，而是展示 CLIP 從訓練到應用的完整流程：</p>
+                    
+                    <h5>1️⃣ 階段一：訓練 (Contrastive Pre-training)</h5>
+                    <p><strong>「連連看」遊戲</strong></p>
+                    <ul>
+                        <li>看圖中最左邊的部分。我們有一批圖片（綠色）和一批文字描述（紫色）。</li>
+                        <li>模型的任務是：算出哪張圖配哪段文字（對角線上的藍色格子）。</li>
+                        <li><strong>目標</strong>：讓正確配對的相似度變高（I₁配T₁），錯誤配對的相似度變低（I₁不配T₂）。這就叫「對比學習」。</li>
+                    </ul>
+
+                    <h5>2️⃣ 階段二：準備 (Create Dataset Classifier)</h5>
+                    <p><strong>「把標籤變成句子」</strong></p>
+                    <ul>
+                        <li>現在我們要考試了（例如考 ImageNet 分類）。</li>
+                        <li>傳統模型只能看固定的標籤（如 "plane", "car"）。</li>
+                        <li>CLIP 不一樣，它把標籤填入一個句子模板：「A photo of a {object}」。</li>
+                        <li>例如 "plane" 變成了 "A photo of a plane"。然後用文字編碼器把這些句子變成向量。</li>
+                    </ul>
+
+                    <h5>3️⃣ 階段三：預測 (Zero-shot Prediction)</h5>
+                    <p><strong>「找出最像的描述」</strong></p>
+                    <ul>
+                        <li>現在來了一張新圖片（小狗）。</li>
+                        <li>模型計算這張圖與剛才生成的所有句子向量的相似度。</li>
+                        <li>發現它與 "A photo of a dog" 的相似度最高。</li>
+                        <li><strong>Bingo!</strong> 預測結果就是 "dog"。</li>
+                    </ul>
+
+                    <div class="key-concept">
+                        <h6>💡 為什麼這很厲害？</h6>
+                        <p>
+                            注意到了嗎？在第 2 和第 3 階段，模型<strong>沒有進行任何訓練</strong>（沒有更新權重）。
+                            它只是運用它在第 1 階段學到的「圖文對齊」能力，就能直接完成分類任務。
+                            這就是<strong>零樣本 (Zero-shot)</strong> 的魔力。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. 效率對比 (Figure 2) -->
+            <h2>📈 效率對比：為什麼選擇對比學習？</h2>
+            
+            <div class="story-container">
+                <p>
+                    要讓 AI 從文字中學習視覺，其實有好幾種方法。OpenAI 測試了三種，發現「對比學習」是唯一能擴展到 4 億數據量的方法。
+                </p>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/efficiency-ablation.png" alt="CLIP 效率對比">
+                <div class="caption">
+                    <strong>Figure 2:</strong> 學習效率大比拼。<strong>綠線 (CLIP)</strong> 的學習速度比另外兩種方法快得多。
+                </div>
+            </div>
+
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>🔍 為什麼綠線 (CLIP) 贏了？</h4>
+                    <p>這張圖比較了三種教 AI 的方式，我們用<strong>「考試題型」</strong>來類比它們的難度：</p>
+
+                    <div class="key-concept">
+                        <h5>🔵 藍線：Transformer Language Model (看圖作文)</h5>
+                        <p><strong>任務</strong>：給一張圖，要求 AI 寫出完整的描述句子。</p>
+                        <p><strong>難度：⭐⭐⭐⭐⭐ (申論題)</strong></p>
+                        <p>這太難了！AI 不只要認出物體，還要學文法、學修辭。就像要求小學生不但要認出貓，還要寫一篇關於貓的優美散文。所以學習效率最慢（圖中藍線最低）。</p>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>🟠 橘線：Bag of Words Prediction (關鍵字標籤)</h5>
+                        <p><strong>任務</strong>：給一張圖，要求 AI 列出圖中的關鍵字（不分順序）。</p>
+                        <p><strong>難度：⭐⭐⭐ (填空題)</strong></p>
+                        <p>比寫作文簡單，但還是需要 AI 憑空「產生」單詞。效率中等。</p>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>🟢 綠線：CLIP (對比學習)</h5>
+                        <p><strong>任務</strong>：給一張圖和幾個可能的描述，問 AI 哪一個是對的。</p>
+                        <p><strong>難度：⭐ (選擇題)</strong></p>
+                        <p>
+                            這最簡單！AI 只需要判斷「相似度」，不需要自己產出文字。
+                            <strong>做選擇題永遠比寫申論題快。</strong>
+                            這就是為什麼 CLIP (綠線) 的效率能比傳統方法快 12 倍，讓訓練超大規模模型成為可能。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. 歷史與貢獻 -->
+            <h2>🌐 總結：CLIP 的歷史地位</h2>
+
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>
+                        CLIP 的成功不是因為發明了什麼驚天動地的新算法，而是做對了三件事：
+                    </p>
+                    <ol>
+                        <li><strong>找對了老師</strong>：用自然語言（網際網路）當老師，而不是人工標籤。</li>
+                        <li><strong>選對了教材</strong>：收集了 4 億組圖文對 (WebImageText)。</li>
+                        <li><strong>用對了教法</strong>：用「做選擇題」（對比學習）的方式訓練，而不是「寫作文」。</li>
+                    </ol>
+                    <p>
+                        這三者的結合，讓 CLIP 成為了多模態 AI 的基石，為後來的 DALL-E 和 GPT-4 鋪平了道路。
+                    </p>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="index.html" class="nav-button nav-button-prev">
+                    ← 回到目錄
+                </a>
+                <a href="02-natural-language-supervision.html" class="nav-button nav-button-next">
+                    下一章：自然語言監督 →
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

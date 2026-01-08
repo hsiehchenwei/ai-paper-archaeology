@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CLIP 第 3 章：對比式預訓練 - 圖像與文字的對齊</title>
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+  </head>
+  <body>
+    <div
+      class="hero-section"
+      style="background-image: url('images/chapter03_hero.png'); height: 80vh"
+    >
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <h1>對比式預訓練</h1>
+        <p class="hero-subtitle">讓圖像與文字在向量空間中對齊</p>
+        <p class="hero-meta">CLIP 深度解析 · 第 3 章</p>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="../index.html">🏠 首頁</a>
+        <span>/</span>
+        <a href="index.html">CLIP 教學</a>
+        <span>/</span>
+        <span class="current">第 3 章</span>
+      </div>
+
+      <div class="story-container">
+        <p class="story-lead drop-cap">
+          在第 1 章我們看到，CLIP 選擇對比學習而非生成式學習，訓練效率提升了 12
+          倍。
+          但<strong>對比學習到底是什麼？</strong>它如何讓圖像與文字在同一個向量空間中對齊？
+          本章將深入解析 CLIP 的核心訓練機制。
+        </p>
+
+        <div class="section-divider"><span>✦</span></div>
+
+        <p>對比學習的核心思想非常簡單：</p>
+        <ul>
+          <li>
+            <strong>不預測精確文字</strong
+            >：不需要生成「一隻橘貓在陽光下打盹」這樣的完整描述
+          </li>
+          <li>
+            <strong>只判斷配對</strong
+            >：只需要判斷「這張圖像和這段文字是否配對」
+          </li>
+          <li>
+            <strong>向量空間對齊</strong
+            >：讓配對的圖像和文字向量相似度高，不配對的相似度低
+          </li>
+        </ul>
+
+        <p>這個簡單的想法帶來了巨大的優勢：</p>
+        <ul>
+          <li><strong>訓練效率</strong>：比生成式學習快 12 倍</li>
+          <li><strong>表徵質量</strong>：學到的表徵更適合下游任務</li>
+          <li><strong>可擴展性</strong>：可以處理 400M 圖文對</li>
+        </ul>
+      </div>
+
+      <h2>🎯 為何選擇對比學習？</h2>
+
+      <div class="paper-section">
+        <div class="original-quote">
+          <strong>原文</strong>
+          <p>
+            Our initial approach, similar to VirTex, jointly trained an image
+            CNN and text transformer from scratch to predict the caption of an
+            image. However, we encountered difficulties efficiently scaling this
+            method. A 63 million parameter transformer language model, which
+            already uses twice the compute of its ResNet-50 image encoder,
+            learns to recognize ImageNet classes three times slower than a much
+            simpler baseline that predicts a bag-of-words encoding of the same
+            text.
+          </p>
+          <p>
+            Both these approaches share a key similarity. They try to predict
+            the <em>exact</em> words of the text accompanying each image. This
+            is a difficult task due to the wide variety of descriptions,
+            comments, and related text that co-occur with images. Recent work in
+            contrastive representation learning for images has found that
+            contrastive objectives can learn better representations than their
+            equivalent predictive objective. Other work has found that although
+            generative models of images can learn high quality image
+            representations, they require over an order of magnitude more
+            compute than contrastive models with the same performance.
+          </p>
+          <p>
+            Noting these findings, we explored training a system to solve the
+            potentially easier proxy task of predicting only which text
+            <em>as a whole</em> is paired with which image and not the exact
+            words of that text. Starting with the same bag-of-words encoding
+            baseline, we swapped the predictive objective for a contrastive
+            objective and observed a further 4x efficiency improvement in the
+            rate of zero-shot transfer to ImageNet.
+          </p>
+        </div>
+
+        <div class="translation">
+          <h4>📝 中文翻譯</h4>
+          <p>
+            我們最初的方法類似於 VirTex，聯合訓練圖像 CNN 和文字 Transformer
+            從零開始預測圖像的標題。 然而，我們在有效擴展這種方法時遇到了困難。
+            一個 6300 萬參數的 Transformer 語言模型，已經使用了其 ResNet-50
+            圖像編碼器計算量的兩倍， 學習識別 ImageNet
+            類別的速度比預測相同文字的詞袋編碼的簡單基線慢 3 倍。
+          </p>
+          <p>
+            這兩種方法都有一個關鍵相似性。
+            它們試圖預測與每張圖像配對的文字的<em>精確</em>詞彙。
+            這是一個困難的任務，因為與圖像共現的描述、評論和相關文字種類繁多。
+            最近在圖像對比表徵學習方面的工作發現，對比目標可以學習比其等效預測目標更好的表徵。
+            其他工作發現，儘管圖像生成模型可以學習高質量的圖像表徵，
+            但它們需要比具有相同性能的對比模型多一個數量級的計算量。
+          </p>
+          <p>
+            注意到這些發現，我們探索訓練一個系統來解決可能更簡單的代理任務：
+            只預測哪段文字<em>整體</em>與哪張圖像配對，而不是該文字的精確詞彙。
+            從相同的詞袋編碼基線開始，我們將預測目標換成對比目標，
+            觀察到零樣本遷移到 ImageNet 的效率進一步提升了 4 倍。
+          </p>
+        </div>
+
+        <div class="explanation">
+          <h4>💡 三種方法的對比</h4>
+
+          <div style="overflow-x: auto; margin: 20px 0">
+            <table
+              style="
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                overflow: hidden;
+                font-family: 'Inter', sans-serif;
+              "
+            >
+              <thead>
+                <tr style="background: #f8fafc; color: #1e293b">
+                  <th
+                    style="
+                      padding: 16px;
+                      text-align: left;
+                      font-weight: 700;
+                      border-bottom: 2px solid #e2e8f0;
+                      font-size: 0.95rem;
+                    "
+                  >
+                    方法
+                  </th>
+                  <th
+                    style="
+                      padding: 16px;
+                      text-align: left;
+                      font-weight: 700;
+                      border-bottom: 2px solid #e2e8f0;
+                      font-size: 0.95rem;
+                    "
+                  >
+                    任務
+                  </th>
+                  <th
+                    style="
+                      padding: 16px;
+                      text-align: left;
+                      font-weight: 700;
+                      border-bottom: 2px solid #e2e8f0;
+                      font-size: 0.95rem;
+                    "
+                  >
+                    難度
+                  </th>
+                  <th
+                    style="
+                      padding: 16px;
+                      text-align: left;
+                      font-weight: 700;
+                      border-bottom: 2px solid #e2e8f0;
+                      font-size: 0.95rem;
+                    "
+                  >
+                    效率
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="background: #fff; border-bottom: 1px solid #f1f5f9">
+                  <td style="padding: 16px; font-weight: 600; color: #334155">
+                    Transformer<br /><span
+                      style="font-size: 0.85em; color: #64748b"
+                      >(生成式)</span
+                    >
+                  </td>
+                  <td style="padding: 16px; color: #475569">
+                    預測完整標題的每個詞
+                  </td>
+                  <td style="padding: 16px; color: #ef4444">
+                    <span
+                      style="
+                        display: inline-block;
+                        padding: 4px 8px;
+                        background: #fef2f2;
+                        border-radius: 4px;
+                        font-weight: 600;
+                      "
+                      >⭐⭐⭐⭐⭐ 最難</span
+                    >
+                  </td>
+                  <td style="padding: 16px; color: #64748b">
+                    1x <span style="font-size: 0.85em">(基準)</span>
+                  </td>
+                </tr>
+                <tr
+                  style="background: #f8fafc; border-bottom: 1px solid #f1f5f9"
+                >
+                  <td style="padding: 16px; font-weight: 600; color: #334155">
+                    Bag of Words<br /><span
+                      style="font-size: 0.85em; color: #64748b"
+                      >(詞袋)</span
+                    >
+                  </td>
+                  <td style="padding: 16px; color: #475569">
+                    預測文字中出現的詞（無順序）
+                  </td>
+                  <td style="padding: 16px; color: #f59e0b">
+                    <span
+                      style="
+                        display: inline-block;
+                        padding: 4px 8px;
+                        background: #fffbeb;
+                        border-radius: 4px;
+                        font-weight: 600;
+                      "
+                      >⭐⭐⭐ 中等</span
+                    >
+                  </td>
+                  <td style="padding: 16px; color: #059669; font-weight: 600">
+                    3x
+                  </td>
+                </tr>
+                <tr style="background: #eff6ff">
+                  <td
+                    style="
+                      padding: 16px;
+                      font-weight: 700;
+                      color: #1d4ed8;
+                      border-left: 4px solid #3b82f6;
+                    "
+                  >
+                    CLIP<br /><span style="font-size: 0.85em; color: #60a5fa"
+                      >(對比式)</span
+                    >
+                  </td>
+                  <td style="padding: 16px; color: #1e3a8a">
+                    只判斷圖像與文字是否配對
+                  </td>
+                  <td style="padding: 16px; color: #1e40af">
+                    <span
+                      style="
+                        display: inline-block;
+                        padding: 4px 8px;
+                        background: #dbeafe;
+                        border-radius: 4px;
+                        font-weight: 600;
+                      "
+                      >⭐ 最簡單</span
+                    >
+                  </td>
+                  <td
+                    style="
+                      padding: 16px;
+                      color: #1d4ed8;
+                      font-weight: 700;
+                      font-size: 1.1em;
+                    "
+                  >
+                    12x (快 12 倍!)
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="analogy">
+            <h6>🌰 生活類比：學習認人的三種方式</h6>
+            <p><strong>方法 1：生成式（Transformer）</strong></p>
+            <ul>
+              <li>
+                看到一個人，要完整描述：「一個戴眼鏡的男性，穿藍色襯衫，黑色頭髮，站在辦公室裡...」
+              </li>
+              <li>困難：需要記住所有細節並按順序描述</li>
+              <li>效率：最慢</li>
+            </ul>
+
+            <p><strong>方法 2：詞袋（BoW）</strong></p>
+            <ul>
+              <li>
+                看到一個人，列出關鍵詞：「男性、眼鏡、藍色、襯衫、黑色、頭髮、辦公室」
+              </li>
+              <li>改進：不需要順序，更容易</li>
+              <li>效率：快 3 倍</li>
+            </ul>
+
+            <p><strong>方法 3：對比式（CLIP）</strong></p>
+            <ul>
+              <li>給你看 4 張照片和 4 段描述，問：「哪張照片配哪段描述？」</li>
+              <li>最簡單：只需判斷相似度，不需生成文字</li>
+              <li>效率：快 12 倍，效果最好！</li>
+            </ul>
+          </div>
+
+          <div class="key-concept">
+            <h6>💡 為何對比學習更高效？</h6>
+            <ul>
+              <li>
+                <strong>任務更簡單</strong>：二分類（配對/不配對）vs 序列生成
+              </li>
+              <li>
+                <strong>監督更強</strong>：每個 batch 提供 N 個正例和 N²-N
+                個負例
+              </li>
+              <li>
+                <strong>目標更明確</strong
+                >：直接優化表徵空間的對齊，而非文字生成
+              </li>
+              <li>
+                <strong>計算更高效</strong>：不需要自回歸生成，只需計算相似度
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h2>🔬 對比學習的數學原理</h2>
+
+      <div class="paper-section">
+        <div class="original-quote">
+          <strong>原文</strong>
+          <p>
+            Given a batch of $N$ (image, text) pairs, CLIP is trained to predict
+            which of the $N\times N$ possible (image, text) pairings across a
+            batch actually occurred. To do this, CLIP learns a multi-modal
+            embedding space by jointly training an image encoder and text
+            encoder to maximize the cosine similarity of the image and text
+            embeddings of the $N$ real pairs in the batch while minimizing the
+            cosine similarity of the embeddings of the $N^2-N$ incorrect
+            pairings. We optimize a symmetric cross entropy loss over these
+            similarity scores.
+          </p>
+        </div>
+
+        <div class="translation">
+          <h4>📝 中文翻譯</h4>
+          <p>
+            給定一批 $N$ 個（圖像，文字）對，CLIP 被訓練來預測批次中 $N\times N$
+            個可能的（圖像，文字）配對中哪些實際發生了。 為此，CLIP
+            通過聯合訓練圖像編碼器和文字編碼器來學習多模態嵌入空間，
+            最大化批次中 $N$ 個真實配對的圖像和文字嵌入的餘弦相似度， 同時最小化
+            $N^2-N$ 個錯誤配對的嵌入的餘弦相似度。
+            我們在這些相似度分數上優化對稱交叉熵損失。
+          </p>
+        </div>
+
+        <div class="explanation">
+          <h4>📐 對比學習的數學框架</h4>
+
+          <h5>1️⃣ Batch 構建</h5>
+          <p>假設我們有一個 batch，包含 $N$ 個（圖像，文字）配對：</p>
+          <div class="math-block">
+            $$\text{Batch} = \{(I_1, T_1), (I_2, T_2), ..., (I_N, T_N)\}$$
+          </div>
+          <p>其中 $I_i$ 是第 $i$ 張圖像，$T_i$ 是對應的文字描述。</p>
+
+          <h5>2️⃣ 編碼</h5>
+          <p>使用圖像編碼器和文字編碼器將圖像和文字轉為向量：</p>
+
+          <div class="figure figure-ai">
+            <img
+              src="images/generated/clip_embedding_space.png"
+              alt="Embedding Space Visualization"
+            />
+            <div class="caption">
+              <strong>💡 AI 圖解：</strong> 多模態嵌入空間 (Embedding
+              Space)。貓的照片與文字「貓
+              (Cat)」在空間中距離很近（高相似度），而與「車 (Car)」距離很遠。
+            </div>
+          </div>
+
+          <div class="math-block">
+            $$\begin{align} \mathbf{i}_k &= \text{ImageEncoder}(I_k) \in
+            \mathbb{R}^d \\ \mathbf{t}_k &= \text{TextEncoder}(T_k) \in
+            \mathbb{R}^d \end{align}$$
+          </div>
+          <p>其中 $d$ 是嵌入空間的維度（CLIP 使用 512 或更高）。</p>
+
+          <h5>3️⃣ 相似度矩陣</h5>
+          <p>計算所有圖像和文字向量之間的餘弦相似度：</p>
+          <div class="math-block">
+            $$S_{ij} = \frac{\mathbf{i}_i \cdot \mathbf{t}_j}{||\mathbf{i}_i||
+            \cdot ||\mathbf{t}_j||} = \cos(\theta_{ij})$$
+          </div>
+          <p>這產生一個 $N \times N$ 的相似度矩陣：</p>
+          <div class="key-concept">
+            <pre
+              style="
+                background: #f9fafb;
+                color: #1f2937;
+                padding: 20px;
+                border-radius: 8px;
+                overflow-x: auto;
+                font-family: 'Consolas', monospace;
+                font-size: 0.9em;
+                line-height: 1.5;
+              "
+            >
+相似度矩陣 S = 
+┌─────────────────────────────────┐
+│     T₁    T₂    T₃   ...   Tₙ  │
+├─────────────────────────────────┤
+│ I₁  ✓     ✗     ✗    ...   ✗  │  ← I₁ 應該與 T₁ 相似度高
+│ I₂  ✗     ✓     ✗    ...   ✗  │  ← I₂ 應該與 T₂ 相似度高
+│ I₃  ✗     ✗     ✓    ...   ✗  │  ← I₃ 應該與 T₃ 相似度高
+│ ... ...  ...   ...   ...  ...  │
+│ Iₙ  ✗     ✗     ✗    ...   ✓  │  ← Iₙ 應該與 Tₙ 相似度高
+└─────────────────────────────────┘
+
+對角線（✓）：真實配對，相似度應該高
+非對角線（✗）：錯誤配對，相似度應該低
+                    </pre
+            >
+          </div>
+
+          <h5>4️⃣ 損失函數</h5>
+          <p>CLIP 使用<strong>對稱交叉熵損失</strong>：</p>
+          <div class="math-block">
+            $$\begin{align} L_{\text{image}} &= -\frac{1}{N}\sum_{i=1}^{N} \log
+            \frac{\exp(S_{ii} / \tau)}{\sum_{j=1}^{N} \exp(S_{ij} / \tau)} \\
+            L_{\text{text}} &= -\frac{1}{N}\sum_{j=1}^{N} \log \frac{\exp(S_{jj}
+            / \tau)}{\sum_{i=1}^{N} \exp(S_{ij} / \tau)} \\ L_{\text{total}} &=
+            \frac{L_{\text{image}} + L_{\text{text}}}{2} \end{align}$$
+          </div>
+          <p>其中 $\tau$ 是溫度參數（temperature），控制 softmax 的銳度。</p>
+
+          <div class="key-concept">
+            <h6>🔍 損失函數的直觀理解：雙向奔赴</h6>
+            <p>這個公式看起來很複雜，但其實只在做兩件事：</p>
+            <ol>
+              <li>
+                <strong>圖找文 ($L_{\text{image}}$)</strong>：給定一張圖，在 N
+                個文字選項中，找出最配的那個文字。（就像拿著照片找解說牌）
+              </li>
+              <li>
+                <strong>文找圖 ($L_{\text{text}}$)</strong>：給定一段文字，在 N
+                張圖片選項中，找出最配的那張圖。（就像看著解說牌找照片）
+              </li>
+            </ol>
+            <p>
+              <strong>對稱性</strong>意味著：CLIP
+              強調「雙向奔赴」，不僅圖要像文，文也要像圖。這確保了兩者在數學空間中緊密結合。
+            </p>
+          </div>
+
+          <div class="analogy">
+            <h6>🌰 生活類比：配對遊戲</h6>
+            <p>想像一個配對遊戲：</p>
+            <ul>
+              <li>桌上有 4 張照片和 4 段描述</li>
+              <li>你的任務是將照片和描述配對</li>
+              <li>每對一次，你得到一個分數（相似度）</li>
+              <li>目標：讓正確配對的分數最高，錯誤配對的分數最低</li>
+            </ul>
+            <p>CLIP 的訓練就是讓模型學會玩這個遊戲：</p>
+            <ul>
+              <li>模型需要學習將圖像和文字轉換成「可比較」的向量</li>
+              <li>正確配對的向量應該「靠近」（高相似度）</li>
+              <li>錯誤配對的向量應該「遠離」（低相似度）</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h2>💻 CLIP 的偽代碼</h2>
+
+      <div class="figure figure-original">
+        <img src="images/original/pseudocode.png" alt="CLIP 偽代碼" />
+        <div class="caption">
+          <strong>Figure:</strong> CLIP 實現核心的 Numpy 風格偽代碼。
+        </div>
+      </div>
+
+      <div class="paper-section">
+        <div class="explanation">
+          <h4>🔍 偽代碼深度解析</h4>
+
+          <h5>步驟 1：編碼</h5>
+          <pre
+            style="
+              background: #f9fafb;
+              color: #1f2937;
+              padding: 20px;
+              border-radius: 8px;
+              overflow-x: auto;
+              font-family: 'Consolas', monospace;
+              font-size: 0.9em;
+              line-height: 1.5;
+            "
+          ><code># 將圖像和文字編碼為向量
+I_f = image_encoder(I)  # [n, d_i] - n 張圖像，每張 d_i 維
+T_f = text_encoder(T)    # [n, d_t] - n 段文字，每段 d_t 維</code></pre>
+
+          <h5>步驟 2：投影到共同空間</h5>
+          <pre
+            style="
+              background: #f9fafb;
+              color: #1f2937;
+              padding: 20px;
+              border-radius: 8px;
+              overflow-x: auto;
+              font-family: 'Consolas', monospace;
+              font-size: 0.9em;
+              line-height: 1.5;
+            "
+          ><code># 線性投影到多模態嵌入空間
+I_e = l2_normalize(np.dot(I_f, W_i), axis=1)  # [n, d_e]
+T_e = l2_normalize(np.dot(T_f, W_t), axis=1)  # [n, d_e]</code></pre>
+          <p><strong>關鍵點</strong>：</p>
+          <ul>
+            <li>使用線性投影（而非非線性），簡化架構</li>
+            <li>L2 正規化確保向量在單位球面上，餘弦相似度 = 點積</li>
+            <li>圖像和文字投影到相同的維度 $d_e$</li>
+          </ul>
+
+          <h5>步驟 3：計算相似度矩陣</h5>
+          <pre
+            style="
+              background: #f9fafb;
+              color: #1f2937;
+              padding: 20px;
+              border-radius: 8px;
+              overflow-x: auto;
+              font-family: 'Consolas', monospace;
+              font-size: 0.9em;
+              line-height: 1.5;
+            "
+          ><code># 計算所有配對的相似度
+logits = np.dot(I_e, T_e.T) * np.exp(t)  # [n, n]</code></pre>
+          <p><strong>關鍵點</strong>：</p>
+          <ul>
+            <li>由於向量已正規化，點積 = 餘弦相似度</li>
+            <li>乘以 $\exp(t)$ 相當於除以溫度參數 $\tau = 1/\exp(t)$</li>
+            <li>結果是 $N \times N$ 的相似度矩陣</li>
+          </ul>
+
+          <h5>步驟 4：計算損失</h5>
+          <pre
+            style="
+              background: #f9fafb;
+              color: #1f2937;
+              padding: 20px;
+              border-radius: 8px;
+              overflow-x: auto;
+              font-family: 'Consolas', monospace;
+              font-size: 0.9em;
+              line-height: 1.5;
+            "
+          ><code># 對稱交叉熵損失
+labels = np.arange(n)  # [0, 1, 2, ..., n-1] - 對角線索引
+loss_i = cross_entropy_loss(logits, labels, axis=0)  # 圖像 → 文字
+loss_t = cross_entropy_loss(logits, labels, axis=1)  # 文字 → 圖像
+loss = (loss_i + loss_t) / 2  # 對稱損失</code></pre>
+
+          <div class="key-concept">
+            <h6>💡 對稱損失的意義</h6>
+            <ul>
+              <li><strong>圖像 → 文字</strong>：每張圖像應該找到對應的文字</li>
+              <li><strong>文字 → 圖像</strong>：每段文字應該找到對應的圖像</li>
+              <li>
+                <strong>雙向對齊</strong>：確保圖像和文字在向量空間中完全對齊
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h2>⚙️ CLIP 的訓練細節</h2>
+
+      <div class="paper-section">
+        <div class="original-quote">
+          <strong>原文</strong>
+          <p>
+            Due to the large size of our pre-training dataset, over-fitting is
+            not a major concern and the details of training CLIP are simplified
+            compared to the implementation of ConVIRT. We train CLIP from
+            scratch without initializing the image encoder with ImageNet weights
+            or the text encoder with pre-trained weights. We do not use the
+            non-linear projection between the representation and the contrastive
+            embedding space. We instead use only a linear projection to map from
+            each encoder's representation to the multi-modal embedding space.
+          </p>
+          <p>
+            We also simplify the image transformation function. A random square
+            crop from resized images is the only data augmentation used during
+            training. Finally, the temperature parameter which controls the
+            range of the logits in the softmax, $\tau$, is directly optimized
+            during training as a log-parameterized multiplicative scalar to
+            avoid tuning as a hyper-parameter.
+          </p>
+        </div>
+
+        <div class="translation">
+          <h4>📝 中文翻譯</h4>
+          <p>
+            由於預訓練資料集規模很大，過擬合不是主要問題， 與 ConVIRT
+            的實現相比，CLIP 的訓練細節被簡化了。 我們從零開始訓練 CLIP，不使用
+            ImageNet 權重初始化圖像編碼器， 也不使用預訓練權重初始化文字編碼器。
+            我們不在表徵和對比嵌入空間之間使用非線性投影。
+            相反，我們只使用線性投影將每個編碼器的表徵映射到多模態嵌入空間。
+          </p>
+          <p>
+            我們還簡化了圖像變換函數。
+            從調整大小後的圖像中隨機裁剪正方形是訓練期間唯一使用的數據增強。
+            最後，控制 softmax 中 logits 範圍的溫度參數 $\tau$
+            在訓練期間作為對數參數化的乘法標量直接優化， 以避免作為超參數調優。
+          </p>
+        </div>
+
+        <div class="explanation">
+          <h4>🔧 簡化的設計選擇</h4>
+
+          <h5>1️⃣ 從零開始訓練</h5>
+          <ul>
+            <li>
+              <strong>不預訓練</strong>：圖像編碼器不使用 ImageNet 預訓練權重
+            </li>
+            <li>
+              <strong>不預訓練</strong>：文字編碼器不使用語言模型預訓練權重
+            </li>
+            <li><strong>原因</strong>：400M 數據足夠大，可以從零學習</li>
+          </ul>
+
+          <h5>2️⃣ 線性投影（而非非線性）</h5>
+          <div class="key-concept">
+            <h6>為何選擇線性投影？</h6>
+            <ul>
+              <li><strong>簡化架構</strong>：減少參數和計算量</li>
+              <li><strong>效果相當</strong>：實驗發現線性和非線性效果相似</li>
+              <li>
+                <strong>推測</strong>：非線性投影可能只在單模態自監督學習中有用
+              </li>
+            </ul>
+          </div>
+
+          <h5>3️⃣ 簡單的數據增強</h5>
+          <ul>
+            <li><strong>唯一增強</strong>：隨機正方形裁剪</li>
+            <li><strong>無其他增強</strong>：無顏色抖動、無旋轉、無翻轉</li>
+            <li><strong>原因</strong>：數據量足夠大，不需要複雜的增強</li>
+          </ul>
+
+          <h5>4️⃣ 可學習的溫度參數</h5>
+          <ul>
+            <li>
+              <strong>對數參數化</strong>：$\tau = \exp(t)$，其中 $t$
+              是可學習參數
+            </li>
+            <li><strong>剪裁</strong>：限制 $\tau$ 的範圍，防止訓練不穩定</li>
+            <li><strong>優勢</strong>：自動找到最優溫度，無需手動調參</li>
+          </ul>
+
+          <h5>5️⃣ 超大 Batch Size</h5>
+          <ul>
+            <li><strong>32,768</strong>：CLIP 使用非常大的 batch size</li>
+            <li>
+              <strong>原因</strong>：對比學習需要大量負樣本，大 batch
+              提供更多負例
+            </li>
+            <li>
+              <strong>技術</strong>：使用梯度檢查點、混合精度等技術節省記憶體
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>📚 本章小結</h2>
+
+      <div class="paper-section">
+        <div class="explanation">
+          <p><strong>對比學習的核心</strong>：</p>
+          <ul>
+            <li><strong>簡單任務</strong>：只判斷配對，不生成文字</li>
+            <li><strong>高效訓練</strong>：比生成式學習快 12 倍</li>
+            <li><strong>強監督</strong>：每個 batch 提供大量正負樣本</li>
+            <li><strong>向量對齊</strong>：圖像和文字在同一個向量空間中對齊</li>
+          </ul>
+
+          <p><strong>CLIP 的設計哲學</strong>：</p>
+          <ul>
+            <li><strong>簡化</strong>：線性投影、簡單增強、從零訓練</li>
+            <li><strong>規模</strong>：用大數據彌補簡單架構</li>
+            <li><strong>效率</strong>：優化訓練效率，而非模型複雜度</li>
+          </ul>
+
+          <div class="key-concept">
+            <h6>💡 下一章預告</h6>
+            <p>
+              在第 4 章，我們將探討<strong>模型架構與擴展</strong>： CLIP
+              使用哪些編碼器？如何從小模型擴展到大模型？ 為何 Vision Transformer
+              最終表現更好？
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-buttons">
+        <a
+          href="02-natural-language-supervision.html"
+          class="nav-button nav-button-prev"
+        >
+          ← 上一章：自然語言監督
+        </a>
+        <a href="04-model-architecture.html" class="nav-button nav-button-next">
+          下一章：模型架構與擴展 →
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

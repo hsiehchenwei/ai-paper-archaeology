@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLIP 第 6 章：結果分析與穩健性 - 超越監督學習的穩定性</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter06_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>結果分析與穩健性</h1>
+            <p class="hero-subtitle">表徵學習、分佈偏移與人類基準</p>
+            <p class="hero-meta">CLIP 深度解析 · 第 6 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">CLIP 教學</a>
+            <span>/</span>
+            <span class="current">第 6 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                零樣本性能只是 CLIP 能力的一部分。
+                本章將深入分析 CLIP 在<strong>表徵學習</strong>、<strong>魯棒性</strong>和<strong>分佈偏移</strong>上的表現，
+                揭示為何零樣本模型可能比監督模型更可靠。
+            </p>
+        </div>
+
+        <h2>📊 線性探測：表徵質量評估</h2>
+
+        <div class="figure figure-original">
+            <img src="images/original/linear-probes.png" alt="Linear Probe Results">
+            <div class="caption">
+                <strong>Figure:</strong> CLIP 的線性探測結果，展示表徵學習的質量。
+            </div>
+        </div>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <h4>💡 什麼是線性探測？</h4>
+                <p>
+                    <strong>線性探測（Linear Probe）</strong>是評估表徵質量的標準方法：
+                </p>
+                <ol>
+                    <li>凍結預訓練的編碼器（不更新權重）</li>
+                    <li>只在編碼器輸出上訓練一個線性分類器</li>
+                    <li>如果線性分類器表現好，說明表徵質量高</li>
+                </ol>
+
+                <div class="key-concept">
+                    <h6>🔍 為何線性探測重要？</h6>
+                    <ul>
+                        <li><strong>表徵質量</strong>：好的表徵應該線性可分</li>
+                        <li><strong>公平比較</strong>：所有模型使用相同的線性分類器</li>
+                        <li><strong>遷移能力</strong>：表徵質量直接影響下游任務性能</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2>🛡️ 穩健性：分佈偏移的挑戰</h2>
+
+        <div class="figure figure-original">
+            <img src="images/original/robustness-datasets.png" alt="Robustness Analysis">
+            <div class="caption">
+                <strong>Figure:</strong> CLIP 在分佈偏移下的穩健性分析。
+            </div>
+        </div>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    We find that zero-shot CLIP models are much more robust than equivalent accuracy supervised ImageNet models which suggests that zero-shot evaluation of task-agnostic models is much more representative of a model's capability.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    我們發現零樣本 CLIP 模型比同等準確率的監督 ImageNet 模型更穩健，
+                    這表明任務無關模型的零樣本評估更能代表模型的能力。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 什麼是「穩健性」(Robustness)？</h4>
+                <p>
+                    在機器學習中，穩健性（中國大陸譯作「魯棒性」）指的是模型在面對<strong>與訓練數據不同（分佈偏移）</strong>的數據時，仍能保持良好表現的能力。
+                </p>
+
+                <div class="analogy">
+                    <h6>🌰 生活類比：背題庫 vs 懂原理</h6>
+                    <ul>
+                        <li><strong>不穩健（傳統模型）</strong>：就像一個死背考古題的學生。如果考試題目跟考古題一模一樣，他能考 100 分；但只要題目稍微改一個數字或換一種問法（分佈偏移），他就完全不會了。</li>
+                        <li><strong>穩健（CLIP）</strong>：就像一個真正理解原理的學生。不管題目怎麼變，甚至考卷字跡潦草、題目有錯別字，他都能根據對概念的理解答對。</li>
+                    </ul>
+                </div>
+
+                <div class="key-concept">
+                    <h6>🔍 監督學習的問題</h6>
+                    <ul>
+                        <li><strong>過度擬合</strong>：模型可能過度擬合 ImageNet 的特定分佈</li>
+                        <li><strong>分佈偏移</strong>：在 ImageNet 變體上性能大幅下降</li>
+                        <li><strong>評估偏差</strong>：在訓練分佈上表現好，不代表真實能力</li>
+                    </ul>
+                </div>
+
+                <div class="key-concept">
+                    <h6>✅ CLIP 的優勢</h6>
+                    <ul>
+                        <li><strong>多樣化訓練</strong>：400M 圖文對涵蓋廣泛的分佈</li>
+                        <li><strong>語義理解</strong>：學習的是語義概念，而非特定分佈</li>
+                        <li><strong>零樣本評估</strong>：更能反映模型的真實能力</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2>👤 與人類性能的對比</h2>
+
+        <div class="figure figure-original">
+            <img src="images/original/clip_human_difficulty.png" alt="Human Difficulty Comparison">
+            <div class="caption">
+                <strong>Figure:</strong> CLIP 與人類在困難樣本上的對比。
+            </div>
+        </div>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <h4>💡 關鍵發現</h4>
+                <ul>
+                    <li><strong>人類容易的樣本</strong>：CLIP 也容易</li>
+                    <li><strong>人類困難的樣本</strong>：CLIP 也困難</li>
+                    <li><strong>相關性</strong>：CLIP 的錯誤模式與人類相似</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>📚 本章小結</h2>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <p>
+                    <strong>CLIP 的優勢不僅在零樣本性能</strong>：
+                </p>
+                <ul>
+                    <li><strong>表徵質量</strong>：線性探測顯示高質量表徵</li>
+                    <li><strong>穩健性</strong>：比監督模型更能應對分佈偏移</li>
+                    <li><strong>人類相似性</strong>：錯誤模式與人類相似</li>
+                </ul>
+
+                <div class="key-concept">
+                    <h6>💡 下一章預告</h6>
+                    <p>
+                        在第 7 章，我們將探討<strong>限制、偏見與影響</strong>：
+                        CLIP 有哪些弱點？如何處理資料偏見？
+                        負責任開發的思考。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="05-zero-shot-transfer.html" class="nav-button nav-button-prev">
+                ← 上一章：零樣本遷移實驗
+            </a>
+            <a href="07-limitations-and-impacts.html" class="nav-button nav-button-next">
+                下一章：限制、偏見與影響 →
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+
+

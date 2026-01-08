@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-4 第 5 章：限制與挑戰 - 誠實面對 AI 的邊界</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter05_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>AI 的邊界</h1>
+            <p class="hero-subtitle">誠實面對限制與挑戰</p>
+            <p class="hero-meta">GPT-4 Technical Report 深度解析 · 第 5 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">GPT-4 教學</a>
+            <span>/</span>
+            <span class="current">第 5 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                儘管 GPT-4 展現了驚人的能力，但這份技術報告最值得稱讚的地方，
+                是它<strong>誠實地承認了模型的限制</strong>。
+                這不是技術缺陷，而是負責任的 AI 開發應有的態度：
+                只有理解 AI 的邊界，我們才能安全、有效地使用它。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                GPT-4 的主要限制包括：
+            </p>
+            <ul>
+                <li><strong>幻覺問題</strong>：仍然會產生不準確的事實和推理錯誤</li>
+                <li><strong>知識截止</strong>：訓練數據截止到 2021 年 9 月，缺乏最新信息</li>
+                <li><strong>校準問題</strong>：後訓練後，模型的信心校準降低</li>
+                <li><strong>偏見問題</strong>：輸出中仍存在各種偏見，需要持續改進</li>
+            </ul>
+        </div>
+
+        <h2>⚠️ 幻覺問題的改進</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    Despite its capabilities, GPT-4 has similar limitations as earlier GPT models. Most importantly, it still is not fully reliable (it ``hallucinates'' facts and makes reasoning errors). Great care should be taken when using language model outputs, particularly in high-stakes contexts, with the exact protocol (such as human review, grounding with additional context, or avoiding high-stakes uses altogether) matching the needs of specific applications.
+                </p>
+                <p>
+                    GPT-4 significantly reduces hallucinations relative to previous GPT-3.5 models (which have themselves been improving with continued iteration). GPT-4 scores 19 percentage points higher than our latest GPT-3.5 on our internal, adversarially-designed factuality evaluations (Figure~\ref{fig:factual}).
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    儘管 GPT-4 具有這些能力，但它與早期 GPT 模型有類似的限制。
+                    最重要的是，它仍然不完全可靠（會「幻覺」事實並產生推理錯誤）。
+                    在使用語言模型輸出時應格外小心，特別是在高風險場景中，
+                    具體協議（如人工審查、用額外上下文進行基礎驗證，或完全避免高風險用途）
+                    應符合特定應用的需求。
+                </p>
+                <p>
+                    GPT-4 相對於先前的 GPT-3.5 模型（這些模型本身也在持續迭代中改進）
+                    顯著減少了幻覺。GPT-4 在我們內部對抗性設計的事實性評估中
+                    比我們最新的 GPT-3.5 高出 19 個百分點。
+                </p>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/factual.png" alt="Factuality Evaluation">
+                <div class="caption">
+                    <strong>Figure:</strong> GPT-4 在九個內部對抗性設計的事實性評估上的性能。
+                    準確率顯示在 y 軸上，越高越好。
+                    準確率 1.0 意味著模型在所有問題上的答案都被判斷為與人類理想回應一致。
+                    我們將 GPT-4 與三個基於 GPT-3.5 的早期 ChatGPT 版本進行比較；
+                    GPT-4 比最新的 GPT-3.5 模型改進了 19 個百分點，在所有主題上都有顯著提升。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>幻覺問題的改進</strong>：
+                </p>
+                <ul>
+                    <li><strong>19 個百分點的提升</strong>：雖然仍有幻覺，但已經大幅改善</li>
+                    <li><strong>持續改進</strong>：GPT-3.5 本身也在持續迭代中改進，GPT-4 在此基礎上進一步提升</li>
+                    <li><strong>對抗性評估</strong>：使用對抗性設計的評估，更能反映真實世界的挑戰</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：當我們使用 ChatGPT 時，雖然它比 GPT-3.5 更準確，
+                    但仍需要對其輸出進行驗證，特別是在高風險場景中。
+                </p>
+            </div>
+        </div>
+
+        <h2>🎯 TruthfulQA 的挑戰</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    GPT-4 makes progress on public benchmarks like TruthfulQA, which tests the model's ability to separate fact from an adversarially-selected set of incorrect statements. These questions are paired with factually incorrect answers that are statistically appealing. The GPT-4 base model is only slightly better at this task than GPT-3.5; however, after RLHF post-training we observe large improvements over GPT-3.5.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    GPT-4 在 TruthfulQA 等公開基準測試上取得進展，
+                    該測試評估模型從對抗性選擇的不正確陳述集中區分事實的能力。
+                    這些問題與在統計上具有吸引力的不正確答案配對。
+                    GPT-4 基礎模型在這項任務上僅略優於 GPT-3.5；
+                    然而，在 RLHF 後訓練後，我們觀察到相對於 GPT-3.5 的大幅改進。
+                </p>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/truthful_qa.png" alt="TruthfulQA">
+                <div class="caption">
+                    <strong>Figure:</strong> GPT-4 在 TruthfulQA 上的性能。
+                    準確率顯示在 y 軸上，越高越好。
+                    我們比較了 GPT-4 在零樣本提示、少樣本提示和 RLHF 微調後的表現。
+                    GPT-4 顯著優於 GPT-3.5 和 Anthropic-LM。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>TruthfulQA 的挑戰性</strong>：
+                </p>
+                <ul>
+                    <li><strong>對抗性設計</strong>：問題與「統計上具有吸引力」的不正確答案配對，測試模型能否抵抗誘惑</li>
+                    <li><strong>RLHF 的關鍵作用</strong>：基礎模型僅略優於 GPT-3.5，但 RLHF 後訓練帶來大幅改進</li>
+                    <li><strong>仍有錯誤</strong>：報告展示了 GPT-4 正確和錯誤回答的範例，說明問題仍然存在</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這提醒我們，即使是最先進的模型，
+                    在面對精心設計的誤導性問題時，仍可能出錯。
+                    這強調了人工驗證和多重檢查的重要性。
+                </p>
+            </div>
+        </div>
+
+        <h2>📅 知識截止與學習限制</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    GPT-4 generally lacks knowledge of events that have occurred after the vast majority of its pre-training data cuts off in September 2021, and does not learn from its experience. It can sometimes make simple reasoning errors which do not seem to comport with competence across so many domains, or be overly gullible in accepting obviously false statements from a user. It can fail at hard problems the same way humans do, such as introducing security vulnerabilities into code it produces.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    GPT-4 通常缺乏對其大部分預訓練數據截止於 2021 年 9 月之後發生的事件知識，
+                    並且不會從經驗中學習。它有時會犯簡單的推理錯誤，
+                    這似乎與其在如此多領域的能力不符，或者過於輕信地接受用戶明顯錯誤的陳述。
+                    它可能以與人類相同的方式在困難問題上失敗，例如在其生成的代碼中引入安全漏洞。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>知識截止的影響</strong>：
+                </p>
+                <ul>
+                    <li><strong>時間限制</strong>：訓練數據截止到 2021 年 9 月，缺乏最新信息</li>
+                    <li><strong>無法學習</strong>：模型不會從與用戶的互動中學習，每次對話都是獨立的</li>
+                    <li><strong>推理不一致</strong>：有時在簡單問題上出錯，與其在複雜領域的能力不符</li>
+                    <li><strong>過度信任</strong>：可能過於輕信用戶提供的錯誤信息</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：當我們使用 ChatGPT 時，需要注意：
+                </p>
+                <ul>
+                    <li>對於 2021 年 9 月之後的事件，模型可能缺乏知識或提供過時信息</li>
+                    <li>模型不會「記住」之前的對話，每次都是新的開始</li>
+                    <li>需要對模型輸出進行驗證，特別是在涉及事實的場景中</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>📊 校準問題</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    GPT-4 can also be confidently wrong in its predictions, not taking care to double-check work when it's likely to make a mistake. Interestingly, the pre-trained model is highly calibrated (its predicted confidence in an answer generally matches the probability of being correct). However, after the post-training process, the calibration is reduced (Figure~\ref{fig:calibration}).
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    GPT-4 也可能對其預測過於自信，在可能犯錯時不注意雙重檢查。
+                    有趣的是，預訓練模型是高度校準的
+                    （其對答案的預測信心通常與正確的概率相匹配）。
+                    然而，在後訓練過程後，校準降低了。
+                </p>
+            </div>
+
+            <div class="figure-grid">
+                <div class="figure figure-original">
+                    <img src="images/original/calibration_pretrain.png" alt="Pre-training Calibration">
+                    <div class="caption">
+                        <strong>Figure (左):</strong> 預訓練 GPT-4 模型在 MMLU 數據集子集上的校準圖。
+                        x 軸是根據模型對每個問題的 A/B/C/D 選項的信心（logprob）分組的區間；
+                        y 軸是每個區間內的準確率。虛線對角線代表完美校準。
+                    </div>
+                </div>
+                <div class="figure figure-original">
+                    <img src="images/original/calibration_ppo.png" alt="Post-training Calibration">
+                    <div class="caption">
+                        <strong>Figure (右):</strong> 後訓練 GPT-4 模型在相同 MMLU 子集上的校準圖。
+                        後訓練顯著損害了校準。
+                    </div>
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>校準問題的意義</strong>：
+                </p>
+                <ul>
+                    <li><strong>預訓練模型高度校準</strong>：模型的信心與正確概率匹配，這很有用</li>
+                    <li><strong>後訓練降低校準</strong>：RLHF 後訓練雖然提升了有用性和安全性，但降低了校準</li>
+                    <li><strong>過度自信</strong>：模型可能對錯誤答案過於自信，這是一個安全風險</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這意味著當 ChatGPT 說「我確定...」時，
+                    我們不應該完全信任它的信心水平。
+                    這是一個需要持續改進的問題。
+                </p>
+            </div>
+        </div>
+
+        <h2>🔮 與現在 LLM 使用經驗的對照</h2>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <h4>💡 從論文到現實</h4>
+                <p>
+                    當我們今天使用 ChatGPT 時，我們經常遇到報告中描述的限制：
+                </p>
+                <ul>
+                    <li><strong>幻覺問題</strong>：ChatGPT 有時會「編造」事實，特別是在不熟悉的領域。這正是報告中「幻覺」問題的體現，雖然已經改善，但仍存在</li>
+                    <li><strong>知識截止</strong>：當你問 ChatGPT 2022 年或 2023 年的事件時，它可能提供過時或錯誤的信息。這正是報告中「知識截止到 2021 年 9 月」的體現</li>
+                    <li><strong>過度自信</strong>：ChatGPT 有時會對錯誤答案表現得很自信，這正是報告中「校準問題」的體現</li>
+                    <li><strong>推理錯誤</strong>：在簡單問題上出錯，特別是在需要多步驟推理的場景中，這正是報告中「推理錯誤」的體現</li>
+                </ul>
+                <p>
+                    <strong>理解這些限制的意義</strong>：只有理解 AI 的邊界，我們才能：
+                </p>
+                <ul>
+                    <li>知道在什麼場景下可以信任 AI 的輸出</li>
+                    <li>知道何時需要人工驗證</li>
+                    <li>知道如何設計更好的提示詞來獲得準確結果</li>
+                    <li>知道如何與 AI 協作以發揮最大價值</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            「只有誠實面對 AI 的限制，我們才能安全、有效地使用它。
+            理解邊界不是缺陷，而是負責任的 AI 開發應有的態度。」
+        </div>
+
+        <div class="navigation">
+            <a href="04-visual-inputs.html" class="nav-link">← 上一章：視覺輸入能力</a>
+            <a href="06-risks-and-mitigations.html" class="nav-link">下一章：風險與緩解 →</a>
+        </div>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-4 第 1 章：摘要與核心能力 - 多模態 AI 的里程碑</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter01_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>2023 年 3 月的突破</h1>
+            <p class="hero-subtitle">當 AI 首次真正「看見」並「理解」</p>
+            <p class="hero-meta">GPT-4 Technical Report 深度解析 · 第 1 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">GPT-4 教學</a>
+            <span>/</span>
+            <span class="current">第 1 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                2023 年 3 月 15 日，OpenAI 發布了 GPT-4 Technical Report。
+                這不僅是一篇技術報告，更是 AI 發展史上的重要里程碑：
+                <strong>GPT-4 是第一個真正意義上的多模態大語言模型</strong>，
+                能夠同時處理圖像和文字輸入，並在各種專業考試中達到人類級別的性能。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                與 GPT-3 相比，GPT-4 的突破不僅在於規模，更在於：
+            </p>
+            <ul>
+                <li><strong>多模態能力</strong>：首次支援圖像輸入，開啟了視覺理解的新時代</li>
+                <li><strong>人類級別性能</strong>：在律師考試中達到前 10% 的成績，遠超 GPT-3.5 的後 10%</li>
+                <li><strong>可預測擴展</strong>：能夠從小模型準確預測大模型的性能</li>
+                <li><strong>更好的對齊</strong>：在事實性、有用性和安全性上顯著提升</li>
+            </ul>
+
+            <p>
+                這份技術報告的特殊之處在於：<strong>由於競爭和安全考量，OpenAI 選擇不公開模型架構、大小、訓練細節等關鍵技術資訊</strong>。
+                這使得這份報告更像是一份「能力展示報告」而非傳統的學術論文。
+                但即便如此，報告中仍包含了豐富的實驗結果、安全分析和技術洞察，值得深入研讀。
+            </p>
+        </div>
+
+        <h2>📄 論文摘要 (Abstract)</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    We report the development of GPT-4, a large-scale, multimodal model which can accept image and text inputs and produce text outputs. While less capable than humans in many real-world scenarios, GPT-4 exhibits human-level performance on various professional and academic benchmarks, including passing a simulated bar exam with a score around the top 10% of test takers.
+                </p>
+                <p>
+                    GPT-4 is a Transformer-based model pre-trained to predict the next token in a document.
+                    The post-training alignment process results in improved performance on measures of factuality and adherence to desired behavior.
+                </p>
+                <p>
+                    A core component of this project was developing infrastructure and optimization methods that behave predictably across a wide range of scales. This allowed us to accurately predict some aspects of GPT-4's performance based on models trained with no more than 1/1,000th the compute of GPT-4.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    我們報告了 GPT-4 的開發，這是一個大規模、多模態模型，能夠接受圖像和文字輸入並產生文字輸出。
+                    雖然在許多真實世界場景中仍不如人類，但 GPT-4 在各種專業和學術基準測試中表現出人類級別的性能，
+                    包括在模擬律師考試中達到約前 10% 考生的成績。
+                </p>
+                <p>
+                    GPT-4 是一個基於 Transformer 的模型，預訓練用於預測文檔中的下一個 token。
+                    後訓練對齊過程在事實性和遵循期望行為的指標上帶來改進。
+                </p>
+                <p>
+                    本專案的核心組件是開發在廣泛規模範圍內表現可預測的基礎設施和優化方法。
+                    這使我們能夠基於使用不超過 GPT-4 計算量 1/1000 的模型訓練，準確預測 GPT-4 性能的某些方面。
+                </p>
+            </div>
+
+            <div class="key-concept">
+                <h4>🔑 核心要點</h4>
+                <ul>
+                    <li><strong>多模態</strong>：圖像 + 文字輸入 → 文字輸出</li>
+                    <li><strong>人類級別性能</strong>：律師考試前 10%（對比 GPT-3.5 的後 10%）</li>
+                    <li><strong>可預測擴展</strong>：從 1/1000 計算量的小模型預測大模型性能</li>
+                    <li><strong>對齊改進</strong>：RLHF 後訓練提升事實性和安全性</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>🎯 核心突破：從 GPT-3.5 到 GPT-4</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    To test its capabilities in such scenarios, GPT-4 was evaluated on a variety of exams originally designed for humans. In these evaluations it performs quite well and often outscores the vast majority of human test takers. For example, on a simulated bar exam, GPT-4 achieves a score that falls in the top 10% of test takers. This contrasts with GPT-3.5, which scores in the bottom 10%.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    為了在這些場景中測試其能力，GPT-4 在各種原本為人類設計的考試上進行了評估。
+                    在這些評估中，它表現相當出色，經常超過絕大多數人類考生。
+                    例如，在模擬律師考試中，GPT-4 達到的分數落在前 10% 的考生中。
+                    這與 GPT-3.5 形成對比，後者的分數落在後 10%。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>律師考試的驚人突破</strong>：
+                </p>
+                <ul>
+                    <li><strong>GPT-3.5</strong>：後 10%（213/400 分）</li>
+                    <li><strong>GPT-4</strong>：前 10%（298/400 分）</li>
+                    <li><strong>提升幅度</strong>：從後 10% 躍升到前 10%，這是質的飛躍</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這意味著 GPT-4 不僅在「理解」上達到人類水平，
+                    更在「應用知識解決複雜問題」上展現出專業水準。
+                    這為 AI 在專業領域的應用打開了大門。
+                </p>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            「GPT-4 在模擬律師考試中達到前 10% 的成績，這與 GPT-3.5 的後 10% 形成鮮明對比。
+            這不僅是性能的提升，更是能力的質變。」
+        </div>
+
+        <h2>🌍 多語言能力的突破</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    On a suite of traditional NLP benchmarks, GPT-4 outperforms both previous large language models and most state-of-the-art systems (which often have benchmark-specific training or hand-engineering). On the MMLU benchmark, an English-language suite of multiple-choice questions covering 57 subjects, GPT-4 not only outperforms existing models by a considerable margin in English, but also demonstrates strong performance in other languages. On translated variants of MMLU, GPT-4 surpasses the English-language state-of-the-art in 24 of 26 languages considered.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    在一套傳統 NLP 基準測試中，GPT-4 超越了先前的大語言模型和大多數最先進的系統
+                    （這些系統通常有針對特定基準的訓練或手工工程）。
+                    在 MMLU 基準測試中，這是一個涵蓋 57 個學科的英文多選題套件，
+                    GPT-4 不僅在英文上以相當大的優勢超越現有模型，還在其他語言上表現出色。
+                    在 MMLU 的翻譯變體中，GPT-4 在 26 種考慮的語言中有 24 種超越了英文的最先進水平。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>多語言能力的意義</strong>：
+                </p>
+                <ul>
+                    <li><strong>MMLU 涵蓋 57 個學科</strong>：從數學、物理到歷史、哲學</li>
+                    <li><strong>24/26 語言超越英文 SOTA</strong>：包括低資源語言（拉脫維亞語、威爾士語、斯瓦希里語）</li>
+                    <li><strong>零樣本多語言能力</strong>：無需針對特定語言進行微調</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這意味著 GPT-4 不僅是「英文 AI」，
+                    更是一個真正的「多語言 AI」。這為全球化應用奠定了基礎。
+                </p>
+            </div>
+        </div>
+
+        <h2>⚠️ 報告的範圍與限制</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    This report focuses on the capabilities, limitations, and safety properties of GPT-4. GPT-4 is a Transformer-style model pre-trained to predict the next token in a document, using both publicly available data (such as internet data) and data licensed from third-party providers. The model was then fine-tuned using Reinforcement Learning from Human Feedback (RLHF). Given both the competitive landscape and the safety implications of large-scale models like GPT-4, this report contains no further details about the architecture (including model size), hardware, training compute, dataset construction, training method, or similar.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    本報告專注於 GPT-4 的能力、限制和安全屬性。
+                    GPT-4 是一個 Transformer 風格的模型，預訓練用於預測文檔中的下一個 token，
+                    使用公開可用的數據（如互聯網數據）和從第三方提供商授權的數據。
+                    然後使用人類反饋強化學習（RLHF）對模型進行微調。
+                    考慮到競爭環境和大規模模型（如 GPT-4）的安全影響，
+                    本報告不包含關於架構（包括模型大小）、硬體、訓練計算、數據集構建、訓練方法或類似內容的進一步細節。
+                </p>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>為什麼不公開技術細節？</strong>
+                </p>
+                <ul>
+                    <li><strong>競爭考量</strong>：保護商業機密和技術優勢</li>
+                    <li><strong>安全考量</strong>：防止惡意使用和模型複製</li>
+                    <li><strong>負責任披露</strong>：在透明度和安全性之間取得平衡</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這份報告更像是一份「能力展示報告」而非傳統的學術論文。
+                    但即便如此，報告中仍包含了豐富的實驗結果和安全分析，值得深入研讀。
+                </p>
+            </div>
+        </div>
+
+        <h2>🔮 與現在 LLM 使用經驗的對照</h2>
+
+        <div class="paper-section">
+            <div class="explanation">
+                <h4>💡 從論文到現實</h4>
+                <p>
+                    當我們今天使用 ChatGPT、Claude 或其他基於 GPT-4 的服務時，我們正在體驗這份報告中描述的能力：
+                </p>
+                <ul>
+                    <li><strong>多模態能力</strong>：ChatGPT Plus 的圖像輸入功能，正是這份報告中描述的多模態能力的體現</li>
+                    <li><strong>專業級別回答</strong>：當你問 ChatGPT 複雜的法律、醫學或技術問題時，它展現的專業水準正是報告中「前 10% 律師考試成績」的體現</li>
+                    <li><strong>多語言支持</strong>：ChatGPT 能夠流暢處理多種語言，正是報告中「24/26 語言超越英文 SOTA」的體現</li>
+                    <li><strong>更好的對齊</strong>：ChatGPT 拒絕有害請求、提供有用回答的能力，正是報告中「RLHF 改進」的成果</li>
+                </ul>
+                <p>
+                    <strong>理解這份報告的意義</strong>：當我們理解 GPT-4 的技術基礎和能力邊界，
+                    我們就能更好地使用這些 AI 工具，知道它們能做什麼、不能做什麼，
+                    以及如何與它們協作以發揮最大價值。
+                </p>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <a href="index.html" class="nav-link">← 回到目錄</a>
+            <a href="02-predictable-scaling.html" class="nav-link">下一章：可預測擴展 →</a>
+        </div>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</body>
+</html>
+

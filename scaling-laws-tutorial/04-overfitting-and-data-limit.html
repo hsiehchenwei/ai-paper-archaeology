@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaling Laws 第4章：過擬合與數據極限 - 關鍵公式 L(N,D)</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter04_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>過擬合的普遍規律</h1>
+            <p class="hero-subtitle">每增加 8 倍模型，只需增加 5 倍數據</p>
+            <p class="hero-meta">Scaling Laws 論文深度解析 · 第 4 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Scaling Laws 教學</a>
+            <span>/</span>
+            <span class="current">第 4 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                這是整篇論文最關鍵的發現之一：<strong>過擬合遵循可預測的規律</strong>。
+                論文發現，只要按照 $D \propto N^{0.74}$ 的比例同時增加模型大小和數據量，
+                就可以避免過擬合，保持性能的持續提升。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                這個發現的實際意義是：<strong>每增加 8 倍模型，只需增加約 5 倍數據</strong>。
+                這意味著數據需求的增長速度遠慢於模型大小的增長速度，
+                為訓練超大模型提供了可行性。
+            </p>
+        </div>
+
+        <h2>🔑 核心公式：L(N,D)</h2>
+
+        <div class="paper-section">
+            <div class="key-concept">
+                <h4>📐 統一公式：性能與模型大小和數據量</h4>
+                <div class="math-block">
+                    $$L(N, D) = \left[ \left( \frac{N_c}{N} \right)^{\frac{\alpha_N}{\alpha_D}} + \frac{D_c}{D}  \right]^{\alpha_D}$$
+                    <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">
+                        其中 $\alpha_N \approx 0.076$，$\alpha_D \approx 0.095$，$\frac{\alpha_N}{\alpha_D} \approx 0.74$
+                    </p>
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 公式解讀</h4>
+                <ul>
+                    <li><strong>當 $D \to \infty$</strong>：公式退化為 $L(N) = (N_c/N)^{\alpha_N}$（只依賴模型大小）</li>
+                    <li><strong>當 $N \to \infty$</strong>：公式退化為 $L(D) = (D_c/D)^{\alpha_D}$（只依賴數據量）</li>
+                    <li><strong>過擬合項</strong>：$\left( \frac{N_c}{N} \right)^{\frac{\alpha_N}{\alpha_D}}$ 代表模型容量限制</li>
+                    <li><strong>數據項</strong>：$\frac{D_c}{D}$ 代表數據不足的限制</li>
+                </ul>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/DatasetModelSizevsPerformance.png" alt="Dataset vs Model Size">
+                <div class="caption">
+                    <strong>Figure:</strong> 早期停止的測試損失 $L(N, D)$ 可預測地依賴數據集大小 $D$ 和模型大小 $N$。
+                    對於大的 $D$，性能是 $N$ 的直線冪律。對於較小的固定 $D$，隨著 $N$ 增加，性能停止提升，模型開始過擬合。
+                </div>
+            </div>
+        </div>
+
+        <h2>⚖️ 過擬合的普遍性</h2>
+
+        <div class="paper-section">
+            <div class="key-concept">
+                <h4>📊 過擬合比例</h4>
+                <p>
+                    過擬合的程度主要取決於比例：
+                </p>
+                <div class="math-block">
+                    $$\frac{N^{0.74}}{D}$$
+                </div>
+                <p>
+                    這意味著：<strong>每增加 8 倍模型（$8^{0.74} \approx 5$），只需增加 5 倍數據即可避免過擬合</strong>。
+                </p>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/DatasetModelSizevsChangePerformance.png" alt="Overfitting">
+                <div class="caption">
+                    <strong>Figure:</strong> 過擬合的程度主要取決於比例 $N^{0.74}/D$。
+                    這條線是我們對該方程的擬合。
+                </div>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            「性能只要我們同時擴展 $N$ 和 $D$，就會可預測地提升，
+            但如果固定 $N$ 或 $D$ 而增加另一個，就會進入收益遞減的狀態。」
+        </div>
+
+        <div class="navigation">
+            <a href="03-empirical-power-laws.html" class="nav-link">← 上一章：實證結果與基本冪律</a>
+            <a href="05-scaling-with-training-time.html" class="nav-link">下一章：訓練時間的擴展法則 →</a>
+        </div>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</body>
+</html>
+

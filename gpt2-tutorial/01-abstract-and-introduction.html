@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-2 第1章：摘要與引言 - 無監督多任務學習的誕生</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter01_hero.png'); height: 100vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>2019 年 2 月的突破</h1>
+            <p class="hero-subtitle">當 AI 學會在沒有範例的情況下解題</p>
+            <p class="hero-meta">GPT-2 論文深度解析 · 第 1 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">GPT-2 教學</a>
+            <span>/</span>
+            <span class="current">第 1 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                2019 年 2 月，OpenAI 發表了一篇論文，展示了一件令人震驚的事：
+                一個語言模型在完全沒有針對特定任務訓練的情況下，竟然能夠回答問題、翻譯文字、撰寫摘要。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                這不是科幻小說。這是 GPT-2，一個擁有 15 億參數的 Transformer 模型。
+                它的核心主張簡單卻革命性：<strong>語言模型本身就是無監督的多任務學習者</strong>。
+            </p>
+
+            <p>
+                在此之前，AI 系統被視為「狹窄的專家」——你想讓它做翻譯，就得用翻譯資料訓練它；
+                你想讓它回答問題，就得用問答資料訓練它。每個任務都需要專門的資料集和訓練過程。
+            </p>
+
+            <p>
+                但 GPT-2 打破了這個慣例。它只是被訓練來「預測下一個字」，卻在過程中學會了執行各種任務。
+                <strong>這個發現開啟了通往通用 AI 的一扇門，並為一年後 GPT-3 的 Few-Shot Learning 奇蹟奠定了基礎。</strong>
+            </p>
+        </div>
+
+        <div class="key-concept">
+            <h4>🔗 演進脈絡</h4>
+            <div class="evolution-grid">
+                <div>
+                    <strong style="color: var(--mag-primary);">📍 本篇：GPT-2 (2019)</strong>
+                    <p style="font-size: 0.95rem; margin: 8px 0 0 0;">Zero-Shot Learning<br>證明不用微調也能做任務</p>
+                </div>
+                <div style="opacity: 0.6;">
+                    <strong>⏭️ 下一步：GPT-3 (2020)</strong>
+                    <p style="font-size: 0.95rem; margin: 8px 0 0 0;">Few-Shot Learning<br>給幾個範例效果更好</p>
+                </div>
+                <div style="opacity: 0.6;">
+                    <strong>⏭️ 理論化：Prompt (2021)</strong>
+                    <p style="font-size: 0.95rem; margin: 8px 0 0 0;">第四範式正名<br>將發現系統化成理論</p>
+                </div>
+            </div>
+        </div>
+
+        <h2>📄 論文摘要</h2>
+        
+        <div class="paper-section">
+            <h3>🎯 核心主張</h3>
+            <p>
+                論文標題：<strong>Language Models are Unsupervised Multitask Learners</strong>
+                （語言模型是無監督的多任務學習者）
+            </p>
+            
+            <div class="key-concept">
+                <h4>💡 關鍵發現</h4>
+                <ul>
+                    <li><strong>Zero-Shot Learning</strong>：GPT-2 可以在沒有任何任務特定訓練的情況下執行任務</li>
+                    <li><strong>WebText 資料集</strong>：從 800 萬個網頁收集的 40GB 高品質文字資料</li>
+                    <li><strong>規模效應</strong>：模型容量越大，Zero-Shot 效能提升呈現 log-linear 關係</li>
+                    <li><strong>SOTA 表現</strong>：在 8 個語言模型測試集中，7 個達到當時最佳效能</li>
+                </ul>
+            </div>
+
+            <h3>📊 令人震驚的數字</h3>
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>15 億參數</h4>
+                    <p>GPT-2 最大版本的參數量，是 GPT-1 的 10 倍以上</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>55 F1 分數</h4>
+                    <p>在 CoQA 閱讀理解任務上，超越 3/4 的基準系統，卻沒用任何訓練範例</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>7/8 SOTA</h4>
+                    <p>在 8 個語言模型資料集中，7 個達到當時最佳效能（Zero-Shot）</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>仍然 Underfit</h4>
+                    <p>即使是最大的模型，仍未完全學習 WebText 資料集</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            「這些發現暗示了一條充滿希望的道路：
+            建立能從自然語言示範中學習執行任務的語言處理系統。」
+        </div>
+
+        <h2>🎭 引言：AI 的困境</h2>
+
+        <div class="story-container">
+            <h3>狹窄專家 vs 通用智能</h3>
+            <p>
+                論文開頭直指 AI 領域的一個核心問題：現代機器學習系統雖然在特定任務上表現出色，
+                但它們是「<strong>狹窄的專家</strong>」，而非「<strong>通用的智能</strong>」。
+            </p>
+
+            <p>
+                想像一下：你訓練一個 AI 模型來辨識貓的圖片，它可能達到 99% 的準確率。
+                但如果你稍微改變圖片的風格、角度，或是讓它去辨識狗，效能可能就會崩潰。
+                這種脆弱性正是當時（2019年）AI 系統的通病。
+            </p>
+
+            <h3>🔄 傳統方法的侷限</h3>
+            <p>傳統的 AI 開發流程是這樣的：</p>
+            <ol>
+                <li>收集一個任務特定的資料集（例如：10萬個翻譯句對）</li>
+                <li>訓練一個模型來模仿這些範例的行為</li>
+                <li>在獨立的測試集上評估效能</li>
+            </ol>
+
+            <p>
+                這個方法在單一任務上有效，但有個根本問題：
+                <strong>缺乏泛化能力</strong>（generalization）。
+                你需要為每個新任務都重複這個昂貴且耗時的過程。
+            </p>
+
+            <h3>🌐 多任務學習的挑戰</h3>
+            <p>
+                有人嘗試過多任務學習（multitask learning），讓一個模型同時學習多個任務。
+                但當時（2019年）最雄心勃勃的嘗試也只訓練了 10-17 個「（資料集, 目標）對」。
+            </p>
+
+            <p>
+                論文指出一個關鍵洞察：從 meta-learning 的角度來看，
+                每個「（資料集, 目標）對」就是一個「訓練範例」。
+                而現代 ML 系統需要<strong>成百上千個範例</strong>才能泛化。
+            </p>
+
+            <p>
+                這意味著要真正實現多任務學習，我們可能需要同樣數量級的任務。
+                而手動創建這麼多資料集幾乎是不可能的。
+            </p>
+        </div>
+
+        <div class="key-concept">
+            <h3>💡 GPT-2 的解決方案</h3>
+            <p>
+                與其費力去創建成千上萬個任務特定的資料集，
+                GPT-2 提出了一個更激進的想法：
+            </p>
+            <p style="font-size: 1.2rem; font-weight: 600; color: #667eea; text-align: center; margin: 20px 0;">
+                「讓語言模型從網路上的自然語言中<br>自動學習執行各種任務」
+            </p>
+            <p>
+                這個想法的核心假設是：網際網路上已經包含了大量「自然發生的任務示範」。
+                只要模型夠大、資料夠多，它就能從中學會執行這些任務。
+            </p>
+        </div>
+
+        <h2>🔬 核心概念解析</h2>
+
+        <div class="paper-section">
+            <h3>1️⃣ Zero-Shot Learning（零樣本學習）</h3>
+            
+            <div class="definition">
+                <strong>定義：</strong>模型在沒有見過任何任務特定的訓練範例的情況下，
+                直接執行該任務。
+            </div>
+
+            <div style="margin: 40px 0; text-align: center;">
+                <img src="images/zero_shot_comic.png" alt="Zero-Shot Learning 概念漫畫" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12);">
+                <p class="image-caption">
+                    Zero-Shot Learning：左邊的傳統模型需要大量範例才能學習，右邊的 GPT-2 只需理解任務就能執行
+                </p>
+            </div>
+
+            <div class="example">
+                <h4>🌰 生活類比</h4>
+                <p>
+                    想像你從小到大閱讀了大量書籍、文章、對話。
+                    某天有人要你「把這段中文翻譯成英文」，即使你從未接受過正式的翻譯訓練，
+                    你可能也能做出合理的嘗試——因為你見過大量中英文對照的例子。
+                </p>
+                <p>
+                    GPT-2 就是這樣：它只是被訓練來「預測下一個字」，
+                    但在學習預測的過程中，它見過大量網頁內容，
+                    其中包含翻譯、問答、摘要等各種「自然示範」。
+                </p>
+            </div>
+
+            <h3>2️⃣ 語言模型作為無監督多任務學習者</h3>
+            
+            <div class="technical-detail">
+                <h4>📐 數學表述</h4>
+                <p>傳統的監督學習估計條件機率：</p>
+                <pre>p(output | input, task)</pre>
+                <p>
+                    問題是：如何讓模型知道要執行哪個「task」？
+                    傳統方法是用不同的模型架構或訓練演算法來指定任務。
+                </p>
+                <p>
+                    <strong>GPT-2 的創新</strong>：用自然語言來指定任務！
+                </p>
+                <pre>翻譯範例：
+"translate to french, english text, french text"
+
+問答範例：
+"answer the question, document, question, answer"</pre>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    語言模型的目標是預測 p(x)，即整個序列的機率。
+                    如果我們把「任務 + 輸入 + 輸出」都寫成一個序列，
+                    那麼最小化語言模型的損失，在原則上也就是最小化監督學習的損失！
+                </p>
+                <p>
+                    換句話說：<strong>無監督的目標包含了監督的目標</strong>。
+                </p>
+            </div>
+
+            <h3>3️⃣ WebText 資料集</h3>
+            
+            <div class="solution">
+                <h4>🌐 為什麼需要新資料集？</h4>
+                <p>
+                    雖然 Common Crawl 等網路爬蟲資料集很大，
+                    但它們包含大量低品質內容（垃圾郵件、亂碼等）。
+                </p>
+                <p>
+                    <strong>GPT-2 的解決方案：</strong>
+                    只爬取 Reddit 上至少獲得 3 個讚的連結。
+                    這是一種啟發式的「品質過濾」——至少有些人覺得這個連結值得一看。
+                </p>
+                
+                <h4>📊 資料集規模</h4>
+                <ul>
+                    <li>來源：4500 萬個 Reddit 連結</li>
+                    <li>爬取：800 萬個網頁</li>
+                    <li>大小：40GB 文字</li>
+                    <li>去重：移除所有 Wikipedia 內容（避免測試集污染）</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>🎯 為什麼這很重要？</h2>
+
+        <div class="story-container">
+            <h3>從 GPT-1 到 GPT-2 的跳躍</h3>
+            <p>
+                GPT-1（2018）已經證明了 Transformer 預訓練的威力，
+                但它仍然需要<strong>針對每個任務進行微調</strong>（fine-tuning）。
+            </p>
+
+            <p>
+                GPT-2 的突破在於：<strong>完全不需要微調</strong>。
+                只要給它一個自然語言的「提示」（prompt），
+                它就能理解你想做什麼，並嘗試完成任務。
+            </p>
+
+            <h3>為 GPT-3 鋪路</h3>
+            <p>
+                GPT-2 驗證了兩個關鍵假設：
+            </p>
+            <ol>
+                <li><strong>規模化有效</strong>：模型越大，Zero-Shot 效能越好</li>
+                <li><strong>資料品質重要</strong>：WebText 比 Common Crawl 效果更好</li>
+            </ol>
+
+            <p>
+                這為 GPT-3（2020）的 Few-Shot Learning 奠定了基礎。
+                如果 Zero-Shot 已經有效，那給模型一些範例（Few-Shot）豈不是更強？
+                事實證明確實如此。
+            </p>
+        </div>
+
+        <div class="timeline" style="margin: 60px 0;">
+            <h3 style="text-align: center; margin-bottom: 30px;">🔗 GPT 系列的演進</h3>
+            <div class="paradigm-grid">
+                <div class="paradigm-card" style="opacity: 0.6;">
+                    <h4>2018 GPT-1</h4>
+                    <p>117M 參數</p>
+                    <p>需要微調（Fine-tuning）</p>
+                </div>
+                <div class="paradigm-card" style="border: 2px solid #667eea;">
+                    <h4>2019 GPT-2</h4>
+                    <p>1.5B 參數</p>
+                    <p><strong>Zero-Shot Learning</strong></p>
+                </div>
+                <div class="paradigm-card" style="opacity: 0.6;">
+                    <h4>2020 GPT-3</h4>
+                    <p>175B 參數</p>
+                    <p>Few-Shot Learning</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <a href="index.html" class="nav-button">← 回到目錄</a>
+            <a href="02-approach-and-dataset.html" class="nav-button">下一章：方法論與資料集 →</a>
+        </div>
+
+        <div class="chapter-summary">
+            <h3>📝 本章重點回顧</h3>
+            <ul>
+                <li>GPT-2 證明語言模型可以是「無監督的多任務學習者」</li>
+                <li>Zero-Shot Learning：無需任務特定訓練即可執行任務</li>
+                <li>WebText 資料集：800萬網頁，40GB高品質文字</li>
+                <li>規模化效應：模型越大，效能提升呈 log-linear</li>
+                <li>為 GPT-3 的 Few-Shot Learning 奠定基礎</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+

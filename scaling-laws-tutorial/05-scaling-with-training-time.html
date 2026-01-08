@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaling Laws 第5章：訓練時間的擴展法則 - 學習曲線預測</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/chapter05_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>學習曲線的可預測性</h1>
+            <p class="hero-subtitle">從訓練早期預測最終性能</p>
+            <p class="hero-meta">Scaling Laws 論文深度解析 · 第 5 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Scaling Laws 教學</a>
+            <span>/</span>
+            <span class="current">第 5 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                論文的另一個關鍵發現是：<strong>訓練曲線遵循可預測的冪律</strong>。
+                這意味著你可以從訓練早期的表現，預測模型最終能達到什麼性能。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <p>
+                更重要的是，論文發現：<strong>大模型比小模型更樣本高效</strong>。
+                它們用更少的優化步數和數據點就能達到相同的性能水平。
+            </p>
+        </div>
+
+        <h2>📈 學習曲線公式：L(N, S)</h2>
+
+        <div class="paper-section">
+            <div class="key-concept">
+                <h4>📐 性能與模型大小和訓練步數</h4>
+                <div class="math-block">
+                    $$L(N, S) = \left( \frac{N_c}{N} \right)^{\alpha_N}  + \left( \frac{S_c }{S_{\rm min}(S)} \right)^{\alpha_S}$$
+                    <p style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">
+                        其中 $S_c \approx 2.1 \times 10^3$，$\alpha_S \approx 0.76$
+                    </p>
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 公式解讀</h4>
+                <ul>
+                    <li><strong>第一項</strong>：模型容量限制（與 $N$ 相關）</li>
+                    <li><strong>第二項</strong>：訓練步數限制（與 $S$ 相關）</li>
+                    <li><strong>$S_{\rm min}(S)$</strong>：在大批次大小下訓練時的最小步數</li>
+                </ul>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/LearningCurveFitComparisonIntro.png" alt="Learning Curves">
+                <div class="caption">
+                    <strong>Figure:</strong> 在初始瞬態期後，所有模型大小的學習曲線都可以用公式擬合。
+                </div>
+            </div>
+        </div>
+
+        <h2>⚡ 樣本效率：大模型更高效</h2>
+
+        <div class="paper-section">
+            <div class="figure figure-original">
+                <img src="images/original/EfficiencyIllustration.png" alt="Sample Efficiency">
+                <div class="caption">
+                    <strong>Figure:</strong> 一系列語言模型訓練運行，模型大小從 $10^3$ 到 $10^9$ 參數（排除嵌入）。
+                    大模型用更少的步數達到相同性能。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵發現</h4>
+                <p>
+                    <strong>大模型比小模型更樣本高效</strong>：
+                </p>
+                <ul>
+                    <li>用更少的優化步數達到相同性能</li>
+                    <li>用更少的數據點達到相同性能</li>
+                    <li>這為「提前停止」策略提供了理論支持</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>🎯 關鍵批次大小 (Critical Batch Size)</h2>
+
+        <div class="paper-section">
+            <div class="original-quote">
+                <strong>原文</strong>
+                <p>
+                    There is a critical batch size $B_{\rm crit}$ for training; training at larger batch sizes 
+                    provides minimal benefits in terms of compute efficiency. The critical batch size roughly doubles 
+                    for every 13% decrease in loss, and does not depend directly on model size except through the value of the loss achieved.
+                </p>
+            </div>
+
+            <div class="translation">
+                <h4>📝 中文翻譯</h4>
+                <p>
+                    訓練有一個關鍵批次大小 $B_{\rm crit}$；使用更大的批次大小訓練在計算效率方面提供的好處微乎其微。
+                    關鍵批次大小在損失每減少 13% 時大約翻倍，並且不直接依賴於模型大小，而是取決於所達到的損失值。
+                </p>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/CriticalBatchSizeVsPerf.png" alt="Critical Batch Size">
+                <div class="caption">
+                    <strong>Figure:</strong> 關鍵批次大小 $B_{\rm crit}$ 隨損失呈冪律變化，
+                    不直接依賴於模型大小。損失每減少 13%，$B_{\rm crit}$ 約翻倍。
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>💡 關鍵洞察</h4>
+                <p>
+                    <strong>什麼是關鍵批次大小？</strong>
+                </p>
+                <ul>
+                    <li>當批次大小 $B < B_{\rm crit}$ 時，增加批次可以提高訓練效率</li>
+                    <li>當 $B > B_{\rm crit}$ 時，再增加批次對效率幫助不大</li>
+                    <li>$B_{\rm crit}$ 只取決於性能水平，不取決於模型大小</li>
+                </ul>
+                <p>
+                    <strong>實務意義</strong>：這告訴我們應該使用多大的批次大小。
+                    超過 $B_{\rm crit}$ 後，增加批次只會浪費並行計算資源，而不會加速收斂。
+                </p>
+            </div>
+        </div>
+
+        <h2>📊 固定計算預算或固定步數下的性能</h2>
+
+        <div class="paper-section">
+            <div class="figure-grid">
+                <div class="figure figure-original">
+                    <img src="images/original/PerfVsParams-ComputeBudget.png" alt="Performance vs Compute Budget">
+                    <div class="caption">
+                        <strong>Figure (左):</strong> 固定計算預算時，存在最優模型大小。
+                    </div>
+                </div>
+                <div class="figure figure-original">
+                    <img src="images/original/PerfVsParams-StepBudget.png" alt="Performance vs Step Budget">
+                    <div class="caption">
+                        <strong>Figure (右):</strong> 固定訓練步數時，性能隨模型大小變化。
+                    </div>
+                </div>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 關鍵發現</h4>
+                <ul>
+                    <li><strong>固定計算預算</strong>：每個預算都有一個最優模型大小</li>
+                    <li><strong>固定訓練步數</strong>：更大的模型總是更好</li>
+                    <li>這些結果為第 6 章的計算預算最優分配奠定了基礎</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            「訓練曲線遵循可預測的冪律，其參數大致獨立於模型大小。
+            通過外推訓練曲線的早期部分，我們可以大致預測如果訓練更長時間會達到的損失。」
+        </div>
+
+        <div class="navigation">
+            <a href="04-overfitting-and-data-limit.html" class="nav-link">← 上一章：過擬合與數據極限</a>
+            <a href="06-optimal-compute-allocation.html" class="nav-link">下一章：計算預算的最優分配 →</a>
+        </div>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</body>
+</html>
+
