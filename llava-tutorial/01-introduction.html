@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLaVA 第 1 章：引言與動機 - 會看圖的 ChatGPT</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/generated/hero_llava.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>當 AI 學會「看圖說話」</h1>
+            <p class="hero-subtitle">指令微調從語言延伸到視覺的開創性跨越</p>
+            <p class="hero-meta">LLaVA 深度解析 · 第 1 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">LLaVA 教學</a>
+            <span>/</span>
+            <span class="current">第 1 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                2023 年 4 月，一篇名為「Visual Instruction Tuning」的論文在 arXiv 上發表。
+                這篇論文沒有提出複雜的新架構，也沒有使用數十億美元的算力，
+                卻用一個簡單但強大的想法改變了多模態 AI 的遊戲規則：
+                <strong>讓語言模型也能「看圖說話」，並且像 ChatGPT 一樣聽從人類指令</strong>。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 1. 核心概念解碼：先建立直覺 -->
+            <div class="paper-section" style="background-color: var(--mag-bg-light); border-left: 5px solid var(--mag-primary);">
+                <h3>🚀 先修概念：LLaVA 的世界觀</h3>
+                <p>在深入論文之前，我們需要先理解 LLaVA 帶來的兩個核心轉變：</p>
+
+                <div class="key-concept">
+                    <h5>1️⃣ 從「分類模型」到「通用助手」</h5>
+                    <p><strong>傳統視覺 AI (ImageNet 時代)</strong>：像是一個只會回答「是/否」的機器。你給它一張圖片，它只能告訴你「這是狗」或「這是貓」。如果你問「這隻狗在做什麼？」它就啞口無言了。</p>
+                    <p><strong>LLaVA (指令微調時代)</strong>：像是一個能自由對話的視覺助手。它不只能識別物體，還能回答複雜問題：「這張圖有什麼不尋常的地方？」「為什麼這個場景很危險？」「你能詳細描述這張圖嗎？」</p>
+                </div>
+
+                <div class="key-concept">
+                    <h5>2️⃣ 從「文字世界」到「多模態世界」</h5>
+                    <p><strong>ChatGPT 的成功</strong>：OpenAI 證明了「指令微調」(Instruction Tuning) 可以讓語言模型變得極度有用。給 GPT-3 加上指令微調，就得到了 ChatGPT——一個能聽懂人類意圖並完成各種任務的助手。</p>
+                    <p><strong>LLaVA 的突破</strong>：如果指令微調在純文字領域這麼成功，為什麼不把它延伸到<strong>視覺+語言</strong>的多模態領域？LLaVA 就是第一個回答這個問題的模型。</p>
+                    <p><strong>💡 ChatGPT 用戶視角</strong>：就像 ChatGPT 能理解你的各種文字指令，LLaVA 能理解你的各種<strong>視覺指令</strong>——「描述這張圖」「找出不尋常的地方」「解釋這個場景的背景」。</p>
+                </div>
+            </div>
+
+            <div class="figure figure-ai">
+                <img src="images/generated/traditional_vs_llava.png" alt="傳統 AI vs LLaVA 對比">
+                <div class="caption">
+                    <strong>對比圖：</strong>傳統視覺 AI 只能做分類（「這是狗」），而 LLaVA 能進行複雜對話與推理。
+                </div>
+            </div>
+
+            <!-- 2. 論文摘要 -->
+            <h2>📄 論文摘要 (Abstract)</h2>
+            <div class="paper-section">
+                <div class="original-quote">
+                    <strong>原文</strong>
+                    <p>
+                        Instruction tuning large language models (LLMs) using machine-generated instruction-following data has been shown to improve zero-shot capabilities on new tasks, but the idea is less explored in the multimodal field.
+                    </p>
+                    <p>
+                        We present the first attempt to use language-only GPT-4 to generate multimodal language-image instruction-following data. By instruction tuning on such generated data, we introduce LLaVA: Large Language and Vision Assistant, an end-to-end trained large multimodal model that connects a vision encoder and an LLM for general-purpose visual and language understanding.
+                    </p>
+                    <p>
+                        Our experiments show that LLaVA demonstrates impressive multimodal chat abilities, sometimes exhibiting the behaviors of multimodal GPT-4 on unseen images/instructions, and yields a 85.1% relative score compared with GPT-4 on a synthetic multimodal instruction-following dataset. When fine-tuned on Science QA, the synergy of LLaVA and GPT-4 achieves a new state-of-the-art accuracy of 92.53%.
+                    </p>
+                </div>
+                
+                <div class="translation">
+                    <h4>📝 重點解讀</h4>
+                    <p>
+                        <strong>核心創新</strong>：LLaVA 是<strong>第一個</strong>將指令微調 (Instruction Tuning) 概念延伸到多模態領域的模型。
+                    </p>
+                    <p>
+                        <strong>資料來源</strong>：使用<strong>語言版 GPT-4</strong>（無法看圖的版本）來生成多模態指令資料。這聽起來很矛盾——如何讓一個看不見的模型教會另一個模型看圖？答案在第 3 章揭曉。
+                    </p>
+                    <p>
+                        <strong>驚人表現</strong>：LLaVA 在多模態對話上達到 GPT-4 的 85.1% 水準，在 Science QA 科學問答任務上創下 92.53% 的新紀錄。要知道，GPT-4 是閉源且成本極高的商業模型，而 LLaVA 是開源的。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 3. 核心動機 -->
+            <h2>🎯 核心動機：為何視覺領域需要「指令微調」？</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>視覺 AI 的困境：被「固定標籤」綁架</h4>
+                    <p>
+                        傳統的視覺模型（如 ImageNet 訓練的 ResNet）有一個根本性限制：它們只能預測<strong>固定的類別</strong>。
+                    </p>
+                    <p>
+                        舉個例子：如果一個模型被訓練來識別 1000 種物體（ImageNet 的類別數），那麼：
+                    </p>
+                    <ul>
+                        <li>✅ 它能告訴你「這是金毛獵犬」（因為金毛獵犬在 1000 類中）</li>
+                        <li>❌ 它無法告訴你「這隻狗在接飛盤」（動作理解不在預設類別中）</li>
+                        <li>❌ 它無法回答「這張圖有什麼不尋常？」（開放式問答不在設計範圍）</li>
+                    </ul>
+                    <p>
+                        <strong>更嚴重的問題</strong>：如果你想讓模型識別新的概念（比如「柴犬」），你必須收集大量柴犬圖片，重新標註，重新訓練模型。這個過程<strong>昂貴、緩慢、不可擴展</strong>。
+                    </p>
+                </div>
+
+                <div class="key-concept">
+                    <h4>💡 類比：為什麼指令微調這麼重要？</h4>
+                    <p><strong>生活類比</strong>：想像你雇用了兩個助手——</p>
+                    <ul>
+                        <li><strong>傳統視覺 AI</strong>：像一個「默片演員」，只能用肢體語言回答預設的 1000 個問題，無法與你對話。</li>
+                        <li><strong>LLaVA</strong>：像一個「脫口秀主持人」，能理解你的各種提問，並用自然語言回答。</li>
+                    </ul>
+                    <p><strong>工程類比</strong>：</p>
+                    <ul>
+                        <li><strong>傳統 API</strong>：只有固定的 endpoint，每個 endpoint 返回固定格式的數據。</li>
+                        <li><strong>GraphQL / LLaVA</strong>：接受靈活的查詢語言，可以根據你的需求動態組合回應。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2>🌟 LLaVA 的四大貢獻</h2>
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>1️⃣ 多模態指令資料</h4>
+                    <p>首創使用 GPT-4 生成 158K 高品質的圖文指令跟隨資料。包含對話、詳細描述、複雜推理三種類型。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>2️⃣ 大型多模態模型</h4>
+                    <p>連接 CLIP 視覺編碼器與 Vicuna 語言模型，用簡單的線性投影層實現端到端訓練。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>3️⃣ 評測基準</h4>
+                    <p>提出 LLaVA-Bench (COCO) 和 LLaVA-Bench (In-the-Wild) 兩個挑戰性評測集，用 GPT-4 作為評審。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>4️⃣ 開源精神</h4>
+                    <p>公開釋出資料、程式碼、模型權重與互動 Demo，推動社群研究發展。</p>
+                </div>
+            </div>
+
+            <!-- 4. 歷史脈絡 -->
+            <h2>🕰️ 歷史脈絡：從 GPT-3 到 LLaVA</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>要理解 LLaVA 的重要性，我們需要回顧指令微調的發展歷程：</p>
+                    
+                    <h4>2020-2022：語言模型的指令微調革命</h4>
+                    <ul>
+                        <li><strong>2020 年 GPT-3</strong>：強大但難以控制，需要複雜的 prompt engineering 才能完成任務。</li>
+                        <li><strong>2022 年 InstructGPT</strong>：OpenAI 發現，在人類標註的指令資料上微調 GPT-3，可以讓它變得「聽話」且有用。</li>
+                        <li><strong>2022 年 ChatGPT</strong>：InstructGPT + RLHF，創造了史上最受歡迎的 AI 產品。</li>
+                    </ul>
+
+                    <h4>2023 年：視覺領域的覺醒</h4>
+                    <p>
+                        在語言領域大獲成功後，研究者開始思考：<strong>能否將指令微調延伸到視覺領域？</strong>
+                    </p>
+                    <p>
+                        但這裡有個問題：語言模型的指令資料可以由人類標註員大量產生，但<strong>多模態指令資料</strong>（需要同時理解圖片和文字）非常稀缺，標註成本極高。
+                    </p>
+                    <p>
+                        <strong>LLaVA 的創意解法</strong>：用已經很強大的 GPT-4 來「自動生成」多模態指令資料！這是一個以強帶弱、以語言帶視覺的巧妙策略。
+                    </p>
+                </div>
+            </div>
+
+            <div class="quote-block">
+                「指令微調是語言模型的覺醒時刻，LLaVA 把這個時刻帶到了多模態世界。」
+            </div>
+
+            <!-- 5. 為什麼是現在？ -->
+            <h2>⏰ 為什麼是 2023 年？</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>LLaVA 的誕生並非偶然，它需要三個關鍵技術的成熟：</p>
+                    
+                    <div class="key-concept">
+                        <h5>1. 強大的視覺編碼器：CLIP (2021)</h5>
+                        <p>CLIP 在 4 億圖文對上訓練，擁有強大的開放集視覺理解能力。它能識別任意概念，不受限於 ImageNet 的 1000 類。</p>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>2. 開源語言模型：LLaMA & Vicuna (2023)</h5>
+                        <p>Meta 開源了 LLaMA，社群基於它訓練出 Vicuna——當時最強的開源指令跟隨模型。這讓研究者有了可用的「大腦」。</p>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>3. 資料生成助手：GPT-4 (2023)</h5>
+                        <p>GPT-4 的發布讓「用 AI 生成訓練資料」成為可能。雖然 GPT-4 本身無法看圖，但它可以根據圖片的文字描述來生成高品質的問答對。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. 總結 -->
+            <h2>📌 本章重點回顧</h2>
+            <div class="chapter-summary">
+                <h3>核心要點</h3>
+                <ul>
+                    <li><strong>核心問題</strong>：傳統視覺 AI 被「固定類別」限制，無法靈活回應人類指令。</li>
+                    <li><strong>核心解法</strong>：將在語言領域大獲成功的「指令微調」延伸到多模態領域。</li>
+                    <li><strong>核心創新</strong>：用 GPT-4 自動生成多模態指令資料，解決標註瓶頸。</li>
+                    <li><strong>核心成果</strong>：LLaVA 達到商業模型 GPT-4 的 85% 水準，且完全開源。</li>
+                </ul>
+                
+                <h3>下一章預告</h3>
+                <p>
+                    第 2 章將帶你回顧多模態 AI 的演進歷程，理解 LLaVA 站在哪些巨人的肩膀上，
+                    以及它與 Flamingo、BLIP-2、OpenFlamingo 等前輩模型的差異。
+                </p>
+            </div>
+
+            <div class="nav-buttons" style="display: flex; justify-content: space-between; margin-top: 40px;">
+                <a href="index.html" class="nav-button">
+                    ← 回到目錄
+                </a>
+                <a href="02-related-work.html" class="nav-button nav-button-next">
+                    下一章：相關研究脈絡 →
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

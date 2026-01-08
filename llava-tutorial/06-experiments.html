@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLaVA 第 6 章：實驗結果與分析 - 驗證時刻的到來</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/original/img_extreme_ironing.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>LLaVA 真的「會看圖說話」嗎？</h1>
+            <p class="hero-subtitle">從 Extreme Ironing 到 Science QA 的全面驗證</p>
+            <p class="hero-meta">LLaVA 深度解析 · 第 6 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">LLaVA 教學</a>
+            <span>/</span>
+            <span class="current">第 6 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                訓練完成後，最激動人心的時刻到了——LLaVA 真的能像 GPT-4 一樣理解圖片並回答複雜問題嗎？
+                這一章我們將深入分析 LLaVA 的實驗結果：從定性分析（Extreme Ironing 範例）到定量評測（LLaVA-Bench）
+，
+                再到學術基準測試（Science QA），全面驗證視覺指令微調的有效性。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 1. Extreme Ironing 定性分析 -->
+            <h2>🔥 定性分析：Extreme Ironing 案例</h2>
+            <div class="figure figure-original">
+                <img src="images/original/img_extreme_ironing.png" alt="Extreme Ironing 範例">
+                <div class="caption">
+                    <strong>Figure（論文原圖）：</strong>來自 GPT-4 論文的測試案例。一個人在計程車頂上熨衣服——這是一個需要深度推理的場景。
+                </div>
+            </div>
+
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>測試問題：「What is unusual about this image?」</h4>
+                    <p>這個問題來自 GPT-4 的原始論文，用於測試多模態理解能力。讓我們對比四個模型的回應：</p>
+                </div>
+
+                <div class="paradigm-grid" style="grid-template-columns: 1fr;">
+                    <div class="paradigm-card" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-left: 5px solid #10b981;">
+                        <h4>✅ LLaVA 的回應</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.8;">
+                            "The unusual aspect of this image is <strong>a man ironing clothes on the back of a minivan or van</strong>. 
+                            This is not a typical place to perform this activity, as one would usually iron clothes in a more stationary and safe location, 
+                            such as a home, using a regular ironing board. 
+                            The scene depicted in the image is <strong>peculiar as it involves a makeshift ironing setup on a vehicle</strong>, 
+                            which can be both unsafe and unconventional. 
+                            Additionally, it is not clear how the man is able to maintain balance and stability while ironing clothes in such an unstable environment."
+                        </p>
+                        <p style="margin-top: 10px; color: #065f46; font-weight: 600;">
+                            💡 LLaVA 不只識別出不尋常之處，還進行了深度推理（安全性、穩定性），甚至超越 GPT-4 的回應長度。
+                        </p>
+                    </div>
+
+                    <div class="paradigm-card" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-left: 5px solid #3b82f6;">
+                        <h4>🤖 GPT-4 的回應</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.8;">
+                            "The unusual thing about this image is that <strong>a man is ironing clothes on an ironing board attached to the roof of a moving taxi</strong>."
+                        </p>
+                        <p style="margin-top: 10px; color: #1e40af; font-weight: 600;">
+                            💡 GPT-4 準確識別核心不尋常之處，但回應較簡潔。
+                        </p>
+                    </div>
+
+                    <div class="paradigm-card" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 5px solid #f59e0b;">
+                        <h4>⚠️ BLIP-2 的回應</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.8;">
+                            "A man is sitting on the back of a yellow cab."
+                        </p>
+                        <p style="margin-top: 10px; color: #92400e; font-weight: 600;">
+                            ❌ BLIP-2 只是描述場景，沒有理解「不尋常」的含義，未能跟隨指令。
+                        </p>
+                    </div>
+
+                    <div class="paradigm-card" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border-left: 5px solid #ef4444;">
+                        <h4>❌ OpenFlamingo 的回應</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.8;">
+                            "The man is drying his clothes on the hood of his car."
+                        </p>
+                        <p style="margin-top: 10px; color: #991b1b; font-weight: 600;">
+                            ❌ 理解錯誤，將「熨衣服」誤認為「晾衣服」，且未識別不尋常之處。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="key-concept">
+                    <h4>💎 關鍵洞察</h4>
+                    <p><strong>指令跟隨能力的差異</strong>：</p>
+                    <ul>
+                        <li><strong>LLaVA & GPT-4</strong>：理解「unusual」的語義，回答「為什麼不尋常」而不只是「看到什麼」</li>
+                        <li><strong>BLIP-2 & OpenFlamingo</strong>：只會描述場景，缺乏指令跟隨訓練</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>推理深度的差異</strong>：</p>
+                    <ul>
+                        <li><strong>LLaVA</strong>：不只指出不尋常，還分析原因（安全性、穩定性）</li>
+                        <li><strong>GPT-4</strong>：簡潔準確，但較少深入分析</li>
+                    </ul>
+                </div>
+
+                <div class="quote-block">
+                    「LLaVA 展現了與 multimodal GPT-4 相似的推理行為，有時甚至更詳細。」
+                </div>
+            </div>
+
+            <!-- 2. LLaVA-Bench (COCO) -->
+            <h2>📊 定量評測 1：LLaVA-Bench (COCO)</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>評測設計：用 GPT-4 作為評審</h4>
+                    <p>
+                        傳統的多模態評測（如 VQA 準確率）只關注「答案對錯」，無法評估「回應品質」。
+                        LLaVA 提出創新的評測方法：<strong>讓 GPT-4 當評審</strong>。
+                    </p>
+                    
+                    <h5>評測流程</h5>
+                    <ol>
+                        <li>從 COCO-Val-2014 隨機選 30 張圖</li>
+                        <li>用第 3 章的資料生成流程為每張圖生成 3 種問題（對話、描述、推理），共 90 個問題</li>
+                        <li>讓 LLaVA 和 GPT-4（text-only，只看 ground-truth caption）分別回答</li>
+                        <li>將兩個回應交給 GPT-4 評審，打 1-10 分並解釋理由</li>
+                    </ol>
+                    
+                    <h5>為什麼用 GPT-4 當評審？</h5>
+                    <ul>
+                        <li><strong>一致性</strong>：人類評審主觀性強，GPT-4 能提供穩定的評分標準</li>
+                        <li><strong>可擴展</strong>：自動化評測，無需雇用大量標註員</li>
+                        <li><strong>多維度</strong>：GPT-4 能評估 helpfulness, relevance, accuracy, detail</li>
+                    </ul>
+                </div>
+
+                <div class="key-concept">
+                    <h4>💡 相對分數的概念</h4>
+                    <p>
+                        LLaVA 的分數是<strong>相對於 text-only GPT-4</strong> 的。
+                        例如，LLaVA 得分 85.1%，意思是「達到 GPT-4（使用 ground-truth 文字）的 85.1% 水準」。
+                    </p>
+                    <p style="margin-top: 10px;">
+                        這是一個<strong>近似的理論上限</strong>：因為 GPT-4 看到的是完美的文字描述，而 LLaVA 只能從視覺特徵推斷。
+                    </p>
+                </div>
+            </div>
+
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>實驗結果：資料類型的影響</h4>
+                </div>
+
+                <table class="results-table">
+                    <tr>
+                        <th>訓練資料配置</th>
+                        <th>Conversation</th>
+                        <th>Detail</th>
+                        <th>Reasoning</th>
+                        <th><strong>All</strong></th>
+                    </tr>
+                    <tr>
+                        <td><strong>Full Data（三種都有）</strong></td>
+                        <td>83.1</td>
+                        <td>75.3</td>
+                        <td>96.5</td>
+                        <td class="best-result">85.1</td>
+                    </tr>
+                    <tr>
+                        <td>Detail + Complex（無對話）</td>
+                        <td>81.5 <span style="color: red;">(-1.6)</span></td>
+                        <td>73.3 <span style="color: red;">(-2.0)</span></td>
+                        <td>90.8 <span style="color: red;">(-5.7)</span></td>
+                        <td>81.9 <span style="color: red;">(-3.2)</span></td>
+                    </tr>
+                    <tr>
+                        <td>Conv + 5% Detail + 10% Complex</td>
+                        <td>81.0 <span style="color: red;">(-2.1)</span></td>
+                        <td>68.4 <span style="color: red;">(-7.1)</span></td>
+                        <td>91.5 <span style="color: red;">(-5.0)</span></td>
+                        <td>80.5 <span style="color: red;">(-4.4)</span></td>
+                    </tr>
+                    <tr>
+                        <td>只有 Conversation</td>
+                        <td>76.5 <span style="color: red;">(-6.6)</span></td>
+                        <td>59.8 <span style="color: red;">(-16.2)</span></td>
+                        <td>84.9 <span style="color: red;">(-12.4)</span></td>
+                        <td>73.8 <span style="color: red;">(-11.3)</span></td>
+                    </tr>
+                    <tr style="background: #fee2e2;">
+                        <td><strong>無指令微調</strong></td>
+                        <td>22.0 <span style="color: red;">(-61.1)</span></td>
+                        <td>24.0 <span style="color: red;">(-51.3)</span></td>
+                        <td>18.5 <span style="color: red;">(-78.0)</span></td>
+                        <td>21.5 <span style="color: red;">(-63.6)</span></td>
+                    </tr>
+                </table>
+
+                <div class="key-concept" style="margin-top: 30px;">
+                    <h4>🔍 關鍵發現</h4>
+                    <ol>
+                        <li><strong>指令微調至關重要</strong>：沒有指令微調的模型只有 21.5% 分數，加上指令微調後跳升到 85.1%（<strong>+63.6%</strong>）</li>
+                        <li><strong>資料多樣性很重要</strong>：只用 Conversation 資料會導致 11.3% 的下降</li>
+                        <li><strong>Complex Reasoning 影響最大</strong>：移除推理資料後，Reasoning 任務分數從 96.5% 降到 90.8%（-5.7%）</li>
+                        <li><strong>少量多樣勝過大量單一</strong>：Conv + 5% Detail + 10% Complex 比只用 Conv 好得多（80.5% vs 73.8%）</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- 3. LLaVA-Bench (In-the-Wild) -->
+            <h2>🌍 定量評測 2：LLaVA-Bench (In-the-Wild)</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>更具挑戰性的評測集</h4>
+                    <p>
+                        COCO 圖片相對簡單（日常場景），為了測試模型在<strong>更困難、更多樣</strong>場景下的泛化能力，
+                        LLaVA 團隊手工收集了 24 張「野外」圖片，包括：
+                    </p>
+                    <ul>
+                        <li>室內/室外複雜場景</li>
+                        <li>迷因圖 (Memes)</li>
+                        <li>畫作與素描</li>
+                        <li>需要多語言理解的圖片（如日文餐廳招牌）</li>
+                        <li>需要高解析度細節的圖片（如冰箱裡的優格品牌）</li>
+                    </ul>
+                    <p>每張圖片都有<strong>極其詳細的人工標註</strong>和精心設計的問題。</p>
+                </div>
+
+                <div class="figure figure-original">
+                    <img src="images/original/sample_bench_ramen.jpg" alt="拉麵餐廳範例" style="max-height: 400px;">
+                    <div class="caption">
+                        <strong>挑戰範例 1：</strong>日本拉麵餐廳「ICHIRAN」。問題：「餐廳名稱是什麼？」需要識別日文字元。
+                    </div>
+                </div>
+
+                <div class="figure figure-original">
+                    <img src="images/original/sample_bench_fridge.jpg" alt="冰箱優格範例" style="max-height: 400px;">
+                    <div class="caption">
+                        <strong>挑戰範例 2：</strong>冰箱內的優格。問題：「藍莓口味優格的品牌是什麼？」需要高解析度視覺和廣泛知識。
+                    </div>
+                </div>
+            </div>
+
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>實驗結果：LLaVA 大幅領先</h4>
+                </div>
+
+                <table class="results-table">
+                    <tr>
+                        <th>模型</th>
+                        <th>Conversation</th>
+                        <th>Detail</th>
+                        <th>Reasoning</th>
+                        <th><strong>All</strong></th>
+                    </tr>
+                    <tr>
+                        <td>OpenFlamingo</td>
+                        <td>19.3 ± 0.5</td>
+                        <td>19.0 ± 0.5</td>
+                        <td>19.1 ± 0.7</td>
+                        <td>19.1 ± 0.4</td>
+                    </tr>
+                    <tr>
+                        <td>BLIP-2</td>
+                        <td>54.6 ± 1.4</td>
+                        <td>29.1 ± 1.2</td>
+                        <td>32.9 ± 0.7</td>
+                        <td>38.1 ± 1.0</td>
+                    </tr>
+                    <tr style="background: #d1fae5;">
+                        <td><strong>LLaVA</strong></td>
+                        <td>57.3 ± 1.9</td>
+                        <td>52.5 ± 6.3</td>
+                        <td class="best-result">81.7 ± 1.8</td>
+                        <td class="best-result">67.3 ± 2.0</td>
+                    </tr>
+                    <tr style="background: #dbeafe;">
+                        <td>LLaVA (穩定性測試)</td>
+                        <td>58.8 ± 0.6</td>
+                        <td>49.2 ± 0.8</td>
+                        <td>81.4 ± 0.3</td>
+                        <td>66.7 ± 0.3</td>
+                    </tr>
+                </table>
+
+                <div class="key-concept" style="margin-top: 30px;">
+                    <h4>🔍 關鍵發現</h4>
+                    <ul>
+                        <li><strong>LLaVA 大幅領先</strong>：整體分數 67.3%，比 BLIP-2 高 <strong>+29%</strong>，比 OpenFlamingo 高 <strong>+48%</strong></li>
+                        <li><strong>Complex Reasoning 表現突出</strong>：LLaVA 在推理任務上達到 81.7%，接近 GPT-4 水準</li>
+                        <li><strong>Detail Description 仍有挑戰</strong>：52.5% 表明模型在生成長篇細節描述時還有提升空間</li>
+                        <li><strong>GPT-4 評審穩定</strong>：多次運行標準差小（±0.3-0.8），證明評測可靠</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 4. Science QA -->
+            <h2>🔬 學術基準測試：Science QA</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>資料集介紹</h4>
+                    <p><strong>Science QA</strong> 是一個大規模的科學問答資料集，特色是：</p>
+                    <ul>
+                        <li><strong>規模</strong>：21K 多選題（訓練集 12.7K，驗證集 4.2K，測試集 4.2K）</li>
+                        <li><strong>多樣性</strong>：涵蓋 3 個學科、26 個主題、127 個類別、379 個技能</li>
+                        <li><strong>多模態</strong>：部分題目包含圖片或圖表作為上下文</li>
+                        <li><strong>推理過程</strong>：每題都有 gold 標註的推理解釋（lectures）</li>
+                    </ul>
+                    <p><strong>評測指標</strong>：準確率（答對選項的比例）</p>
+                </div>
+
+                <div class="key-concept">
+                    <h4>💡 為什麼測 Science QA？</h4>
+                    <p>
+                        與 LLaVA-Bench 不同，Science QA 是一個<strong>標準化的學術基準</strong>，
+                        可以與大量已發表的模型進行公平比較。
+                        它也測試了 LLaVA 在<strong>特定領域（科學）</strong>的效能。
+                    </p>
+                </div>
+            </div>
+
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>實驗結果：新 SOTA 92.53%</h4>
+                </div>
+
+                <table class="arch-table">
+                    <tr>
+                        <th>方法</th>
+                        <th>NAT</th>
+                        <th>SOC</th>
+                        <th>LAN</th>
+                        <th>IMG</th>
+                        <th>NO</th>
+                        <th><strong>Average</strong></th>
+                    </tr>
+                    <tr>
+                        <td>Human</td>
+                        <td>90.23</td>
+                        <td>84.97</td>
+                        <td>87.48</td>
+                        <td>87.50</td>
+                        <td>88.10</td>
+                        <td>88.40</td>
+                    </tr>
+                    <tr>
+                        <td>GPT-3.5</td>
+                        <td>74.64</td>
+                        <td>69.74</td>
+                        <td>76.00</td>
+                        <td>67.28</td>
+                        <td>77.42</td>
+                        <td>73.97</td>
+                    </tr>
+                    <tr>
+                        <td>GPT-3.5 w/ CoT</td>
+                        <td>75.44</td>
+                        <td>70.87</td>
+                        <td>78.09</td>
+                        <td>67.43</td>
+                        <td>79.93</td>
+                        <td>75.17</td>
+                    </tr>
+                    <tr>
+                        <td>MM-CoT (Previous SOTA)</td>
+                        <td>95.91</td>
+                        <td>82.00</td>
+                        <td>90.82</td>
+                        <td>88.80</td>
+                        <td>92.89</td>
+                        <td>91.68</td>
+                    </tr>
+                    <tr style="background: #fffbeb;">
+                        <td>GPT-4 (text-only)</td>
+                        <td>84.06</td>
+                        <td>73.45</td>
+                        <td>87.36</td>
+                        <td>70.75</td>
+                        <td>90.73</td>
+                        <td>82.69</td>
+                    </tr>
+                    <tr style="background: #d1fae5;">
+                        <td><strong>LLaVA</strong></td>
+                        <td>90.36</td>
+                        <td>95.95</td>
+                        <td>88.00</td>
+                        <td>88.00</td>
+                        <td>90.66</td>
+                        <td>90.92</td>
+                    </tr>
+                    <tr style="background: #bfdbfe;">
+                        <td>LLaVA + GPT-4 (complement)</td>
+                        <td>90.36</td>
+                        <td>95.50</td>
+                        <td>88.55</td>
+                        <td>87.80</td>
+                        <td>91.08</td>
+                        <td>90.97</td>
+                    </tr>
+                    <tr style="background: #fef3c7; font-weight: 700;">
+                        <td><strong>LLaVA + GPT-4 (judge)</strong></td>
+                        <td>91.56</td>
+                        <td>96.74</td>
+                        <td>91.09</td>
+                        <td>88.99</td>
+                        <td>93.52</td>
+                        <td class="best-result">92.53</td>
+                    </tr>
+                </table>
+
+                <div class="explanation" style="margin-top: 20px;">
+                    <p><strong>欄位說明</strong>：NAT (自然科學), SOC (社會科學), LAN (語言科學), IMG (有圖片), NO (無圖片)</p>
+                </div>
+
+                <div class="key-concept" style="margin-top: 30px;">
+                    <h4>🔍 關鍵發現</h4>
+                    <ol>
+                        <li><strong>LLaVA 接近 Previous SOTA</strong>：90.92% vs 91.68%（僅 -0.76%），但 LLaVA 是端到端訓練的單一模型</li>
+                        <li><strong>超越 Human 基準</strong>：92.53% > 88.40%（+4.13%），首次在此任務上超越人類平均表現</li>
+                        <li><strong>GPT-4 Judge 策略有效</strong>：當 LLaVA 和 GPT-4 給出不同答案時，讓 GPT-4 綜合兩者再判斷，準確率從 90.92% 提升到 92.53%（<strong>+1.61%</strong>）</li>
+                        <li><strong>有趣的發現</strong>：text-only GPT-4 能改善<strong>有圖片</strong>的題目準確率（88.00% → 88.99%），因為有些題目其實不需要看圖</li>
+                    </ol>
+                </div>
+
+                <div class="quote-block">
+                    「這是首次將 GPT-4 用於模型集成 (model ensembling)，證明了語言模型可以作為高階推理引擎。」
+                </div>
+            </div>
+
+            <!-- 5. 消融實驗 -->
+            <h2>🔬 消融實驗：設計選擇的驗證</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>LLaVA 在 Science QA 上進行了多個消融實驗，驗證各個設計選擇的重要性：</p>
+                </div>
+
+                <table class="arch-table">
+                    <tr>
+                        <th>配置</th>
+                        <th>準確率 (%)</th>
+                        <th>差異</th>
+                    </tr>
+                    <tr style="background: #d1fae5;">
+                        <td><strong>Best Variant（倒數第二層 + reasoning-first）</strong></td>
+                        <td class="best-result">90.92</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>使用最後一層視覺特徵</td>
+                        <td>89.96</td>
+                        <td><span style="color: red;">-0.96</span></td>
+                    </tr>
+                    <tr>
+                        <td>Answer-first（先答案後推理）</td>
+                        <td>89.77</td>
+                        <td><span style="color: red;">-1.15</span></td>
+                    </tr>
+                    <tr>
+                        <td>跳過預訓練（從零訓練）</td>
+                        <td>85.81</td>
+                        <td><span style="color: red;">-5.11</span></td>
+                    </tr>
+                    <tr>
+                        <td>使用 7B 模型（而非 13B）</td>
+                        <td>89.84</td>
+                        <td><span style="color: red;">-1.08</span></td>
+                    </tr>
+                </table>
+
+                <div class="key-concept" style="margin-top: 30px;">
+                    <h4>🔍 關鍵洞察</h4>
+                    <ul>
+                        <li><strong>預訓練至關重要</strong>：跳過 Stage 1 導致 5.11% 的巨大下降，證明特徵對齊是基礎</li>
+                        <li><strong>視覺特徵層的選擇</strong>：倒數第二層保留更多局部細節，對於理解圖中具體物件更有幫助</li>
+                        <li><strong>CoT 順序影響收斂速度</strong>：reasoning-first 更快收斂，但最終效能差異不大</li>
+                        <li><strong>模型規模很重要</strong>：13B 比 7B 好 1.08%，但成本也更高</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 6. 局限性分析 -->
+            <h2>⚠️ 局限性與失敗案例</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>LLaVA 團隊誠實地展示了模型的弱點。理解這些局限對於未來改進至關重要：</p>
+                </div>
+
+                <div class="paradigm-grid" style="grid-template-columns: 1fr;">
+                    <div class="paradigm-card" style="background: #fef3c7; border-left: 5px solid #f59e0b;">
+                        <h4>1. 高解析度與細節識別</h4>
+                        <p><strong>案例</strong>：冰箱優格品牌識別</p>
+                        <p>LLaVA 使用 224×224 的輸入解析度，無法清楚看到小字。當問「藍莓優格的品牌是什麼？」時，模型可能無法讀取標籤上的小字。</p>
+                        <p style="margin-top: 10px;"><strong>原因</strong>：CLIP 的輸入限制（224×224）導致資訊損失</p>
+                        <p><strong>潛在解法</strong>：使用更高解析度的視覺編碼器（如 CLIP ViT-L/14@336px）</p>
+                    </div>
+
+                    <div class="paradigm-card" style="background: #fef3c7; border-left: 5px solid #f59e0b;">
+                        <h4>2. 知識覆蓋度不足</h4>
+                        <p><strong>案例</strong>：日文餐廳名稱「ICHIRAN」</p>
+                        <p>要正確回答餐廳名稱，模型需要：(1) 識別日文字元 (2) 知道這是一家知名連鎖拉麵店。
+                        如果 Vicuna 的預訓練資料中缺乏日文或這家餐廳的資訊，就會失敗。</p>
+                        <p style="margin-top: 10px;"><strong>原因</strong>：LLM 的知識邊界</p>
+                        <p><strong>潛在解法</strong>：整合檢索系統（retrieval-augmented generation）</p>
+                    </div>
+
+                    <div class="paradigm-card" style="background: #fee2e2; border-left: 5px solid #ef4444;">
+                        <h4>3. 「Bag of Patches」問題</h4>
+                        <p><strong>案例</strong>：草莓 + 優格 → 「草莓優格」？</p>
+                        <p>當問「冰箱裡有草莓優格嗎？」LLaVA 回答「有」，但實際上冰箱裡是<strong>分開的</strong>優格和草莓，而非「草莓優格」。</p>
+                        <p style="margin-top: 10px;"><strong>原因</strong>：模型有時將圖片視為「一袋特徵」，無法精確理解物件間的關係和整體語義</p>
+                        <p><strong>啟示</strong>：需要更強的<strong>組合理解</strong>和<strong>細粒度推理</strong>能力</p>
+                    </div>
+                </div>
+
+                <div class="quote-block" style="background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);">
+                    「LLaVA 作為第一個視覺指令微調模型，已經展現了令人驚艷的能力。這些局限性為未來研究指明了方向。」
+                </div>
+            </div>
+
+            <!-- 7. 總結 -->
+            <h2>📌 本章重點回顧</h2>
+            <div class="chapter-summary">
+                <h3>核心要點</h3>
+                <ul>
+                    <li><strong>定性分析</strong>：LLaVA 在 Extreme Ironing 等案例上展現與 GPT-4 相似的推理能力</li>
+                    <li><strong>LLaVA-Bench (COCO)</strong>：達到 text-only GPT-4 的 85.1% 水準，證明指令微調的巨大價值（+63.6%）</li>
+                    <li><strong>LLaVA-Bench (Wild)</strong>：67.3% 整體分數，比 BLIP-2 高 29%，比 OpenFlamingo 高 48%</li>
+                    <li><strong>Science QA</strong>：創下新 SOTA 92.53%，超越人類平均表現（88.40%）</li>
+                    <li><strong>關鍵洞察</strong>：預訓練特徵對齊至關重要（-5.11%），資料多樣性勝過單一類型（-11.3%）</li>
+                    <li><strong>局限性</strong>：高解析度細節、知識覆蓋度、Bag of Patches 問題</li>
+                </ul>
+                
+                <h3>下一章預告</h3>
+                <p>
+                    第 7 章將總結 LLaVA 的歷史意義，探討它如何為後續的 LLaVA-1.5、LLaVA-NeXT 奠定基礎，
+                    以及多模態 AI 的未來發展方向。
+                </p>
+            </div>
+
+            <div class="nav-buttons" style="display: flex; justify-content: space-between; margin-top: 40px;">
+                <a href="05-training.html" class="nav-button">
+                    ← 上一章：兩階段訓練策略
+                </a>
+                <a href="07-conclusion.html" class="nav-button nav-button-next">
+                    下一章：結論與未來展望 →
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -47,12 +47,38 @@
 
             <p>
                 GPT-4 報告展示了兩個關鍵的可預測擴展成果：
-                <strong>損失預測</strong>和<strong>能力預測</strong>。
+                <strong>損失預測 (Loss Prediction)</strong> 和 <strong>能力預測 (Capability Prediction)</strong>。
                 這驗證了 Scaling Laws 論文的預言，並將其推向了新的高度。
             </p>
         </div>
 
         <h2>📐 損失預測 (Loss Prediction)</h2>
+
+    <section id="codebase-definition" class="paper-section">
+        <h3>什麼是「代碼庫」(codebase)？</h3>
+        <p>在 GPT‑4 Technical Report 的第 2 章「Predictable Scaling」中，<em>codebase</em> 指的是我們內部收集的大規模程式碼資料集（由各種語言的 code tokens 組成），此資料集<strong>未出現在模型的訓練資料裡</strong>，因此可作為純粹測試模型在程式碼上的表現。</p>
+        <p>這個代碼庫被用來評估模型的最終損失 (final loss)。報告說：「我們預測 GPT‑4 在內部代碼庫（non‑part of the training set）上的最終損失…」<cite>GPT‑4 Technical Report, §2.1</cite></p>
+        <figure class="figure-original">
+            <img src="../論文原文/arXiv-2303.08774v6＿GPT-4 Technical Report/assets/codebase_loss.pdf" alt="代碼庫 loss 圖表" style="max-width:100%;height:auto;" />
+            <figcaption>圖 1：在內部代碼庫上測得的最終損失與預測曲線（來自原始報告）</figcaption>
+        </figure>
+    </section>
+
+        <div class="glossary-box">
+            <h4>📖 名詞百科</h4>
+            <div style="margin-bottom: 15px;">
+                <strong>1. 損失 (Loss)：衡量模型「有多笨」的指標</strong>
+                <p style="margin-bottom: 10px;">
+                    損失是用來衡量模型「預測正確程度」的數值。<strong>Loss 越高</strong>，代表模型預測得越不準；<strong>Loss 越低</strong>，代表模型越精準。
+                </p>
+            </div>
+            <div>
+                <strong>2. 不可約損失 (Irreducible Loss)：進步的「天花板」</strong>
+                <p>
+                    這指的是公式中的常數 <strong>$c$</strong>。你可以把它想像成一個「誤差底線」：就算你給模型無限的計算量和資料，有些誤差還是永遠無法消除（例如：有些問題本身就沒有標準答案，或語言本身存在的模糊性）。
+                </p>
+            </div>
+        </div>
 
         <div class="paper-section">
             <div class="original-quote">
@@ -68,27 +94,24 @@
             <div class="translation">
                 <h4>📝 中文翻譯</h4>
                 <p>
-                    經過適當訓練的大語言模型的最終損失被認為可以用訓練模型所用計算量的冪律來很好地近似。
+                    學界普遍有一個共識：只要訓練方式正確，大型語言模型的<strong>「最終損失 (Final Loss)」</strong>其實是可以被精準預測的。我們只需要知道訓練時投入了多少計算量，就能透過所謂的「冪律 (Power Law)」公式算出結果。
                 </p>
                 <p>
-                    為了驗證我們優化基礎設施的可擴展性，我們通過擬合一個帶有不可約損失項的擴展定律
-                    （如 Henighan et al. 2020）：$L(C) = aC^b + c$，
-                    從使用相同方法但使用最多比 GPT-4 少 10,000 倍計算量的模型訓練中，
-                    預測了 GPT-4 在我們內部代碼庫（不屬於訓練集）上的最終損失。
-                    這個預測是在運行開始後不久做出的，沒有使用任何部分結果。
-                    擬合的擴展定律以高精度預測了 GPT-4 的最終損失。
+                    為了測試我們的系統到底有多能「預測未來」，我們套用了一個包含<strong>「不可約損失項 (Irreducible Loss Term)」</strong>的公式：$L(C) = aC^b + c$。這個公式厲害的地方在於，我們只用計算規模比 GPT-4 小了一萬倍的「超迷你模型」數據來做擬合（Fitting），就能預測出 GPT-4 在我們內部代碼庫上的最終表現。
+                </p>
+                <p>
+                    重點是，這項預測是在 GPT-4 剛開始訓練、什麼成果都還沒看到的時候就做出的。結果令人驚艷：這套數學模型精準地預言了 GPT-4 完工後的損失表現，誤差極小。
                 </p>
             </div>
 
             <div class="figure figure-original">
                 <img src="images/original/codebase_loss.png" alt="Loss Prediction">
                 <div class="caption">
-                    <strong>Figure:</strong> GPT-4 和較小模型的性能。
-                    指標是在我們內部代碼庫衍生的數據集上的最終損失。
-                    這是一個方便的大型代碼 token 數據集，不包含在訓練集中。
-                    我們選擇查看損失，因為它在不同訓練計算量下往往比其他指標噪音更小。
-                    對較小模型（不包括 GPT-4）的冪律擬合顯示為虛線；這個擬合準確預測了 GPT-4 的最終損失。
-                    x 軸是歸一化的訓練計算量，GPT-4 為 1。
+                    <strong>Figure:</strong> 看看 GPT-4 到底有多好預測。
+                    這張圖顯示模型在我們內部的代碼數據集（模型從來沒看過這份資料）上的<strong>最終損失 (Loss)</strong> 表現。
+                    <strong>為什麼看 Loss？</strong> 因為比起準確率，Loss 在不同模型規模下更穩定，比較不會有亂跳的雜訊。
+                    圖中的虛線是我們根據那些「超小型模型」的表現算出來的預測線。
+                    你可以看到，當我們把計算量一路推到 GPT-4 的等級（x 軸的 1），預測結果竟然跟實際表現幾乎完全重合！
                 </div>
             </div>
 
@@ -113,13 +136,12 @@
                     <strong>為什麼選擇代碼庫作為測試數據？</strong>
                 </p>
                 <ul>
-                    <li><strong>大規模且乾淨</strong>：代碼 token 數據集規模大，且不包含在訓練集中</li>
-                    <li><strong>損失指標穩定</strong>：損失在不同訓練計算量下比其他指標（如準確率）噪音更小</li>
-                    <li><strong>實務相關</strong>：代碼理解是 GPT-4 的重要應用場景</li>
+                    <li><strong>數據量大且完全沒見過</strong>：我們使用了全新的代碼數據，確保模型沒辦法靠記憶來「作弊」。</li>
+                    <li><strong>Loss 指標更穩定</strong>：比起容易跳動的準確率（Accuracy），Loss 在模型變大時的變化非常平滑，更容易被精準預測。</li>
+                    <li><strong>實務相關性高</strong>：寫程式能力是 GPT-4 的強項，代碼數據的 Loss 直接反映了它的邏輯理解能力。</li>
                 </ul>
                 <p>
-                    <strong>預測精度</strong>：從使用 1/10,000 計算量的小模型，準確預測了 GPT-4 的最終損失。
-                    這證明了擴展定律的有效性，也為未來的大模型訓練提供了科學依據。
+                    <strong>預測精準度</strong>：即使只用「萬分之一」的計算量來進行小規模測試，我們還是能精準算出 GPT-4 最終的表現。這證明了 Scaling Laws 不只是理論，更讓訓練大模型從「豪賭」變成了可以預先計算的科學。
                 </p>
             </div>
         </div>
@@ -137,37 +159,35 @@
             <div class="translation">
                 <h4>📝 中文翻譯</h4>
                 <p>
-                    在訓練前了解模型的能力可以改善關於對齊、安全和部署的決策。
-                    除了預測最終損失外，我們開發了預測更可解釋的能力指標的方法。
-                    其中一個指標是 HumanEval 數據集上的通過率，它衡量合成不同複雜度 Python 函數的能力。
-                    我們通過從使用最多 $1,000\times$ 更少計算量訓練的模型外推，
-                    成功預測了 HumanEval 數據集子集上的通過率。
+                    在正式訓練展開前即掌握模型的能力表現，有助於優化關於對齊 (Alignment)、安全性與部署相關的決策。除了預測<strong>最終損失 (Final Loss)</strong> 之外，我們還開發了預測更具可解釋性之「能力指標」的方法。
+                </p>
+                <p>
+                    其中一項指標是 <strong>HumanEval 數據集</strong>的通過率，用以衡量模型合成不同複雜程度 Python 函數的能力。我們僅透過比 GPT-4 計算量少 1,000 倍的模型進行外推 (Extrapolation)，便成功預測了 HumanEval 子集上的通過率。
                 </p>
             </div>
 
             <div class="figure figure-original">
                 <img src="images/original/capability_pred.png" alt="Capability Prediction">
                 <div class="caption">
-                    <strong>Figure:</strong> GPT-4 和較小模型的性能。
-                    指標是 HumanEval 數據集子集上的平均對數通過率。
-                    對較小模型（不包括 GPT-4）的冪律擬合顯示為虛線；這個擬合準確預測了 GPT-4 的性能。
-                    x 軸是歸一化的訓練計算量，GPT-4 為 1。
+                    <strong>Figure:</strong> 寫程式能力也能提早預測？
+                    這是模型在 <strong>HumanEval</strong>（Python 程式撰寫測驗）上的表現。
+                    我們用對數通過率（Log Pass Rate）來觀察，結果發現：即使只用計算量小 1,000 倍的模型來推算（虛線），
+                    我們還是能精準預測出 GPT-4 在解決複雜程式題時的實力。
                 </div>
             </div>
 
             <div class="explanation">
                 <h4>💡 關鍵洞察</h4>
                 <p>
-                    <strong>為什麼能力預測比損失預測更難？</strong>
+                    <strong>為什麼預測「能力」比預測「損失」更難？</strong>
                 </p>
                 <ul>
-                    <li><strong>離散性</strong>：通過率是離散的（0 或 1），不像損失是連續的</li>
-                    <li><strong>非單調性</strong>：某些問題的表現可能隨規模惡化（Inverse Scaling）</li>
-                    <li><strong>低通過率估計困難</strong>：當通過率很低時，很難準確估計</li>
+                    <li><strong>對錯太分明 (Discrete)</strong>：答對就是 1，答錯就是 0。這不像連續的 Loss 可以慢慢下降，能力指標往往會突然躍升。</li>
+                    <li><strong>反向擴展 (Inverse Scaling)</strong>：某些任務在模型變大時，表現反而會變差（例如想太多的陷阱題）。</li>
+                    <li><strong>低頻信號難捕捉</strong>：當模型還很小時，通過率幾乎是 0，很難從一堆零當中預測出未來的成長曲線。</li>
                 </ul>
                 <p>
-                    <strong>解決方案</strong>：論文使用對數通過率 $-\mathrm{E}_{P}[\log(\mathrm{pass\_rate(C)})] = \alpha*\mathrm{C}^{-k}$，
-                    並限制在可以準確估計的問題子集上。這使得預測成為可能。
+                    <strong>解決方案</strong>：研究團隊使用了對數通過率，並特別鎖定在那些「可以穩定預估」的問題子集上。這讓我們即使在模型還很弱的時候，就能預見它變強後的樣子。
                 </p>
             </div>
         </div>
@@ -194,26 +214,24 @@
             <div class="figure figure-original">
                 <img src="images/original/inverse_scaling.png" alt="Inverse Scaling">
                 <div class="caption">
-                    <strong>Figure:</strong> GPT-4 和較小模型在 Hindsight Neglect 任務上的性能。
-                    準確率顯示在 y 軸上，越高越好。
-                    ada、babbage 和 curie 指的是通過 OpenAI API 可用的模型。
+                    <strong>Figure:</strong> 那些「大器晚成」的任務：以 Hindsight Neglect 為例。
+                    在某些陷阱題中，小模型（如 ada, babbage）往往會越學越糟，出現性能下滑的奇特現象。
+                    但好消息是，當模型大到 GPT-4 這個等級時，它會突然「開竅」並逆轉這個趨勢，準確率直接衝上頂峰。
                 </div>
             </div>
 
             <div class="explanation">
                 <h4>💡 關鍵洞察</h4>
                 <p>
-                    <strong>Inverse Scaling 的意義</strong>：
+                    <strong>「逆轉趨勢」的意義</strong>：
                 </p>
                 <ul>
-                    <li><strong>小模型的問題</strong>：在某些任務上，模型越大表現越差</li>
-                    <li><strong>GPT-4 的突破</strong>：逆轉了這個趨勢，證明足夠大的模型可以克服這些問題</li>
-                    <li><strong>預測的挑戰</strong>：這種「逆轉」很難從小模型預測</li>
+                    <li><strong>大不一定好？</strong> 在某些邏輯陷阱題中，中型模型往往因為「學半套」而比小模型表現更差。</li>
+                    <li><strong>GPT-4 的突破</strong>：當規模突破某個臨界點，GPT-4 展現了逆轉趨勢的能力，證明「夠大」確實能解決原本解決不了的問題。</li>
+                    <li><strong>預測的極限</strong>：這種「開竅」或「湧現」的能力，目前依然很難從小模型精準預測。</li>
                 </ul>
                 <p>
-                    <strong>實務意義</strong>：這提醒我們，可預測擴展有其邊界。
-                    某些「湧現能力」（Emergent Capabilities）可能無法從小模型預測，
-                    這為 AI 安全帶來了挑戰。
+                    <strong>實務啟發</strong>：這提醒我們「可預測性」是有邊界的。雖然我們可以算出 Loss 的下降，但模型何時會突然學會某種複雜邏輯，依然帶有一絲神祕感。
                 </p>
             </div>
         </div>

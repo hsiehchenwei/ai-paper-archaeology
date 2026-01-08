@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLaVA 第 2 章：相關研究脈絡 - 站在巨人的肩膀上</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/generated/multimodal_timeline.png'); height: 70vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>多模態 AI 的演進之路</h1>
+            <p class="hero-subtitle">從 Flamingo 到 LLaVA，理解視覺與語言融合的歷程</p>
+            <p class="hero-meta">LLaVA 深度解析 · 第 2 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">LLaVA 教學</a>
+            <span>/</span>
+            <span class="current">第 2 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                LLaVA 並非憑空出現。它站在一系列開創性工作的肩膀上——從 Flamingo 的「多模態 GPT-3 時刻」，
+                到 BLIP-2 的 Q-former 架構，再到 Alpaca 與 Vicuna 在指令微調上的突破。
+                理解這些前輩模型，才能真正體會 LLaVA 的創新之處。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>🏗️ 多模態指令跟隨代理：兩種路線</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>在計算機視覺領域，構建指令跟隨代理主要有兩種思路：</p>
+                </div>
+
+                <div class="paradigm-grid">
+                    <div class="paradigm-card">
+                        <h4>路線 1：端到端訓練模型</h4>
+                        <p>針對特定任務訓練單一大型模型。例如：</p>
+                        <ul style="font-size: 0.9rem;">
+                            <li><strong>視覺導航 (VLN)</strong>：讓 AI 根據語言指令在環境中導航</li>
+                            <li><strong>InstructPix2Pix</strong>：根據文字指令編輯圖片（「把天空變成黃昏」）</li>
+                        </ul>
+                        <p style="margin-top: 10px;"><strong>限制</strong>：每個任務都需要獨立訓練，缺乏通用性。</p>
+                    </div>
+                    <div class="paradigm-card" style="border-left: 4px solid var(--mag-secondary);">
+                        <h4>路線 2：LLM 協調系統</h4>
+                        <p>用 LLM (如 ChatGPT) 作為「中央控制器」，協調多個視覺工具。例如：</p>
+                        <ul style="font-size: 0.9rem;">
+                            <li><strong>Visual ChatGPT</strong>：ChatGPT 調用 DALL-E、BLIP 等工具</li>
+                            <li><strong>MM-REACT</strong>：多模態推理與行動框架</li>
+                        </ul>
+                        <p style="margin-top: 10px;"><strong>限制</strong>：依賴外部工具，延遲高，難以優化。</p>
+                    </div>
+                </div>
+
+                <div class="key-concept">
+                    <h4>💡 LLaVA 的定位</h4>
+                    <p>
+                        LLaVA 選擇了<strong>路線 1（端到端訓練）</strong>，但與傳統方法的關鍵差異在於：
+                        它不是為單一任務設計的，而是通過<strong>指令微調</strong>成為<strong>通用多模態助手</strong>。
+                    </p>
+                    <p><strong>類比</strong>：就像學外語——有人靠「環境浸潤」自然習得（路線 2），有人需要「老師顯式教學」（LLaVA）。LLaVA 證明了後者在多模態領域同樣有效。</p>
+                </div>
+            </div>
+
+            <h2>📚 指令微調的發展史</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>語言領域的成功範式</h4>
+                    <p>在 NLP 社群，指令微調已被證明是讓 LLM「聽話」的關鍵技術：</p>
+                    
+                    <div class="paradigm-grid" style="grid-template-columns: 1fr;">
+                        <div class="paradigm-card">
+                            <h4>2020-2022：基礎模型時代</h4>
+                            <ul>
+                                <li><strong>GPT-3 (2020)</strong>：1750 億參數，強大但難控制，需要複雜的 prompt engineering</li>
+                                <li><strong>T5, PaLM, OPT</strong>：Google 和 Meta 的類似嘗試，預訓練強大但缺乏指令跟隨能力</li>
+                            </ul>
+                        </div>
+                        <div class="paradigm-card">
+                            <h4>2022：指令微調革命</h4>
+                            <ul>
+                                <li><strong>InstructGPT (OpenAI)</strong>：在人類標註的指令資料上微調 GPT-3，大幅提升可用性</li>
+                                <li><strong>FLAN-T5, FLAN-PaLM</strong>：Google 的開源指令微調版本</li>
+                                <li><strong>ChatGPT (2022.11)</strong>：InstructGPT + RLHF，引爆全球 AI 浪潮</li>
+                            </ul>
+                        </div>
+                        <div class="paradigm-card">
+                            <h4>2023：開源社群跟進</h4>
+                            <ul>
+                                <li><strong>LLaMA (Meta)</strong>：開源基礎模型，媲美 GPT-3</li>
+                                <li><strong>Alpaca (Stanford)</strong>：用 GPT-3.5 生成 52K 指令資料，微調 LLaMA</li>
+                                <li><strong>Vicuna (UC Berkeley)</strong>：用 ShareGPT 的 70K 使用者對話微調，達到 ChatGPT 90% 水準</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quote-block">
+                    「指令微調讓 LLM 從『能幹但不聽話的天才』變成『既能幹又聽話的助手』。」
+                </div>
+            </div>
+
+            <h2>🌅 Flamingo：多模態的「GPT-3 時刻」</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>
+                        2022 年，DeepMind 發表了 Flamingo，這是多模態領域的里程碑論文。
+                        Flamingo 展示了驚人的<strong>零樣本遷移</strong>和<strong>情境學習</strong>能力，
+                        被譽為「多模態的 GPT-3 時刻」。
+                    </p>
+                    
+                    <div class="key-concept">
+                        <h4>Flamingo 的關鍵創新</h4>
+                        <ul>
+                            <li><strong>架構</strong>：用 Perceiver Resampler 將視覺特徵壓縮，再用 gated cross-attention 注入 LLM</li>
+                            <li><strong>訓練資料</strong>：混合圖文對 (M3W, ALIGN) 與長文 VQA 資料</li>
+                            <li><strong>能力</strong>：可以做 few-shot learning，看幾個範例就能完成新任務</li>
+                        </ul>
+                    </div>
+
+                    <div class="key-concept">
+                        <h4>🤔 LLaVA vs Flamingo：核心差異</h4>
+                        <p><strong>Flamingo 的限制</strong>：雖然 Flamingo 在零樣本任務上表現強大，但它<strong>沒有經過顯式的多模態指令微調</strong>。
+                        它的訓練主要基於圖文對和 VQA 資料集，缺乏「如何跟隨人類複雜指令」的訓練。</p>
+                        <p><strong>LLaVA 的突破</strong>：LLaVA 明確地在<strong>多模態指令資料</strong>上微調，
+                        讓模型學會「理解使用者意圖」並「以助手的口吻回應」，而不只是回答資料集中的固定問題。</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>🔷 BLIP-2 與開源追趕者</h2>
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>BLIP-2 (Salesforce, 2023.01)</h4>
+                    <ul>
+                        <li><strong>創新</strong>：Q-former 架構，用 Queries 從視覺編碼器中提取最相關的特徵</li>
+                        <li><strong>效率</strong>：凍結視覺編碼器和 LLM，只訓練 Q-former，參數效率極高</li>
+                        <li><strong>限制</strong>：同樣缺乏指令微調，主要用於圖文檢索和 VQA</li>
+                    </ul>
+                </div>
+                <div class="paradigm-card">
+                    <h4>OpenFlamingo (2023.03)</h4>
+                    <ul>
+                        <li><strong>目標</strong>：開源複現 Flamingo</li>
+                        <li><strong>進展</strong>：釋出模型和訓練程式碼，推動社群研究</li>
+                        <li><strong>限制</strong>：仍然是預訓練模型，未針對指令跟隨優化</li>
+                    </ul>
+                </div>
+                <div class="paradigm-card">
+                    <h4>LLaMA-Adapter (2023.03)</h4>
+                    <ul>
+                        <li><strong>創新</strong>：用輕量的 Adapter 讓 LLaMA 接受圖像輸入</li>
+                        <li><strong>效率</strong>：只需訓練 1.2M 參數</li>
+                        <li><strong>限制</strong>：適配器容量有限，多模態能力較弱</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2>✨ LLaVA 的差異化優勢</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>相較於這些前輩模型，LLaVA 的獨特之處在於：</p>
+                </div>
+
+                <div class="paradigm-grid">
+                    <div class="paradigm-card" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">
+                        <h4>1. 顯式的視覺指令微調</h4>
+                        <p>LLaVA 是<strong>第一個</strong>在大規模多模態指令資料上微調的模型，讓它學會「作為助手」與人類互動。</p>
+                    </div>
+                    <div class="paradigm-card" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+                        <h4>2. GPT-4 輔助資料生成</h4>
+                        <p>創新性地利用語言版 GPT-4 生成高品質的多模態指令資料，解決標註瓶頸。</p>
+                    </div>
+                    <div class="paradigm-card" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+                        <h4>3. 簡潔但有效的架構</h4>
+                        <p>相比 Flamingo 的 gated attention 或 BLIP-2 的 Q-former，LLaVA 只用一個線性投影層，證明簡單也能有效。</p>
+                    </div>
+                    <div class="paradigm-card" style="background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);">
+                        <h4>4. 完全開源</h4>
+                        <p>資料、程式碼、模型全部開源，讓社群能複現、改進和擴展。</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2>📊 總結：LLaVA 的定位</h2>
+            <div class="chapter-summary">
+                <h3>核心要點</h3>
+                <ul>
+                    <li><strong>繼承</strong>：LLaVA 繼承了 CLIP 的視覺理解、Vicuna 的指令跟隨、Flamingo 的多模態架構思想</li>
+                    <li><strong>創新</strong>：首創將指令微調延伸到多模態領域，用 GPT-4 生成訓練資料</li>
+                    <li><strong>簡潔</strong>：證明不需要複雜的 Q-former 或 gated attention，簡單的線性投影層就足夠</li>
+                    <li><strong>開源</strong>：推動社群發展，為後續 LLaVA-1.5, LLaVA-NeXT 奠定基礎</li>
+                </ul>
+                
+                <h3>下一章預告</h3>
+                <p>
+                    第 3 章將深入揭秘 LLaVA 的「資料魔法」——如何用一個看不見的 GPT-4 創造出 158K 高品質的多模態指令資料。
+                </p>
+            </div>
+
+            <div class="nav-buttons" style="display: flex; justify-content: space-between; margin-top: 40px;">
+                <a href="01-introduction.html" class="nav-button">
+                    ← 上一章：引言與動機
+                </a>
+                <a href="03-data-generation.html" class="nav-button nav-button-next">
+                    下一章：資料生成的魔法 →
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -108,38 +108,93 @@
             <div class="translation">
                 <h4>📝 中文翻譯</h4>
                 <p>
-                    我們的基於規則的獎勵模型（RBRMs）是一組零樣本 GPT-4 分類器。
-                    這些分類器在 RLHF 微調期間為 GPT-4 策略模型提供額外的獎勵信號，
-                    針對正確行為，例如拒絕生成有害內容或不拒絕無害請求。
-                    RBRM 接受三個輸入：提示詞（可選）、策略模型的輸出，
-                    以及用於評估此輸出的人類編寫的評分標準（例如，多選題風格的規則集）。
-                    然後，RBRM 根據評分標準對輸出進行分類。
+                    我們開發了一套名叫「基於規則的獎勵模型」（<strong>Rule-Based Reward Models，RBRM</strong>）的系統。這套系統本質上是一群「零樣本 GPT-4 分類器」——也就是用 GPT-4 本身來當裁判，完全不用額外訓練。
+                </p>
+                <p>
+                    這些分類器的工作是在 RLHF 訓練期間，為主模型添加額外的「安全獎勵信號」。具體來說，它們會獎勵模型的「正確行為」，比如「拒絕產生有害內容」和「不該拒絕無害要求時正常回答」。
+                </p>
+                <p>
+                    RBRM 的運作流程很簡單：它接收三個輸入 ➜ 根據人類寫好的規則進行判斷 ➜ 輸出分類結果。這三個輸入分別是：
+                    <br />① 使用者的提示詞（可選）<br />
+                    ② 策略模型的回應<br />
+                    ③ 人類編寫的「評分標準」（一份清晰的規則清單，類似多選題的答案卡）
                 </p>
             </div>
 
             <div class="key-concept">
                 <h4>🔑 RBRM 的工作原理</h4>
                 <ul>
-                    <li><strong>零樣本分類器</strong>：使用 GPT-4 本身作為分類器，無需額外訓練</li>
-                    <li><strong>評分標準驅動</strong>：基於人類編寫的明確規則進行分類</li>
-                    <li><strong>細粒度控制</strong>：可以區分「理想風格的拒絕」、「不理想風格的拒絕」、「包含禁止內容」、「安全非拒絕回應」等</li>
-                    <li><strong>雙向獎勵</strong>：獎勵拒絕有害請求，也獎勵不拒絕無害請求</li>
+                    <li><strong>零樣本分類器</strong>：用 GPT-4 本身做裁判，無需訓練就能評判對錯</li>
+                    <li><strong>規則驅動</strong>：完全基於人類明確寫好的規則進行判斷，有據可查</li>
+                    <li><strong>細粒度控制 (Granular Control)</strong>：能夠精細區分不同類型的回應，而不只是簡單的「拒絕」或「不拒絕」</li>
+                    <li><strong>雙向獎勵</strong>：既獎勵「正確拒絕有害要求」，也獎勵「正確回應無害要求」</li>
                 </ul>
+            </div>
+
+            <div class="glossary-box">
+                <h4>📖 名詞解釋：細粒度控制的具體例子</h4>
+                <p style="margin-bottom: 15px;">
+                    RBRM 可以區分以下四種拒絕/回應的「風格」：
+                </p>
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+                    <tr style="background: #f0f9ff; border-bottom: 2px solid #3b82f6;">
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;"><strong>英文原文</strong></td>
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;"><strong>中文翻譯</strong></td>
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;"><strong>解釋</strong></td>
+                    </tr>
+                    <tr style="background: #fff;">
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;"><strong>Ideal refusal</strong></td>
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;"><strong>理想拒絕</strong></td>
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;">模型禮貌、清楚地拒絕有害要求，並解釋原因（如：「我不能幫助製作炸彈，因為這可能傷害他人」）</td>
+                    </tr>
+                    <tr style="background: #fef3c7;">
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;"><strong>Non-ideal refusal</strong></td>
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;"><strong>不理想的拒絕</strong></td>
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;">模型雖然拒絕了，但方式生硬、冷漠或不禮貌（如：「不行」）。這類拒絕雖然安全，但使用者體驗不好</td>
+                    </tr>
+                    <tr style="background: #fee2e2;">
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;"><strong>Harmful refusal (contains disallowed content)</strong></td>
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;"><strong>有害拒絕</strong><br/>（包含禁止內容）</td>
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;">表面上看起來像是拒絕，但實際上提供了危害資訊（如：「我不該告訴你怎麼製炸彈……但這樣做：1. 2. 3.」）</td>
+                    </tr>
+                    <tr style="background: #dcfce7;">
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;"><strong>Safe non-refusal</strong></td>
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;"><strong>安全的非拒絕</strong></td>
+                        <td style="padding: 10px; border: 1px solid #e0e7ff;">用戶問無害的問題，模型正常回答（如：「天空為什麼是藍色的？」→ 提供科學解釋）</td>
+                    </tr>
+                </table>
             </div>
 
             <div class="explanation">
                 <h4>💡 關鍵洞察</h4>
                 <p>
-                    <strong>為什麼需要 RBRM？</strong>
+                    <strong>為什麼需要 RBRM？原有的 RLHF 不夠嗎？</strong>
                 </p>
                 <ul>
-                    <li><strong>RLHF 的局限性</strong>：RLHF 後，模型在安全輸入上可能過於謹慎，在危險輸入上可能仍然脆弱</li>
-                    <li><strong>細粒度控制</strong>：需要更細粒度的控制，而不僅僅是「拒絕」或「不拒絕」</li>
-                    <li><strong>模型即工具</strong>：使用模型本身作為工具來改進模型，這是一個有趣的「元學習」方法</li>
+                    <li>
+                        <strong>RLHF 的「雙重盲點」</strong>：
+                        <ul style="margin-top: 8px; margin-left: 20px;">
+                            <li>模型在安全要求上 <strong>過度謹慎</strong>：面對無害問題也莫名其妙地拒絕</li>
+                            <li>模型在危險任務上仍然 <strong>容易被誤導</strong>：經過巧妙的提示詞引導，還是會洩露有害資訊</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>細粒度控制的必要性</strong>：
+                        <ul style="margin-top: 8px; margin-left: 20px;">
+                            <li>光說「拒絕」或「不拒絕」太粗糙，無法區分「理想拒絕」和「不理想拒絕」</li>
+                            <li>RBRM 的規則能精確控制：何時應該禮貌拒絕、何時應該直接回答、何時應該給出警告</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>模型即工具的「自指」設計</strong>：
+                        <ul style="margin-top: 8px; margin-left: 20px;">
+                            <li>用 GPT-4 本身作為裁判來改進 GPT-4，這是一個有趣的「自循環」</li>
+                            <li>好處是無需訓練新的分類器，壞處是可能會有偏差放大</li>
+                        </ul>
+                    </li>
                 </ul>
-                <p>
-                    <strong>實務意義</strong>：這展示了 AI 安全不僅是技術問題，更是系統工程問題。
-                    需要多層次的防護機制，從訓練時的安全措施到部署時的監控。
+                <p style="margin-top: 15px;">
+                    <strong>實務意義</strong>：這展示了 <strong>AI 安全不只是技術問題，更是系統工程問題</strong>。不能只靠單一的訓練方法（如 RLHF），需要多層防護：訓練時有 RBRM、部署時有監控系統、事後有快速回應機制。
                 </p>
             </div>
         </div>

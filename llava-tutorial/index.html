@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLaVA: 視覺指令微調 - AI Paper Archaeology</title>
+    <meta name="description" content="深入解析 LLaVA (Large Language and Vision Assistant)，理解如何將指令微調延伸到多模態領域，開啟「會看圖的 ChatGPT」時代。">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    
+    <style>
+        /* Custom styles for Landing Page to match Main Index */
+        body {
+            background-color: #f8fafc;
+        }
+
+        /* Hero Section Override */
+        .tutorial-hero {
+            position: relative;
+            height: 60vh;
+            min-height: 500px;
+            background-image: url('images/generated/hero_llava.png');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 60px;
+            color: white;
+        }
+        
+        .tutorial-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+        }
+
+        .hero-content-wrapper {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        .hero-tag {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 99px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .hero-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            font-weight: 300;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Bento Grid for Chapters */
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto 80px;
+        }
+
+        .chapter-card {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: var(--text-main);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .chapter-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .chapter-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20px;
+            bottom: 20px;
+            width: 4px;
+            background: #e5e7eb;
+            border-radius: 0 4px 4px 0;
+            transition: background 0.3s;
+        }
+
+        .chapter-card:hover::before {
+            background: var(--mag-primary);
+        }
+
+        .card-number {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding-left: 15px;
+        }
+
+        .card-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            padding-left: 15px;
+        }
+
+        .card-desc {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            flex-grow: 1;
+            padding-left: 15px;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 20px;
+            border-top: 1px solid #f3f4f6;
+            padding-left: 15px;
+        }
+
+        .read-time {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-arrow {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .chapter-card:hover .card-arrow {
+            background: var(--mag-primary);
+            color: white;
+        }
+
+        /* Essential Sections */
+        .section-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 60px auto 40px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--text-main) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .learning-path-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto 60px;
+            padding: 0 20px;
+        }
+
+        .path-step {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            background: #eff6ff;
+            color: var(--mag-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 15px;
+        }
+
+        /* Glass Nav */
+        .glass-nav {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 10px 24px;
+            border-radius: 99px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .nav-link {
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-link:hover {
+            color: var(--mag-primary);
+        }
+
+        .nav-divider {
+            width: 1px;
+            height: 16px;
+            background: #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Glass Navigation -->
+    <nav class="glass-nav">
+        <a href="../index.html" class="nav-link">🏠 首頁</a>
+        <div class="nav-divider"></div>
+        <a href="../clip-tutorial/index.html" class="nav-link">← CLIP</a>
+        <span class="nav-link" style="color: var(--mag-primary); font-weight: 700;">LLaVA</span>
+        <a href="../gpt4-tutorial/index.html" class="nav-link">GPT-4 →</a>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="tutorial-hero">
+        <div class="hero-content-wrapper">
+            <span class="hero-tag">AI Paper Archaeology · 2023</span>
+            <h1 class="hero-title">LLaVA</h1>
+            <p class="hero-subtitle">視覺指令微調 · 從語言到多模態的關鍵跨越</p>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <a href="01-introduction.html" class="button" style="background: white; color: black; border-radius: 99px; padding: 12px 32px; font-weight: 600; text-decoration: none;">開始閱讀</a>
+                <a href="https://arxiv.org/abs/2304.08485" target="_blank" class="button" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 99px; padding: 12px 24px; font-weight: 500; text-decoration: none;">原始論文 ↗</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Learning Path Section -->
+    <section>
+        <div class="section-header">
+            <h2 class="section-title">學習路徑指引</h2>
+            <p style="color: var(--text-secondary);">如何循序漸進掌握這篇開創性論文</p>
+        </div>
+        <div class="learning-path-grid">
+            <div class="path-step">
+                <div class="step-icon">🎯</div>
+                <h3 style="margin-bottom: 10px;">核心創新</h3>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">從<a href="01-introduction.html">第 1 章</a>理解為何需要視覺指令微調，以及 LLaVA 的突破性貢獻。</p>
+            </div>
+            <div class="path-step">
+                <div class="step-icon">🤖</div>
+                <h3 style="margin-bottom: 10px;">資料魔法</h3>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">在<a href="03-data-generation.html">第 3 章</a>學習如何用 GPT-4 創造 158K 多模態指令資料。</p>
+            </div>
+            <div class="path-step">
+                <div class="step-icon">🏗️</div>
+                <h3 style="margin-bottom: 10px;">架構設計</h3>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">探索<a href="04-architecture.html">第 4 章</a>如何用簡單的投影層連接 CLIP 與 Vicuna。</p>
+            </div>
+            <div class="path-step">
+                <div class="step-icon">⚡</div>
+                <h3 style="margin-bottom: 10px;">實驗驗證</h3>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">在<a href="06-experiments.html">第 6 章</a>體驗 LLaVA 如何達到 92.53% 的 SOTA 準確率。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chapters Grid -->
+    <section>
+        <div class="section-header">
+            <h2 class="section-title">章節導覽</h2>
+        </div>
+        
+        <div class="chapters-grid">
+            <!-- Chapter 1 -->
+            <a href="01-introduction.html" class="chapter-card">
+                <div class="card-number">CHAPTER 01</div>
+                <h3 class="card-title">引言與動機</h3>
+                <p class="card-desc">理解為何我們需要「會看圖的 ChatGPT」。探索 LLM 指令微調的成功，以及如何將這個概念延伸到多模態領域。LLaVA 的四大貢獻揭示了視覺指令微調的開創性意義。</p>
+                <div class="card-meta">
+                    <div class="read-time">
+                        <span>⏱️</span> 20 min read
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- Chapter 2 -->
+            <a href="02-related-work.html" class="chapter-card">
+                <div class="card-number">CHAPTER 02</div>
+                <h3 class="card-title">相關研究脈絡</h3>
+                <p class="card-desc">LLaVA 站在哪些巨人的肩膀上？從 Flamingo 的「多模態 GPT-3 時刻」到 BLIP-2 的 Q-former 架構，理解多模態 AI 的演進歷程，以及 LLaVA 的差異化定位。</p>
+                <div class="card-meta">
+                    <div class="read-time">
+                        <span>⏱️</span> 15 min read
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- Chapter 3 -->
+            <a href="03-data-generation.html" class="chapter-card">
+                <div class="card-number">CHAPTER 03</div>
+                <h3 class="card-title">資料生成的魔法</h3>
+                <p class="card-desc">如何用「瞎子」GPT-4 創造「看圖說話」的資料？通過符號表示（Captions + Bounding Boxes）讓語言模型理解視覺內容，產生 158K 高品質的多模態指令資料。</p>
+                <div class="card-meta">
+                    <div class="read-time">
+                        <span>⏱️</span> 25 min read
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- Chapter 4 -->
+            <a href="04-architecture.html" class="chapter-card">
+                <div class="card-number">CHAPTER 04</div>
+                <h3 class="card-title">模型架構解析</h3>
+                <p class="card-desc">如何把「眼睛」(CLIP) 接到「大腦」(Vicuna)？探索 LLaVA 的簡潔設計哲學：一個線性投影層就能連接視覺與語言世界，無需複雜的 Q-former 或 gated attention。</p>
+                <div class="card-meta">
+                    <div class="read-time">
+                        <span>⏱️</span> 20 min read
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- Chapter 5 -->
+            <a href="05-training.html" class="chapter-card">
+                <div class="card-number">CHAPTER 05</div>
+                <h3 class="card-title">兩階段訓練策略</h3>
+                <p class="card-desc">如何訓練一個「會看圖的助手」？Stage 1 特徵對齊（凍結 CLIP 和 LLM），Stage 2 端到端微調（解凍 LLM）。理解這個優雅的訓練範式如何讓 LLaVA 學會視覺理解。</p>
+                <div class="card-meta">
+                    <div class="read-time">
+                        <span>⏱️</span> 25 min read
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- Chapter 6 -->
+            <a href="06-experiments.html" class="chapter-card">
+                <div class="card-number">CHAPTER 06</div>
+                <h3 class="card-title">實驗結果與分析</h3>
+                <p class="card-desc">LLaVA 真的「會看圖說話」嗎？在 LLaVA-Bench 上達到 85.1% 相對分數，在 Science QA 上創下 92.53% 的新 SOTA。深入分析 Extreme Ironing 範例與局限性。</p>
+                <div class="card-meta">
+                    <div class="read-time">
+                        <span>⏱️</span> 30 min read
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- Chapter 7 -->
+            <a href="07-conclusion.html" class="chapter-card">
+                <div class="card-number">CHAPTER 07</div>
+                <h3 class="card-title">結論與未來展望</h3>
+                <p class="card-desc">LLaVA 開啟了什麼？作為多模態 AI 的「Alpaca 時刻」，LLaVA 為後續 LLaVA-1.5、LLaVA-NeXT 奠定基礎。探索通用視覺助手的未來願景與延伸閱讀。</p>
+                <div class="card-meta">
+                    <div class="read-time">
+                        <span>⏱️</span> 15 min read
+                    </div>
+                    <div class="card-arrow">→</div>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 60px 20px; color: var(--text-secondary); border-top: 1px solid #e5e7eb;">
+        <p>© 2026 AI Paper Archaeology</p>
+        <p style="font-size: 0.9rem; margin-top: 10px;">Made with ❤️ for AI Learners</p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLaVA 第 4 章：模型架構解析 - 連接視覺與語言的優雅設計</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/generated/clip_vicuna_fusion.png'); height: 75vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>當「眼睛」遇見「大腦」</h1>
+            <p class="hero-subtitle">一個線性投影層的優雅連接</p>
+            <p class="hero-meta">LLaVA 深度解析 · 第 4 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">LLaVA 教學</a>
+            <span>/</span>
+            <span class="current">第 4 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                LLaVA 的架構設計體現了一個重要的工程哲學：<strong>簡單往往勝過複雜</strong>。
+                相較於 Flamingo 的 gated cross-attention 或 BLIP-2 的 Q-former，
+                LLaVA 只用了一個<strong>線性投影層</strong>就連接了視覺編碼器與語言模型。
+                這個設計不僅易於實作和訓練，更重要的是——它有效。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 1. 整體架構概覽 -->
+            <h2>🏗️ 整體架構：三個核心組件</h2>
+            <div class="figure figure-original">
+                <img src="images/original/llava_arch.png" alt="LLaVA 架構圖">
+                <div class="caption">
+                    <strong>Figure 1（論文原圖）：</strong>LLaVA 網路架構。視覺編碼器提取圖片特徵，投影層將視覺特徵映射到語言空間，語言模型生成回應。
+                </div>
+            </div>
+
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>LLaVA 由三個主要組件構成：</p>
+                </div>
+
+                <div class="paradigm-grid">
+                    <div class="paradigm-card" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">
+                        <h4>1. Vision Encoder (視覺編碼器)</h4>
+                        <p><strong>選擇：CLIP ViT-L/14</strong></p>
+                        <ul style="font-size: 0.9rem;">
+                            <li>預訓練於 400M 圖文對</li>
+                            <li>強大的開放集視覺理解能力</li>
+                            <li>輸出：257 個 token（1 個 class token + 16×16 grid features）</li>
+                        </ul>
+                        <p style="margin-top: 10px;"><strong>參數量</strong>：約 300M</p>
+                    </div>
+                    <div class="paradigm-card" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+                        <h4>2. Projection Matrix (投影層)</h4>
+                        <p><strong>設計：簡單的線性變換</strong></p>
+                        <ul style="font-size: 0.9rem;">
+                            <li>將 CLIP 的視覺特徵映射到 LLM 的 word embedding 空間</li>
+                            <li>可訓練的權重矩陣 \( \mathbf{W} \)</li>
+                            <li>輕量級設計，快速迭代</li>
+                        </ul>
+                        <p style="margin-top: 10px;"><strong>參數量</strong>：約 2M（相對微小）</p>
+                    </div>
+                    <div class="paradigm-card" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+                        <h4>3. Language Model (語言模型)</h4>
+                        <p><strong>選擇：Vicuna-13B</strong></p>
+                        <ul style="font-size: 0.9rem;">
+                            <li>基於 LLaMA-13B 指令微調</li>
+                            <li>當時最強的開源指令跟隨模型</li>
+                            <li>達到 ChatGPT 90% 的水準</li>
+                        </ul>
+                        <p style="margin-top: 10px;"><strong>參數量</strong>：13B</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="figure figure-ai">
+                <img src="images/generated/clip_vicuna_fusion.png" alt="CLIP + Vicuna 融合示意">
+                <div class="caption">
+                    <strong>概念圖：</strong>CLIP 視覺編碼器（左）通過投影層（中）連接到 Vicuna 語言模型（右）。
+                </div>
+            </div>
+
+            <!-- 2. 組件 1：為什麼選 CLIP？ -->
+            <h2>👁️ 組件 1：視覺編碼器 - 為什麼選 CLIP？</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>CLIP 的優勢</h4>
+                    <p>LLaVA 選擇 CLIP (Contrastive Language-Image Pre-training) 作為視覺編碼器有以下原因：</p>
+                </div>
+
+                <div class="key-concept">
+                    <h5>1. 開放集視覺理解 (Open-vocabulary)</h5>
+                    <p>
+                        <strong>傳統視覺模型</strong>（如 ImageNet 預訓練的 ResNet）只能識別預定義的 1000 個類別。
+                        如果圖片中出現「柴犬」（不在 ImageNet 1000 類中），模型會失敗。
+                    </p>
+                    <p>
+                        <strong>CLIP</strong> 在 400M 多樣化的圖文對上訓練，能識別<strong>任意概念</strong>——
+                        從常見的「狗」到罕見的「賽博龐克風格的街頭塗鴉」。
+                        這種開放集能力對於通用視覺助手至關重要。
+                    </p>
+                </div>
+
+                <div class="key-concept">
+                    <h5>2. 強大的視覺-語言對齊</h5>
+                    <p>
+                        CLIP 的訓練目標是<strong>對比學習</strong>：讓匹配的圖文對在嵌入空間中接近，不匹配的遠離。
+                        這意味著 CLIP 的視覺特徵天然地與語言特徵對齊——
+                        這正是 LLaVA 需要的！後續的投影層只需要做「小幅調整」，而不是「從零對齊」。
+                    </p>
+                </div>
+
+                <div class="key-concept">
+                    <h5>3. 成熟的預訓練權重</h5>
+                    <p>
+                        OpenAI 釋出了多個 CLIP 模型（ViT-B/32、ViT-B/16、ViT-L/14 等）。
+                        LLaVA 選擇了 <strong>ViT-L/14</strong>——最大且效果最好的版本。
+                        使用預訓練權重避免了從零訓練視覺編碼器的巨大成本。
+                    </p>
+                </div>
+            </div>
+
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>CLIP ViT-L/14 的技術細節</h4>
+                    <ul>
+                        <li><strong>架構</strong>：Vision Transformer (ViT)</li>
+                        <li><strong>輸入</strong>：224×224 圖片，分割成 16×16 patches</li>
+                        <li><strong>Patch 數量</strong>：14×14 = 196 個 patches</li>
+                        <li><strong>輸出</strong>：257 個 token
+                            <ul style="margin-top: 5px;">
+                                <li>1 個 [CLS] token（全局特徵）</li>
+                                <li>256 個 grid features（16×16 的空間特徵）</li>
+                            </ul>
+                        </li>
+                        <li><strong>特徵維度</strong>：每個 token 是 1024 維向量</li>
+                    </ul>
+                </div>
+
+                <div class="key-concept">
+                    <h4>💡 關鍵設計選擇：使用哪一層的特徵？</h4>
+                    <p>LLaVA 嘗試了兩種方案：</p>
+                    <ul>
+                        <li><strong>最後一層 (Last layer)</strong>：更抽象、全局的特徵</li>
+                        <li><strong>倒數第二層 (Before last layer)</strong>：保留更多局部細節</li>
+                    </ul>
+                    <p>
+                        <strong>實驗結果</strong>（在 Science QA 上測試）：
+                        倒數第二層比最後一層高出 <strong>0.96%</strong>（90.92% vs 89.96%）。
+                    </p>
+                    <p>
+                        <strong>解釋</strong>：CLIP 的最後一層針對對比學習優化，可能過度關注全局特徵而丟失局部細節。
+                        倒數第二層保留了更多空間資訊，對於理解圖片中的具體物件和位置更有幫助。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 3. 組件 2：投影層的數學 -->
+            <h2>🔗 組件 2：投影層 - 橋接兩個世界</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>為什麼需要投影層？</h4>
+                    <p>CLIP 和 Vicuna 來自不同的「星球」：</p>
+                    <ul>
+                        <li><strong>CLIP</strong> 的視覺特徵維度：<strong>1024 維</strong></li>
+                        <li><strong>Vicuna</strong> 的 word embedding 維度：<strong>5120 維</strong>（13B 模型）</li>
+                    </ul>
+                    <p>
+                        它們不僅維度不同，語義空間也不同。CLIP 的特徵空間是「視覺中心」的，
+                        而 Vicuna 的嵌入空間是「語言中心」的。
+                        <strong>投影層的任務就是完成這個翻譯工作</strong>。
+                    </p>
+                </div>
+
+                <div class="key-concept">
+                    <h4>🧮 數學公式</h4>
+                    <p>投影層的運算非常簡單：</p>
+                    <div style="background: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+                        \[
+                        \mathbf{H}_v = \mathbf{W} \cdot \mathbf{Z}_v, \quad \text{where} \quad \mathbf{Z}_v = g(\mathbf{X}_v)
+                        \]
+                    </div>
+                    <p>符號說明：</p>
+                    <ul>
+                        <li>\( \mathbf{X}_v \)：輸入圖片</li>
+                        <li>\( g(\cdot) \)：CLIP 視覺編碼器（凍結的）</li>
+                        <li>\( \mathbf{Z}_v \)：CLIP 輸出的視覺特徵，形狀 \( [257, 1024] \)</li>
+                        <li>\( \mathbf{W} \)：<strong>可訓練的投影矩陣</strong>，形狀 \( [5120, 1024] \)</li>
+                        <li>\( \mathbf{H}_v \)：投影後的視覺 token，形狀 \( [257, 5120] \)</li>
+                    </ul>
+                    <p style="margin-top: 15px;">
+                        <strong>本質</strong>：這是一個<strong>線性變換</strong>，將 1024 維的視覺向量映射到 5120 維的語言空間。
+                    </p>
+                </div>
+
+                <div class="key-concept">
+                    <h4>💡 類比：翻譯官的工作</h4>
+                    <p><strong>生活類比</strong>：</p>
+                    <p>
+                        投影層就像一個<strong>翻譯官</strong>。「眼睛」（CLIP）用「視覺語言」描述看到的東西，
+                        投影層把這些描述翻譯成「大腦」（Vicuna）能理解的「自然語言」。
+                    </p>
+                    <p><strong>工程類比</strong>：</p>
+                    <p>
+                        這是經典的 <strong>Adapter Pattern（適配器模式）</strong>。
+                        當你有兩個接口不兼容的模組（CLIP 和 Vicuna），你不需要重寫它們，
+                        只需要加一個輕量的適配器層來轉換數據格式。
+                    </p>
+                </div>
+            </div>
+
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>為什麼不用更複雜的設計？</h4>
+                    <p>LLaVA 論文明確提到，他們選擇簡單的線性投影層是為了：</p>
+                </div>
+
+                <div class="paradigm-grid">
+                    <div class="paradigm-card">
+                        <h4>1. 快速迭代</h4>
+                        <p>簡單的設計讓研究團隊能快速測試不同的資料配置。如果投影層太複雜，每次實驗都會很慢。</p>
+                    </div>
+                    <div class="paradigm-card">
+                        <h4>2. 避免過擬合</h4>
+                        <p>複雜的架構（如 Q-former）有更多參數，在資料不足時容易過擬合。線性層參數少，泛化性更好。</p>
+                    </div>
+                    <div class="paradigm-card">
+                        <h4>3. 驗證概念</h4>
+                        <p>LLaVA 的核心創新是<strong>資料</strong>（指令微調資料），而不是架構。簡單的架構能證明「資料才是關鍵」。</p>
+                    </div>
+                </div>
+
+                <div class="quote-block">
+                    「我們證明了不需要 Flamingo 的 gated attention 或 BLIP-2 的 Q-former，簡單的投影層就足夠有效。」
+                </div>
+            </div>
+
+            <!-- 4. 組件 3：為什麼選 Vicuna？ -->
+            <h2>🧠 組件 3：語言模型 - 為什麼選 Vicuna？</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>LLaVA 需要一個<strong>開源的</strong>、<strong>指令跟隨能力強</strong>的語言模型。在 2023 年 4 月，Vicuna 是最佳選擇。</p>
+                </div>
+
+                <div class="key-concept">
+                    <h4>Vicuna 的背景</h4>
+                    <ul>
+                        <li><strong>基礎模型</strong>：LLaMA-13B（Meta 開源）</li>
+                        <li><strong>訓練資料</strong>：70K ShareGPT 使用者對話（真實的 ChatGPT 對話記錄）</li>
+                        <li><strong>訓練方法</strong>：標準的指令微調（Instruction Tuning）</li>
+                        <li><strong>表現</strong>：在 MT-Bench 上達到 ChatGPT 的 90% 水準</li>
+                        <li><strong>成本</strong>：訓練成本約 $300（相比 GPT-3.5 的數百萬美元）</li>
+                    </ul>
+                </div>
+
+                <div class="key-concept">
+                    <h4>💡 為什麼不用其他模型？</h4>
+                    <p><strong>vs. LLaMA</strong>：LLaMA 是基礎模型，缺乏指令跟隨能力。Vicuna 是在 LLaMA 基礎上微調的。</p>
+                    <p><strong>vs. Alpaca</strong>：Alpaca 的訓練資料是 GPT-3.5 生成的，品質不如 ShareGPT 的真實對話。</p>
+                    <p><strong>vs. GPT-3.5/GPT-4</strong>：閉源且昂貴，無法修改和部署。</p>
+                </div>
+            </div>
+
+            <!-- 5. 資訊流動：從圖片到回應 -->
+            <h2>🔄 完整流程：從圖片到回應</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>讓我們追蹤一張圖片在 LLaVA 中的完整旅程：</p>
+                    
+                    <div class="paradigm-grid" style="grid-template-columns: 1fr;">
+                        <div class="paradigm-card" style="background: #f8f9fa;">
+                            <h4>Step 1：視覺編碼</h4>
+                            <p>輸入：一張 224×224 的圖片</p>
+                            <p>處理：CLIP ViT-L/14 將圖片編碼為 257 個 1024 維的視覺 token</p>
+                            <p>輸出：\( \mathbf{Z}_v \in \mathbb{R}^{257 \times 1024} \)</p>
+                        </div>
+                        
+                        <div class="paradigm-card" style="background: #eff6ff;">
+                            <h4>Step 2：特徵投影</h4>
+                            <p>輸入：\( \mathbf{Z}_v \)</p>
+                            <p>處理：線性變換 \( \mathbf{H}_v = \mathbf{W} \cdot \mathbf{Z}_v \)</p>
+                            <p>輸出：\( \mathbf{H}_v \in \mathbb{R}^{257 \times 5120} \)（與 word embedding 同維度）</p>
+                        </div>
+                        
+                        <div class="paradigm-card" style="background: #f0fdf4;">
+                            <h4>Step 3：序列拼接</h4>
+                            <p>將視覺 token 與文字 token 拼接：</p>
+                            <pre style="background: white; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-top: 10px;">
+[系統消息]<STOP>
+Human: [視覺 token × 257] [文字問題]<STOP>
+Assistant:
+                            </pre>
+                            <p style="margin-top: 10px;">視覺 token 被當作「特殊的單詞」插入序列中。</p>
+                        </div>
+                        
+                        <div class="paradigm-card" style="background: #fef3c7;">
+                            <h4>Step 4：自回歸生成</h4>
+                            <p>Vicuna 看到這個混合序列（視覺 + 文字），自回歸地生成回應：</p>
+                            <pre style="background: white; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-top: 10px;">
+Assistant: 在這張圖中，我看到一輛黑色 SUV...
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. 與其他模型的架構對比 -->
+            <h2>🆚 架構對比：LLaVA vs 競品</h2>
+            <div class="comparison-table">
+                <table>
+                    <tr>
+                        <th>模型</th>
+                        <th>視覺編碼器</th>
+                        <th>連接方式</th>
+                        <th>語言模型</th>
+                        <th>複雜度</th>
+                    </tr>
+                    <tr>
+                        <td><strong>LLaVA</strong></td>
+                        <td>CLIP ViT-L/14</td>
+                        <td>線性投影層</td>
+                        <td>Vicuna-13B</td>
+                        <td>⭐ 簡單</td>
+                    </tr>
+                    <tr>
+                        <td>Flamingo</td>
+                        <td>CLIP ViT-L/14</td>
+                        <td>Perceiver Resampler + Gated Cross-Attention</td>
+                        <td>Chinchilla-70B</td>
+                        <td>⭐⭐⭐⭐ 複雜</td>
+                    </tr>
+                    <tr>
+                        <td>BLIP-2</td>
+                        <td>CLIP ViT-L/14</td>
+                        <td>Q-former (32 learnable queries)</td>
+                        <td>OPT-6.7B / FlanT5-XXL</td>
+                        <td>⭐⭐⭐ 中等</td>
+                    </tr>
+                    <tr>
+                        <td>OpenFlamingo</td>
+                        <td>CLIP ViT-L/14</td>
+                        <td>Perceiver + Gated Cross-Attention</td>
+                        <td>LLaMA-7B</td>
+                        <td>⭐⭐⭐⭐ 複雜</td>
+                    </tr>
+                    <tr>
+                        <td>LLaMA-Adapter</td>
+                        <td>CLIP ViT-L/14</td>
+                        <td>Lightweight Adapter (1.2M params)</td>
+                        <td>LLaMA-7B</td>
+                        <td>⭐⭐ 簡單但容量受限</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>關鍵洞察</h4>
+                    <p>
+                        LLaVA 的簡潔設計並非妥協，而是<strong>策略性選擇</strong>。
+                        它證明了在正確的資料（指令微調資料）支持下，
+                        簡單的架構也能達到甚至超越複雜模型的效果。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 7. 總結 -->
+            <h2>📌 本章重點回顧</h2>
+            <div class="chapter-summary">
+                <h3>核心要點</h3>
+                <ul>
+                    <li><strong>三組件架構</strong>：CLIP (視覺) + 線性投影層 + Vicuna (語言)</li>
+                    <li><strong>CLIP 優勢</strong>：開放集理解、視覺-語言對齊、成熟的預訓練權重</li>
+                    <li><strong>投影層設計</strong>：簡單的線性變換，快速迭代，避免過擬合</li>
+                    <li><strong>Vicuna 選擇</strong>：當時最強的開源指令跟隨模型</li>
+                    <li><strong>設計哲學</strong>：簡單勝過複雜，資料勝過架構</li>
+                </ul>
+                
+                <h3>下一章預告</h3>
+                <p>
+                    第 5 章將深入 LLaVA 的訓練策略——如何通過兩階段訓練（特徵對齊 + 端到端微調）
+                    讓這個簡單的架構學會「看圖說話」。
+                </p>
+            </div>
+
+            <div class="nav-buttons" style="display: flex; justify-content: space-between; margin-top: 40px;">
+                <a href="03-data-generation.html" class="nav-button">
+                    ← 上一章：資料生成的魔法
+                </a>
+                <a href="05-training.html" class="nav-button nav-button-next">
+                    下一章：兩階段訓練策略 →
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
