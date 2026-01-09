@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViT 第 2 章：Patch Embedding - 圖片變成 Tokens</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/generated/chapter02_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>圖片切塊的藝術</h1>
+            <p class="hero-subtitle">從 2D 圖片到 1D 序列的轉換</p>
+            <p class="hero-meta">Vision Transformer 深度解析 · 第 2 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">ViT 教學</a>
+            <span>/</span>
+            <span class="current">第 2 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                要把 Transformer 應用到圖片上，第一步就是「把圖片變成文字」。
+                但圖片是 2D 的，而 Transformer 只能處理 1D 序列。
+                怎麼辦？ViT 的答案很簡單：<strong>把圖片切成小塊，每一塊就是一個「詞彙」</strong>。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 1. 核心概念：圖片切塊 -->
+            <h2>🔪 第一步：把圖片切成 Patches</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>📐 數學表示</h4>
+                    <p>
+                        假設我們有一張圖片 <strong>x ∈ ℝ<sup>H × W × C</sup></strong>，其中：
+                    </p>
+                    <ul>
+                        <li><strong>H, W</strong>：圖片的高度和寬度（例如 224×224）</li>
+                        <li><strong>C</strong>：通道數（RGB 圖片是 3）</li>
+                    </ul>
+                    
+                    <p>
+                        我們把這張圖片切成 <strong>P×P</strong> 的小塊（patches），例如 16×16。
+                        這樣會得到 <strong>N = HW/P²</strong> 個 patches。
+                    </p>
+                    
+                    <p>
+                        對於 224×224 的圖片，16×16 的 patch size：
+                    </p>
+                    <ul>
+                        <li>每邊有 224/16 = 14 個 patches</li>
+                        <li>總共有 14×14 = <strong>196 個 patches</strong></li>
+                        <li>每個 patch 的大小是 16×16×3 = 768 個像素值</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 2. 原始架構圖 -->
+            <div class="figure figure-original">
+                <img src="images/original/model_scheme.png" alt="ViT 模型架構圖">
+                <div class="caption">
+                    <strong>Figure 1:</strong> ViT 模型概覽。我們將圖片切成固定大小的 patches，對每個 patch 進行線性嵌入，加上位置編碼，然後將結果序列送入標準 Transformer encoder。為了進行分類，我們使用標準方法：在序列前添加一個可學習的「分類 token」。
+                </div>
+            </div>
+
+            <!-- 3. Patch Embedding 詳解 -->
+            <h2>🔢 第二步：Patch Embedding</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>從像素值到向量</h4>
+                    <p>
+                        每個 patch 原本是 <strong>P² × C</strong> 個像素值（例如 16×16×3 = 768）。
+                        我們需要把它轉換成一個 <strong>D</strong> 維的向量（例如 768 維），這樣才能送入 Transformer。
+                    </p>
+                    
+                    <div class="key-concept">
+                        <h5>📝 數學公式</h5>
+                        <p>
+                            論文中的公式（Eq. 1）：
+                        </p>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; font-family: 'JetBrains Mono', monospace; text-align: center;">
+                            <strong>z₀ = [x<sub>class</sub>; x¹<sub>p</sub>E; x²<sub>p</sub>E; ...; x<sup>N</sup><sub>p</sub>E] + E<sub>pos</sub></strong>
+                        </div>
+                        <p>
+                            其中：
+                        </p>
+                        <ul>
+                            <li><strong>x<sub>class</sub></strong>：分類 token（類似 BERT 的 [CLS] token）</li>
+                            <li><strong>x<sup>i</sup><sub>p</sub></strong>：第 i 個 patch（大小為 P²×C）</li>
+                            <li><strong>E</strong>：線性投影矩陣（大小為 (P²×C) × D）</li>
+                            <li><strong>E<sub>pos</sub></strong>：位置編碼（大小為 (N+1) × D）</li>
+                        </ul>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>🔍 生活類比：拼圖遊戲</h5>
+                        <p>
+                            想像你在玩一個巨大的拼圖：
+                        </p>
+                        <ul>
+                            <li><strong>原始圖片</strong>：完整的拼圖（224×224）</li>
+                            <li><strong>Patches</strong>：把拼圖切成 196 塊（每塊 16×16）</li>
+                            <li><strong>Patch Embedding</strong>：給每一塊拼圖一個「編號」和「描述」（轉成向量）</li>
+                            <li><strong>Position Embedding</strong>：記錄每一塊拼圖「原本應該在哪個位置」</li>
+                        </ul>
+                        <p>
+                            Transformer 就像是一個「拼圖大師」，它會看所有拼圖塊的「描述」，然後判斷它們之間的關係，最終拼出完整的圖像理解。
+                        </p>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>💻 工程類比：2D 矩陣 Flatten</h5>
+                        <p>
+                            在程式設計中，這就像把 2D 矩陣「攤平」成 1D 陣列：
+                        </p>
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px; overflow-x: auto;"><code># 偽代碼
+image = [224, 224, 3]  # H × W × C
+patches = []
+for i in range(0, 224, 16):
+    for j in range(0, 224, 16):
+        patch = image[i:i+16, j:j+16, :]  # 16×16×3
+        patch_flat = patch.flatten()       # 768 個值
+        patch_embedding = linear_projection(patch_flat)  # 768 維向量
+        patches.append(patch_embedding)
+
+# 結果：196 個 768 維的向量</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Classification Token -->
+            <h2>🏷️ 第三步：Classification Token</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>為什麼需要 CLS Token？</h4>
+                    <p>
+                        類似 BERT 的 [CLS] token，ViT 也在序列最前面加上一個<strong>可學習的 classification token</strong>（記作 <strong>x<sub>class</sub></strong>）。
+                    </p>
+                    
+                    <div class="key-concept">
+                        <h5>🎯 用途</h5>
+                        <ul>
+                            <li><strong>聚合資訊</strong>：經過 Transformer 的處理後，CLS token 會「吸收」所有 patches 的資訊</li>
+                            <li><strong>分類輸出</strong>：最終的分類結果就是從 CLS token 的輸出得到的</li>
+                        </ul>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>💡 類比：會議主持人</h5>
+                        <p>
+                            CLS token 就像是一個「會議主持人」：
+                        </p>
+                        <ul>
+                            <li>它會「聽取」所有 patches（與會者）的意見</li>
+                            <li>透過 Self-Attention 機制，它會「整合」所有資訊</li>
+                            <li>最終，它會「總結」整個圖片的內容，做出分類決策</li>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Position Embedding -->
+            <h2>📍 第四步：Position Embedding</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>為什麼需要位置資訊？</h4>
+                    <p>
+                        Transformer 的 Self-Attention 機制是「順序無關」的（permutation-invariant）。
+                        也就是說，如果你把 patches 的順序打亂，Transformer 的輸出不會改變。
+                    </p>
+                    
+                    <p>
+                        但圖片的空間位置很重要！「貓在左邊，狗在右邊」和「貓在右邊，狗在左邊」是完全不同的場景。
+                    </p>
+                    
+                    <div class="key-concept">
+                        <h5>🔢 1D vs 2D Position Embedding</h5>
+                        <p>
+                            論文測試了兩種位置編碼方式：
+                        </p>
+                        <ul>
+                            <li><strong>1D Position Embedding</strong>：只記錄 patches 在序列中的位置（第 1 個、第 2 個...）</li>
+                            <li><strong>2D Position Embedding</strong>：記錄 patches 在原始圖片中的 2D 座標（第幾行、第幾列）</li>
+                        </ul>
+                        <p>
+                            <strong>結果</strong>：1D 和 2D 的效果差不多！這說明 Transformer 有能力從資料中學習 2D 空間關係，即使只給它 1D 的位置資訊。
+                        </p>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>🎨 視覺化：位置編碼的學習</h5>
+                        <p>
+                            論文的附錄中展示了學習到的位置編碼的相似度矩陣。
+                            有趣的是，即使使用 1D 位置編碼，模型也能學習到類似 2D 的結構：
+                        </p>
+                        <ul>
+                            <li>相鄰的 patches 有相似的位置編碼</li>
+                            <li>同一行的 patches 有相似的位置編碼</li>
+                            <li>同一列的 patches 也有相似的位置編碼</li>
+                        </ul>
+                        <p>
+                            這證明了 Transformer 的強大學習能力。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. 完整流程總結 -->
+            <h2>🔄 完整流程總結</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>從圖片到 Transformer 輸入</h4>
+                    <ol style="line-height: 2;">
+                        <li><strong>輸入圖片</strong>：224×224×3 的 RGB 圖片</li>
+                        <li><strong>切分成 Patches</strong>：14×14 = 196 個 16×16 的 patches</li>
+                        <li><strong>Flatten</strong>：每個 patch 變成 768 個像素值（16×16×3）</li>
+                        <li><strong>Linear Projection</strong>：768 個值 → 768 維向量（透過矩陣 E）</li>
+                        <li><strong>加上 CLS Token</strong>：在序列最前面加上一個可學習的 token</li>
+                        <li><strong>加上 Position Embedding</strong>：每個 patch 加上對應的位置編碼</li>
+                        <li><strong>送入 Transformer</strong>：得到 197 個 768 維的向量（1 個 CLS + 196 個 patches）</li>
+                    </ol>
+                    
+                    <div class="quote-block">
+                        「一張 224×224 的圖片 = 196 個 16×16 的 patches = 196 個『詞彙』」<br>
+                        <span style="font-size: 0.9em; opacity: 0.8;">這就是論文標題「An Image is Worth 16x16 Words」的含義。</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="chapter-navigation">
+                <a href="01-introduction.html" class="nav-link">← 上一章：引言與動機</a>
+                <a href="index.html" class="nav-link">返回目錄</a>
+                <a href="03-architecture.html" class="nav-link">下一章：模型架構 →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

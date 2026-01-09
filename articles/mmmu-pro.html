@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      反作弊的評測：為什麼堵住「捷徑」後，AI 表現大幅下降？ | AI Paper
+      Archaeology
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles/global.css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+    <style>
+      :root {
+        --hero-bg: linear-gradient(
+          135deg,
+          #1a1f3a 0%,
+          #2d1b3d 50%,
+          #0f1419 100%
+        );
+        --gold: #ffd700;
+        --silver: #c0c0c0;
+        --deep-blue: #0f1419;
+        --warning-red: #ef4444;
+        --success-green: #10b981;
+        --orange: #f97316;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.8;
+        color: #2c3e50;
+        background: var(--deep-blue);
+      }
+
+      /* Hero Section */
+      .hero-section {
+        position: relative;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--hero-bg);
+        background-image: url("./mmmu-pro/images/generated/hero.png");
+        background-size: cover;
+        background-position: center;
+        overflow: hidden;
+      }
+
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(26, 31, 58, 0.4) 0%,
+          rgba(26, 31, 58, 0.85) 60%,
+          rgba(26, 31, 58, 0.95) 100%
+        );
+        z-index: 1;
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        padding: 0 20px;
+        max-width: 1000px;
+      }
+
+      .hero-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: clamp(2.5rem, 6vw, 5rem);
+        font-weight: 900;
+        color: #ffffff;
+        margin-bottom: 30px;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8),
+          0 0 60px rgba(255, 215, 0, 0.3);
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+
+      .hero-subtitle {
+        font-family: "Inter", sans-serif;
+        font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+        color: var(--gold);
+        font-weight: 300;
+        letter-spacing: 0.05em;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+        margin-bottom: 20px;
+      }
+
+      .hero-meta {
+        font-size: 1rem;
+        color: var(--silver);
+        font-weight: 400;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+      }
+
+      /* Story Container */
+      .story-container {
+        background: #ffffff;
+        margin-top: -50px;
+        position: relative;
+        z-index: 10;
+        border-radius: 30px 30px 0 0;
+        padding: 80px 40px;
+      }
+
+      .content-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      /* Typography */
+      .story-lead {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.5rem;
+        line-height: 2;
+        color: #1a1a1a;
+        margin: 40px 0;
+        padding: 40px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-left: 5px solid var(--orange);
+        border-radius: 10px;
+      }
+
+      h2 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #0a0e27;
+        margin: 60px 0 30px 0;
+        border-bottom: 3px solid var(--orange);
+        padding-bottom: 15px;
+      }
+
+      h3 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.8rem;
+        color: #1a1f3a;
+        margin: 40px 0 20px 0;
+      }
+
+      p {
+        font-size: 1.1rem;
+        line-height: 1.9;
+        margin-bottom: 20px;
+        color: #2c3e50;
+      }
+
+      /* Key Concept Boxes */
+      .key-concept {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin: 30px 0;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        border-top: 4px solid var(--orange);
+      }
+
+      .key-concept.strong {
+        border-top-color: var(--success-green);
+        background: linear-gradient(135deg, #10b98120 0%, #ffffff 100%);
+      }
+
+      .key-concept.weak {
+        border-top-color: var(--warning-red);
+        background: linear-gradient(135deg, #ef444420 0%, #ffffff 100%);
+      }
+
+      .key-concept h5 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.3rem;
+        color: #0a0e27;
+        margin-bottom: 15px;
+        font-weight: 700;
+      }
+
+      /* Comparison Table */
+      .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 30px 0;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .comparison-table th {
+        background: var(--deep-blue);
+        color: var(--gold);
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+      }
+
+      .comparison-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .comparison-table tr:hover {
+        background: #f8f9fa;
+      }
+
+      .comparison-table .highlight {
+        background: linear-gradient(135deg, #10b98120 0%, transparent 100%);
+        font-weight: 600;
+        color: var(--success-green);
+      }
+
+      .comparison-table .warning {
+        background: linear-gradient(135deg, #ef444420 0%, transparent 100%);
+        font-weight: 600;
+        color: var(--warning-red);
+      }
+
+      /* Figure Styles */
+      .figure {
+        margin: 40px 0;
+        text-align: center;
+      }
+
+      .figure img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .figure-original {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        border: 2px solid #e5e7eb;
+      }
+
+      .figure-ai {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        padding: 20px;
+        border-radius: 10px;
+        border: 2px solid var(--orange);
+      }
+
+      .caption {
+        margin-top: 15px;
+        font-size: 0.9rem;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .caption strong {
+        color: #0a0e27;
+      }
+
+      /* Original Quote */
+      .original-quote {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 10px;
+        border-left: 4px solid var(--orange);
+        margin: 30px 0;
+      }
+
+      .original-quote strong {
+        color: #0a0e27;
+        font-size: 1.1rem;
+        display: block;
+        margin-bottom: 15px;
+      }
+
+      .original-quote p {
+        font-style: italic;
+        color: #2c3e50;
+        margin-bottom: 15px;
+      }
+
+      .translation {
+        background: linear-gradient(135deg, #10b98110 0%, #ffffff 100%);
+        padding: 25px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border-left: 4px solid var(--success-green);
+      }
+
+      .translation h4 {
+        color: var(--success-green);
+        margin-bottom: 15px;
+      }
+
+      /* Quote Block */
+      .quote-block {
+        background: var(--hero-bg);
+        padding: 40px;
+        border-radius: 15px;
+        margin: 50px 0;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .quote-block::before {
+        content: '"';
+        position: absolute;
+        left: 20px;
+        top: 10px;
+        font-size: 6rem;
+        color: var(--orange);
+        opacity: 0.2;
+        font-family: Georgia, serif;
+      }
+
+      .quote-block p {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.5rem;
+        color: var(--gold);
+        margin: 0;
+        position: relative;
+        z-index: 1;
+        line-height: 1.8;
+      }
+
+      /* Breadcrumb */
+      .breadcrumb {
+        padding: 20px 40px;
+        background: rgba(10, 14, 39, 0.05);
+        font-size: 0.9rem;
+      }
+
+      .breadcrumb a {
+        color: var(--orange);
+        text-decoration: none;
+        transition: opacity 0.3s;
+      }
+
+      .breadcrumb a:hover {
+        opacity: 0.8;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .hero-title {
+          font-size: 2rem;
+        }
+
+        .story-container {
+          padding: 40px 20px;
+        }
+
+        .comparison-table {
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="breadcrumb">
+      <a href="../index.html">🏠 首頁</a>
+      <span style="margin: 0 10px; color: #999">/</span>
+      <span style="color: #666">知識筆記</span>
+      <span style="margin: 0 10px; color: #999">/</span>
+      <span style="color: #666">反作弊的評測</span>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <h1 class="hero-title">反作弊的評測</h1>
+        <p class="hero-subtitle">為什麼堵住「捷徑」後，AI 表現大幅下降？</p>
+        <p class="hero-meta">MMMU-Pro 基準測試揭示的真相</p>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="story-container">
+      <div class="content-wrapper">
+        <div class="story-lead">
+          2024 年 9 月，研究團隊提出了一個「反作弊」的基準測試：
+          <strong>MMMU-Pro</strong>。這是原始 MMMU 基準測試的增強版，
+          通過堵住模型的「作弊途徑」，強迫模型真正理解圖片內容。結果令人震驚：
+          <strong>所有模型的準確率都下降了 16.8% 到 26.9%</strong>。
+          這揭示了模型在原版 MMMU 上的高分，部分來自「猜測」和「文字知識」，
+          而非真正的視覺理解能力。
+        </div>
+
+        <h2>🎯 MMMU-Pro：堵住「作弊途徑」的評測</h2>
+
+        <p>
+          原始 MMMU（Massive Multi-discipline Multimodal Understanding）基準測試
+          雖然廣泛使用，但存在三個重大缺陷，讓模型可以「作弊」得分：
+        </p>
+
+        <div class="key-concept weak">
+          <h5>❌ 原始 MMMU 的三個問題</h5>
+          <p><strong>1. 有些題目不看圖也能答</strong></p>
+          <ul>
+            <li>部分問題只需要文字知識就能回答</li>
+            <li>模型可以跳過圖片理解，直接用文字知識答題</li>
+            <li>無法真正測試視覺理解能力</li>
+          </ul>
+          <p><strong>2. 選項太少，容易猜對</strong></p>
+          <ul>
+            <li>只有 4 個選項，猜對機率 25%</li>
+            <li>模型可能靠運氣得分，而非真正理解</li>
+            <li>無法準確評估模型能力</li>
+          </ul>
+          <p><strong>3. 圖片和文字分開</strong></p>
+          <ul>
+            <li>圖片是圖片，文字是文字，分開處理</li>
+            <li>不像真實世界需要同時整合視覺和文字資訊</li>
+            <li>無法測試真正的多模態整合能力</li>
+          </ul>
+        </div>
+
+        <div class="key-concept strong">
+          <h5>✅ MMMU-Pro 的三大改進</h5>
+          <p>
+            <strong>1. 過濾「純文字題」</strong>：移除不需要看圖就能答的題目，
+            確保所有問題都必須真正理解圖片內容。
+          </p>
+          <p>
+            <strong>2. 增加選項數量</strong>：增加答案選項，降低猜對機率，
+            強迫模型進行更精確的推理。
+          </p>
+          <p>
+            <strong>3. 問題嵌入圖片</strong>：將問題文字直接放在圖片裡，
+            要求模型同時處理視覺和文字資訊，更貼近真實應用場景。
+          </p>
+        </div>
+
+        <h2>💥 震撼發現：所有模型表現大幅下降</h2>
+
+        <p>
+          當研究團隊堵住這些「作弊途徑」後，所有模型在 MMMU-Pro 上的表現
+          都顯著下降：
+        </p>
+
+        <div class="key-concept weak">
+          <h5>❌ 準確率下降幅度</h5>
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>模型類型</th>
+                <th>原 MMMU</th>
+                <th>MMMU-Pro</th>
+                <th>下降幅度</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>所有測試模型</strong></td>
+                <td class="highlight">較高</td>
+                <td class="warning">較低</td>
+                <td class="warning">-16.8% 到 -26.9%</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin-top: 20px; color: #666; font-size: 0.95rem">
+            💡 <strong>關鍵發現</strong>：所有模型的準確率都下降了
+            <strong>16.8% 到 26.9%</strong>。這表明模型在原版 MMMU
+            上的高分，部分來自「猜測」和「文字知識」，而非真正的視覺理解能力。
+          </p>
+        </div>
+
+        <h2>🔍 三大改進的詳細分析</h2>
+
+        <div class="key-concept">
+          <h5>1️⃣ 過濾「純文字題」</h5>
+          <p><strong>問題</strong>：原始 MMMU 中，有些問題不需要看圖就能回答</p>
+          <p><strong>例子</strong>：</p>
+          <ul>
+            <li>
+              ❌ <strong>移除</strong>：「愛因斯坦提出了什麼理論？」（不需要看圖）
+            </li>
+            <li>
+              ✅ <strong>保留</strong>：「這張 X 光片顯示了什麼病變？」（必須看圖）
+            </li>
+          </ul>
+          <p><strong>影響</strong>：確保所有問題都必須真正理解圖片內容</p>
+        </div>
+
+        <div class="key-concept">
+          <h5>2️⃣ 增加選項數量</h5>
+          <p>
+            <strong>問題</strong>：原始 MMMU 只有 4 個選項，猜對機率 25%
+          </p>
+          <p><strong>改進</strong>：MMMU-Pro 增加選項數量，降低猜對機率</p>
+          <p><strong>影響</strong>：</p>
+          <ul>
+            <li>模型不能靠「猜」來得分</li>
+            <li>必須進行更精確的推理</li>
+            <li>更準確地評估模型能力</li>
+          </ul>
+        </div>
+
+        <div class="key-concept">
+          <h5>3️⃣ 問題嵌入圖片</h5>
+          <p>
+            <strong>創新做法</strong>：將問題文字直接放在圖片裡，而不是分開提供
+          </p>
+          <p><strong>為什麼重要？</strong>：</p>
+          <ul>
+            <li>
+              模型必須「同時」處理圖片和文字，就像人類閱讀教科書、看圖表一樣
+            </li>
+            <li>更貼近真實應用場景（例如：閱讀醫學影像報告、理解科學圖表）</li>
+            <li>測試真正的多模態整合能力</li>
+          </ul>
+          <p><strong>影響</strong>：這是 MMMU-Pro 最創新的改進，也是最難的部分</p>
+        </div>
+
+        <h2>📊 關鍵發現</h2>
+
+        <div class="key-concept">
+          <h5>1. OCR 提示影響有限</h5>
+          <p>
+            <strong>發現</strong>：即使提供 OCR（光學字符識別）提示，
+            幫助模型識別圖片中的文字，對性能提升也有限。
+          </p>
+          <p><strong>意義</strong>：</p>
+          <ul>
+            <li>問題不在於「讀取文字」，而在於「理解內容」</li>
+            <li>模型需要的是真正的視覺理解能力，而非文字識別能力</li>
+          </ul>
+        </div>
+
+        <div class="key-concept strong">
+          <h5>2. CoT 推理有幫助</h5>
+          <p>
+            <strong>發現</strong>：使用 Chain of Thought（思維鏈）推理
+            通常能提升模型表現。
+          </p>
+          <p><strong>意義</strong>：</p>
+          <ul>
+            <li>模型需要「逐步思考」，而非直接給答案</li>
+            <li>思維鏈推理能幫助模型更好地整合視覺和文字資訊</li>
+            <li>這是未來改進的方向之一</li>
+          </ul>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>3. 所有模型都受影響</h5>
+          <p>
+            <strong>發現</strong>：無論是開源模型還是閉源模型，
+            無論模型規模大小，所有模型在 MMMU-Pro 上的表現都下降。
+          </p>
+          <p><strong>意義</strong>：</p>
+          <ul>
+            <li>這不是特定模型的問題，而是整個領域的問題</li>
+            <li>當前多模態模型普遍存在「依賴文字知識」和「猜測」的問題</li>
+            <li>需要從根本上改進模型架構和訓練方法</li>
+          </ul>
+        </div>
+
+        <h2>🚫 哪些場景 AI 無法勝任？</h2>
+
+        <div class="key-concept weak">
+          <h5>1. 需要同時理解圖片和文字的任務</h5>
+          <p><strong>問題</strong>：需要同時處理視覺和文字資訊</p>
+          <p><strong>表現</strong>：模型在 MMMU-Pro 上表現下降，顯示整合能力不足</p>
+          <p><strong>不適用場景</strong>：</p>
+          <ul>
+            <li>閱讀醫學影像報告（圖片 + 文字說明）</li>
+            <li>理解科學圖表（圖表 + 圖例 + 說明）</li>
+            <li>分析教育材料（圖片 + 文字解釋）</li>
+          </ul>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>2. 需要精確推理的任務</h5>
+          <p>
+            <strong>問題</strong>：當選項增加、猜測機率降低時，模型表現下降
+          </p>
+          <p>
+            <strong>表現</strong>：模型依賴「猜測」而非精確推理，在嚴格評測下失敗
+          </p>
+          <p><strong>不適用場景</strong>：</p>
+          <ul>
+            <li>高風險決策（醫學診斷、法律判斷）</li>
+            <li>需要高準確率的任務（>90%）</li>
+            <li>不能容忍「猜測」的應用</li>
+          </ul>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>3. 需要真正視覺理解的任務</h5>
+          <p>
+            <strong>問題</strong>：當移除「純文字題」後，模型表現下降，
+            顯示缺乏真正的視覺理解能力
+          </p>
+          <p>
+            <strong>表現</strong>：模型傾向於依賴文字知識，而非視覺理解
+          </p>
+          <p><strong>不適用場景</strong>：</p>
+          <ul>
+            <li>視覺內容分析（藝術品、設計圖）</li>
+            <li>需要視覺推理的任務（空間關係、視覺模式）</li>
+            <li>無法用文字描述的視覺內容</li>
+          </ul>
+        </div>
+
+        <h2>🔍 根本原因分析</h2>
+
+        <div class="key-concept">
+          <h5>1. 訓練資料偏向文字知識</h5>
+          <p><strong>問題</strong>：</p>
+          <ul>
+            <li>訓練資料中，文字知識遠多於視覺理解</li>
+            <li>模型學會了「看到問題 → 調用文字知識 → 答題」的模式</li>
+            <li>缺乏「真正看圖理解」的訓練</li>
+          </ul>
+          <p><strong>影響</strong>：模型傾向於依賴文字知識，而非視覺理解</p>
+        </div>
+
+        <div class="key-concept">
+          <h5>2. 評估方式鼓勵「猜測」</h5>
+          <p><strong>問題</strong>：</p>
+          <ul>
+            <li>選項太少，猜對機率高</li>
+            <li>評估只關注最終答案，不關注推理過程</li>
+            <li>模型發現「猜測」也能得分，就傾向於猜測</li>
+          </ul>
+          <p><strong>影響</strong>：模型學會了「猜測策略」，而非精確推理</p>
+        </div>
+
+        <div class="key-concept">
+          <h5>3. 缺乏真正的多模態整合</h5>
+          <p><strong>問題</strong>：</p>
+          <ul>
+            <li>現有架構將圖片和文字分開處理</li>
+            <li>缺乏同時整合視覺和文字資訊的機制</li>
+            <li>無法像人類一樣自然地整合多模態資訊</li>
+          </ul>
+          <p>
+            <strong>影響</strong>：模型無法處理需要同時理解圖片和文字的任務
+          </p>
+        </div>
+
+        <div class="key-concept">
+          <h5>4. 基準測試設計問題</h5>
+          <p><strong>問題</strong>：</p>
+          <ul>
+            <li>原始基準測試存在「作弊途徑」</li>
+            <li>模型可以通過「猜測」和「文字知識」得分</li>
+            <li>無法準確評估真正的視覺理解能力</li>
+          </ul>
+          <p>
+            <strong>影響</strong>：高估了模型能力，誤導了研究方向
+          </p>
+        </div>
+
+        <h2>💡 對實際應用的啟示</h2>
+
+        <div class="key-concept">
+          <h5>如何判斷是否適合使用多模態模型？</h5>
+          <p><strong>✅ 適合使用的場景</strong>：</p>
+          <ul>
+            <li>簡單的圖片描述（不需要整合文字）</li>
+            <li>圖片分類（不需要精確推理）</li>
+            <li>低風險應用（可以容忍一定錯誤率）</li>
+            <li>有大量選項的任務（降低猜測影響）</li>
+          </ul>
+          <p><strong>❌ 不適合使用的場景</strong>：</p>
+          <ul>
+            <li>需要同時理解圖片和文字的任務</li>
+            <li>需要精確推理的任務（高準確率要求）</li>
+            <li>需要真正視覺理解的任務</li>
+            <li>高風險應用（醫學、法律、金融）</li>
+          </ul>
+        </div>
+
+        <div class="key-concept">
+          <h5>需要人工監督的場景</h5>
+          <p>
+            即使在「適合使用」的場景中，如果涉及重要決策，也建議加入人工監督：
+          </p>
+          <ul>
+            <li>
+              <strong>多模態整合任務</strong>：需要檢查模型是否正確整合視覺和文字資訊
+            </li>
+            <li>
+              <strong>精確推理任務</strong>：需要驗證模型是否進行了正確的推理
+            </li>
+            <li>
+              <strong>視覺理解任務</strong>：需要檢查模型是否真正理解了圖片內容
+            </li>
+            <li><strong>高風險應用</strong>：必須有人工最終確認</li>
+          </ul>
+        </div>
+
+        <div class="key-concept">
+          <h5>未來改進方向</h5>
+          <p><strong>1. 改進訓練資料</strong>：</p>
+          <ul>
+            <li>增加需要真正視覺理解的訓練範例</li>
+            <li>減少可以只用文字知識回答的範例</li>
+            <li>增加需要同時整合視覺和文字資訊的範例</li>
+          </ul>
+          <p><strong>2. 改進模型架構</strong>：</p>
+          <ul>
+            <li>開發專門的多模態整合機制</li>
+            <li>設計能夠同時處理視覺和文字資訊的架構</li>
+            <li>強化視覺理解能力，而非依賴文字知識</li>
+          </ul>
+          <p><strong>3. 改進評估方式</strong>：</p>
+          <ul>
+            <li>使用更嚴格的基準測試（如 MMMU-Pro）</li>
+            <li>評估推理過程，而不僅是最終答案</li>
+            <li>增加選項數量，降低猜測影響</li>
+          </ul>
+        </div>
+
+        <h2>📄 論文核心結論</h2>
+
+        <div class="original-quote">
+          <strong>原文</strong>
+          <p>
+            Model performance on MMMU-Pro is significantly lower compared to the
+            original MMMU benchmark, with accuracy drops ranging from 16.8% to
+            26.9% across various models. This decline underscores the increased
+            difficulty and robustness of MMMU-Pro in assessing true multimodal
+            understanding.
+          </p>
+        </div>
+
+        <div class="translation">
+          <h4>📝 重點解讀</h4>
+          <p>
+            模型在 MMMU-Pro 上的表現顯著低於原始 MMMU 基準測試，
+            <strong>準確率下降了 16.8% 到 26.9%</strong>。
+            這種下降凸顯了 MMMU-Pro 在評估真正的多模態理解能力方面的
+            <strong>更高難度和更強健性</strong>。
+          </p>
+        </div>
+
+        <div class="quote-block">
+          <p>
+            「當堵住『作弊途徑』後，所有模型的表現都大幅下降。」<br />
+            <span
+              style="
+                font-size: 1rem;
+                opacity: 0.8;
+                margin-top: 15px;
+                display: block;
+              "
+            >
+              MMMU-Pro 基準測試揭示了多模態模型的真實能力
+            </span>
+          </p>
+        </div>
+
+        <h2>🌟 總結</h2>
+
+        <div class="key-concept">
+          <h5>關鍵要點</h5>
+          <ol style="line-height: 2">
+            <li>
+              <strong>所有模型表現下降</strong>：當堵住「作弊途徑」後，
+              所有模型的準確率都下降了 16.8% 到 26.9%
+            </li>
+            <li>
+              <strong>原始 MMMU 存在問題</strong>：允許模型通過「猜測」和「文字知識」得分，
+              無法準確評估真正的視覺理解能力
+            </li>
+            <li>
+              <strong>MMMU-Pro 更嚴格</strong>：通過過濾純文字題、增加選項、問題嵌入圖片，
+              強迫模型真正理解圖片內容
+            </li>
+            <li>
+              <strong>CoT 推理有幫助</strong>：使用思維鏈推理通常能提升模型表現，
+              這是未來改進的方向
+            </li>
+            <li>
+              <strong>需要根本改進</strong>：需要改進訓練資料、模型架構和評估方式，
+              而非簡單擴展模型規模
+            </li>
+          </ol>
+        </div>
+
+        <div class="key-concept strong">
+          <h5>實用建議</h5>
+          <p>在決定是否使用多模態模型時，請考慮：</p>
+          <ul>
+            <li>
+              <strong>任務類型</strong>：如果任務需要同時理解圖片和文字，
+              當前模型表現不佳
+            </li>
+            <li>
+              <strong>準確率要求</strong>：如果任務對準確率要求高（>85%），
+              當前模型可能無法滿足
+            </li>
+            <li>
+              <strong>風險等級</strong>：高風險應用（醫學、法律、金融）
+              必須有人工監督
+            </li>
+            <li>
+              <strong>評估方式</strong>：使用更嚴格的基準測試（如 MMMU-Pro）
+              來評估模型能力
+            </li>
+            <li>
+              <strong>未來發展</strong>：關注多模態整合和視覺理解能力的發展，
+              這些可能是解決方案
+            </li>
+          </ul>
+        </div>
+
+        <div
+          style="
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 50px 0;
+            text-align: center;
+          "
+        >
+          <p style="margin: 0; color: #666; font-size: 0.9rem">
+            📚 <strong>參考資料</strong>：MMMU-Pro: A More Robust
+            Multi-discipline Multimodal Understanding Benchmark<br />
+            arXiv:
+            <a
+              href="https://arxiv.org/abs/2409.02813"
+              target="_blank"
+              style="color: var(--orange)"
+              >2409.02813</a
+            >
+            | GitHub:
+            <a
+              href="https://github.com/MMMU-Benchmark/MMMU"
+              target="_blank"
+              style="color: var(--orange)"
+              >MMMU-Benchmark/MMMU</a
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

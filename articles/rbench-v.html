@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      視覺推理的盲點：為什麼 AI 無法真正「畫圖思考」？ | AI Paper Archaeology
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles/global.css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+    <style>
+      :root {
+        --hero-bg: linear-gradient(
+          135deg,
+          #1a1f3a 0%,
+          #2d1b3d 50%,
+          #0f1419 100%
+        );
+        --gold: #ffd700;
+        --silver: #c0c0c0;
+        --deep-blue: #0f1419;
+        --warning-red: #ef4444;
+        --success-green: #10b981;
+        --purple: #8b5cf6;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.8;
+        color: #2c3e50;
+        background: var(--deep-blue);
+      }
+
+      /* Hero Section */
+      .hero-section {
+        position: relative;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--hero-bg);
+        background-image: url("./rbench-v/images/generated/hero.png");
+        background-size: cover;
+        background-position: center;
+        overflow: hidden;
+      }
+
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(26, 31, 58, 0.4) 0%,
+          rgba(26, 31, 58, 0.85) 60%,
+          rgba(26, 31, 58, 0.95) 100%
+        );
+        z-index: 1;
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        padding: 0 20px;
+        max-width: 1000px;
+      }
+
+      .hero-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: clamp(2.5rem, 6vw, 5rem);
+        font-weight: 900;
+        color: #ffffff;
+        margin-bottom: 30px;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8),
+          0 0 60px rgba(255, 215, 0, 0.3);
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+
+      .hero-subtitle {
+        font-family: "Inter", sans-serif;
+        font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+        color: var(--gold);
+        font-weight: 300;
+        letter-spacing: 0.05em;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+        margin-bottom: 20px;
+      }
+
+      .hero-meta {
+        font-size: 1rem;
+        color: var(--silver);
+        font-weight: 400;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+      }
+
+      /* Story Container */
+      .story-container {
+        background: #ffffff;
+        margin-top: -50px;
+        position: relative;
+        z-index: 10;
+        border-radius: 30px 30px 0 0;
+        padding: 80px 40px;
+      }
+
+      .content-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      /* Typography */
+      .story-lead {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.5rem;
+        line-height: 2;
+        color: #1a1a1a;
+        margin: 40px 0;
+        padding: 40px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-left: 5px solid var(--purple);
+        border-radius: 10px;
+      }
+
+      h2 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #0a0e27;
+        margin: 60px 0 30px 0;
+        border-bottom: 3px solid var(--purple);
+        padding-bottom: 15px;
+      }
+
+      h3 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.8rem;
+        color: #1a1f3a;
+        margin: 40px 0 20px 0;
+      }
+
+      p {
+        font-size: 1.1rem;
+        line-height: 1.9;
+        margin-bottom: 20px;
+        color: #2c3e50;
+      }
+
+      /* Key Concept Boxes */
+      .key-concept {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin: 30px 0;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        border-top: 4px solid var(--purple);
+      }
+
+      .key-concept.strong {
+        border-top-color: var(--success-green);
+        background: linear-gradient(135deg, #10b98120 0%, #ffffff 100%);
+      }
+
+      .key-concept.weak {
+        border-top-color: var(--warning-red);
+        background: linear-gradient(135deg, #ef444420 0%, #ffffff 100%);
+      }
+
+      .key-concept h5 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.3rem;
+        color: #0a0e27;
+        margin-bottom: 15px;
+        font-weight: 700;
+      }
+
+      /* Comparison Table */
+      .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 30px 0;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .comparison-table th {
+        background: var(--deep-blue);
+        color: var(--gold);
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+      }
+
+      .comparison-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .comparison-table tr:hover {
+        background: #f8f9fa;
+      }
+
+      .comparison-table .highlight {
+        background: linear-gradient(135deg, #10b98120 0%, transparent 100%);
+        font-weight: 600;
+        color: var(--success-green);
+      }
+
+      .comparison-table .warning {
+        background: linear-gradient(135deg, #ef444420 0%, transparent 100%);
+        font-weight: 600;
+        color: var(--warning-red);
+      }
+
+      /* Figure Styles */
+      .figure {
+        margin: 40px 0;
+        text-align: center;
+      }
+
+      .figure img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .figure-original {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        border: 2px solid #e5e7eb;
+      }
+
+      .figure-ai {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        padding: 20px;
+        border-radius: 10px;
+        border: 2px solid var(--purple);
+      }
+
+      .caption {
+        margin-top: 15px;
+        font-size: 0.9rem;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .caption strong {
+        color: #0a0e27;
+      }
+
+      /* Original Quote */
+      .original-quote {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 10px;
+        border-left: 4px solid var(--purple);
+        margin: 30px 0;
+      }
+
+      .original-quote strong {
+        color: #0a0e27;
+        font-size: 1.1rem;
+        display: block;
+        margin-bottom: 15px;
+      }
+
+      .original-quote p {
+        font-style: italic;
+        color: #2c3e50;
+        margin-bottom: 15px;
+      }
+
+      .translation {
+        background: linear-gradient(135deg, #10b98110 0%, #ffffff 100%);
+        padding: 25px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border-left: 4px solid var(--success-green);
+      }
+
+      .translation h4 {
+        color: var(--success-green);
+        margin-bottom: 15px;
+      }
+
+      /* Quote Block */
+      .quote-block {
+        background: var(--hero-bg);
+        padding: 40px;
+        border-radius: 15px;
+        margin: 50px 0;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .quote-block::before {
+        content: '"';
+        position: absolute;
+        left: 20px;
+        top: 10px;
+        font-size: 6rem;
+        color: var(--purple);
+        opacity: 0.2;
+        font-family: Georgia, serif;
+      }
+
+      .quote-block p {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.5rem;
+        color: var(--gold);
+        margin: 0;
+        position: relative;
+        z-index: 1;
+        line-height: 1.8;
+      }
+
+      /* Breadcrumb */
+      .breadcrumb {
+        padding: 20px 40px;
+        background: rgba(10, 14, 39, 0.05);
+        font-size: 0.9rem;
+      }
+
+      .breadcrumb a {
+        color: var(--purple);
+        text-decoration: none;
+        transition: opacity 0.3s;
+      }
+
+      .breadcrumb a:hover {
+        opacity: 0.8;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .hero-title {
+          font-size: 2rem;
+        }
+
+        .story-container {
+          padding: 40px 20px;
+        }
+
+        .comparison-table {
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="breadcrumb">
+      <a href="../index.html">🏠 首頁</a>
+      <span style="margin: 0 10px; color: #999">/</span>
+      <span style="color: #666">知識筆記</span>
+      <span style="margin: 0 10px; color: #999">/</span>
+      <span style="color: #666">視覺推理的盲點</span>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <h1 class="hero-title">視覺推理的盲點</h1>
+        <p class="hero-subtitle">為什麼 AI 無法真正「畫圖思考」？</p>
+        <p class="hero-meta">RBench-V 基準測試揭示的真相</p>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="story-container">
+      <div class="content-wrapper">
+        <div class="story-lead">
+          2025 年 5 月，卡內基梅隆大學的研究團隊提出了一個全新的評測基準：
+          <strong>RBench-V</strong>。這個基準測試要求 AI
+          模型在解決問題時產生視覺輸出——
+          畫幾何圖形、描繪路徑、標記目標。結果令人震驚：<strong
+            >即使是目前最先進的模型（o3）， 準確率也僅有 25.8%</strong
+          >，而人類專家的表現是 <strong>82.3%</strong>。 這揭示了 AI
+          在視覺推理領域的一個根本性盲點。
+        </div>
+
+        <h2>🎯 RBench-V：要求視覺輸出的推理基準</h2>
+
+        <p>
+          現有的多模態基準測試大多只要求模型「看圖說話」——輸入圖片，輸出文字。
+          但 RBench-V
+          提出了更高的要求：<strong>模型必須在推理過程中產生視覺輸出</strong>。
+        </p>
+
+        <div class="key-concept">
+          <h5>📐 基準測試設計</h5>
+          <ul>
+            <li><strong>問題數量</strong>：803 個精心設計的問題</li>
+            <li><strong>問題類型</strong>：356 個選擇題 + 447 個開放式問題</li>
+            <li>
+              <strong>輸入類型</strong>：763 個需要多模態輸入 + 40 個純文字輸入
+            </li>
+            <li><strong>任務領域</strong>：4 個領域，涵蓋不同類型的視覺推理</li>
+            <li>
+              <strong>輸出要求</strong
+              >：所有問題都必須產生視覺輸出（畫圖、標記、描繪等）
+            </li>
+            <li>
+              <strong>評估標準</strong
+              >：不僅看答案是否正確，還要看視覺輸出的品質
+            </li>
+          </ul>
+        </div>
+
+        <div class="key-concept strong">
+          <h5>✅ 為什麼這個基準測試特別重要？</h5>
+          <p>
+            <strong>1. 填補評測空白</strong
+            >：現有基準測試只關注多模態輸入和文字推理，
+            缺乏對視覺輸出能力的評估。RBench-V
+            是第一個專門評估視覺輸出推理的基準測試。
+          </p>
+          <p>
+            <strong>2. 真實應用需求</strong>：在真實應用中，我們經常需要 AI
+            畫圖、標記、描繪。
+            例如：幾何問題需要畫輔助線、路徑規劃需要描繪軌跡、遊戲需要連接點或走迷宮。
+          </p>
+          <p>
+            <strong>3. 揭示推理捷徑</strong>：RBench-V
+            發現了「多模態推理捷徑」問題——
+            模型傾向於將幾何問題轉換為代數問題，而不是進行真正的視覺推理。
+          </p>
+        </div>
+
+        <h2>📊 四個任務領域</h2>
+
+        <div class="key-concept">
+          <h5>1️⃣ 數學（176 題）</h5>
+          <p><strong>任務類型</strong>：</p>
+          <ul>
+            <li>幾何變換（旋轉、平移、對稱）</li>
+            <li>平面幾何和立體幾何</li>
+            <li>圖論問題</li>
+          </ul>
+          <p>
+            <strong>視覺輸出要求</strong
+            >：畫幾何圖形、添加輔助線、標記角度和長度
+          </p>
+        </div>
+
+        <div class="key-concept">
+          <h5>2️⃣ 物理（157 題）</h5>
+          <p><strong>任務類型</strong>：</p>
+          <ul>
+            <li>光學（光線路徑、反射、折射）</li>
+            <li>力學（力的方向、運動軌跡）</li>
+            <li>電磁學（電場線、磁場線）</li>
+            <li>熱力學（熱流方向、溫度分布）</li>
+          </ul>
+          <p>
+            <strong>視覺輸出要求</strong>：畫光線路徑、標記力的方向、描繪場線
+          </p>
+        </div>
+
+        <div class="key-concept">
+          <h5>3️⃣ 計數（195 題）</h5>
+          <p><strong>任務類型</strong>：</p>
+          <ul>
+            <li>形狀繪製</li>
+            <li>目標標記</li>
+            <li>視覺計數任務</li>
+          </ul>
+          <p>
+            <strong>視覺輸出要求</strong
+            >：畫出特定形狀、標記目標物體、進行視覺計數
+          </p>
+        </div>
+
+        <div class="key-concept">
+          <h5>4️⃣ 遊戲（275 題）</h5>
+          <p><strong>任務類型</strong>：</p>
+          <ul>
+            <li>連點成線（Connect the dots）</li>
+            <li>迷宮求解</li>
+            <li>軌跡描繪</li>
+            <li>拼圖問題</li>
+          </ul>
+          <p><strong>視覺輸出要求</strong>：連接點、畫出路徑、描繪軌跡</p>
+        </div>
+
+        <h2>💥 震撼發現：最佳模型僅 25.8%</h2>
+
+        <p>
+          研究團隊測試了多個大型多模態模型（MLLMs）和全模態模型（omni-models）。
+          結果顯示，即使是目前最先進的模型，在 RBench-V 上的表現也遠遠不如人類。
+        </p>
+
+        <div class="key-concept weak">
+          <h5>❌ 模型表現對比</h5>
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>模型</th>
+                <th>準確率</th>
+                <th>與人類差距</th>
+                <th>評語</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>人類專家</strong></td>
+                <td class="highlight">82.3%</td>
+                <td>-</td>
+                <td>基準線</td>
+              </tr>
+              <tr>
+                <td><strong>o3（最佳模型）</strong></td>
+                <td class="warning">25.8%</td>
+                <td class="warning">-56.5%</td>
+                <td>差距巨大</td>
+              </tr>
+              <tr>
+                <td><strong>其他模型</strong></td>
+                <td class="warning">< 25%</td>
+                <td class="warning">> 57%</td>
+                <td>表現不佳</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin-top: 20px; color: #666; font-size: 0.95rem">
+            💡 <strong>關鍵發現</strong>：最佳模型（o3）的準確率僅 25.8%，
+            與人類專家的 82.3% 相比，差距高達 <strong>56.5 個百分點</strong>。
+            這表明當前模型在視覺推理方面存在根本性缺陷。
+          </p>
+        </div>
+
+        <h2>🔍 多模態推理捷徑：模型的「作弊」行為</h2>
+
+        <p>
+          研究發現了一個關鍵問題：<strong>模型傾向於使用「推理捷徑」</strong>，
+          而不是進行真正的視覺推理。
+        </p>
+
+        <div class="key-concept weak">
+          <h5>❌ 什麼是「多模態推理捷徑」？</h5>
+          <p>
+            <strong>問題</strong>：當遇到幾何問題時，模型不會畫圖思考，
+            而是直接將問題轉換為代數方程求解。
+          </p>
+          <p><strong>例子</strong>：</p>
+          <ul>
+            <li>
+              <strong>幾何問題</strong>：「畫一個三角形，標記三個角的角度」
+            </li>
+            <li>
+              <strong>模型的「捷徑」</strong>：不畫圖，直接用代數計算角度關係
+            </li>
+            <li><strong>正確做法</strong>：先畫圖，在圖上標記，然後推理</li>
+          </ul>
+          <p>
+            <strong>影響</strong>：這種「捷徑」雖然在某些簡單問題上有效，
+            但在需要真正視覺推理的複雜問題上會失敗。
+          </p>
+        </div>
+
+        <div class="key-concept">
+          <h5>💡 為什麼會出現推理捷徑？</h5>
+          <p><strong>1. 訓練資料偏向</strong>：</p>
+          <ul>
+            <li>訓練資料中，幾何問題大多以代數形式呈現</li>
+            <li>模型學會了「看到幾何問題 → 轉換為代數 → 求解」的模式</li>
+            <li>缺乏「畫圖思考」的訓練範例</li>
+          </ul>
+          <p><strong>2. 架構限制</strong>：</p>
+          <ul>
+            <li>現有的全模態（omni-model）架構主要針對文字和圖片輸入設計</li>
+            <li>缺乏專門的視覺輸出生成模組</li>
+            <li>視覺輸出往往被視為「可選項」，而非推理過程的一部分</li>
+          </ul>
+          <p><strong>3. 評估方式問題</strong>：</p>
+          <ul>
+            <li>現有基準測試只評估最終答案，不評估推理過程</li>
+            <li>模型發現「不畫圖也能答對」，就傾向於跳過視覺推理步驟</li>
+          </ul>
+        </div>
+
+        <h2>🚫 哪些任務 AI 無法勝任？</h2>
+
+        <div class="key-concept weak">
+          <h5>1. 需要畫圖的幾何問題</h5>
+          <p><strong>問題</strong>：需要畫輔助線、標記角度、描繪幾何關係</p>
+          <p>
+            <strong>表現</strong
+            >：模型傾向於跳過畫圖步驟，直接用代數求解，導致錯誤
+          </p>
+          <p><strong>不適用場景</strong>：</p>
+          <ul>
+            <li>幾何證明題（需要畫圖輔助思考）</li>
+            <li>複雜的空間幾何問題</li>
+            <li>需要視覺化理解的圖論問題</li>
+          </ul>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>2. 路徑規劃和軌跡描繪</h5>
+          <p><strong>問題</strong>：需要描繪路徑、連接點、走迷宮</p>
+          <p>
+            <strong>表現</strong
+            >：模型無法準確描繪路徑，經常出現錯誤的連接或遺漏
+          </p>
+          <p><strong>不適用場景</strong>：</p>
+          <ul>
+            <li>自動駕駛路徑規劃（需要視覺化路徑）</li>
+            <li>機器人導航（需要畫出軌跡）</li>
+            <li>遊戲 AI（需要描繪移動路徑）</li>
+          </ul>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>3. 物理現象視覺化</h5>
+          <p><strong>問題</strong>：需要畫光線路徑、標記力的方向、描繪場線</p>
+          <p>
+            <strong>表現</strong
+            >：模型無法準確視覺化物理現象，經常出現方向錯誤或遺漏
+          </p>
+          <p><strong>不適用場景</strong>：</p>
+          <ul>
+            <li>光學設計（需要畫光線路徑）</li>
+            <li>力學分析（需要標記力的方向）</li>
+            <li>電磁場可視化（需要描繪場線）</li>
+          </ul>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>4. 需要視覺標記的計數任務</h5>
+          <p><strong>問題</strong>：需要畫出形狀、標記目標、進行視覺計數</p>
+          <p><strong>表現</strong>：模型無法準確標記目標，經常遺漏或錯誤標記</p>
+          <p><strong>不適用場景</strong>：</p>
+          <ul>
+            <li>醫學影像標記（需要精確標記病變區域）</li>
+            <li>品質檢測（需要標記缺陷位置）</li>
+            <li>視覺計數任務（需要標記每個物體）</li>
+          </ul>
+        </div>
+
+        <h2>🔍 根本原因分析</h2>
+
+        <div class="key-concept">
+          <h5>1. 缺乏真正的多模態思維鏈</h5>
+          <p><strong>問題</strong>：</p>
+          <ul>
+            <li>現有模型主要使用「文字思維鏈」（Chain of Thought）</li>
+            <li>缺乏「視覺思維鏈」（Visual Chain of Thought）</li>
+            <li>模型無法在推理過程中「畫圖思考」</li>
+          </ul>
+          <p>
+            <strong>影響</strong>：模型無法像人類一樣，在解決問題時畫圖輔助思考
+          </p>
+        </div>
+
+        <div class="key-concept">
+          <h5>2. 視覺輸出被視為「可選項」</h5>
+          <p><strong>問題</strong>：</p>
+          <ul>
+            <li>現有架構將視覺輸出視為「最終結果」，而非「推理過程」</li>
+            <li>模型發現「不畫圖也能答對」，就跳過視覺推理</li>
+            <li>缺乏強制要求視覺輸出的訓練機制</li>
+          </ul>
+          <p><strong>影響</strong>：模型傾向於使用代數「捷徑」，而非視覺推理</p>
+        </div>
+
+        <div class="key-concept">
+          <h5>3. 訓練資料缺乏視覺推理範例</h5>
+          <p><strong>問題</strong>：</p>
+          <ul>
+            <li>訓練資料中，幾何問題大多以代數形式呈現</li>
+            <li>缺乏「畫圖思考」的完整範例</li>
+            <li>模型沒有學會「何時需要畫圖」的判斷</li>
+          </ul>
+          <p><strong>影響</strong>：模型無法學會真正的視覺推理方法</p>
+        </div>
+
+        <div class="key-concept">
+          <h5>4. 簡單擴展模型規模無法解決問題</h5>
+          <p><strong>發現</strong>：</p>
+          <ul>
+            <li>研究顯示，僅僅增加模型規模（scaling）無法解決視覺推理問題</li>
+            <li>現有的全模態架構（omni-model）也不足以應對視覺輸出推理</li>
+            <li>需要專門的架構設計和訓練方法</li>
+          </ul>
+          <p><strong>影響</strong>：未來需要重新設計模型架構，而非簡單擴展</p>
+        </div>
+
+        <h2>💡 對實際應用的啟示</h2>
+
+        <div class="key-concept">
+          <h5>如何判斷是否適合使用多模態模型？</h5>
+          <p><strong>✅ 適合使用的場景</strong>：</p>
+          <ul>
+            <li>文字描述圖片內容（不需要視覺輸出）</li>
+            <li>圖片分類和標籤（不需要畫圖）</li>
+            <li>簡單的視覺問答（不需要視覺推理）</li>
+            <li>內容審核（不需要視覺輸出）</li>
+          </ul>
+          <p><strong>❌ 不適合使用的場景</strong>：</p>
+          <ul>
+            <li>需要畫圖的幾何問題</li>
+            <li>路徑規劃和軌跡描繪</li>
+            <li>物理現象視覺化</li>
+            <li>需要視覺標記的計數任務</li>
+            <li>需要「畫圖思考」的複雜推理問題</li>
+          </ul>
+        </div>
+
+        <div class="key-concept">
+          <h5>需要人工監督的場景</h5>
+          <p>
+            即使在「適合使用」的場景中，如果涉及視覺輸出，也建議加入人工監督：
+          </p>
+          <ul>
+            <li><strong>幾何問題</strong>：需要檢查模型是否正確畫圖</li>
+            <li><strong>路徑規劃</strong>：需要驗證路徑是否正確</li>
+            <li><strong>物理視覺化</strong>：需要檢查方向是否正確</li>
+            <li><strong>標記任務</strong>：需要驗證標記是否準確</li>
+          </ul>
+        </div>
+
+        <div class="key-concept">
+          <h5>未來改進方向</h5>
+          <p><strong>1. 開發視覺思維鏈（Visual Chain of Thought）</strong>：</p>
+          <ul>
+            <li>設計專門的視覺推理模組</li>
+            <li>訓練模型在推理過程中畫圖思考</li>
+            <li>強制要求視覺輸出作為推理過程的一部分</li>
+          </ul>
+          <p><strong>2. 改進訓練資料</strong>：</p>
+          <ul>
+            <li>收集更多「畫圖思考」的完整範例</li>
+            <li>訓練模型學會「何時需要畫圖」的判斷</li>
+            <li>減少代數「捷徑」的訓練範例</li>
+          </ul>
+          <p><strong>3. 重新設計架構</strong>：</p>
+          <ul>
+            <li>開發專門的視覺輸出生成模組</li>
+            <li>將視覺輸出整合到推理過程中，而非僅作為最終結果</li>
+            <li>設計評估機制，獎勵正確的視覺推理過程</li>
+          </ul>
+        </div>
+
+        <h2>📄 論文核心結論</h2>
+
+        <div class="original-quote">
+          <strong>原文</strong>
+          <p>
+            RBench-V addresses a critical gap in multi-modal evaluation by
+            focusing on models' ability to produce visual outputs during
+            reasoning. The benchmark exposes "multi-modal reasoning shortcuts,"
+            where models convert geometric problems to algebraic ones rather
+            than engaging in genuine visual reasoning. It demonstrates that
+            simple model scaling and current omni-model architectures are
+            insufficient for tasks requiring true multi-modal chain of thought.
+          </p>
+        </div>
+
+        <div class="translation">
+          <h4>📝 重點解讀</h4>
+          <p>
+            基準測試揭示了「多模態推理捷徑」問題，模型傾向於將幾何問題轉換為代數問題，
+            而不是進行真正的視覺推理。這表明，<strong
+              >簡單的模型擴展和現有的全模態架構
+              都不足以應對需要真正多模態思維鏈的任務</strong
+            >。
+          </p>
+        </div>
+
+        <div class="quote-block">
+          <p>
+            「模型可以『看圖說話』，但無法『畫圖思考』。」<br />
+            <span
+              style="
+                font-size: 1rem;
+                opacity: 0.8;
+                margin-top: 15px;
+                display: block;
+              "
+            >
+              RBench-V 基準測試揭示了多模態模型在視覺推理領域的根本性盲點
+            </span>
+          </p>
+        </div>
+
+        <h2>🌟 總結</h2>
+
+        <div class="key-concept">
+          <h5>關鍵要點</h5>
+          <ol style="line-height: 2">
+            <li>
+              <strong>最佳模型僅 25.8%</strong
+              >：即使是目前最先進的模型（o3），在 RBench-V 上的準確率也僅有
+              25.8%，遠低於人類專家的 82.3%
+            </li>
+            <li>
+              <strong>視覺推理是盲點</strong
+              >：模型無法在推理過程中產生視覺輸出，無法「畫圖思考」
+            </li>
+            <li>
+              <strong>推理捷徑問題</strong
+              >：模型傾向於將幾何問題轉換為代數問題，使用「捷徑」而非真正的視覺推理
+            </li>
+            <li>
+              <strong>簡單擴展無效</strong
+              >：僅僅增加模型規模無法解決問題，需要重新設計架構和訓練方法
+            </li>
+            <li>
+              <strong>需要專門設計</strong
+              >：未來需要開發視覺思維鏈、改進訓練資料、重新設計架構
+            </li>
+          </ol>
+        </div>
+
+        <div class="key-concept strong">
+          <h5>實用建議</h5>
+          <p>在決定是否使用多模態模型進行視覺推理任務時，請考慮：</p>
+          <ul>
+            <li>
+              <strong>任務類型</strong
+              >：如果任務需要視覺輸出（畫圖、標記、描繪），當前模型表現不佳
+            </li>
+            <li>
+              <strong>推理方式</strong
+              >：如果任務需要「畫圖思考」，建議使用專門的工具或人工處理
+            </li>
+            <li>
+              <strong>準確率要求</strong
+              >：如果任務對準確率要求高（>80%），當前模型無法滿足
+            </li>
+            <li>
+              <strong>風險等級</strong
+              >：高風險應用（醫學、工程設計）必須有人工監督
+            </li>
+            <li>
+              <strong>未來發展</strong
+              >：關注視覺思維鏈和專門架構的發展，這些可能是解決方案
+            </li>
+          </ul>
+        </div>
+
+        <div
+          style="
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 50px 0;
+            text-align: center;
+          "
+        >
+          <p style="margin: 0; color: #666; font-size: 0.9rem">
+            📚 <strong>參考資料</strong>：RBench-V: A Graduate-Level Multimodal
+            Benchmark for Complex Reasoning Evaluation<br />
+            arXiv:
+            <a
+              href="https://arxiv.org/abs/2505.16770"
+              target="_blank"
+              style="color: var(--purple)"
+              >2505.16770</a
+            >
+            | Website:
+            <a
+              href="https://evalmodels.github.io/rbenchv/"
+              target="_blank"
+              style="color: var(--purple)"
+              >evalmodels.github.io/rbenchv</a
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

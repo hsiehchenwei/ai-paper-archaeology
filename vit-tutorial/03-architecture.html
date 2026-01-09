@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViT 第 3 章：模型架構全解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/generated/chapter03_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>Transformer 的視覺化</h1>
+            <p class="hero-subtitle">標準 Transformer Encoder 的完整解析</p>
+            <p class="hero-meta">Vision Transformer 深度解析 · 第 3 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">ViT 教學</a>
+            <span>/</span>
+            <span class="current">第 3 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                ViT 的架構設計遵循一個核心原則：<strong>「盡可能接近原始 Transformer」</strong>。
+                這樣做的好處是，所有在 NLP 領域已經優化好的 Transformer 實作，幾乎可以直接拿來用。
+                但這也意味著，ViT 必須放棄 CNN 的「歸納偏置」，完全依賴資料來學習視覺結構。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 1. Transformer Encoder 結構 -->
+            <h2>🏗️ Transformer Encoder 結構</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>標準架構</h4>
+                    <p>
+                        ViT 使用標準的 Transformer Encoder，由多個相同的層（layers）堆疊而成。
+                        每一層包含兩個主要組件：
+                    </p>
+                    
+                    <div class="key-concept">
+                        <h5>1️⃣ Multi-Head Self-Attention (MSA)</h5>
+                        <p>
+                            讓每個 patch 都能「看到」其他所有 patches，並根據相似度決定「關注」哪些 patches。
+                        </p>
+                        <p>
+                            <strong>公式（Eq. 2）</strong>：
+                        </p>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; font-family: 'JetBrains Mono', monospace; text-align: center;">
+                            <strong>z'<sub>ℓ</sub> = MSA(LN(z<sub>ℓ-1</sub>)) + z<sub>ℓ-1</sub></strong>
+                        </div>
+                        <p>
+                            其中：
+                        </p>
+                        <ul>
+                            <li><strong>LN</strong>：Layer Normalization（在注意力之前）</li>
+                            <li><strong>MSA</strong>：Multi-Head Self-Attention</li>
+                            <li><strong>+ z<sub>ℓ-1</sub></strong>：殘差連接（Residual Connection）</li>
+                        </ul>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>2️⃣ MLP Block</h5>
+                        <p>
+                            一個兩層的前饋神經網路，使用 GELU 作為激活函數。
+                        </p>
+                        <p>
+                            <strong>公式（Eq. 3）</strong>：
+                        </p>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; font-family: 'JetBrains Mono', monospace; text-align: center;">
+                            <strong>z<sub>ℓ</sub> = MLP(LN(z'<sub>ℓ</sub>)) + z'<sub>ℓ</sub></strong>
+                        </div>
+                        <p>
+                            同樣包含 Layer Normalization 和殘差連接。
+                        </p>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>🔍 Pre-LayerNorm vs Post-LayerNorm</h5>
+                        <p>
+                            ViT 使用 <strong>Pre-LayerNorm</strong>（在注意力/MLP 之前做 LayerNorm），而不是 Post-LayerNorm（在之後做）。
+                            這是現代 Transformer 的標準做法，因為它更穩定，更容易訓練。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 歸納偏置對比 -->
+            <h2>⚖️ 歸納偏置：CNN vs ViT</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>什麼是歸納偏置？</h4>
+                    <p>
+                        <strong>歸納偏置 (Inductive Bias)</strong> 是模型對資料結構的「先驗假設」。
+                        它幫助模型在資料不足時也能做出合理的推斷。
+                    </p>
+                    
+                    <div class="key-concept" style="background: linear-gradient(135deg, #3b82f620 0%, #8b5cf620 100%); border-left: 5px solid var(--mag-primary);">
+                        <h5>🔵 CNN 的歸納偏置</h5>
+                        <ul>
+                            <li><strong>局部性 (Locality)</strong>：相近的像素更相關</li>
+                            <li><strong>平移等變性 (Translation Equivariance)</strong>：物體移動位置，特徵也跟著移動</li>
+                            <li><strong>二維鄰域結構</strong>：卷積核直接利用圖片的空間結構</li>
+                        </ul>
+                        <p>
+                            這些假設「內建」在 CNN 的每一層中，貫穿整個模型。
+                        </p>
+                    </div>
+
+                    <div class="key-concept" style="background: linear-gradient(135deg, #10b98120 0%, #3b82f620 100%); border-left: 5px solid var(--mag-secondary);">
+                        <h5>🟢 ViT 的歸納偏置</h5>
+                        <ul>
+                            <li><strong>MLP 層</strong>：只有局部性和平移等變性（因為每個 patch 獨立處理）</li>
+                            <li><strong>Self-Attention 層</strong>：全局性（每個 patch 都能看到所有其他 patches）</li>
+                            <li><strong>二維結構</strong>：只在兩個地方使用：
+                                <ul>
+                                    <li>切分圖片成 patches（模型開始時）</li>
+                                    <li>Fine-tuning 時調整位置編碼（不同解析度的圖片）</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <p>
+                            <strong>關鍵差異</strong>：位置編碼在初始化時<strong>不包含任何 2D 位置資訊</strong>。
+                            所有 patches 之間的空間關係都必須從資料中學習。
+                        </p>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>💡 類比：天賦 vs 努力</h5>
+                        <p>
+                            <strong>CNN</strong>：像是一個「有天賦」的學生，天生就理解空間結構。
+                            在少量練習（小資料集）下就能表現優異。
+                        </p>
+                        <p>
+                            <strong>ViT</strong>：像是一個「普通」學生，沒有先天的空間理解能力。
+                            但透過海量練習（大規模資料），最終也能超越有天賦的學生。
+                        </p>
+                        <p>
+                            這正是論文的核心結論：<strong>「Large scale training trumps inductive bias」</strong>。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 模型變體 -->
+            <h2>📊 模型變體：Base, Large, Huge</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>三種規模</h4>
+                    <p>
+                        ViT 的模型配置直接參考 BERT，並新增了一個更大的「Huge」版本：
+                    </p>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <thead>
+                            <tr style="background: var(--mag-bg-light);">
+                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--mag-primary);">模型</th>
+                                <th style="padding: 12px; text-align: center; border-bottom: 2px solid var(--mag-primary);">層數 (L)</th>
+                                <th style="padding: 12px; text-align: center; border-bottom: 2px solid var(--mag-primary);">隱藏維度 (D)</th>
+                                <th style="padding: 12px; text-align: center; border-bottom: 2px solid var(--mag-primary);">MLP 大小</th>
+                                <th style="padding: 12px; text-align: center; border-bottom: 2px solid var(--mag-primary);">注意力頭數</th>
+                                <th style="padding: 12px; text-align: center; border-bottom: 2px solid var(--mag-primary);">參數數</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>ViT-Base</strong></td>
+                                <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">12</td>
+                                <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">768</td>
+                                <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">3072</td>
+                                <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">12</td>
+                                <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">86M</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>ViT-Large</strong></td>
+                                <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">24</td>
+                                <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">1024</td>
+                                <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">4096</td>
+                                <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">16</td>
+                                <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">307M</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px;"><strong>ViT-Huge</strong></td>
+                                <td style="padding: 12px; text-align: center;">32</td>
+                                <td style="padding: 12px; text-align: center;">1280</td>
+                                <td style="padding: 12px; text-align: center;">5120</td>
+                                <td style="padding: 12px; text-align: center;">16</td>
+                                <td style="padding: 12px; text-align: center;">632M</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="key-concept">
+                        <h5>📏 Patch Size 的影響</h5>
+                        <p>
+                            論文使用 <strong>ViT-L/16</strong> 這樣的記號，其中：
+                        </p>
+                        <ul>
+                            <li><strong>L</strong>：Large 模型（24 層）</li>
+                            <li><strong>16</strong>：Patch size 是 16×16</li>
+                        </ul>
+                        <p>
+                            <strong>Patch size 越小，序列越長，計算成本越高</strong>：
+                        </p>
+                        <ul>
+                            <li>224×224 圖片，16×16 patches → 196 個 patches</li>
+                            <li>224×224 圖片，14×14 patches → 256 個 patches（更貴）</li>
+                            <li>224×224 圖片，32×32 patches → 49 個 patches（更便宜，但可能損失細節）</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Classification Head -->
+            <h2>🎯 Classification Head</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>預訓練 vs Fine-tuning</h4>
+                    <p>
+                        最終的分類結果是從 CLS token 的輸出得到的（Eq. 4）：
+                    </p>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; font-family: 'JetBrains Mono', monospace; text-align: center;">
+                        <strong>y = LN(z<sub>L</sub><sup>0</sup>)</strong>
+                    </div>
+                    
+                    <div class="key-concept">
+                        <h5>🔵 預訓練階段</h5>
+                        <p>
+                            使用一個 <strong>MLP（一層隱藏層）</strong>作為分類頭，在 ImageNet-21k 或 JFT-300M 上預訓練。
+                        </p>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>🟢 Fine-tuning 階段</h5>
+                        <p>
+                            移除預訓練的分類頭，換成一個<strong>零初始化的線性層</strong>（大小為 D×K，K 是下游任務的類別數）。
+                        </p>
+                        <p>
+                            <strong>為什麼零初始化？</strong> 這樣可以確保在 Fine-tuning 初期，模型的輸出接近隨機，不會破壞預訓練的權重。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Fine-tuning 與高解析度 -->
+            <h2>🔍 Fine-tuning 與高解析度</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>為什麼要用更高解析度？</h4>
+                    <p>
+                        在 Fine-tuning 時，通常使用比預訓練時更高的解析度（例如預訓練用 224×224，Fine-tuning 用 384×384 或 512×512）。
+                        這樣可以：
+                    </p>
+                    <ul>
+                        <li>捕捉更細緻的細節</li>
+                        <li>提升分類準確率</li>
+                    </ul>
+                    
+                    <div class="key-concept">
+                        <h5>📍 位置編碼的插值</h5>
+                        <p>
+                            當解析度改變時，patches 的數量也會改變（例如 224×224 → 384×384，patches 從 196 個變成 576 個）。
+                            但預訓練的位置編碼只有 197 個（1 個 CLS + 196 個 patches）。
+                        </p>
+                        <p>
+                            <strong>解決方案</strong>：使用 <strong>2D 插值</strong>，根據 patches 在原始圖片中的 2D 位置，對位置編碼進行插值。
+                        </p>
+                        <p>
+                            <strong>注意</strong>：這是 ViT 中<strong>唯一手動注入 2D 結構資訊</strong>的地方（除了切分 patches）。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Hybrid Architecture -->
+            <h2>🔀 Hybrid Architecture（混合架構）</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>CNN + Transformer</h4>
+                    <p>
+                        除了直接使用圖片 patches，ViT 也支援「混合架構」：
+                        先用 CNN 提取特徵圖（feature maps），然後把特徵圖當成「patches」送入 Transformer。
+                    </p>
+                    
+                    <div class="key-concept">
+                        <h5>💡 為什麼需要混合架構？</h5>
+                        <ul>
+                            <li><strong>小資料集</strong>：當資料不足時，CNN 的歸納偏置可以幫助模型更快收斂</li>
+                            <li><strong>遷移學習</strong>：可以利用預訓練好的 CNN（如 ResNet）作為特徵提取器</li>
+                        </ul>
+                        <p>
+                            <strong>實驗結果</strong>：在 ImageNet 上，混合架構的表現略好於純 ViT，但差距不大。
+                            當資料規模擴大時，純 ViT 的優勢會更明顯。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="chapter-navigation">
+                <a href="02-patch-embedding.html" class="nav-link">← 上一章：Patch Embedding</a>
+                <a href="index.html" class="nav-link">返回目錄</a>
+                <a href="04-experiments.html" class="nav-link">下一章：實驗結果 →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

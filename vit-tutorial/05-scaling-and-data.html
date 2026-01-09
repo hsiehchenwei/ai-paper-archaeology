@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViT 第 5 章：資料規模與泛化能力</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/generated/chapter05_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>規模的魔法</h1>
+            <p class="hero-subtitle">為什麼 ViT 需要大規模資料？</p>
+            <p class="hero-meta">Vision Transformer 深度解析 · 第 5 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">ViT 教學</a>
+            <span>/</span>
+            <span class="current">第 5 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                ViT 最令人困惑的地方，就是它在小資料集上表現「差強人意」，但在大資料集上卻能「超越一切」。
+                這背後的原因是什麼？論文透過詳細的實驗和分析，揭示了<strong>資料規模如何彌補歸納偏置的缺失</strong>。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 1. 為什麼小資料集表現差？ -->
+            <h2>❓ 為什麼小資料集表現差？</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>歸納偏置的缺失</h4>
+                    <p>
+                        當 ViT 在 ImageNet（130 萬張圖片）上訓練時，表現比同等大小的 ResNet 低幾個百分點。
+                        這不是 bug，而是 feature。
+                    </p>
+                    
+                    <div class="key-concept">
+                        <h5>🔵 CNN 的優勢（小資料集）</h5>
+                        <p>
+                            CNN 的歸納偏置讓它在資料不足時也能做出合理的推斷：
+                        </p>
+                        <ul>
+                            <li><strong>局部性</strong>：假設「相近的像素更相關」，這在大多數自然圖像中都成立</li>
+                            <li><strong>平移等變性</strong>：物體移動位置，特徵也跟著移動，這符合視覺常識</li>
+                            <li><strong>二維結構</strong>：卷積核直接利用圖片的空間結構，不需要從資料中學習</li>
+                        </ul>
+                        <p>
+                            這些「先驗知識」讓 CNN 在少量資料下就能學好。
+                        </p>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>🟢 ViT 的劣勢（小資料集）</h5>
+                        <p>
+                            ViT 沒有這些歸納偏置，必須從資料中學習所有關係：
+                        </p>
+                        <ul>
+                            <li><strong>空間關係</strong>：哪些 patches 應該「關注」哪些 patches？</li>
+                            <li><strong>局部性</strong>：相近的 patches 是否更相關？</li>
+                            <li><strong>全局結構</strong>：如何整合所有 patches 的資訊？</li>
+                        </ul>
+                        <p>
+                            當資料不足時，ViT 無法學到這些複雜的關係，所以表現較差。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 資料規模的轉折點 -->
+            <h2>📊 資料規模的轉折點</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>從劣勢到優勢</h4>
+                    <p>
+                        論文的實驗顯示了一個清晰的轉折點：
+                    </p>
+                    
+                    <div class="figure figure-original">
+                        <img src="images/original/imagenet_5shot.png" alt="資料規模對性能的影響">
+                        <div class="caption">
+                            <strong>Figure 1:</strong> ImageNet 上的線性少樣本評估 vs 預訓練資料規模。ResNet 在小資料集上表現更好，但很快達到平台期；ViT 在大資料集上表現更好，且持續提升。
+                        </div>
+                    </div>
+
+                    <div class="key-concept" style="background: linear-gradient(135deg, #10b98120 0%, #3b82f620 100%); border-left: 5px solid var(--mag-secondary);">
+                        <h5>🎯 關鍵發現</h5>
+                        <ul>
+                            <li><strong>ImageNet (1.3M)</strong>：ResNet 表現更好</li>
+                            <li><strong>ImageNet-21k (14M)</strong>：ViT 開始追上，甚至超越</li>
+                            <li><strong>JFT-300M (303M)</strong>：ViT 明顯超越，且差距持續擴大</li>
+                        </ul>
+                        <p>
+                            <strong>結論</strong>：當資料規模達到一定程度時，ViT 的「無偏置」設計反而成為優勢，因為它可以學習到比 CNN 的歸納偏置更複雜、更靈活的模式。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Attention 距離分析 -->
+            <h2>👁️ Attention 距離分析</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>淺層局部，深層全局</h4>
+                    <p>
+                        論文分析了 ViT 在不同層的 Attention 距離，發現了一個有趣的模式：
+                    </p>
+                </div>
+            </div>
+
+            <div class="figure figure-original">
+                <img src="images/original/20201002_attention_distance_by_depth_main.png" alt="Attention 距離隨深度變化">
+                <div class="caption">
+                    <strong>Figure 2:</strong> Attention 距離隨層數的變化。淺層關注局部 patches，深層關注全局 patches。
+                </div>
+            </div>
+
+            <div class="paper-section">
+                <div class="explanation">
+                    <div class="key-concept">
+                        <h5>🔍 發現</h5>
+                        <ul>
+                            <li><strong>淺層（前幾層）</strong>：Attention 距離較短，主要關注<strong>局部</strong>的 patches</li>
+                            <li><strong>深層（後幾層）</strong>：Attention 距離較長，主要關注<strong>全局</strong>的 patches</li>
+                        </ul>
+                        <p>
+                            這說明 ViT 雖然沒有「內建」局部性假設，但它能從資料中<strong>學習到</strong>這種模式：
+                            先處理局部特徵，再整合全局資訊。
+                        </p>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>💡 類比：從細節到整體</h5>
+                        <p>
+                            這就像人類看圖片的過程：
+                        </p>
+                        <ul>
+                            <li><strong>第一眼</strong>：先看局部細節（眼睛、鼻子、嘴巴）</li>
+                            <li><strong>再看</strong>：整合這些細節，理解整體結構（這是一張臉）</li>
+                            <li><strong>最後</strong>：結合上下文，做出判斷（這是誰的臉）</li>
+                        </ul>
+                        <p>
+                            ViT 的 Attention 機制讓它能夠自然地學習到這種「從局部到全局」的處理方式。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. 位置編碼的學習 -->
+            <h2>📍 位置編碼的學習</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>從 1D 到 2D 的轉換</h4>
+                    <p>
+                        論文還分析了學習到的位置編碼，發現即使使用 1D 位置編碼，模型也能學習到類似 2D 的結構。
+                    </p>
+                    
+                    <div class="key-concept">
+                        <h5>🔍 視覺化發現</h5>
+                        <p>
+                            位置編碼的相似度矩陣顯示：
+                        </p>
+                        <ul>
+                            <li>相鄰的 patches 有相似的位置編碼</li>
+                            <li>同一行的 patches 有相似的位置編碼</li>
+                            <li>同一列的 patches 也有相似的位置編碼</li>
+                        </ul>
+                        <p>
+                            這證明了 Transformer 的強大學習能力：即使只給它 1D 的位置資訊，它也能學習到 2D 的空間結構。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. 模型規模的影響 -->
+            <h2>📏 模型規模的影響</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>更大的模型，更好的表現</h4>
+                    <p>
+                        論文的實驗還顯示，當資料規模擴大時，更大的 ViT 模型（如 ViT-H）表現更好：
+                    </p>
+                    
+                    <div class="key-concept">
+                        <h5>📊 規模效應</h5>
+                        <ul>
+                            <li><strong>小資料集</strong>：ViT-B 和 ViT-L 表現相近，ViT-H 可能過擬合</li>
+                            <li><strong>大資料集</strong>：ViT-H 明顯超越 ViT-L，ViT-L 超越 ViT-B</li>
+                        </ul>
+                        <p>
+                            這說明 ViT 的擴展性很好：只要有足夠的資料，更大的模型就能學到更複雜的模式。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. 泛化能力的來源 -->
+            <h2>🌐 泛化能力的來源</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>為什麼 ViT 泛化得更好？</h4>
+                    <p>
+                        ViT 在 VTAB 等遷移學習任務上表現優異，這說明它學到了更通用的表徵。
+                        原因可能是：
+                    </p>
+                    
+                    <div class="key-concept">
+                        <h5>🎯 通用性 vs 特殊性</h5>
+                        <ul>
+                            <li><strong>CNN</strong>：歸納偏置讓它快速適應特定任務，但可能過度依賴這些假設</li>
+                            <li><strong>ViT</strong>：沒有歸納偏置，必須學習通用的模式，反而更容易遷移到新任務</li>
+                        </ul>
+                        <p>
+                            這就像「死記硬背」vs「理解原理」：
+                            前者在熟悉的情境下表現好，但後者在陌生情境下更靈活。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. 自監督學習的潛力 -->
+            <h2>🔮 自監督學習的未來</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>無標籤資料的利用</h4>
+                    <p>
+                        論文還進行了初步的自監督學習實驗，使用類似 BERT 的 Masked Patch Prediction 任務。
+                        結果顯示，自監督 ViT 也很有潛力，為未來的無監督視覺學習指明了方向。
+                    </p>
+                    
+                    <div class="quote-block">
+                        「當資料規模足夠大時，歸納偏置的缺失不再是劣勢，而是優勢。」<br>
+                        <span style="font-size: 0.9em; opacity: 0.8;">ViT 證明了，大規模訓練可以讓模型學習到比人工設計的歸納偏置更強大的模式。</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="chapter-navigation">
+                <a href="04-experiments.html" class="nav-link">← 上一章：實驗結果</a>
+                <a href="index.html" class="nav-link">返回目錄</a>
+                <a href="06-conclusion.html" class="nav-link">下一章：結論與影響 →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

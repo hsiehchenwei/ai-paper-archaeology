@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>真實世界的考驗：為什麼多模態模型在真實場景中表現不佳？ | AI Paper Archaeology</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles/global.css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+    <style>
+      :root {
+        --hero-bg: linear-gradient(
+          135deg,
+          #1a1f3a 0%,
+          #2d1b3d 50%,
+          #0f1419 100%
+        );
+        --gold: #ffd700;
+        --silver: #c0c0c0;
+        --deep-blue: #0f1419;
+        --warning-red: #ef4444;
+        --success-green: #10b981;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.8;
+        color: #2c3e50;
+        background: var(--deep-blue);
+      }
+
+      /* Hero Section */
+      .hero-section {
+        position: relative;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--hero-bg);
+        background-image: url('./mme-realworld/images/generated/hero.png');
+        background-size: cover;
+        background-position: center;
+        overflow: hidden;
+      }
+
+      .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(26, 31, 58, 0.4) 0%,
+          rgba(26, 31, 58, 0.85) 60%,
+          rgba(26, 31, 58, 0.95) 100%
+        );
+        z-index: 1;
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        padding: 0 20px;
+        max-width: 1000px;
+      }
+
+      .hero-title {
+        font-family: "Noto Serif TC", serif;
+        font-size: clamp(2.5rem, 6vw, 5rem);
+        font-weight: 900;
+        color: #ffffff;
+        margin-bottom: 30px;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8),
+          0 0 60px rgba(255, 215, 0, 0.3);
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+
+      .hero-subtitle {
+        font-family: "Inter", sans-serif;
+        font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+        color: var(--gold);
+        font-weight: 300;
+        letter-spacing: 0.05em;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+        margin-bottom: 20px;
+      }
+
+      .hero-meta {
+        font-size: 1rem;
+        color: var(--silver);
+        font-weight: 400;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+      }
+
+      /* Story Container */
+      .story-container {
+        background: #ffffff;
+        margin-top: -50px;
+        position: relative;
+        z-index: 10;
+        border-radius: 30px 30px 0 0;
+        padding: 80px 40px;
+      }
+
+      .content-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      /* Typography */
+      .story-lead {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.5rem;
+        line-height: 2;
+        color: #1a1a1a;
+        margin: 40px 0;
+        padding: 40px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-left: 5px solid var(--warning-red);
+        border-radius: 10px;
+      }
+
+      h2 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #0a0e27;
+        margin: 60px 0 30px 0;
+        border-bottom: 3px solid var(--gold);
+        padding-bottom: 15px;
+      }
+
+      h3 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.8rem;
+        color: #1a1f3a;
+        margin: 40px 0 20px 0;
+      }
+
+      p {
+        font-size: 1.1rem;
+        line-height: 1.9;
+        margin-bottom: 20px;
+        color: #2c3e50;
+      }
+
+      /* Key Concept Boxes */
+      .key-concept {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin: 30px 0;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        border-top: 4px solid var(--gold);
+      }
+
+      .key-concept.strong {
+        border-top-color: var(--success-green);
+        background: linear-gradient(135deg, #10b98120 0%, #ffffff 100%);
+      }
+
+      .key-concept.weak {
+        border-top-color: var(--warning-red);
+        background: linear-gradient(135deg, #ef444420 0%, #ffffff 100%);
+      }
+
+      .key-concept h5 {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.3rem;
+        color: #0a0e27;
+        margin-bottom: 15px;
+        font-weight: 700;
+      }
+
+      /* Comparison Table */
+      .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 30px 0;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .comparison-table th {
+        background: var(--deep-blue);
+        color: var(--gold);
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+      }
+
+      .comparison-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .comparison-table tr:hover {
+        background: #f8f9fa;
+      }
+
+      .comparison-table .highlight {
+        background: linear-gradient(135deg, #10b98120 0%, transparent 100%);
+        font-weight: 600;
+        color: var(--success-green);
+      }
+
+      .comparison-table .warning {
+        background: linear-gradient(135deg, #ef444420 0%, transparent 100%);
+        font-weight: 600;
+        color: var(--warning-red);
+      }
+
+      /* Figure Styles */
+      .figure {
+        margin: 40px 0;
+        text-align: center;
+      }
+
+      .figure img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .figure-original {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        border: 2px solid #e5e7eb;
+      }
+
+      .figure-ai {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        padding: 20px;
+        border-radius: 10px;
+        border: 2px solid var(--gold);
+      }
+
+      .caption {
+        margin-top: 15px;
+        font-size: 0.9rem;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .caption strong {
+        color: #0a0e27;
+      }
+
+      /* Original Quote */
+      .original-quote {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 10px;
+        border-left: 4px solid var(--gold);
+        margin: 30px 0;
+      }
+
+      .original-quote strong {
+        color: #0a0e27;
+        font-size: 1.1rem;
+        display: block;
+        margin-bottom: 15px;
+      }
+
+      .original-quote p {
+        font-style: italic;
+        color: #2c3e50;
+        margin-bottom: 15px;
+      }
+
+      .translation {
+        background: linear-gradient(135deg, #10b98110 0%, #ffffff 100%);
+        padding: 25px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border-left: 4px solid var(--success-green);
+      }
+
+      .translation h4 {
+        color: var(--success-green);
+        margin-bottom: 15px;
+      }
+
+      /* Quote Block */
+      .quote-block {
+        background: var(--hero-bg);
+        padding: 40px;
+        border-radius: 15px;
+        margin: 50px 0;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .quote-block::before {
+        content: '"';
+        position: absolute;
+        left: 20px;
+        top: 10px;
+        font-size: 6rem;
+        color: var(--gold);
+        opacity: 0.2;
+        font-family: Georgia, serif;
+      }
+
+      .quote-block p {
+        font-family: "Noto Serif TC", serif;
+        font-size: 1.5rem;
+        color: var(--gold);
+        margin: 0;
+        position: relative;
+        z-index: 1;
+        line-height: 1.8;
+      }
+
+      /* Breadcrumb */
+      .breadcrumb {
+        padding: 20px 40px;
+        background: rgba(10, 14, 39, 0.05);
+        font-size: 0.9rem;
+      }
+
+      .breadcrumb a {
+        color: var(--gold);
+        text-decoration: none;
+        transition: opacity 0.3s;
+      }
+
+      .breadcrumb a:hover {
+        opacity: 0.8;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .hero-title {
+          font-size: 2rem;
+        }
+
+        .story-container {
+          padding: 40px 20px;
+        }
+
+        .comparison-table {
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="breadcrumb">
+      <a href="../index.html">🏠 首頁</a>
+      <span style="margin: 0 10px; color: #999">/</span>
+      <span style="color: #666">知識筆記</span>
+      <span style="margin: 0 10px; color: #999">/</span>
+      <span style="color: #666">真實世界的考驗</span>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <h1 class="hero-title">真實世界的考驗</h1>
+        <p class="hero-subtitle">為什麼多模態模型在真實場景中表現不佳？</p>
+        <p class="hero-meta">MME-RealWorld 基準測試揭示的真相</p>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="story-container">
+      <div class="content-wrapper">
+        <div class="story-lead">
+          2024 年 8 月，一項研究對 29 個頂尖多模態模型進行了全面評估，
+          使用 13,366 張高解析度真實圖片和 29,429 個手動標註的問答對。
+          結果令人震驚：<strong>沒有任何一個模型的準確率超過 60%</strong>。
+          即使是 GPT-4o、Gemini 1.5 Pro、Claude 3.5 Sonnet 這些最先進的模型，
+          在真實世界的挑戰面前，也顯得力不從心。
+        </div>
+
+        <h2>📊 MME-RealWorld：史上最大規模的手動標註基準測試</h2>
+
+        <p>
+          在深入分析之前，我們先來看看 MME-RealWorld 基準測試的設計。
+          這個基準測試的規模和品質，都達到了前所未有的水準。
+        </p>
+
+        <div class="figure figure-original">
+          <img src="./mme-realworld/images/original/teaser_tasks.png" alt="MME-RealWorld 任務架構圖">
+          <div class="caption">
+            <strong>Figure 1:</strong> MME-RealWorld 基準測試架構。包含 5 個真實領域，涵蓋 43 個感知和推理子任務。
+            每個問答對提供 5 個選項。我們用紅色框標示並放大與問題相關的圖片部分，以便更好地觀察。
+          </div>
+        </div>
+
+        <div class="key-concept">
+          <h5>📐 基準測試規模</h5>
+          <ul>
+            <li><strong>圖片數量</strong>：13,366 張高解析度真實圖片（平均 2000×1500 像素）</li>
+            <li><strong>問答對</strong>：29,429 個手動標註的問答對</li>
+            <li><strong>任務領域</strong>：5 個真實領域，43 個子任務</li>
+            <li><strong>標註團隊</strong>：25 名專業標註員 + 7 名多模態模型專家</li>
+            <li><strong>圖片來源</strong>：從超過 30 萬張公開資料集和網路圖片中篩選</li>
+          </ul>
+        </div>
+
+        <div class="key-concept strong">
+          <h5>✅ 為什麼這個基準測試特別重要？</h5>
+          <p>
+            <strong>1. 完全手動標註</strong>：所有問答對都由人類專家手動完成，確保品質。
+            這是目前已知<strong>最大規模的完全手動標註基準測試</strong>。
+          </p>
+          <p>
+            <strong>2. 最高解析度</strong>：平均解析度 2000×1500，最高可達 5304×7952（約 4200 萬像素）。
+            這遠高於現有基準測試（例如 MME 的平均解析度僅 1161×840）。
+          </p>
+          <p>
+            <strong>3. 真實場景難度</strong>：許多任務對人類來說都很困難，需要多個標註員回答並交叉檢查。
+            例如：在監控場景中數出 133 輛車，或在遙感圖像中識別平均解析度超過 5000×5000 的小物體。
+          </p>
+        </div>
+
+        <h2>💥 震撼發現：所有模型準確率 < 60%</h2>
+
+        <p>
+          最令人震驚的發現是：即使是目前最先進的多模態模型，
+          在 MME-RealWorld 基準測試上的表現都不理想。
+        </p>
+
+        <div class="figure figure-original">
+          <img src="./mme-realworld/images/original/teaser_performance.png" alt="模型性能對比">
+          <div class="caption">
+            <strong>Figure 2:</strong> 模型性能排行榜。展示了先進多模態模型在英文和中文資料集上的平均準確率。
+          </div>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>❌ 感知任務（Perception）表現</h5>
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>模型</th>
+                <th>OCR</th>
+                <th>遙感</th>
+                <th>圖表</th>
+                <th>監控</th>
+                <th>自動駕駛</th>
+                <th>平均</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Qwen2-VL</strong></td>
+                <td class="highlight">81.38%</td>
+                <td>44.81%</td>
+                <td class="highlight">70.18%</td>
+                <td>37.30%</td>
+                <td>34.62%</td>
+                <td class="highlight">58.96%</td>
+              </tr>
+              <tr>
+                <td><strong>InternVL-2</strong></td>
+                <td>73.92%</td>
+                <td>39.35%</td>
+                <td>62.80%</td>
+                <td class="highlight">53.19%</td>
+                <td>35.46%</td>
+                <td class="highlight">55.82%</td>
+              </tr>
+              <tr>
+                <td><strong>Claude 3.5 Sonnet</strong></td>
+                <td>72.47%</td>
+                <td class="warning">25.74%</td>
+                <td>67.44%</td>
+                <td>32.19%</td>
+                <td>40.77%</td>
+                <td>52.90%</td>
+              </tr>
+              <tr>
+                <td><strong>GPT-4o</strong></td>
+                <td class="highlight">77.69%</td>
+                <td class="warning">28.92%</td>
+                <td class="warning">46.68%</td>
+                <td>33.93%</td>
+                <td class="warning">22.43%</td>
+                <td>46.43%</td>
+              </tr>
+              <tr>
+                <td><strong>Gemini 1.5 Pro</strong></td>
+                <td>67.62%</td>
+                <td class="warning">13.99%</td>
+                <td class="warning">39.90%</td>
+                <td>31.11%</td>
+                <td>26.64%</td>
+                <td class="warning">39.63%</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin-top: 20px; color: #666; font-size: 0.95rem;">
+            💡 <strong>關鍵發現</strong>：最佳模型（Qwen2-VL）的平均準確率僅 58.96%，
+            第二名的 InternVL-2 為 55.82%。沒有任何模型達到 60% 的門檻。
+          </p>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>❌ 推理任務（Reasoning）表現更差</h5>
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>模型</th>
+                <th>OCR 推理</th>
+                <th>圖表推理</th>
+                <th>監控推理</th>
+                <th>自動駕駛推理</th>
+                <th>平均</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Claude 3.5 Sonnet</strong></td>
+                <td class="highlight">61.90%</td>
+                <td class="highlight">61.20%</td>
+                <td>41.79%</td>
+                <td>31.92%</td>
+                <td class="highlight">44.12%</td>
+              </tr>
+              <tr>
+                <td><strong>Qwen2-VL</strong></td>
+                <td class="highlight">63.40%</td>
+                <td>48.60%</td>
+                <td>33.13%</td>
+                <td>31.47%</td>
+                <td>40.39%</td>
+              </tr>
+              <tr>
+                <td><strong>InternVL-2</strong></td>
+                <td>57.40%</td>
+                <td class="warning">39.00%</td>
+                <td>43.57%</td>
+                <td>29.84%</td>
+                <td>38.74%</td>
+              </tr>
+              <tr>
+                <td><strong>GPT-4o</strong></td>
+                <td>61.40%</td>
+                <td>44.80%</td>
+                <td>36.51%</td>
+                <td class="warning">26.41%</td>
+                <td>37.61%</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin-top: 20px; color: #666; font-size: 0.95rem;">
+            💡 <strong>關鍵發現</strong>：推理任務比感知任務更困難。
+            即使是表現最好的模型（Claude 3.5 Sonnet），平均準確率也只有 44.12%，
+            類別平均準確率不超過 50%。這表明當前模型距離人類水平的推理能力還有很大差距。
+          </p>
+        </div>
+
+        <h2>✅ 真實應用情境的強項</h2>
+
+        <div class="key-concept strong">
+          <h5>1️⃣ OCR 文字識別：表現相對優秀</h5>
+          <p>
+            <strong>GPT-4o</strong> 在 OCR 任務上達到 <strong>77.69%</strong> 的準確率，
+            僅次於 Qwen2-VL 的 81.38%。這說明多模態模型在文字識別方面確實有優勢。
+          </p>
+          <p>
+            <strong>適用場景</strong>：
+          </p>
+          <ul>
+            <li>文件掃描與文字提取</li>
+            <li>路標、招牌文字識別</li>
+            <li>書籍、報紙文字識別</li>
+            <li>產品標籤、廣告文字提取</li>
+          </ul>
+        </div>
+
+        <div class="key-concept strong">
+          <h5>2️⃣ 一般視覺理解：基礎能力尚可</h5>
+          <p>
+            在簡單的物體識別、場景描述等基礎視覺理解任務上，模型表現尚可。
+            但一旦涉及細節或複雜場景，表現就會大幅下降。
+          </p>
+          <p>
+            <strong>適用場景</strong>：
+          </p>
+          <ul>
+            <li>內容審核（簡單場景）</li>
+            <li>圖像分類（常見物體）</li>
+            <li>簡單的場景描述</li>
+          </ul>
+        </div>
+
+        <h2>❌ 真實應用情境的弱點</h2>
+
+        <div class="key-concept weak">
+          <h5>1️⃣ 高解析度真實場景：所有模型都失敗</h5>
+          <p>
+            <strong>表現</strong>：所有模型的準確率 < 60%，最佳模型僅 55.82%
+          </p>
+          <p>
+            <strong>具體失敗案例</strong>：
+          </p>
+          <ul>
+            <li><strong>監控場景</strong>：需要數出 133 輛車，模型無法準確計數</li>
+            <li><strong>遙感圖像</strong>：平均解析度超過 5000×5000，需要識別小物體，模型表現差</li>
+            <li><strong>高解析度細節</strong>：體育賽事中的記分板、遠距離物體等細節，模型無法準確識別</li>
+          </ul>
+          <p>
+            <strong>不適用場景</strong>：
+          </p>
+          <ul>
+            <li>高解析度監控分析</li>
+            <li>衛星圖像分析</li>
+            <li>醫學影像細節分析（需要人工監督）</li>
+            <li>需要精確計數的場景</li>
+          </ul>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>2️⃣ 複雜推理任務：最高僅 44.12%</h5>
+          <p>
+            <strong>表現</strong>：推理任務最高準確率僅 44.12%（Claude 3.5 Sonnet）
+          </p>
+          <p>
+            <strong>具體失敗案例</strong>：
+          </p>
+          <ul>
+            <li><strong>自動駕駛意圖預測</strong>：預測車輛的轉向意圖，模型表現差</li>
+            <li><strong>監控場景推理</strong>：推理物體的下一步行動，準確率低</li>
+            <li><strong>圖表推理</strong>：從複雜圖表中進行計算和趨勢預測，表現不佳</li>
+            <li><strong>空間關係推理</strong>：理解物體之間的複雜空間關係，失敗率高</li>
+          </ul>
+          <p>
+            <strong>不適用場景</strong>：
+          </p>
+          <ul>
+            <li>自動駕駛決策（需要人工監督）</li>
+            <li>複雜場景分析</li>
+            <li>需要物理常識推理的任務</li>
+            <li>動態資訊理解（單幀圖像無法提供足夠資訊）</li>
+          </ul>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>3️⃣ 閉源模型的特殊問題</h5>
+          <p>
+            研究發現，閉源模型（GPT-4o、Gemini、Claude）在真實場景中表現不如預期，
+            主要有三個原因：
+          </p>
+          <ul>
+            <li><strong>解析度限制</strong>：上傳本地圖片時有最大解析度和檔案大小限制
+              <ul>
+                <li>Claude 3.5 Sonnet：最大 8K 解析度，5MB</li>
+                <li>GPT-4o、Gemini：最大 20MB</li>
+                <li>這導致高品質圖片必須壓縮，損失細節</li>
+              </ul>
+            </li>
+            <li><strong>保守策略</strong>：閉源模型更傾向於輸出 "E"（無法回答），
+              這表明它們採用保守策略以避免幻覺，但也導致錯過許多可以回答的問題</li>
+            <li><strong>內容過濾</strong>：某些問題被認為涉及隱私或有害內容，模型拒絕回答</li>
+          </ul>
+        </div>
+
+        <div class="figure figure-ai">
+          <img src="./mme-realworld/images/generated/failure_cases.png" alt="失敗案例視覺化">
+          <div class="caption">
+            💡 <strong>AI 圖解：</strong> 多模態模型在真實場景中的典型失敗模式。
+            紅色區域表示模型表現差的任務類型。
+          </div>
+        </div>
+
+        <h2>🚫 哪些情境不適合使用多模態模型？</h2>
+
+        <div class="key-concept weak">
+          <h5>1. 高解析度監控分析</h5>
+          <p>
+            <strong>問題</strong>：需要精確計數、識別小物體、理解複雜場景
+          </p>
+          <p>
+            <strong>表現</strong>：監控任務的平均準確率僅 33-53%，遠低於實用需求
+          </p>
+          <p>
+            <strong>建議</strong>：需要人工監督，或使用專門的監控 AI 系統
+          </p>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>2. 醫學影像細節分析</h5>
+          <p>
+            <strong>問題</strong>：需要識別微小的病變、理解醫學圖表的語義、進行診斷推理
+          </p>
+          <p>
+            <strong>表現</strong>：研究顯示，多模態模型在醫學診斷問題上可能比隨機猜測更差
+          </p>
+          <p>
+            <strong>建議</strong>：<strong>絕對不適合</strong>作為主要診斷工具，只能作為輔助參考，且必須有專業醫師監督
+          </p>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>3. 自動駕駛決策</h5>
+          <p>
+            <strong>問題</strong>：需要預測車輛意圖、理解動態交互、進行即時決策
+          </p>
+          <p>
+            <strong>表現</strong>：自動駕駛推理任務的平均準確率僅 26-40%，遠低於安全要求
+          </p>
+          <p>
+            <strong>建議</strong>：<strong>不適合</strong>用於自動駕駛決策，需要專門的感知和決策系統
+          </p>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>4. 複雜圖表與數據可視化解讀</h5>
+          <p>
+            <strong>問題</strong>：需要精確提取數據、進行計算、預測趨勢
+          </p>
+          <p>
+            <strong>表現</strong>：圖表推理任務表現差，特別是複雜的財務報表、科學數據圖表
+          </p>
+          <p>
+            <strong>建議</strong>：簡單圖表可以，但複雜圖表需要人工檢查
+          </p>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>5. 實時處理需求</h5>
+          <p>
+            <strong>問題</strong>：處理高解析度圖片需要大量計算資源
+          </p>
+          <p>
+            <strong>表現</strong>：
+          </p>
+          <ul>
+            <li>LLaVA1.5：16.37 TFLOPS（處理 1024×1024 以上圖片）</li>
+            <li>SliME：40.82 TFLOPS</li>
+            <li>Mini-Gemini-HD：87.59 TFLOPS（約為 LLaVA1.5 的 5 倍）</li>
+          </ul>
+          <p>
+            <strong>建議</strong>：不適合實時視頻分析、即時翻譯等低延遲應用
+          </p>
+        </div>
+
+        <h2>🔍 根本原因分析</h2>
+
+        <div class="figure figure-ai">
+          <img src="./mme-realworld/images/generated/root_causes.png" alt="根本原因分析">
+          <div class="caption">
+            💡 <strong>AI 圖解：</strong> 多模態模型在真實場景中表現不佳的根本原因。
+          </div>
+        </div>
+
+        <div class="key-concept">
+          <h5>1. 資料問題：訓練資料與真實場景分布不一致</h5>
+          <p>
+            <strong>問題</strong>：
+          </p>
+          <ul>
+            <li>訓練資料多為低解析度或合成圖片</li>
+            <li>缺乏高解析度真實場景的資料</li>
+            <li>專業領域資料稀缺（醫學、遙感、監控等）</li>
+            <li>資料標註品質問題（許多基準測試使用模型自動標註，品質受限）</li>
+          </ul>
+          <p>
+            <strong>影響</strong>：模型在訓練時沒有見過類似的真實場景，因此無法正確處理
+          </p>
+        </div>
+
+        <div class="key-concept">
+          <h5>2. 架構限制：視覺編碼器對細節處理不足</h5>
+          <p>
+            <strong>問題</strong>：
+          </p>
+          <ul>
+            <li>標準視覺編碼器（如 CLIP）主要針對低解析度圖片設計</li>
+            <li>缺乏對高解析度細節的有效處理機制</li>
+            <li>即使使用高解析度輸入（如 Mini-Gemini-HD），也會將大於 672×672 的圖片縮放，損失細節</li>
+            <li>計算成本隨解析度呈指數增長</li>
+          </ul>
+          <p>
+            <strong>影響</strong>：無法有效處理高解析度圖片中的細節資訊
+          </p>
+        </div>
+
+        <div class="key-concept">
+          <h5>3. 訓練範式問題：缺乏真實場景的複雜性建模</h5>
+          <p>
+            <strong>問題</strong>：
+          </p>
+          <ul>
+            <li>主要依賴大規模資料，缺乏結構化知識注入</li>
+            <li>缺乏物理常識建模（無法理解物體運動、交互等）</li>
+            <li>缺乏組合推理能力（無法理解複雜的空間關係）</li>
+            <li>Fine-tuning 容易導致災難性遺忘</li>
+          </ul>
+          <p>
+            <strong>影響</strong>：無法處理需要常識推理和組合理解的複雜任務
+          </p>
+        </div>
+
+        <div class="key-concept">
+          <h5>4. 評估問題：現有基準與真實應用差距大</h5>
+          <p>
+            <strong>問題</strong>：
+          </p>
+          <ul>
+            <li>現有基準測試多為低解析度、簡單場景</li>
+            <li>缺乏失敗案例分析</li>
+            <li>評估指標無法反映真實性能</li>
+            <li>模型在基準測試上表現好，但在真實應用中失敗</li>
+          </ul>
+          <p>
+            <strong>影響</strong>：無法準確評估模型在真實應用中的表現
+          </p>
+        </div>
+
+        <div class="figure figure-original">
+          <img src="./mme-realworld/images/original/close_source_e.png" alt="閉源模型輸出 E 的頻率">
+          <div class="caption">
+            <strong>Figure 3:</strong> 不同模型在各領域中輸出答案 "E"（無法回答）的頻率。
+            括號中的標記表示任務類型：P 為感知任務，R 為推理任務。
+          </div>
+        </div>
+
+        <div class="key-concept weak">
+          <h5>💡 關鍵發現：模型「看不到」圖片中的物體</h5>
+          <p>
+            研究發現，在標註過程中，答案 "E"（物體不在圖片中）的比例不超過 5%。
+            但幾乎所有模型輸出 "E" 的頻率都遠高於實際數量。
+          </p>
+          <p>
+            <strong>這說明什麼？</strong>
+          </p>
+          <ul>
+            <li>模型的視覺感知模組<strong>無法識別</strong>圖片中對應問題的物體</li>
+            <li>即使物體存在，模型也「看不到」</li>
+            <li>這不是推理問題，而是<strong>基礎的感知問題</strong></li>
+          </ul>
+        </div>
+
+        <h2>💡 對實際應用的啟示</h2>
+
+        <div class="key-concept">
+          <h5>如何判斷是否適合使用多模態模型？</h5>
+          <p>
+            <strong>✅ 適合使用的場景</strong>：
+          </p>
+          <ul>
+            <li>OCR 文字識別（文件、招牌、標籤等）</li>
+            <li>簡單的圖像分類和場景描述</li>
+            <li>內容審核（簡單場景）</li>
+            <li>教育輔助（解釋圖片內容）</li>
+            <li>客服應用（圖文混合對話）</li>
+          </ul>
+          <p>
+            <strong>❌ 不適合使用的場景</strong>：
+          </p>
+          <ul>
+            <li>高解析度監控分析</li>
+            <li>醫學診斷（需要專業醫師監督）</li>
+            <li>自動駕駛決策</li>
+            <li>複雜圖表數據分析</li>
+            <li>實時處理需求</li>
+            <li>高風險決策（法律、金融等）</li>
+          </ul>
+        </div>
+
+        <div class="key-concept">
+          <h5>需要人工監督的場景</h5>
+          <p>
+            即使在「適合使用」的場景中，也建議加入人工監督：
+          </p>
+          <ul>
+            <li><strong>關鍵決策</strong>：任何涉及重要決策的應用，都需要人工最終確認</li>
+            <li><strong>專業領域</strong>：醫學、法律、金融等專業領域，必須有專業人士監督</li>
+            <li><strong>高解析度圖片</strong>：處理高解析度圖片時，需要人工檢查結果</li>
+            <li><strong>複雜推理</strong>：涉及複雜推理的任務，需要人工驗證</li>
+          </ul>
+        </div>
+
+        <div class="key-concept">
+          <h5>未來改進方向</h5>
+          <p>
+            <strong>1. 高解析度處理能力</strong>：
+          </p>
+          <ul>
+            <li>開發更高效的高解析度圖片處理方法</li>
+            <li>降低計算成本，提高處理速度</li>
+            <li>改進視覺編碼器，更好地處理細節</li>
+          </ul>
+          <p>
+            <strong>2. 真實場景資料</strong>：
+          </p>
+          <ul>
+            <li>收集更多高解析度真實場景資料</li>
+            <li>提高資料品質，使用專業標註</li>
+            <li>涵蓋更多專業領域（醫學、遙感、監控等）</li>
+          </ul>
+          <p>
+            <strong>3. 推理能力提升</strong>：
+          </p>
+          <ul>
+            <li>注入物理常識和領域知識</li>
+            <li>改進組合推理能力</li>
+            <li>開發更好的動態資訊理解方法</li>
+          </ul>
+        </div>
+
+        <h2>📄 論文核心結論</h2>
+
+        <div class="original-quote">
+          <strong>原文</strong>
+          <p>
+            Our results show that even the most advanced models struggle with our benchmarks,
+            where none of them reach 60% accuracy. The challenges of perceiving high-resolution images
+            and understanding complex real-world scenarios remain urgent issues to be addressed.
+          </p>
+        </div>
+
+        <div class="translation">
+          <h4>📝 重點解讀</h4>
+          <p>
+            研究結果顯示，即使是最先進的模型，在我們的基準測試上也表現困難，
+            <strong>沒有任何模型達到 60% 的準確率</strong>。
+            感知高解析度圖片和理解複雜真實場景的挑戰，仍然是迫切需要解決的問題。
+          </p>
+        </div>
+
+        <div class="quote-block">
+          <p>
+            「多模態模型在基準測試上表現優異，但在真實世界的挑戰面前，仍然力不從心。」<br>
+            <span style="font-size: 1rem; opacity: 0.8; margin-top: 15px; display: block;">
+              MME-RealWorld 基準測試揭示了多模態模型的真實能力邊界
+            </span>
+          </p>
+        </div>
+
+        <h2>🌟 總結</h2>
+
+        <div class="key-concept">
+          <h5>關鍵要點</h5>
+          <ol style="line-height: 2;">
+            <li><strong>所有模型準確率 < 60%</strong>：即使是 GPT-4o、Gemini 1.5 Pro、Claude 3.5 Sonnet 這些最先進的模型，在真實高解析度場景中也無法達到 60% 的準確率</li>
+            <li><strong>推理任務更困難</strong>：推理任務的最高準確率僅 44.12%，遠低於實用需求</li>
+            <li><strong>OCR 是強項</strong>：GPT-4o 在 OCR 任務上達到 77.69%，這是多模態模型表現最好的領域</li>
+            <li><strong>高解析度是關鍵挑戰</strong>：所有模型在處理高解析度真實圖片時都表現不佳</li>
+            <li><strong>需要人工監督</strong>：在關鍵應用中，必須有人工監督和最終確認</li>
+          </ol>
+        </div>
+
+        <div class="key-concept strong">
+          <h5>實用建議</h5>
+          <p>
+            在決定是否使用多模態模型時，請考慮：
+          </p>
+          <ul>
+            <li><strong>任務類型</strong>：OCR 和簡單視覺理解可以，複雜推理和細節分析不行</li>
+            <li><strong>圖片解析度</strong>：低解析度可以，高解析度（> 2000×1500）表現差</li>
+            <li><strong>風險等級</strong>：高風險應用（醫學、法律、金融）必須有人工監督</li>
+            <li><strong>實時需求</strong>：需要實時處理的應用，計算成本可能過高</li>
+            <li><strong>專業領域</strong>：專業領域（醫學、遙感等）需要專門訓練的模型</li>
+          </ul>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin: 50px 0; text-align: center;">
+          <p style="margin: 0; color: #666; font-size: 0.9rem;">
+            📚 <strong>參考資料</strong>：MME-RealWorld: Could Your Multimodal LLM Challenge High-Resolution Real-World Scenarios that are Difficult for Humans?<br>
+            arXiv: <a href="https://arxiv.org/abs/2408.13257" target="_blank" style="color: var(--gold);">2408.13257</a> | 
+            GitHub: <a href="https://github.com/yfzhang114/MME-RealWorld" target="_blank" style="color: var(--gold);">yfzhang114/MME-RealWorld</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

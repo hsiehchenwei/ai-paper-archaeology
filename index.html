@@ -126,12 +126,18 @@
           <span class="updates-title">最新更新</span>
         </div>
         <div class="updates-list">
+          <a href="vit-tutorial/index.html" class="update-item">
+            <span class="update-date">2026-01-09</span>
+            <span class="update-text"
+              >Vision Transformer (ViT) 論文深度解析 - 圖片就是 16x16 個詞彙</span
+            >
+            <span class="update-badge">NEW</span>
+          </a>
           <a href="llava-tutorial/index.html" class="update-item">
             <span class="update-date">2026-01-08</span>
             <span class="update-text"
               >LLaVA 論文深度解析 - 視覺指令微調的開創性工作</span
             >
-            <span class="update-badge">NEW</span>
           </a>
           <a href="clip-tutorial/index.html" class="update-item">
             <span class="update-date">2026-01-08</span>
@@ -278,6 +284,41 @@
                 <span>2020-2021</span>
                 <span>•</span>
                 <span>核心理論專題</span>
+              </div>
+            </div>
+
+            <!-- Featured Card: Multimodal Evaluation -->
+            <div
+              class="bento-card"
+              onclick="location.href='topics/multimodal-evaluation.html'"
+              style="cursor: pointer"
+            >
+              <div
+                class="card-icon"
+                style="
+                  background: linear-gradient(135deg, #ef4444 0%, #f97316 50%, #8b5cf6 100%);
+                  width: 100px;
+                  height: 100px;
+                  margin-bottom: 20px;
+                  padding: 0;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 3rem;
+                  border-radius: 10px;
+                "
+              >
+                🔍
+              </div>
+              <h3>多模態評測三部曲</h3>
+              <p>
+                探索三篇震撼研究：MME-RealWorld、MMMU-Pro、RBench-V。
+                揭示多模態 AI 在真實場景、嚴格評測、視覺推理中的三大盲點。
+              </p>
+              <div class="card-meta">
+                <span>2024-2025</span>
+                <span>•</span>
+                <span>3 篇評測論文</span>
               </div>
             </div>
           </div>
@@ -479,6 +520,50 @@
                     證明了「可行性」，GPT-3 證明了「實用性」。
                   </p>
                   <a href="gpt3-tutorial/index.html" class="quick-link"
+                    >深度解析 →</a
+                  >
+                </div>
+              </div>
+
+              <!-- 2020 ViT -->
+              <div class="timeline-item left">
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                  <div
+                    class="timeline-header"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 15px;
+                      margin-bottom: 10px;
+                      justify-content: flex-end;
+                    "
+                  >
+                    <h3 style="margin: 0">2020 ViT</h3>
+                    <img
+                      src="vit-tutorial/images/generated/index_hero.png"
+                      style="
+                        width: 56px;
+                        height: 56px;
+                        object-fit: cover;
+                        border-radius: 8px;
+                      "
+                      alt="ViT Icon"
+                    />
+                  </div>
+                  <strong>圖片就是 16x16 個詞彙</strong>
+                  <p>純 Transformer 應用到視覺，開啟後 CNN 時代。</p>
+                  <p
+                    style="
+                      font-size: 0.85rem;
+                      color: var(--text-secondary);
+                      margin-top: 8px;
+                    "
+                  >
+                    把圖片切成 16x16 的碎片，用 Transformer 處理。
+                    證明了「大規模訓練勝過歸納偏置」，在 JFT-300M 上超越所有 CNN。
+                  </p>
+                  <a href="vit-tutorial/index.html" class="quick-link"
                     >深度解析 →</a
                   >
                 </div>
@@ -878,6 +963,96 @@
                 <p>
                   AI 怎麼讀懂文字？拆解 Tokenization 與 Embedding
                   的兩階段轉換，理解向量由來。
+                </p>
+                <span class="read-more">閱讀全文</span>
+              </div>
+            </a>
+
+            <!-- Article 6: MME-RealWorld -->
+            <a
+              href="articles/mme-realworld.html"
+              class="magazine-card"
+            >
+              <div class="card-image-wrapper">
+                <img
+                  src="articles/mme-realworld/images/generated/hero.png"
+                  alt="MME-RealWorld Cover"
+                  style="object-fit: cover;"
+                />
+              </div>
+              <div class="card-content">
+                <span
+                  class="card-tag"
+                  style="
+                    background: #fee2e2;
+                    color: #ef4444;
+                  "
+                  >多模態評測</span
+                >
+                <h3>真實世界的考驗：MME-RealWorld</h3>
+                <p>
+                  2024年8月，使用13,366張高解析度真實圖片測試29個頂尖模型。
+                  結果震撼：沒有任何模型超過60%準確率。
+                </p>
+                <span class="read-more">閱讀全文</span>
+              </div>
+            </a>
+
+            <!-- Article 7: MMMU-Pro -->
+            <a
+              href="articles/mmmu-pro.html"
+              class="magazine-card"
+            >
+              <div class="card-image-wrapper">
+                <img
+                  src="articles/mmmu-pro/images/generated/hero.png"
+                  alt="MMMU-Pro Cover"
+                  style="object-fit: cover;"
+                />
+              </div>
+              <div class="card-content">
+                <span
+                  class="card-tag"
+                  style="
+                    background: #fff7ed;
+                    color: #f97316;
+                  "
+                  >多模態評測</span
+                >
+                <h3>反作弊的評測：MMMU-Pro</h3>
+                <p>
+                  2024年9月，堵住「作弊途徑」後，所有模型準確率下降16.8%-26.9%。
+                  揭示原版評測的「虛假高分」。
+                </p>
+                <span class="read-more">閱讀全文</span>
+              </div>
+            </a>
+
+            <!-- Article 8: RBench-V -->
+            <a
+              href="articles/rbench-v.html"
+              class="magazine-card"
+            >
+              <div class="card-image-wrapper">
+                <img
+                  src="articles/rbench-v/images/generated/hero.png"
+                  alt="RBench-V Cover"
+                  style="object-fit: cover;"
+                />
+              </div>
+              <div class="card-content">
+                <span
+                  class="card-tag"
+                  style="
+                    background: #f3e8ff;
+                    color: #8b5cf6;
+                  "
+                  >多模態評測</span
+                >
+                <h3>視覺推理的盲點：RBench-V</h3>
+                <p>
+                  2025年5月，要求模型「畫圖思考」的評測。
+                  最佳模型僅25.8%，人類專家82.3%，揭示視覺推理的根本性缺陷。
                 </p>
                 <span class="read-more">閱讀全文</span>
               </div>

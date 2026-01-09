@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViT 第 1 章：引言與動機 - 圖片就是 16x16 個詞彙</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="hero-section" style="background-image: url('images/generated/chapter01_hero.png'); height: 80vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>當 Transformer 遇見視覺</h1>
+            <p class="hero-subtitle">16x16 個圖片碎片，開啟視覺 AI 的新紀元</p>
+            <p class="hero-meta">Vision Transformer 深度解析 · 第 1 章</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">ViT 教學</a>
+            <span>/</span>
+            <span class="current">第 1 章</span>
+        </div>
+
+        <div class="story-container">
+            <p class="story-lead drop-cap">
+                2020 年 10 月，Google Research 的團隊發表了一篇看似「異想天開」的論文：
+                把圖片切成 16x16 的小碎片，然後用處理文字的方式來處理這些碎片。
+                這個簡單的想法，卻顛覆了計算機視覺領域長達 30 年的 CNN 統治。
+                <strong>Vision Transformer (ViT) 證明了：大規模訓練勝過精心設計的歸納偏置</strong>。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 1. 核心概念解碼：先建立直覺 -->
+            <div class="paper-section" style="background-color: var(--mag-bg-light); border-left: 5px solid var(--mag-primary);">
+                <h3>🚀 先修概念：ViT 的革命性想法</h3>
+                <p>在深入論文之前，我們需要先理解 ViT 帶來的兩個核心轉變：</p>
+
+                <div class="key-concept">
+                    <h5>1️⃣ 從「卷積」到「注意力」</h5>
+                    <p><strong>傳統 CNN</strong>：像是一個有「近視眼」的學生。它只能看到圖片的一小塊區域（局部感受野），必須透過多層卷積才能「拼湊」出完整的圖像理解。這種設計假設了「局部性」和「平移不變性」——這些是 CNN 的<strong>歸納偏置 (Inductive Bias)</strong>。</p>
+                    <p><strong>ViT</strong>：像是一個「視力正常」的學生。它把圖片切成 16x16 的碎片（patches），然後用 Transformer 的 Self-Attention 機制，讓每個碎片都能「看到」其他所有碎片。它沒有預設任何空間結構的假設，所有關係都要從資料中學習。</p>
+                </div>
+
+                <div class="key-concept">
+                    <h5>2️⃣ 從「小資料集」到「大規模預訓練」</h5>
+                    <p><strong>傳統 CNN</strong>：在 ImageNet（130 萬張圖片）上就能表現優異，因為它的歸納偏置（局部性、平移不變性）正好符合自然圖像的特性。</p>
+                    <p><strong>ViT</strong>：在 ImageNet 上表現「差強人意」，比 ResNet 低幾個百分點。但當訓練資料擴大到 1400 萬張（ImageNet-21k）或 3 億張（JFT-300M）時，ViT 開始超越所有 CNN。這證明了：<strong>「大規模訓練可以彌補歸納偏置的缺失」</strong>。</p>
+                    <p><strong>💡 類比</strong>：CNN 像是一個有「天賦」的學生（天生理解空間結構），在少量練習下就能考好。ViT 像是一個「普通」學生，但透過海量練習（大規模資料），最終也能超越有天賦的學生。</p>
+                </div>
+            </div>
+
+            <!-- 2. 論文摘要 -->
+            <h2>📄 論文摘要 (Abstract)</h2>
+            <div class="paper-section">
+                <div class="original-quote">
+                    <strong>原文</strong>
+                    <p>
+                        While the Transformer architecture has become the de-facto standard for natural language processing tasks, its applications to computer vision remain limited.
+                        In vision, attention is either applied in conjunction with convolutional networks, or used to replace certain components of convolutional networks while keeping their overall structure in place.
+                    </p>
+                    <p>
+                        We show that this reliance on CNNs is not necessary and a pure transformer applied directly to sequences of image patches can perform very well on image classification tasks.
+                        When pre-trained on large amounts of data and transferred to multiple mid-sized or small image recognition benchmarks (ImageNet, CIFAR-100, VTAB, etc.), Vision Transformer (ViT) attains excellent results compared to state-of-the-art convolutional networks while requiring substantially fewer computational resources to train.
+                    </p>
+                </div>
+                
+                <div class="translation">
+                    <h4>📝 重點解讀</h4>
+                    <p>
+                        雖然 Transformer 在 NLP 領域已經成為標準架構，但在視覺領域的應用仍然有限。
+                        過去的研究要麼把注意力機制「嫁接」到 CNN 上，要麼只替換 CNN 的某些組件，但整體架構還是 CNN。
+                    </p>
+                    <p>
+                        ViT 證明了：<strong>完全不需要 CNN</strong>。直接把純 Transformer 應用到圖片碎片序列上，就能在圖像分類任務上表現優異。
+                        當在大規模資料上預訓練後，ViT 在多個基準測試上都能達到或超越 SOTA CNN，而且訓練所需的計算資源更少。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 3. 核心動機 -->
+            <h2>🎯 核心動機：為什麼視覺領域還在使用 CNN？</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>
+                        在 NLP 領域，Transformer 已經徹底改變了遊戲規則：
+                    </p>
+                    <ul>
+                        <li><strong>2017 年</strong>：Transformer 架構問世，成為 BERT、GPT 的基礎</li>
+                        <li><strong>2020 年</strong>：GPT-3 達到 175B 參數，展現驚人的通用能力</li>
+                        <li><strong>擴展性</strong>：模型和資料集持續增長，性能沒有飽和跡象</li>
+                    </ul>
+                    
+                    <p>
+                        但在計算機視覺領域，情況完全不同：
+                    </p>
+                    <ul>
+                        <li><strong>CNN 仍然主導</strong>：ResNet、EfficientNet 等 CNN 架構仍然是 SOTA</li>
+                        <li><strong>混合架構的嘗試</strong>：有人嘗試把 Self-Attention 加到 CNN 中，或部分替換卷積層，但效果有限</li>
+                        <li><strong>擴展困難</strong>：這些混合架構因為使用特殊的注意力模式，難以在現代硬體加速器上有效擴展</li>
+                    </ul>
+
+                    <p><strong>ViT 的野心：</strong> 能否把 Transformer 在 NLP 上的成功，直接複製到視覺領域？</p>
+                </div>
+            </div>
+
+            <!-- 4. 核心方法：圖片變 Tokens -->
+            <h2>💡 核心方法：圖片就是 16x16 個詞彙</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>🔍 關鍵洞察</h4>
+                    <p>
+                        ViT 的核心想法極其簡單：<strong>把圖片當成文字來處理</strong>。
+                    </p>
+                    
+                    <div class="key-concept">
+                        <h5>📝 文字處理（NLP）</h5>
+                        <p>
+                            一段文字 → 切分成詞彙 (tokens) → 每個詞彙轉成向量 (embedding) → 送入 Transformer
+                        </p>
+                        <p><strong>範例</strong>：「我愛 AI」→ ["我", "愛", "AI"] → [向量₁, 向量₂, 向量₃] → Transformer</p>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>🖼️ 圖片處理（ViT）</h5>
+                        <p>
+                            一張圖片 → 切分成 16x16 的碎片 (patches) → 每個碎片轉成向量 (embedding) → 送入 Transformer
+                        </p>
+                        <p><strong>範例</strong>：224×224 的圖片 → 14×14 = 196 個碎片 → [向量₁, 向量₂, ..., 向量₁₉₆] → Transformer</p>
+                    </div>
+
+                    <p>
+                        <strong>這就是論文標題的含義：「An Image is Worth 16x16 Words」</strong>。
+                        一張圖片「值」196 個詞彙（假設是 16×16 的碎片大小）。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 5. 關鍵發現：大規模訓練的重要性 -->
+            <h2>🔬 關鍵發現：小資料集 vs 大資料集</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>❌ 小資料集的失敗</h4>
+                    <p>
+                        當 ViT 在中等規模資料集（如 ImageNet，130 萬張圖片）上訓練時，結果「令人失望」：
+                    </p>
+                    <ul>
+                        <li>準確率比同等大小的 ResNet <strong>低幾個百分點</strong></li>
+                        <li>需要更強的正則化才能避免過擬合</li>
+                    </ul>
+                    
+                    <p>
+                        <strong>為什麼？</strong> Transformer 缺乏 CNN 的歸納偏置：
+                    </p>
+                    <ul>
+                        <li><strong>平移等變性 (Translation Equivariance)</strong>：CNN 天生知道「物體移動位置，特徵也跟著移動」</li>
+                        <li><strong>局部性 (Locality)</strong>：CNN 假設「相近的像素更相關」</li>
+                        <li><strong>二維鄰域結構</strong>：CNN 的卷積核直接利用了圖片的空間結構</li>
+                    </ul>
+                    
+                    <p>
+                        ViT 沒有這些「先驗知識」，所以需要從資料中學習所有關係。當資料不足時，它無法學好。
+                    </p>
+                </div>
+
+                <div class="key-concept" style="background: linear-gradient(135deg, #10b98120 0%, #3b82f620 100%); border-left: 5px solid var(--mag-secondary);">
+                    <h5>✅ 大資料集的成功</h5>
+                    <p>
+                        但當訓練資料擴大到 <strong>1400 萬張（ImageNet-21k）或 3 億張（JFT-300M）</strong> 時，情況完全逆轉：
+                    </p>
+                    <ul>
+                        <li><strong>ImageNet</strong>：88.55% 準確率（超越 ResNet）</li>
+                        <li><strong>ImageNet-ReaL</strong>：90.72% 準確率</li>
+                        <li><strong>CIFAR-100</strong>：94.55% 準確率</li>
+                        <li><strong>VTAB (19 個任務)</strong>：77.63% 平均準確率</li>
+                    </ul>
+                    
+                    <p>
+                        <strong>論文的核心結論：</strong>
+                    </p>
+                    <div class="quote-block">
+                        「Large scale training trumps inductive bias.」<br>
+                        <span style="font-size: 0.9em; opacity: 0.8;">大規模訓練勝過歸納偏置。</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. 計算效率優勢 -->
+            <h2>⚡ 計算效率：更少的資源，更好的結果</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>
+                        ViT 不僅在準確率上超越 CNN，在計算效率上也更優：
+                    </p>
+                    <ul>
+                        <li><strong>ViT-L/16 (JFT-300M)</strong>：0.68k TPUv3-core-days</li>
+                        <li><strong>ResNet-152x4 (BiT-L)</strong>：9.9k TPUv3-core-days</li>
+                    </ul>
+                    <p>
+                        ViT 的訓練成本只有 ResNet 的 <strong>約 7%</strong>，但性能卻更好。
+                    </p>
+                    <p>
+                        <strong>為什麼？</strong> Transformer 的並行性更好，而且不需要複雜的卷積運算。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 7. 歷史意義 -->
+            <h2>🌐 總結：ViT 的歷史地位</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <p>
+                        ViT 的發表標誌著計算機視覺領域的「範式轉移」：
+                    </p>
+                    <ul>
+                        <li><strong>打破 CNN 的壟斷</strong>：證明純 Transformer 也能在視覺任務上表現優異</li>
+                        <li><strong>確立大規模預訓練的地位</strong>：證明了「資料規模 > 架構設計」的重要性</li>
+                        <li><strong>開啟後續研究</strong>：DeiT、Swin Transformer、CLIP 等後續工作都建立在 ViT 的基礎上</li>
+                        <li><strong>統一架構的夢想</strong>：為「用同一套架構處理文字、圖片、語音」的願景奠定基礎</li>
+                    </ul>
+                    
+                    <div class="quote-block">
+                        「ViT 證明了 Transformer 不僅是 NLP 的專利，也是視覺 AI 的未來。」
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="chapter-navigation">
+                <a href="index.html" class="nav-link">← 返回目錄</a>
+                <a href="02-patch-embedding.html" class="nav-link">下一章：Patch Embedding →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
