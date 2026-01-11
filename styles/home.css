@@ -656,3 +656,42 @@
     font-size: 1.5rem;
   }
 }
+
+/* --- Paper Metadata (Author Info) Module --- */
+.paper-metadata {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.paper-metadata-item {
+  margin-bottom: 8px;
+}
+
+.paper-metadata-label {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.paper-metadata-value {
+  color: var(--text-secondary);
+}
+
+.paper-importance {
+  margin-top: 8px;
+}
+
+.paper-importance-label {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.paper-importance-description {
+  font-size: 0.8rem;
+  display: block;
+  margin-top: 4px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}

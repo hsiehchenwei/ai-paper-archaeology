@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>引言與摘要 - Gemini 論文深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section" style="background-image: url('images/generated/hero_01_introduction.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>多模態智能的覺醒</h1>
+                <p class="hero-subtitle">首個在 MMLU 達到人類專家水準的模型</p>
+                <div class="hero-meta">Gemini 論文深度解析 · 第 1 章</div>
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Gemini 深度解析</a>
+            <span>/</span>
+            <span class="current">第 1 章：引言與摘要</span>
+        </nav>
+
+        <div class="story-container">
+            <!-- Drop Cap 開場 -->
+            <p class="drop-cap">
+                2023 年 12 月，Google DeepMind 發布了一個震撼性的公告：他們訓練出了一個名為 Gemini 的多模態模型家族，這個模型不僅能夠理解文字，還能同時處理圖像、音訊和影片。更令人驚艷的是，Gemini Ultra 成為了首個在 MMLU（大規模多任務語言理解）基準測試中達到人類專家水準的模型，得分超過 90%。這不僅是一個技術突破，更是 AI 發展史上的重要里程碑。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 論文摘要 -->
+            <div class="original-quote">
+                <div class="icon">📄</div>
+                <div class="content">
+                    <div class="en">
+                        <strong>論文原文（Abstract）</strong><br><br>
+                        This report introduces a new family of multimodal models, Gemini, that exhibit remarkable capabilities across image, audio, video, and text understanding. The Gemini family consists of Ultra, Pro, and Nano sizes, suitable for applications ranging from complex reasoning tasks to on-device memory-constrained use-cases. Evaluation on a broad range of benchmarks shows that our most-capable Gemini Ultra model advances the state of the art in 30 of 32 of these benchmarks --- notably being the first model to achieve human-expert performance on the well-studied exam benchmark MMLU, and improving the state of the art in every one of the 20 multimodal benchmarks we examined.
+                    </div>
+                    <div class="zh">
+                        <strong>中文翻譯</strong><br><br>
+                        本報告介紹了一個新的多模態模型家族 Gemini，在圖像、音訊、影片和文字理解方面展現出卓越的能力。Gemini 家族包含 Ultra、Pro 和 Nano 三種尺寸，適用於從複雜推理任務到設備端記憶體受限用例的各種應用。在廣泛的基準測試評估中，我們最強大的 Gemini Ultra 模型在 32 個基準中的 30 個取得了最先進的成果——特別是在備受研究的考試基準 MMLU 上首次達到人類專家水準，並在我們檢驗的 20 個多模態基準中的每一個都改進了最先進的成果。
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI 生成概念圖 -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept_multimodal_fusion_01.png" alt="多模態融合概念圖">
+                <div class="caption">
+                    💡 <strong>AI 圖解：</strong>多模態智能的融合——視覺、聽覺與文字交匯成統一智能
+                </div>
+            </div>
+
+            <h2>Gemini 家族的三個成員</h2>
+
+            <p>
+                就像一個完整的工具箱需要不同尺寸的工具一樣，Gemini 家族也提供了三種不同規模的模型，以滿足不同的應用需求：
+            </p>
+
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>🚀 Gemini Ultra</h4>
+                    <p>最強大的模型，專為高度複雜的任務設計。在 30 個基準測試中達到 SOTA（state-of-the-art），是首個在 MMLU 上達到人類專家水準的模型。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>⚡ Gemini Pro</h4>
+                    <p>性能與成本平衡的模型，在廣泛的任務中提供卓越表現。具有強大的推理能力和廣泛的多模態能力。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>📱 Gemini Nano</h4>
+                    <p>最輕量的模型，專為設備端部署設計。提供 1.8B 和 3.25B 兩種參數版本，在設備端任務中表現出色。</p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 核心突破 -->
+            <h2>歷史性的突破：MMLU 90%+</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Our most capable model, Gemini Ultra, achieves new state-of-the-art results in 30 of 32 benchmarks we report on, including 10 of 12 popular text and reasoning benchmarks, 9 of 9 image understanding benchmarks, 6 of 6 video understanding benchmarks, and 5 of 5 speech recognition and speech translation benchmarks. Gemini Ultra is the first model to achieve human-expert performance on MMLU –- a prominent benchmark testing knowledge and reasoning via a suite of exams –- with a score above 90\%.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        我們最強大的模型 Gemini Ultra 在我們報告的 32 個基準中的 30 個取得了新的最先進成果，包括 12 個流行的文字和推理基準中的 10 個、9 個圖像理解基準中的全部 9 個、6 個影片理解基準中的全部 6 個，以及 5 個語音識別和語音翻譯基準中的全部 5 個。Gemini Ultra 是首個在 MMLU（一個通過一系列考試測試知識和推理的著名基準）上達到人類專家水準的模型，得分超過 90%。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 為什麼 MMLU 90%+ 如此重要？</h4>
+                <p>
+                    MMLU（Massive Multitask Language Understanding）是一個綜合性的基準測試，涵蓋了 57 個不同學科領域的考試題目，從數學、物理到歷史、法律。達到 90% 以上的分數意味著模型在這些領域的表現已經接近或超越人類專家。這不僅證明了模型的理解能力，更標誌著 AI 在知識推理方面的新高度。
+                </p>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 多模態推理範例 -->
+            <h2>令人驚艷的多模態推理能力</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Consider the educational setting depicted in Figure~\ref{fig:homeworkexample} as an example. A teacher has drawn a physics problem of a skier going down a slope, and a student has worked through a solution to it. Using Gemini models' multimodal reasoning capabilities, the model is able to understand the messy handwriting, correctly understand the problem formulation, convert both the problem and solution to mathematical typesetting, identify the specific step of reasoning where the student went wrong in solving the problem, and then give a worked through correct solution to the problem.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        以圖中描繪的教育場景為例。老師畫了一個滑雪者從斜坡滑下的物理問題，學生已經完成了解答。利用 Gemini 模型的多模態推理能力，模型能夠理解潦草的手寫字跡，正確理解問題表述，將問題和解答都轉換為數學排版，識別出學生在解題過程中出錯的具體推理步驟，然後給出完整的正確解答。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 原始圖片展示 -->
+            <div class="figure figure-original">
+                <img src="images/original/homework_physics_problem.jpg" alt="物理作業範例">
+                <div class="caption">
+                    <strong>Figure 1:</strong> 驗證學生物理問題解答（論文原圖）
+                </div>
+                <div class="explanation">
+                    <h4>🖼️ 原文圖表解析</h4>
+                    <p>
+                        這張圖展示了 Gemini 模型令人驚艷的多模態理解能力。模型不僅能夠：
+                    </p>
+                    <ul>
+                        <li>識別並理解手寫的物理問題和解答</li>
+                        <li>將手寫內容轉換為標準的數學公式（LaTeX）</li>
+                        <li>找出學生在解題過程中的錯誤步驟</li>
+                        <li>提供完整的正確解答</li>
+                    </ul>
+                    <p>
+                        這展現了 Gemini 在跨模態理解方面的強大能力，為教育應用開闢了新的可能性。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 雙重類比 -->
+            <div class="analogy-section">
+                <div class="analogy-card life">
+                    <h4>🏠 生活類比</h4>
+                    <p>
+                        就像一個精通多國語言、能讀懂手寫字、還能理解圖表的全能家教老師。當學生在作業本上寫下物理問題的解答時，這位「AI 老師」不僅能看懂潦草的字跡，還能理解問題的物理原理，找出計算錯誤，並提供清晰的解答步驟。
+                    </p>
+                </div>
+                <div class="analogy-card engineering">
+                    <h4>⚙️ 工程類比</h4>
+                    <p>
+                        在系統架構上，Gemini 類似於一個統一的 API 閘道器，能夠處理多種不同格式的輸入（文字、圖像、音訊、影片），並將它們轉換為統一的內部表示。這就像一個多語言的翻譯中樞，能夠理解不同「語言」（模態）的資訊，並進行跨模態的推理和生成。
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- AlphaCode 2 的突破 -->
+            <h2>從語言模型到通用智能體</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        The reasoning capabilities of large language models show promise toward building generalist agents that can tackle more complex multi-step problems. The AlphaCode team built AlphaCode 2~\citep{gdm2023alphacode2}, a new Gemini-model-powered agent, that combines Gemini models' reasoning capabilities with search and tool-use to excel at solving competitive programming problems. AlphaCode 2 ranks within the top 15\% of entrants on the Codeforces competitive programming platform, a large improvement over its state-of-the-art predecessor in the top 50\%.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        大型語言模型的推理能力顯示出構建能夠處理更複雜多步驟問題的通用智能體的潛力。AlphaCode 團隊構建了 AlphaCode 2，這是一個由 Gemini 模型驅動的新智能體，結合了 Gemini 模型的推理能力與搜尋和工具使用，在解決競賽程式設計問題方面表現卓越。AlphaCode 2 在 Codeforces 競賽程式設計平台上排名前 15%，相比於之前排名前 50% 的最先進模型有了大幅提升。
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quote Block 金句 -->
+            <div class="quote-block">
+                「首個在 MMLU 達到人類專家水準的模型，標誌著 AI 在知識推理方面的新高度」
+            </div>
+
+            <!-- 本章重點回顧 -->
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>Gemini 家族</strong>：包含 Ultra、Pro、Nano 三種尺寸，滿足不同應用需求</li>
+                    <li><strong>歷史性突破</strong>：Gemini Ultra 在 MMLU 上達到 90%+，首個達到人類專家水準的模型</li>
+                    <li><strong>多模態能力</strong>：能夠同時處理文字、圖像、音訊和影片，進行跨模態推理</li>
+                    <li><strong>實際應用</strong>：從教育輔助（批改作業）到競賽程式設計（AlphaCode 2），展現廣泛應用潛力</li>
+                    <li><strong>技術基礎</strong>：建立在 Transformer 架構之上，結合大規模訓練和優化技術</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="chapter-nav">
+            <a href="#" class="prev disabled">← 上一章</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="02-architecture.html" class="next">下一章：模型架構 →</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>後訓練模型 - Gemini 論文深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="hero-section" style="background-image: url('images/generated/hero_06_post_training.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>從預訓練到對齊</h1>
+                <p class="hero-subtitle">RLHF 讓人類偏好成為模型的指南針</p>
+                <div class="hero-meta">Gemini 論文深度解析 · 第 6 章</div>
+            </div>
+        </div>
+
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Gemini 深度解析</a>
+            <span>/</span>
+            <span class="current">第 6 章：後訓練模型</span>
+        </nav>
+
+        <div class="story-container">
+            <p class="drop-cap">
+                預訓練只是第一步。要讓模型真正有用、安全、符合人類期望，還需要經過精細的後訓練過程。Gemini 的後訓練包括監督微調（SFT）、獎勵模型訓練（RM）和強化學習人類反饋（RLHF），這是一個迭代的過程，不斷提升模型的品質和對齊度。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>後訓練的目的</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        After large-scale pre-training, we apply post-training, where one trains on top of a pre-trained model in order to extend the model's proficiency and to enable a wide variety of capabilities. Namely, we seek to improve overall quality, enhance target capabilities such as coding and multilingual, and ensure alignment and safety criteria are met.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        在大規模預訓練之後，我們應用後訓練，在預訓練模型之上進行訓練，以擴展模型的熟練程度並啟用各種能力。也就是說，我們尋求改善整體品質，增強目標能力（如程式設計和多語言），並確保滿足對齊和安全標準。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 為什麼需要後訓練？</h4>
+                <p>
+                    預訓練模型雖然強大，但還不夠：
+                </p>
+                <ul>
+                    <li><strong>對齊問題</strong>：模型可能產生不符合人類期望的輸出</li>
+                    <li><strong>安全性</strong>：需要確保模型不會產生有害內容</li>
+                    <li><strong>特定能力</strong>：需要針對特定任務（如程式設計、多語言）進行優化</li>
+                    <li><strong>對話能力</strong>：需要訓練模型進行多輪對話</li>
+                </ul>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>兩種模型變體：Apps 和 API</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Due to the varied requirements of our downstream applications, we have produced two post-trained Gemini model family variants. Chat-focused variants, referred to as Gemini Apps models, are optimized for Gemini and Gemini Advanced. Developer-focused variants, referred to as Gemini API models, are optimized for a range of products and are accessible through Google AI Studio and Cloud Vertex AI.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        由於下游應用的不同需求，我們生產了兩種後訓練的 Gemini 模型家族變體。專注於對話的變體，稱為 Gemini Apps 模型，針對 Gemini 和 Gemini Advanced 進行優化。專注於開發者的變體，稱為 Gemini API 模型，針對一系列產品進行優化，可通過 Google AI Studio 和 Cloud Vertex AI 訪問。
+                    </div>
+                </div>
+            </div>
+
+            <div class="analogy-section">
+                <div class="analogy-card life">
+                    <h4>🏠 生活類比</h4>
+                    <p>
+                        就像同一款汽車有不同的配置版本：家用版注重舒適性和易用性，而專業版注重性能和可定制性。Gemini Apps 就像家用版，專注於提供流暢的對話體驗；Gemini API 就像專業版，為開發者提供更多控制和定制選項。
+                    </p>
+                </div>
+                <div class="analogy-card engineering">
+                    <h4>⚙️ 工程類比</h4>
+                    <p>
+                        這類似於軟體產品線：
+                        <ul>
+                            <li><strong>Gemini Apps</strong>：類似於 SaaS 產品，開箱即用，專注於終端用戶體驗</li>
+                            <li><strong>Gemini API</strong>：類似於 SDK 或 API 服務，為開發者提供靈活性和控制權</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>後訓練的四個階段</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Post-training Gemini models involves several stages: (1) Prompt Data Collection, (2) SFT on Demonstration Data, (3) RM Training on Feedback Data, (4) RLHF. Careful data curation is critical for all stages.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        後訓練 Gemini 模型涉及幾個階段：(1) 提示資料收集，(2) 在示範資料上進行 SFT，(3) 在反饋資料上訓練 RM，(4) RLHF。仔細的資料策劃對所有階段都至關重要。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 原始後訓練流程圖 -->
+            <div class="figure figure-original">
+                <img src="images/original/gemini_tech-report_02_03.pdf" alt="後訓練流程圖">
+                <div class="caption">
+                    <strong>Figure 1:</strong> 後訓練流程概覽（論文原圖）
+                </div>
+            </div>
+
+            <!-- AI 生成概念圖 -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept_rlhf_06.png" alt="RLHF 訓練循環">
+                <div class="caption">
+                    💡 <strong>AI 圖解：</strong>強化學習人類反饋（RLHF）的迭代改進循環
+                </div>
+            </div>
+
+            <!-- RLHF 動畫 -->
+            <div class="video-container">
+                <video autoplay loop muted playsinline>
+                    <source src="images/videos/rlhf_training_loop.mp4" type="video/mp4">
+                </video>
+                <div class="caption">🎬 RLHF 訓練循環動畫：展示模型如何從人類反饋中學習</div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h3>階段 1：提示資料收集</h3>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        A prompt is a user's input to the model. We curate datasets of target prompts. The datasets serve as the basis for our demonstration and feedback data collections, and they are used directly during reinforcement learning. It is important to cover a diverse set of crucial use cases and in both single-turn and multi-turn formats.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        提示是用戶對模型的輸入。我們策劃目標提示的資料集。這些資料集作為我們示範和反饋資料收集的基礎，並在強化學習期間直接使用。重要的是要涵蓋多樣化的關鍵用例，包括單輪和多輪格式。
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h3>階段 2：監督微調（SFT）</h3>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        SFT trains the model to output a desired target response given a prompt. Our Demonstration Data target responses can be directly written by a human expert, or generated by a model and in some cases revised or reviewed by a human.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        SFT 訓練模型在給定提示時輸出期望的目標回應。我們的示範資料目標回應可以直接由人類專家編寫，或由模型生成，在某些情況下由人類修訂或審查。
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h3>階段 3：獎勵模型訓練（RM）</h3>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        We further collect Feedback Data, for which human raters provide feedback such as relative preferences over candidate responses and feedback regarding individual responses to a given prompt. We use this data to train RMs to output rewards that align with human preferences as closely as possible.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        我們進一步收集反饋資料，人類評分員提供反饋，例如對候選回應的相對偏好以及對給定提示的個別回應的反饋。我們使用這些資料訓練 RM，以輸出盡可能與人類偏好對齊的獎勵。
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h3>階段 4：強化學習人類反饋（RLHF）</h3>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Applying reinforcement learning from human feedback (RLHF) to our models provides further gains over SFT alone. Our approach creates an iterative process in which RL continually pushes the boundaries of the RM, while the RM is continuously improved through evaluation and data collection, leading to progressive improvements in both.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        將強化學習人類反饋（RLHF）應用到我們的模型中，相比僅使用 SFT 提供了進一步的收益。我們的方法創建了一個迭代過程，其中 RL 不斷推動 RM 的邊界，而 RM 通過評估和資料收集不斷改進，導致兩者都逐步改進。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 RLHF 的迭代改進</h4>
+                <p>
+                    RLHF 不是一次性的過程，而是一個持續的迭代循環：
+                </p>
+                <ol>
+                    <li>模型生成回應</li>
+                    <li>人類評分員提供反饋</li>
+                    <li>獎勵模型學習人類偏好</li>
+                    <li>強化學習優化模型策略</li>
+                    <li>回到步驟 1，持續改進</li>
+                </ol>
+                <p>
+                    這個循環不斷提升模型的品質和對齊度。
+                </p>
+            </div>
+
+            <div class="quote-block">
+                「RLHF 創建了一個迭代過程，不斷推動模型和獎勵模型的邊界」
+            </div>
+
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>後訓練目的</strong>：提升品質、增強特定能力、確保對齊和安全</li>
+                    <li><strong>兩種變體</strong>：Gemini Apps（對話優化）和 Gemini API（開發者優化）</li>
+                    <li><strong>四個階段</strong>：提示收集 → SFT → RM 訓練 → RLHF</li>
+                    <li><strong>資料策劃</strong>：所有階段都需要仔細的資料策劃</li>
+                    <li><strong>迭代改進</strong>：RLHF 是一個持續的迭代過程，不斷提升模型品質</li>
+                    <li><strong>對齊目標</strong>：確保模型輸出符合人類偏好、安全且有用</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="chapter-nav">
+            <a href="05-evaluation.html" class="prev">← 上一章：評估體系</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="07-responsible-deployment.html" class="next">下一章：負責任部署 →</a>
+        </div>
+    </div>
+</body>
+</html>

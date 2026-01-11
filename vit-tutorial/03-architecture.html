@@ -250,7 +250,210 @@
                 </div>
             </div>
 
-            <!-- 5. Fine-tuning 與高解析度 -->
+            <!-- 5. 訓練目標與 Loss Function -->
+            <h2>🎓 訓練目標與 Loss Function</h2>
+            <div class="paper-section">
+                <div class="explanation">
+                    <h4>ViT 的訓練目標：監督式分類</h4>
+                    <p>
+                        這是理解 ViT 最關鍵的部分：<strong>ViT 的訓練目標與 GPT 完全不同</strong>。
+                    </p>
+                    
+                    <div class="key-concept" style="background: linear-gradient(135deg, #10b98120 0%, #3b82f620 100%); border-left: 5px solid var(--mag-secondary);">
+                        <h5>🎯 ViT 的訓練流程</h5>
+                        
+                        <div class="figure figure-original" style="margin: 20px 0;">
+                            <img src="images/generated/vit_training_flow_diagram.png" alt="ViT 訓練流程圖解">
+                            <div class="caption">
+                                <strong>圖解：</strong> Vision Transformer 的完整訓練流程，從輸入圖片到輸出分類結果的每個步驟。
+                            </div>
+                        </div>
+                        
+                        <div class="figure figure-original" style="margin: 20px 0;">
+                            <img src="images/original/model_scheme.png" alt="ViT 模型架構圖（論文 Figure 1）">
+                            <div class="caption">
+                                <strong>論文 Figure 1:</strong> Vision Transformer 的完整架構。圖片從左到右展示：1) 圖片切分成 patches，2) Linear Projection 和位置編碼，3) Transformer Encoder，4) MLP Head 輸出分類結果。
+                            </div>
+                        </div>
+                        
+                        <p>
+                            <strong>輸入</strong>：圖片 patches（196 個） + CLS token（1 個） = 197 個 tokens
+                        </p>
+                        <p>
+                            <strong>處理</strong>：經過 L 層 Transformer Encoder，每個 token 都被更新
+                        </p>
+                        <p>
+                            <strong>輸出</strong>：CLS token 的最終狀態（Eq. 4：<code>y = LN(z<sub>L</sub><sup>0</sup>)</code>）
+                        </p>
+                        <p>
+                            <strong>分類</strong>：CLS token 的輸出經過 Classification Head，得到 K 個類別的機率分布
+                        </p>
+                        <p>
+                            <strong>目標</strong>：預測圖片屬於哪個類別（例如：ImageNet 有 1000 個類別）
+                        </p>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>🔍 CLS Token 的關鍵角色</h5>
+                        <p>
+                            CLS token 在 ViT 中扮演「資訊聚合器」的角色，類似 BERT 的 <code>[CLS]</code> token。
+                            論文 Section 3.1 明確說明：
+                        </p>
+                        
+                        <div class="figure figure-original" style="margin: 20px 0;">
+                            <img src="images/generated/vit_cls_token_aggregation.png" alt="CLS Token 資訊聚合機制示意圖">
+                            <div class="caption">
+                                <strong>圖解：</strong> CLS Token 如何透過 Self-Attention 機制聚合所有 patches 的資訊。每個 patch 的資訊都透過連接線流向 CLS token，最終 CLS token 包含整張圖片的全局資訊。
+                            </div>
+                        </div>
+                        
+                        <div class="original-quote" style="margin: 20px 0;">
+                            <strong>論文原文（Section 3.1）</strong>
+                            <p>
+                                "Similar to BERT's <code>[class]</code> token, we prepend a learnable embedding to the sequence of embedded patches (<code>z<sub>0</sub><sup>0</sup> = x<sub>class</sub></code>), whose state at the output of the Transformer encoder (<code>z<sub>L</sub><sup>0</sup></code>) serves as the image representation <code>y</code> (Eq. 4)."
+                            </p>
+                        </div>
+                        
+                        <div class="translation" style="margin-bottom: 20px;">
+                            <strong>中文翻譯</strong>
+                            <p>
+                                類似 BERT 的 <code>[class]</code> token，我們在嵌入的 patches 序列前加上一個可學習的嵌入向量（<code>z<sub>0</sub><sup>0</sup> = x<sub>class</sub></code>），其在 Transformer encoder 輸出端的狀態（<code>z<sub>L</sub><sup>0</sup></code>）作為圖片的表徵 <code>y</code>（公式 4）。
+                            </p>
+                        </div>
+                        
+                        <ul>
+                            <li><strong>初始狀態</strong>：CLS token 是一個可學習的向量，隨機初始化</li>
+                            <li><strong>Self-Attention 機制</strong>：透過多層 Self-Attention，CLS token 可以「看到」所有 patches</li>
+                            <li><strong>資訊聚合</strong>：每一層的 Attention 機制讓 CLS token 逐漸整合所有 patches 的資訊</li>
+                            <li><strong>最終表徵</strong>：經過 L 層後，CLS token 包含了整張圖片的全局資訊</li>
+                        </ul>
+                        <p>
+                            <strong>類比</strong>：CLS token 就像是一個「會議主持人」，在每一層的 Attention 中，它會「詢問」每個 patch：「你看到了什麼？」，然後整合所有資訊，最終做出「這張圖片是什麼」的判斷。
+                        </p>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>📐 Loss Function：Cross-Entropy</h5>
+                        <p>
+                            ViT 使用標準的 <strong>Cross-Entropy Loss（交叉熵損失）</strong>進行監督式分類訓練：
+                        </p>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; font-family: 'JetBrains Mono', monospace; text-align: center;">
+                            <strong>\(\mathcal{L}_{CE} = -\sum_{i=1}^{K} y_i \log(p_i)\)</strong>
+                        </div>
+                        <p>
+                            其中：
+                        </p>
+                        <ul>
+                            <li><strong>K</strong>：類別數量（例如 ImageNet 有 1000 個類別）</li>
+                            <li><strong>y<sub>i</sub></strong>：真實標籤（one-hot 編碼，只有正確類別是 1，其他是 0）</li>
+                            <li><strong>p<sub>i</sub></strong>：模型預測的類別 i 的機率（經過 Softmax）</li>
+                        </ul>
+                        <p>
+                            <strong>直觀理解</strong>：
+                        </p>
+                        <ul>
+                            <li>如果模型預測正確（p<sub>正確類別</sub> 接近 1），loss 接近 0</li>
+                            <li>如果模型預測錯誤（p<sub>正確類別</sub> 接近 0），loss 會很大</li>
+                            <li>訓練目標：<strong>最小化 loss</strong>，讓模型更準確地預測正確類別</li>
+                        </ul>
+                    </div>
+
+                    <div class="key-concept" style="background: linear-gradient(135deg, #3b82f620 0%, #8b5cf620 100%); border-left: 5px solid var(--mag-primary);">
+                        <h5>🔄 ViT vs GPT vs BERT：訓練方式對比</h5>
+                        <p>
+                            這三個模型雖然都使用 Transformer，但訓練目標完全不同：
+                        </p>
+                        
+                        <div class="figure figure-original" style="margin: 20px 0;">
+                            <img src="images/generated/vit_gpt_bert_comparison.png" alt="ViT vs GPT vs BERT 訓練方式對比圖">
+                            <div class="caption">
+                                <strong>圖解：</strong> 三種模型的訓練方式對比。GPT 是自回歸語言模型，BERT 是遮蔽語言模型，ViT 是監督式分類模型。雖然都使用 Transformer 架構，但訓練目標和輸出完全不同。
+                            </div>
+                        </div>
+                        
+                        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                            <thead>
+                                <tr style="background: var(--mag-bg-light);">
+                                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--mag-primary);">模型</th>
+                                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid var(--mag-primary);">訓練目標</th>
+                                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid var(--mag-primary);">輸出</th>
+                                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid var(--mag-primary);">Loss Function</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>GPT</strong></td>
+                                    <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">自回歸語言模型<br/>預測「下一個 token」</td>
+                                    <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">詞彙表的機率分布<br/>（例如 50,000 個詞彙）</td>
+                                    <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">Cross-Entropy<br/>（語言模型）</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>BERT</strong></td>
+                                    <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">遮蔽語言模型<br/>預測「被遮住的 token」</td>
+                                    <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">被遮住位置的詞彙機率分布</td>
+                                    <td style="padding: 12px; text-align: center; border-bottom: 1px solid #e5e7eb;">Cross-Entropy<br/>（遮蔽預測）</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px;"><strong>ViT</strong></td>
+                                    <td style="padding: 12px; text-align: center; color: var(--mag-secondary); font-weight: 600;">監督式分類<br/>預測「圖片類別」</td>
+                                    <td style="padding: 12px; text-align: center; color: var(--mag-secondary); font-weight: 600;">K 個類別的機率分布<br/>（例如 1000 個類別）</td>
+                                    <td style="padding: 12px; text-align: center; color: var(--mag-secondary); font-weight: 600;">Cross-Entropy<br/>（分類任務）</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p style="margin-top: 20px;">
+                            <strong>關鍵差異</strong>：
+                        </p>
+                        <ul>
+                            <li><strong>GPT</strong>：序列生成任務，每個位置都要預測下一個 token，是「自回歸」的</li>
+                            <li><strong>BERT</strong>：雙向理解任務，預測被遮住的 token，是「雙向」的</li>
+                            <li><strong>ViT</strong>：分類任務，只預測一個結果（圖片類別），是「單一輸出」的</li>
+                        </ul>
+                        <p>
+                            <strong>類比</strong>：
+                        </p>
+                        <ul>
+                            <li><strong>GPT</strong>：像是一個「寫作助手」，根據前面的文字，預測下一個字</li>
+                            <li><strong>BERT</strong>：像是一個「填空助手」，根據上下文，猜測被遮住的字</li>
+                            <li><strong>ViT</strong>：像是一個「圖片辨識助手」，看完整張圖片後，判斷「這是什麼」</li>
+                        </ul>
+                    </div>
+
+                    <div class="key-concept">
+                        <h5>🔄 預訓練-微調範式</h5>
+                        <p>
+                            ViT 遵循標準的「預訓練-微調」範式，類似 BERT：
+                        </p>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            <h6 style="margin-top: 0; color: var(--mag-primary);">階段 1：預訓練（Pre-training）</h6>
+                            <ul>
+                                <li><strong>資料集</strong>：大規模資料集（ImageNet-21k：1400 萬張，或 JFT-300M：3 億張）</li>
+                                <li><strong>任務</strong>：監督式分類（每張圖片都有標籤）</li>
+                                <li><strong>Classification Head</strong>：MLP（一層隱藏層）</li>
+                                <li><strong>目標</strong>：學習通用的視覺表徵</li>
+                            </ul>
+                        </div>
+
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            <h6 style="margin-top: 0; color: var(--mag-secondary);">階段 2：微調（Fine-tuning）</h6>
+                            <ul>
+                                <li><strong>資料集</strong>：下游任務資料集（例如 ImageNet：1000 類，或 CIFAR-100：100 類）</li>
+                                <li><strong>任務</strong>：同樣是監督式分類，但類別數可能不同</li>
+                                <li><strong>Classification Head</strong>：替換成零初始化的線性層（D×K，K 是下游任務的類別數）</li>
+                                <li><strong>目標</strong>：適應特定任務，同時保留預訓練的通用表徵</li>
+                            </ul>
+                        </div>
+
+                        <p>
+                            <strong>為什麼要預訓練？</strong> 在大規模資料上預訓練可以讓模型學習到通用的視覺特徵（邊緣、紋理、形狀、物體等），這些特徵對各種視覺任務都有用。然後在下游任務上微調，只需要學習任務特定的特徵即可。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Fine-tuning 與高解析度 -->
             <h2>🔍 Fine-tuning 與高解析度</h2>
             <div class="paper-section">
                 <div class="explanation">

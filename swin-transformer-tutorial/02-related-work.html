@@ -77,8 +77,14 @@
                         On the other hand, the evolution of network architectures in natural language processing (NLP) has taken a different path, where the prevalent architecture today is instead the Transformer. Designed for sequence modeling and transduction tasks, the Transformer is notable for its use of attention to model long-range dependencies in the data. Its tremendous success in the language domain has led researchers to investigate its adaptation to computer vision, where it has recently demonstrated promising results on certain tasks, specifically image classification and joint vision-language modeling.
                     </div>
                     <div class="zh">
-                        <strong>翻譯</strong><br><br>
-                        另一方面，自然語言處理（NLP）中網路架構的演進走了一條不同的道路，今天的主流架構是 Transformer。Transformer 專為序列建模和轉導任務而設計，以其使用注意力來建模數據中的長程依賴關係而著稱。它在語言領域的巨大成功促使研究人員研究其在電腦視覺中的適配，最近在特定任務上展現了有希望的結果，特別是圖像分類和聯合視覺-語言建模。
+                        <strong>📝 白話翻譯</strong><br><br>
+                        但 NLP 領域的發展路線完全不同。現在 NLP 的主流架構是 <strong>Transformer</strong>，而不是 CNN。
+                        <br><br>
+                        <strong>Transformer 的設計理念：</strong>它原本是為了處理「序列資料」（例如：一段文字、一個句子）而設計的。它的核心特色是使用「注意力機制」來捕捉資料中「距離很遠但相關」的資訊（長程依賴關係）。
+                        <br><br>
+                        <strong>💡 什麼是長程依賴關係？</strong>例如在句子「我昨天在咖啡廳遇到的那個朋友，他今天打電話給我」中，「朋友」和「他」雖然距離很遠，但指的是同一個人。Transformer 的注意力機制可以捕捉這種遠距離的關聯。
+                        <br><br>
+                        <strong>從 NLP 到視覺：</strong>Transformer 在語言領域的巨大成功（例如：BERT、GPT 都基於 Transformer），讓研究人員開始思考：能不能把 Transformer 也應用到視覺領域？最近的研究顯示，Transformer 在視覺任務上確實有潛力，特別是在「圖像分類」（判斷圖片是什麼）和「視覺-語言聯合建模」（同時理解圖片和文字，例如：看圖說故事）這兩個任務上。
                     </div>
                 </div>
             </div>
@@ -94,24 +100,46 @@
                         Most related to our work is the Vision Transformer (ViT) and its follow-ups. The pioneering work of ViT directly applies a Transformer architecture on non-overlapping medium-sized image patches for image classification. It achieves an impressive speed-accuracy trade-off on image classification compared to convolutional networks. While ViT requires large-scale training datasets (i.e., JFT-300M) to perform well, DeiT introduces several training strategies that allow ViT to also be effective using the smaller ImageNet-1K dataset. The results of ViT on image classification are encouraging, but its architecture is unsuitable for use as a general-purpose backbone network on dense vision tasks or when the input image resolution is high, due to its low-resolution feature maps and the quadratic increase in complexity with image size.
                     </div>
                     <div class="zh">
-                        <strong>翻譯</strong><br><br>
-                        與我們的工作最相關的是 Vision Transformer (ViT) 及其後續工作。ViT 的開創性工作直接將 Transformer 架構應用於非重疊的中等大小圖像 patch 進行圖像分類。與卷積網路相比，它在圖像分類上取得了令人印象深刻的速度-準確率權衡。雖然 ViT 需要大規模訓練數據集（即 JFT-300M）才能表現良好，但 DeiT 引入了幾種訓練策略，使 ViT 也能在使用較小的 ImageNet-1K 數據集時有效。ViT 在圖像分類上的結果令人鼓舞，但其架構不適合作為密集視覺任務或輸入圖像解析度較高時的通用骨幹網路，這是由於其低解析度特徵圖和複雜度隨圖像大小呈二次增長。
+                        <strong>📝 白話翻譯</strong><br><br>
+                        <strong>與 Swin Transformer 最相關的工作：ViT</strong>
+                        <br><br>
+                        <strong>ViT 的核心做法：</strong>ViT 是第一個「直接把 Transformer 用在圖片上」的開創性工作。它的做法很簡單：把圖片切成一個個不重疊的「中等大小碎片」（patches，例如 16×16 像素），然後把這些碎片當成「詞彙」一樣，送入 Transformer 進行圖像分類。
+                        <br><br>
+                        <strong>ViT 的優勢：</strong>與傳統的 CNN（卷積神經網路）相比，ViT 在「速度」和「準確率」之間取得了很好的平衡——既快又準。
+                        <br><br>
+                        <strong>ViT 的資料需求：</strong>
+                        <ul style="margin: 10px 0; padding-left: 25px;">
+                            <li><strong>原始 ViT</strong>：需要超大規模的資料集（JFT-300M，3 億張圖片）才能表現好</li>
+                            <li><strong>DeiT 的改進</strong>：透過更好的訓練策略，讓 ViT 也能在較小的資料集（ImageNet-1K，130 萬張圖片）上表現不錯</li>
+                        </ul>
+                        <br><br>
+                        <strong>ViT 的局限性（這就是 Swin Transformer 要解決的問題）：</strong>
+                        <br><br>
+                        ViT 在「圖像分類」任務上表現很好，但<strong>無法作為通用骨幹網路</strong>，特別是在以下兩種情況：
+                        <br><br>
+                        <strong>1️⃣ 密集視覺任務（Dense Vision Tasks）</strong>
+                        <ul style="margin: 10px 0; padding-left: 25px;">
+                            <li>例如：語義分割（需要對每個像素都進行預測）、目標檢測（需要找出圖片中所有物體的位置）</li>
+                            <li>問題：ViT 只產生<strong>低解析度的特徵圖</strong>（例如：14×14），無法提供高解析度的預測</li>
+                        </ul>
+                        <br><br>
+                        <strong>2️⃣ 高解析度圖片</strong>
+                        <ul style="margin: 10px 0; padding-left: 25px;">
+                            <li>問題：ViT 的計算複雜度<strong>隨圖片大小呈二次增長</strong>（O(n²)）</li>
+                            <li>例子：處理 1024×1024 的圖片時，計算量會暴增到幾乎無法處理的程度</li>
+                        </ul>
+                        <br><br>
+                        <strong>💡 總結：</strong>ViT 證明了 Transformer 可以用在視覺任務上，但它只適合「圖像分類」這種單一任務。Swin Transformer 的目標就是解決這些問題，讓 Transformer 成為真正的「通用視覺骨幹網路」。
                     </div>
                 </div>
             </div>
 
-            <!-- 雙重類比 -->
+            <!-- 生活類比 -->
             <div class="analogy-section">
                 <div class="analogy-card life">
                     <h4>🏠 生活類比</h4>
                     <p>
                         就像建築風格的演進：CNN 時代像是古典建築，每一層都有明確的結構和功能（卷積層、池化層）。Transformer 時代像是現代建築，更加靈活和開放（注意力機制）。ViT 是第一座「現代風格」的視覺建築，證明了可行性，但還不夠實用。Swin Transformer 則是真正實用的「現代建築」，既保持了現代風格的美感，又解決了實際使用的問題。
-                    </p>
-                </div>
-                <div class="analogy-card engineering">
-                    <h4>⚙️ 工程類比</h4>
-                    <p>
-                        在軟體架構上，這類似於從單體架構（CNN）到微服務架構（Transformer）的演進。ViT 就像是第一次嘗試微服務架構，證明了概念可行，但還有很多問題（單一解析度、高複雜度）。Swin Transformer 則是成熟的微服務架構，通過層次化設計和局部計算，既保持了微服務的靈活性，又解決了性能和複雜度的問題。
                     </p>
                 </div>
             </div>
@@ -127,8 +155,48 @@
                         Also inspired by the success of self-attention layers and Transformer architectures in the NLP field, some works employ self-attention layers to replace some or all of the spatial convolution layers in the popular ResNet. In these works, the self-attention is computed within a local window of each pixel to expedite optimization, and they achieve slightly better accuracy/FLOPs trade-offs than the counterpart ResNet architecture. However, their costly memory access causes their actual latency to be significantly larger than that of the convolutional networks. Instead of using sliding windows, we propose to <em>shift</em> windows between consecutive layers, which allows for a more efficient implementation in general hardware.
                     </div>
                     <div class="zh">
-                        <strong>翻譯</strong><br><br>
-                        同樣受到自注意力層和 Transformer 架構在 NLP 領域成功的啟發，一些工作使用自注意力層來替換流行 ResNet 中的部分或全部空間卷積層。在這些工作中，自注意力在每個像素的局部視窗內計算以加快優化，它們取得了比對應 ResNet 架構稍好的準確率/FLOPs 權衡。然而，它們昂貴的記憶體訪問導致其實際延遲明顯大於卷積網路。我們不是使用滑動視窗，而是提出在連續層之間<em>移位</em>視窗，這允許在通用硬體上實現更高效的實現。
+                        <strong>📝 白話翻譯</strong><br><br>
+                        <strong>早期的嘗試：把自注意力「嫁接」到 CNN 上</strong>
+                        <br><br>
+                        受到 Transformer 在 NLP 領域成功的啟發，一些研究嘗試用「自注意力層」來替換 ResNet 中的「卷積層」（部分或全部）。
+                        <br><br>
+                        <strong>💡 什麼是空間卷積層？</strong>就是 ResNet 中處理圖片空間資訊的卷積層，例如 3×3 的卷積核。
+                        <br><br>
+                        <strong>這些工作的做法：</strong>
+                        <ul style="margin: 10px 0; padding-left: 25px;">
+                            <li>在每個像素的<strong>局部視窗</strong>內計算自注意力（例如：每個像素只看周圍 7×7 的區域）</li>
+                            <li>這樣做是為了<strong>加快優化</strong>（如果看全局，計算量太大）</li>
+                        </ul>
+                        <br><br>
+                        <strong>這些工作的結果：</strong>
+                        <ul style="margin: 10px 0; padding-left: 25px;">
+                            <li><strong>準確率/FLOPs 權衡稍好</strong>：在相同的計算量（FLOPs）下，準確率比 ResNet 稍高一點</li>
+                            <li><strong>但實際延遲更大</strong>：雖然計算量差不多，但實際運行速度反而更慢</li>
+                        </ul>
+                        <br><br>
+                        <strong>為什麼會這樣？</strong>
+                        <br><br>
+                        問題出在<strong>記憶體訪問</strong>。這些方法使用「滑動視窗」機制，需要頻繁地讀寫記憶體，導致：
+                        <ul style="margin: 10px 0; padding-left: 25px;">
+                            <li>記憶體訪問模式不規則，無法充分利用硬體的並行能力</li>
+                            <li>記憶體帶寬成為瓶頸，即使計算量不大，實際速度也很慢</li>
+                        </ul>
+                        <br><br>
+                        <strong>Swin Transformer 的創新：移位視窗（Shifted Windows）</strong>
+                        <br><br>
+                        我們<strong>不使用滑動視窗</strong>，而是提出<strong>在連續層之間移位視窗</strong>：
+                        <ul style="margin: 10px 0; padding-left: 25px;">
+                            <li><strong>滑動視窗</strong>：每個像素都要計算一個新的視窗，記憶體訪問不規則</li>
+                            <li><strong>移位視窗</strong>：視窗位置在每一層之間「移位」，但每個視窗內的計算是規則的，記憶體訪問更高效</li>
+                        </ul>
+                        <br><br>
+                        <strong>💡 類比：</strong>
+                        <ul style="margin: 10px 0; padding-left: 25px;">
+                            <li><strong>滑動視窗</strong>：像是一個人拿著放大鏡，在圖片上慢慢滑動，每次都要重新對焦</li>
+                            <li><strong>移位視窗</strong>：像是把圖片分成固定的格子，每次看不同的格子，但每個格子內的觀察是規則的</li>
+                        </ul>
+                        <br><br>
+                        這種設計讓 Swin Transformer 在通用硬體（GPU、TPU）上能夠實現更高效的實作，既保持了自注意力的優勢，又避免了記憶體訪問的瓶頸。
                     </div>
                 </div>
             </div>

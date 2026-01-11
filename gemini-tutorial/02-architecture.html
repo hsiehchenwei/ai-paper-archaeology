@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模型架構 - Gemini 論文深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section" style="background-image: url('images/generated/hero_02_architecture.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>統一的架構，多模態的靈魂</h1>
+                <p class="hero-subtitle">從一開始就是多模態的 Transformer</p>
+                <div class="hero-meta">Gemini 論文深度解析 · 第 2 章</div>
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Gemini 深度解析</a>
+            <span>/</span>
+            <span class="current">第 2 章：模型架構</span>
+        </nav>
+
+        <div class="story-container">
+            <!-- Drop Cap 開場 -->
+            <p class="drop-cap">
+                與許多「先訓練文字模型，再後接視覺編碼器」的做法不同，Gemini 從設計之初就是一個真正的多模態模型。它使用統一的 Transformer 架構來處理文字、圖像、音訊和影片，就像一個精通多種語言的翻譯官，能夠自然地理解並生成不同模態的內容。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 架構核心概念 -->
+            <h2>核心設計理念：原生多模態</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Gemini models build on top of Transformer decoders that are enhanced with improvements in architecture and model optimization to enable stable training at scale and optimized inference on Google's Tensor Processing Units. They are trained to support 32k context length, employing efficient attention mechanisms (for e.g. multi-query attention).
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        Gemini 模型建立在 Transformer 解碼器之上，通過架構和模型優化的改進來實現大規模穩定訓練，並在 Google 的 Tensor Processing Units 上進行優化推理。它們被訓練以支持 32k 上下文長度，採用高效的注意力機制（例如多查詢注意力）。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 原始架構圖 -->
+            <div class="figure figure-original">
+                <img src="images/original/tech_fig_architecture.png" alt="Gemini 模型架構圖">
+                <div class="caption">
+                    <strong>Figure 1:</strong> Gemini 模型架構（論文原圖）
+                </div>
+                <div class="explanation">
+                    <h4>🖼️ 原文圖表解析</h4>
+                    <p>
+                        這張架構圖展示了 Gemini 的核心設計：
+                    </p>
+                    <ul>
+                        <li><strong>交錯輸入序列</strong>：文字、圖像、音訊和影片可以自然地交錯排列在輸入序列中（圖中用不同顏色的 token 表示）</li>
+                        <li><strong>統一編碼器</strong>：所有模態都通過同一個 Transformer 架構處理，實現真正的多模態理解</li>
+                        <li><strong>多模態輸出</strong>：模型可以生成交錯的圖像和文字回應，而不僅僅是文字</li>
+                    </ul>
+                    <p>
+                        這種設計讓 Gemini 能夠真正理解不同模態之間的關係，進行跨模態推理。
+                    </p>
+                </div>
+            </div>
+
+            <!-- AI 生成概念圖 -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept_unified_encoder_02.png" alt="統一編碼器概念圖">
+                <div class="caption">
+                    💡 <strong>AI 圖解：</strong>統一的多模態 Transformer 架構
+                </div>
+            </div>
+
+            <!-- 樂高積木類比 -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept_architecture_lego_02.png" alt="模組化架構類比">
+                <div class="caption">
+                    💡 <strong>AI 圖解：</strong>用樂高積木理解模組化架構
+                </div>
+            </div>
+
+            <!-- 概念動畫 -->
+            <div class="video-container">
+                <video autoplay loop muted playsinline>
+                    <source src="images/videos/multimodal_flow.mp4" type="video/mp4">
+                </video>
+                <div class="caption">🎬 多模態資料流動畫：展示文字、圖像、音訊如何通過統一的 Transformer 編碼器</div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 三種模型尺寸 -->
+            <h2>三種尺寸，滿足不同需求</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Our first version, Gemini 1.0, comprises three main sizes to support a wide range of applications:
+                        <ul>
+                            <li><strong>Ultra</strong>: Our most capable model that delivers state-of-the-art performance across a wide range of highly complex tasks, including reasoning and multimodal tasks.</li>
+                            <li><strong>Pro</strong>: A performance-optimized model in terms of cost as well as latency that delivers significant performance across a wide range of tasks.</li>
+                            <li><strong>Nano</strong>: Our most efficient model, designed to run on-device. We trained two versions of Nano, with 1.8B (Nano-1) and 3.25B (Nano-2) parameters.</li>
+                        </ul>
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        我們的第一個版本 Gemini 1.0 包含三種主要尺寸，以支持廣泛的應用：
+                        <ul>
+                            <li><strong>Ultra</strong>：我們最強大的模型，在廣泛的高度複雜任務（包括推理和多模態任務）中提供最先進的性能。</li>
+                            <li><strong>Pro</strong>：在成本和延遲方面進行性能優化的模型，在廣泛的任務中提供卓越性能。</li>
+                            <li><strong>Nano</strong>：我們最高效的模型，專為設備端運行而設計。我們訓練了兩個版本的 Nano，分別有 1.8B（Nano-1）和 3.25B（Nano-2）參數。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 為什麼需要三種尺寸？</h4>
+                <p>
+                    不同的應用場景有不同的需求：
+                </p>
+                <ul>
+                    <li><strong>Ultra</strong>：用於需要最高性能的場景，如複雜推理、科學研究、高品質內容生成</li>
+                    <li><strong>Pro</strong>：平衡性能與成本，適合大多數商業應用和 API 服務</li>
+                    <li><strong>Nano</strong>：專為設備端設計，可以在手機、平板等設備上本地運行，保護隱私且無需網路連接</li>
+                </ul>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 多模態輸入處理 -->
+            <h2>靈活的多模態輸入處理</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Gemini models are trained to accommodate textual input interleaved with a wide variety of audio and visual inputs, such as natural images, charts, screenshots, PDFs, and videos, and they can produce text and image outputs. The visual encoding of Gemini models is inspired by our own foundational work on Flamingo, CoCa, and PaLI, with the important distinction that the models are multimodal from the beginning and can natively output images using discrete image tokens.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        Gemini 模型被訓練以容納與各種音訊和視覺輸入交錯的文字輸入，例如自然圖像、圖表、截圖、PDF 和影片，並且它們可以產生文字和圖像輸出。Gemini 模型的視覺編碼受到我們在 Flamingo、CoCa 和 PaLI 方面的基礎工作的啟發，但重要的區別是模型從一開始就是多模態的，並且可以使用離散圖像 token 原生輸出圖像。
+                    </p>
+                </div>
+            </div>
+
+            <div class="analogy-section">
+                <div class="analogy-card life">
+                    <h4>🏠 生活類比</h4>
+                    <p>
+                        就像一個多才多藝的藝術家，能夠同時處理文字、圖像和聲音。當你給他一段文字、一張圖片和一段音訊時，他能夠理解它們之間的關係，並用文字和圖像來回應。這就像一個能夠「看、聽、讀、寫」的全能助手。
+                    </p>
+                </div>
+                <div class="analogy-card engineering">
+                    <h4>⚙️ 工程類比</h4>
+                    <p>
+                        在系統架構上，Gemini 類似於一個統一的 API 閘道器，能夠處理多種不同格式的輸入（文字、圖像、音訊、影片），並將它們轉換為統一的內部表示。這就像一個多語言的翻譯中樞，能夠理解不同「語言」（模態）的資訊，並進行跨模態的推理和生成。
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 影片理解 -->
+            <h2>影片理解：序列幀編碼</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Video understanding is accomplished by encoding the video as a sequence of frames in the large context window. Video frames or images can be interleaved naturally with text or audio as part of the model input. The models can handle variable input resolution in order to spend more compute on tasks that require fine-grained understanding.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        影片理解通過將影片編碼為大上下文窗口中的幀序列來實現。影片幀或圖像可以自然地與文字或音訊交錯，作為模型輸入的一部分。模型可以處理可變輸入解析度，以便在需要細粒度理解的任務上花費更多計算資源。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 音訊處理 -->
+            <h2>原生音訊處理</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        In addition, Gemini models can directly ingest audio signals at 16kHz from Universal Speech Model (USM) features. This enables the model to capture nuances that are typically lost when the audio is naively mapped to a text input.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        此外，Gemini 模型可以直接攝取來自通用語音模型（USM）特徵的 16kHz 音訊信號。這使模型能夠捕獲通常在音訊被簡單映射為文字輸入時丟失的細微差別。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 為什麼原生音訊處理很重要？</h4>
+                <p>
+                    傳統方法通常會先將音訊轉換為文字，這樣會丟失很多資訊，例如：
+                </p>
+                <ul>
+                    <li>語調和情感</li>
+                    <li>背景噪音和環境音</li>
+                    <li>音樂和音效</li>
+                    <li>說話者的特徵（年齡、性別、情緒等）</li>
+                </ul>
+                <p>
+                    Gemini 能夠直接處理音訊信號，保留這些豐富的資訊，從而提供更準確和細緻的理解。
+                </p>
+            </div>
+
+            <!-- Quote Block 金句 -->
+            <div class="quote-block">
+                「從一開始就是多模態的設計，讓 Gemini 能夠真正理解不同模態之間的關係」
+            </div>
+
+            <!-- 本章重點回顧 -->
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>統一架構</strong>：基於 Transformer 解碼器，支持 32k 上下文長度，採用多查詢注意力等高效機制</li>
+                    <li><strong>原生多模態</strong>：從設計之初就支持文字、圖像、音訊、影片的統一處理</li>
+                    <li><strong>三種尺寸</strong>：Ultra（最強）、Pro（平衡）、Nano（設備端）滿足不同應用需求</li>
+                    <li><strong>靈活輸入</strong>：支持交錯的多模態輸入序列，可變解析度處理</li>
+                    <li><strong>原生輸出</strong>：不僅能生成文字，還能使用離散圖像 token 生成圖像</li>
+                    <li><strong>音訊處理</strong>：直接處理 16kHz 音訊信號，保留語調、情感等細微資訊</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="chapter-nav">
+            <a href="01-introduction.html" class="prev">← 上一章：引言與摘要</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="03-infrastructure.html" class="next">下一章：訓練基礎設施 →</a>
+        </div>
+    </div>
+</body>
+</html>

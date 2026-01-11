@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>評估體系 - Gemini 論文深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="hero-section" style="background-image: url('images/generated/hero_05_evaluation.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>30 個基準測試的全面勝利</h1>
+                <p class="hero-subtitle">首個達到人類專家水準的模型</p>
+                <div class="hero-meta">Gemini 論文深度解析 · 第 5 章</div>
+            </div>
+        </div>
+
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Gemini 深度解析</a>
+            <span>/</span>
+            <span class="current">第 5 章：評估體系</span>
+        </nav>
+
+        <div class="story-container">
+            <p class="drop-cap">
+                Gemini Ultra 在 32 個基準測試中的 30 個取得了新的最先進成果，這是一個令人震撼的成就。更令人驚艷的是，它在 MMLU 上達到了 90.04%，成為首個超越人類專家水準（89.8%）的模型。這不僅證明了 Gemini 的強大能力，更標誌著 AI 發展的新里程碑。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>全面的評估結果</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Our most capable model, Gemini Ultra, achieves new state-of-the-art results in 30 of 32 benchmarks we report on, including 10 of 12 popular text and reasoning benchmarks, 9 of 9 image understanding benchmarks, 6 of 6 video understanding benchmarks, and 5 of 5 speech recognition and speech translation benchmarks.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        我們最強大的模型 Gemini Ultra 在我們報告的 32 個基準中的 30 個取得了新的最先進成果，包括 12 個流行的文字和推理基準中的 10 個、9 個圖像理解基準中的全部 9 個、6 個影片理解基準中的全部 6 個，以及 5 個語音識別和語音翻譯基準中的全部 5 個。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 原始評估結果圖 -->
+            <div class="figure figure-original">
+                <img src="images/original/MMLU_final_v3.svg" alt="MMLU 評估結果">
+                <div class="caption">
+                    <strong>Figure 1:</strong> MMLU 評估結果（論文原圖）
+                </div>
+            </div>
+
+            <!-- AI 生成概念圖 -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept_evaluation_05.png" alt="評估結果視覺化">
+                <div class="caption">
+                    💡 <strong>AI 圖解：</strong>Gemini 在各個基準測試中的突破性表現
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>MMLU：歷史性的突破</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Gemini Ultra is the first model to achieve human-expert performance on MMLU –- a prominent benchmark testing knowledge and reasoning via a suite of exams –- with a score above 90\%. MMLU is a holistic exam benchmark, which measures knowledge across a set of 57 subjects. Human expert performance is gauged at 89.8\% by the benchmark authors, and Gemini Ultra is the first model to exceed this threshold, with the prior state-of-the-art result at 86.4\%.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        Gemini Ultra 是首個在 MMLU（一個通過一系列考試測試知識和推理的著名基準）上達到人類專家水準的模型，得分超過 90%。MMLU 是一個綜合性考試基準，測量 57 個學科的知識。基準作者將人類專家表現評估為 89.8%，Gemini Ultra 是首個超過這個閾值的模型，之前的最先進結果為 86.4%。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 為什麼 MMLU 90%+ 如此重要？</h4>
+                <p>
+                    MMLU 涵蓋了 57 個不同學科領域，從數學、物理到歷史、法律。達到 90% 以上的分數意味著：
+                </p>
+                <ul>
+                    <li>模型在這些領域的表現已經接近或超越人類專家</li>
+                    <li>證明了模型具有廣泛的知識基礎和強大的推理能力</li>
+                    <li>標誌著 AI 在知識推理方面的新高度</li>
+                </ul>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>數學能力：從基礎到競賽級</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        For the grade-school math benchmark, GSM8K, we find Gemini Ultra reaches 94.4\% accuracy with chain-of-thought prompting and self-consistency compared to the previous best accuracy of 92\%. Similar positive trends are observed in increased difficulty math problems drawn from middle- and high-school math competitions (MATH benchmark), with the Gemini Ultra model outperforming all competitor models, reaching 53.2\% using 4-shot prompting.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        對於小學數學基準 GSM8K，我們發現 Gemini Ultra 在使用 chain-of-thought 提示和自我一致性時達到 94.4% 的準確率，而之前的最佳準確率為 92%。在來自中學和高中數學競賽的更高難度數學問題（MATH 基準）中，也觀察到類似的積極趨勢，Gemini Ultra 模型在所有競爭模型中表現最佳，使用 4-shot 提示達到 53.2%。
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>程式設計能力：AlphaCode 2 的突破</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Gemini Ultra also excels in coding. For example, on HumanEval, a standard code-completion benchmark mapping function descriptions to Python implementations, instruction-tuned Gemini Ultra correctly implements 74.4\% of problems. On a new held-out evaluation benchmark for python code generation tasks, Natural2Code, where we ensure no web leakage, Gemini Ultra achieves the highest score of 74.9\%.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        Gemini Ultra 在程式設計方面也表現卓越。例如，在 HumanEval（一個將函數描述映射到 Python 實現的標準代碼完成基準）上，經過指令微調的 Gemini Ultra 正確實現了 74.4% 的問題。在一個新的 Python 代碼生成任務的保留評估基準 Natural2Code 上（我們確保沒有網路洩漏），Gemini Ultra 達到了 74.9% 的最高分數。
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>多模態評估：全面的能力展現</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Beyond text, Gemini Ultra makes notable advances on challenging multimodal reasoning tasks. For example, on the recent MMMU benchmark, that comprises questions about images on multi-discipline tasks requiring college-level subject knowledge and deliberate reasoning, Gemini Ultra achieves a new state-of-the-art score of 62.4\%, outperforming the previous best model by more than 5 percentage points.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        除了文字，Gemini Ultra 在具有挑戰性的多模態推理任務上取得了顯著進展。例如，在最近的 MMMU 基準上（包含需要大學級學科知識和深思熟慮推理的多學科圖像問題），Gemini Ultra 達到了 62.4% 的新最先進分數，比之前的最佳模型高出 5 個百分點以上。
+                    </div>
+                </div>
+            </div>
+
+            <div class="quote-block">
+                「首個在 MMLU 達到人類專家水準的模型，標誌著 AI 在知識推理方面的新高度」
+            </div>
+
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>全面勝利</strong>：在 32 個基準中的 30 個取得 SOTA</li>
+                    <li><strong>MMLU 突破</strong>：達到 90.04%，首個超越人類專家水準（89.8%）</li>
+                    <li><strong>數學能力</strong>：GSM8K 94.4%，MATH 53.2%，競賽級問題 32%</li>
+                    <li><strong>程式設計</strong>：HumanEval 74.4%，Natural2Code 74.9%</li>
+                    <li><strong>多模態</strong>：MMMU 62.4%，所有圖像、影片、音訊基準全部 SOTA</li>
+                    <li><strong>多語言</strong>：在 WMT 23 翻譯基準上表現卓越</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="chapter-nav">
+            <a href="04-dataset.html" class="prev">← 上一章：預訓練資料集</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="06-post-training.html" class="next">下一章：後訓練模型 →</a>
+        </div>
+    </div>
+</body>
+</html>

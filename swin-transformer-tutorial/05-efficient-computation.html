@@ -50,7 +50,7 @@
                     </div>
                     <div class="zh">
                         <strong>翻譯</strong><br><br>
-                        移位視窗分區的一個問題是它會導致更多的視窗，從 $\lceil \frac{h}{M}\rceil  \times \lceil\frac{w}{M}\rceil$ 增加到移位配置中的 $(\lceil \frac{h}{M}\rceil +1) \times (\lceil\frac{w}{M}\rceil + 1)$，並且一些視窗會小於 $M\times M$。一個簡單的解決方案是將較小的視窗填充到 $M\times M$ 的大小，並在計算注意力時遮罩填充值。當常規分區中的視窗數量較少時，例如 $2\times 2$，使用這種簡單解決方案的計算增加是相當可觀的（$2\times 2 \rightarrow 3\times 3$，即 2.25 倍）。
+                        移位視窗分區的一個問題是它會導致更多的視窗，從 ⌈h/M⌉ × ⌈w/M⌉ 增加到移位配置中的 (⌈h/M⌉ + 1) × (⌈w/M⌉ + 1)，並且一些視窗會小於 M×M。一個簡單的解決方案是將較小的視窗填充到 M×M 的大小，並在計算注意力時遮罩填充值。當常規分區中的視窗數量較少時，例如 2×2，使用這種簡單解決方案的計算增加是相當可觀的（2×2 → 3×3，即 2.25 倍）。
                     </div>
                 </div>
             </div>
@@ -136,11 +136,11 @@
                     </div>
                     <div class="zh">
                         <strong>翻譯</strong><br><br>
-                        在計算自注意力時，我們遵循先前的工作，在計算相似度時為每個頭包含一個相對位置偏置 $B \in \mathbb{R}^{M^2 \times M^2}$：
+                        在計算自注意力時，我們遵循先前的工作，在計算相似度時為每個頭包含一個相對位置偏置 B ∈ ℝ^(M²×M²)：
                         \begin{equation}
                             \text{Attention}(Q, K, V) = \text{SoftMax}(QK^T/\sqrt{d}+B)V,
                         \end{equation}
-                        其中 $Q, K, V \in \mathbb{R}^{M^2\times d}$ 是 <em>query</em>、<em>key</em> 和 <em>value</em> 矩陣；$d$ 是 <em>query</em>/<em>key</em> 維度，$M^2$ 是視窗中 patch 的數量。由於沿每個軸的相對位置在 $[-M+1, M-1]$ 範圍內，我們參數化一個較小尺寸的偏置矩陣 $\hat{B} \in \mathbb{R}^{(2M-1)\times (2M-1)}$，$B$ 中的值取自 $\hat{B}$。
+                        其中 Q, K, V ∈ ℝ^(M²×d) 是 <em>query</em>、<em>key</em> 和 <em>value</em> 矩陣；d 是 <em>query</em>/<em>key</em> 維度，M² 是視窗中 patch 的數量。由於沿每個軸的相對位置在 [-M+1, M-1] 範圍內，我們參數化一個較小尺寸的偏置矩陣 B̂ ∈ ℝ^((2M-1)×(2M-1))，B 中的值取自 B̂。
                     </div>
                 </div>
             </div>
@@ -149,7 +149,7 @@
                 <h4>💡 相對位置偏置的優勢</h4>
                 <ul>
                     <li><strong>平移不變性</strong>：相對位置偏置讓模型對圖像的平移更加魯棒</li>
-                    <li><strong>參數效率</strong>：使用 $(2M-1)×(2M-1)$ 的偏置矩陣，而不是 $M^2×M^2$</li>
+                    <li><strong>參數效率</strong>：使用 (2M-1)×(2M-1) 的偏置矩陣，而不是 M²×M²</li>
                     <li><strong>實驗驗證</strong>：相比絕對位置嵌入，在密集預測任務上表現更好</li>
                 </ul>
             </div>
@@ -183,7 +183,7 @@
                     <li><strong>移位視窗的挑戰</strong>：視窗數量增加，視窗大小不一致</li>
                     <li><strong>Cyclic-Shift 解決方案</strong>：循環移位 + masking 機制，保持視窗數量不變</li>
                     <li><strong>效率優勢</strong>：相比簡單 padding 方案，避免了 2.25 倍的計算增加</li>
-                    <li><strong>相對位置偏置</strong>：使用 $(2M-1)×(2M-1)$ 的參數矩陣，比絕對位置嵌入更有效</li>
+                    <li><strong>相對位置偏置</strong>：使用 (2M-1)×(2M-1) 的參數矩陣，比絕對位置嵌入更有效</li>
                     <li><strong>實驗驗證</strong>：在三個任務上都帶來顯著性能提升</li>
                 </ul>
             </div>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini 論文深度解析 - 學習路徑導覽</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <span class="current">🔗 Gemini 教學</span>
+        </div>
+
+        <div class="index-header">
+            <h1>🌟 Gemini: A Family of Highly Capable Multimodal Models</h1>
+            <p>Gemini 論文深度解析 · 首個達到人類專家水準的多模態模型</p>
+            <p class="subtitle">
+                MMLU 90%+ 的突破 · 30/32 基準測試 SOTA · 負責任 AI 部署
+            </p>
+        </div>
+
+        <div class="learning-path">
+            <h3>🎯 建議學習路徑</h3>
+            <ul class="path-list">
+                <li><strong>第一次閱讀:</strong>按順序閱讀第 1-8 章，建立完整概念框架</li>
+                <li><strong>核心突破:</strong>重點理解第 1 章（MMLU 90%+）和第 5 章（全面評估）</li>
+                <li><strong>技術深度:</strong>深入學習第 2 章（架構）和第 3 章（基礎設施）</li>
+                <li><strong>應用實踐:</strong>理解第 6 章（後訓練）和第 7 章（負責任部署）</li>
+                <li><strong>未來展望:</strong>閱讀第 8 章（結論）了解 AI 發展方向</li>
+            </ul>
+        </div>
+
+        <h2>📚 章節導覽</h2>
+        
+        <div class="chapter-grid">
+            <a href="01-introduction.html" class="chapter-card">
+                <span class="chapter-number">第 1 章</span>
+                <div class="chapter-title">🌟 引言與摘要</div>
+                <div class="chapter-desc">
+                    了解 Gemini 家族的三個成員（Ultra、Pro、Nano），理解首個在 MMLU 達到人類專家水準的歷史性突破，以及多模態推理的驚艷能力。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 25 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="02-architecture.html" class="chapter-card">
+                <span class="chapter-number">第 2 章</span>
+                <div class="chapter-title">🏗️ 模型架構</div>
+                <div class="chapter-desc">
+                    深入理解 Gemini 的原生多模態設計，統一 Transformer 架構如何處理文字、圖像、音訊和影片，以及三種模型尺寸的設計考量。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 30 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="03-infrastructure.html" class="chapter-card">
+                <span class="chapter-number">第 3 章</span>
+                <div class="chapter-title">⚙️ 訓練基礎設施</div>
+                <div class="chapter-desc">
+                    探索超大規模訓練的工程奇蹟：TPU SuperPods、跨資料中心訓練、創新故障恢復機制，以及從 85% 到 97% 的訓練效率提升。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 30 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="04-dataset.html" class="chapter-card">
+                <span class="chapter-number">第 4 章</span>
+                <div class="chapter-title">📊 預訓練資料集</div>
+                <div class="chapter-desc">
+                    了解多模態多語言資料集的構建，SentencePiece Tokenizer 的優化，品質過濾機制，以及分階段訓練的智慧。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 25 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="05-evaluation.html" class="chapter-card">
+                <span class="chapter-number">第 5 章</span>
+                <div class="chapter-title">📈 評估體系</div>
+                <div class="chapter-desc">
+                    全面了解 Gemini Ultra 在 30/32 基準測試中的 SOTA 表現，MMLU 90%+ 的突破，以及數學、程式設計、多模態等領域的卓越能力。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 30 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="06-post-training.html" class="chapter-card">
+                <span class="chapter-number">第 6 章</span>
+                <div class="chapter-title">🎓 後訓練模型</div>
+                <div class="chapter-desc">
+                    理解後訓練的四個階段：提示收集、SFT、RM 訓練、RLHF，以及 Gemini Apps 和 Gemini API 兩種變體的設計差異。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 30 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="07-responsible-deployment.html" class="chapter-card">
+                <span class="chapter-number">第 7 章</span>
+                <div class="chapter-title">🛡️ 負責任部署</div>
+                <div class="chapter-desc">
+                    學習 Google 的負責任 AI 部署方法：影響評估、安全政策、緩解措施、安全評估，確保 AI 系統的安全、公平和透明。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 25 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="08-conclusion.html" class="chapter-card">
+                <span class="chapter-number">第 8 章</span>
+                <div class="chapter-title">🔮 討論與結論</div>
+                <div class="chapter-desc">
+                    回顧 Gemini 的主要成就，探索新的應用可能性，認識模型的局限性，以及對未來 AI 發展的展望。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 20 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐</span>
+                </div>
+            </a>
+
+            <a href="09-appendix.html" class="chapter-card">
+                <span class="chapter-number">第 9 章</span>
+                <div class="chapter-title">📋 附錄</div>
+                <div class="chapter-desc">
+                    深入技術細節：模型卡片、MMLU Chain-of-Thought 比較、基準測試詳情、定性範例，以及完整的參考資料。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 預計 20 分鐘</span>
+                    <span class="difficulty">難度 ⭐⭐</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="key-concept">
+            <h3>💡 學習重點提示</h3>
+            <ul>
+                <li><strong>MMLU 90%+:</strong>第 1 章建立概念，第 5 章看詳細評估</li>
+                <li><strong>原生多模態:</strong>第 2 章深入理解統一架構設計</li>
+                <li><strong>超大規模訓練:</strong>第 3 章了解工程創新和效率提升</li>
+                <li><strong>後訓練方法:</strong>第 6 章理解 RLHF 的迭代改進過程</li>
+                <li><strong>負責任部署:</strong>第 7 章學習 AI 安全與倫理實踐</li>
+            </ul>
+        </div>
+
+        <div class="solution">
+            <h3>🎓 完成指標</h3>
+            <p>當你能回答以下問題時，代表你已經掌握 Gemini 論文：</p>
+            <ol>
+                <li><strong>核心突破:</strong>為什麼 MMLU 90%+ 是歷史性的突破？</li>
+                <li><strong>原生多模態:</strong>Gemini 的架構設計與其他多模態模型有何不同？</li>
+                <li><strong>訓練效率:</strong>如何從 85% 提升到 97% 的訓練效率？</li>
+                <li><strong>後訓練:</strong>RLHF 如何實現模型的迭代改進？</li>
+                <li><strong>負責任部署:</strong>Google 如何確保 AI 系統的安全和公平？</li>
+                <li><strong>應用前景:</strong>Gemini 開啟了哪些新的應用可能性？</li>
+            </ol>
+        </div>
+
+        <div class="quick-links">
+            <a href="../index.html" class="quick-link">
+                ← 回到首頁
+            </a>
+            <a href="01-introduction.html" class="quick-link">
+                🚀 開始學習 Gemini
+            </a>
+            <a href="https://arxiv.org/abs/2312.11805" class="quick-link" target="_blank">
+                📄 原始論文 (arXiv)
+            </a>
+        </div>
+        
+        <div class="quick-links">
+            <a href="02-architecture.html" class="quick-link">
+                📐 直達核心章節
+            </a>
+            <a href="05-evaluation.html" class="quick-link">
+                📊 評估結果詳解
+            </a>
+            <a href="https://deepmind.google/technologies/gemini/" class="quick-link" target="_blank">
+                🌐 DeepMind 官網
+            </a>
+        </div>
+
+        <div class="about-section">
+            <h3>📖 關於本教學</h3>
+            <p>
+                本深度解析專注於理解 <strong>Gemini 在 AI 發展史中的關鍵地位</strong>。
+                Gemini 是首個在 MMLU 達到人類專家水準的模型，展現了原生多模態設計的強大能力，
+                並為負責任的 AI 部署樹立了新的標準。
+                理解 Gemini，你就能理解現代多模態 AI 系統的設計理念和實踐方法。
+            </p>
+            <p class="highlight">
+                "Gemini: A Family of Highly Capable Multimodal Models"
+            </p>
+            <p class="author">
+                —— 一篇標誌著多模態 AI 新時代的里程碑論文
+            </p>
+        </div>
+
+        <div class="related-reading">
+            <h4>🔗 延伸閱讀</h4>
+            <p>建議學習順序：</p>
+            <p>
+                <strong><a href="../transformer-tutorial/index.html">Transformer (2017)</a></strong> → 
+                <strong><a href="../gpt3-tutorial/index.html">GPT-3 (2020)</a></strong> → 
+                <strong><a href="../gpt4-tutorial/index.html">GPT-4 (2023)</a></strong> → 
+                <strong>Gemini (2023) ← 你在這裡</strong>
+            </p>
+            <p class="note">
+                理解完整演進脈絡，掌握現代多模態 AI 的發展歷程！
+            </p>
+        </div>
+    </div>
+</body>
+</html>

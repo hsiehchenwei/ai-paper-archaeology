@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>負責任部署 - Gemini 論文深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="hero-section" style="background-image: url('images/generated/hero_07_responsible_deployment.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>負責任的 AI 部署</h1>
+                <p class="hero-subtitle">安全、公平、透明的 AI 系統</p>
+                <div class="hero-meta">Gemini 論文深度解析 · 第 7 章</div>
+            </div>
+        </div>
+
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Gemini 深度解析</a>
+            <span>/</span>
+            <span class="current">第 7 章：負責任部署</span>
+        </nav>
+
+        <div class="story-container">
+            <p class="drop-cap">
+                強大的 AI 模型帶來巨大的潛力，但也伴隨著責任。Google 在開發 Gemini 模型時，遵循了一套結構化的負責任部署方法，從影響評估、安全政策、緩解措施到持續評估，確保模型在帶來好處的同時，最大限度地減少潛在的社會風險。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>負責任部署的結構化方法</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        During the development of Gemini models, we follow a structured approach to responsible deployment to identify, measure, and manage foreseeable downstream societal impacts of our models. Throughout the lifecycle of a project, we follow the structure below.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        在開發 Gemini 模型期間，我們遵循結構化的負責任部署方法，以識別、測量和管理我們模型的可預見下游社會影響。在專案的整個生命週期中，我們遵循以下結構。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 原始責任方法圖 -->
+            <div class="figure figure-original">
+                <img src="images/original/Final_Responsibility_Approach.svg" alt="負責任部署方法圖">
+                <div class="caption">
+                    <strong>Figure 1:</strong> 負責任部署的結構化方法（論文原圖）
+                </div>
+            </div>
+
+            <!-- AI 生成概念圖 -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept_responsible_07.png" alt="負責任 AI 部署概念圖">
+                <div class="caption">
+                    💡 <strong>AI 圖解：</strong>負責任 AI 部署的核心要素
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>影響評估：識別風險與機會</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        We conduct model impact assessments to identify, assess, and document societal benefits and harms associated with the capabilities of Gemini models. Our impact assessments for Gemini API models describe downstream benefits and risks that we identify, spanning across the models' modalities.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        我們進行模型影響評估，以識別、評估和記錄與 Gemini 模型能力相關的社會效益和危害。我們對 Gemini API 模型的影響評估描述了我們識別的下游效益和風險，涵蓋模型的各種模態。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 影響評估的兩個層面</h4>
+                <ul>
+                    <li><strong>模型層面</strong>：評估 Gemini API Ultra 1.0 等模型本身的風險和影響</li>
+                    <li><strong>產品層面</strong>：評估 Gemini Advanced 等完整產品的風險和影響</li>
+                </ul>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>安全政策：明確的準則</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        We have developed a set of model safety policies for Gemini models to steer development and evaluation. Policy areas include generation of child sexual abuse and exploitation content, hate speech, harassment, dangerous content such as guidance on how to make weapons, and malicious content.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        我們為 Gemini 模型制定了一套模型安全政策，以指導開發和評估。政策領域包括生成兒童性虐待和剝削內容、仇恨言論、騷擾、危險內容（如如何製造武器的指導）和惡意內容。
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>緩解措施：多層防護</h2>
+
+            <h3>資料策劃實踐</h3>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Prior to all training stages, we take various steps to mitigate potential downstream harms through data curation and careful data collection. We filter training data for high-risk content and to ensure training data is sufficiently high quality.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        在所有訓練階段之前，我們採取各種步驟，通過資料策劃和仔細的資料收集來緩解潛在的下游危害。我們過濾訓練資料中的高風險內容，並確保訓練資料具有足夠高的品質。
+                    </div>
+                </div>
+            </div>
+
+            <h3>模型緩解：後訓練安全措施</h3>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Our modeling mitigation of safety risks, applied across Gemini Advanced and Gemini API Ultra models, is mostly through post-training, encompassing supervised fine-tuning (SFT) and reinforcement learning through human feedback (RLHF) using a reward model.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        我們對安全風險的模型緩解，應用於 Gemini Advanced 和 Gemini API Ultra 模型，主要通過後訓練進行，包括監督微調（SFT）和使用獎勵模型通過人類反饋進行強化學習（RLHF）。
+                    </div>
+                </div>
+            </div>
+
+            <div class="analogy-section">
+                <div class="analogy-card life">
+                    <h4>🏠 生活類比</h4>
+                    <p>
+                        就像建立一個安全的社區，需要多層防護：入口處的檢查（資料過濾）、社區規則（安全政策）、監控系統（持續評估），以及居民的參與（反饋機制）。每一層都發揮著重要作用，共同確保社區的安全和和諧。
+                    </p>
+                </div>
+                <div class="analogy-card engineering">
+                    <h4>⚙️ 工程類比</h4>
+                    <p>
+                        這類似於軟體安全的多層防護：
+                        <ul>
+                            <li><strong>輸入驗證</strong>：資料策劃和過濾</li>
+                            <li><strong>安全策略</strong>：明確的安全政策</li>
+                            <li><strong>代碼審查</strong>：模型緩解和後訓練</li>
+                            <li><strong>持續監控</strong>：安全評估和紅隊測試</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>安全評估：多層次的測試</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        To assess the post-trained Gemini models and products with access to Gemini models against safety policy areas and other key risk areas identified within impact assessments, we developed a suite of evaluations across the lifecycle of model development.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        為了評估後訓練的 Gemini 模型和可以訪問 Gemini 模型的產品，對照安全政策領域和影響評估中識別的其他關鍵風險領域，我們在模型開發的整個生命週期中開發了一套評估方法。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 四種評估類型</h4>
+                <ul>
+                    <li><strong>開發評估</strong>：在訓練過程中持續改進責任標準</li>
+                    <li><strong>保證評估</strong>：由獨立團隊進行，用於治理和審查</li>
+                    <li><strong>外部評估</strong>：由領域專家進行，識別盲點</li>
+                    <li><strong>紅隊測試</strong>：對抗性測試，發現潛在弱點</li>
+                </ul>
+            </div>
+
+            <div class="quote-block">
+                「負責任的 AI 部署需要結構化的方法、明確的政策和持續的評估」
+            </div>
+
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>結構化方法</strong>：從影響評估到持續監控的完整流程</li>
+                    <li><strong>影響評估</strong>：識別模型和產品層面的風險與機會</li>
+                    <li><strong>安全政策</strong>：明確禁止有害內容生成的準則</li>
+                    <li><strong>緩解措施</strong>：資料策劃、模型緩解、產品級別的安全措施</li>
+                    <li><strong>安全評估</strong>：開發、保證、外部和紅隊測試的多層次評估</li>
+                    <li><strong>持續改進</strong>：負責任部署是一個持續的過程，需要不斷更新和改進</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="chapter-nav">
+            <a href="06-post-training.html" class="prev">← 上一章：後訓練模型</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="08-conclusion.html" class="next">下一章：討論與結論 →</a>
+        </div>
+    </div>
+</body>
+</html>

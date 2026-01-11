@@ -49,8 +49,52 @@
                         An overview of the Swin Transformer architecture is presented in Figure 3, which illustrates the tiny version (Swin-T). It first splits an input RGB image into non-overlapping patches by a patch splitting module, like ViT. Each patch is treated as a ``token'' and its feature is set as a concatenation of the raw pixel RGB values. In our implementation, we use a patch size of $4\times 4$ and thus the feature dimension of each patch is $4\times4\times 3=48$. A linear embedding layer is applied on this raw-valued feature to project it to an arbitrary dimension (denoted as $C$).
                     </div>
                     <div class="zh">
-                        <strong>翻譯</strong><br><br>
-                        Swin Transformer 架構的概覽如圖 3 所示，展示了 tiny 版本（Swin-T）。它首先通過 patch splitting 模組將輸入的 RGB 圖像分割成非重疊的 patch，就像 ViT 一樣。每個 patch 被視為一個「token」，其特徵被設置為原始像素 RGB 值的串聯。在我們的實現中，我們使用 $4\times 4$ 的 patch 大小，因此每個 patch 的特徵維度是 $4\times4\times 3=48$。一個線性嵌入層應用於這個原始值特徵，將其投影到任意維度（記為 $C$）。
+                        <strong>📝 白話翻譯</strong><br><br>
+                        Swin Transformer 架構的概覽如圖 3 所示，展示了 tiny 版本（Swin-T）。
+                        <br><br>
+                        <strong>第一步：Patch Splitting（圖片切分）</strong>
+                        <br><br>
+                        就像 ViT 一樣，Swin Transformer 首先通過 <strong>patch splitting 模組</strong>將輸入的 RGB 圖像分割成<strong>非重疊的 patch</strong>（碎片）。
+                        <br><br>
+                        <strong>每個 patch 的特徵計算：</strong>
+                        <ul style="margin: 10px 0; padding-left: 25px;">
+                            <li>每個 patch 被視為一個「token」（就像 NLP 中的詞彙）</li>
+                            <li>特徵 = 這個 patch 內所有像素的 RGB 值「串聯」起來</li>
+                        </ul>
+                        <br><br>
+                        <strong>💡 公式解釋：4×4×3=48</strong>
+                        <br><br>
+                        在我們的實現中，我們使用 <strong>4×4 的 patch 大小</strong>，這意味著：
+                        <ul style="margin: 10px 0; padding-left: 25px;">
+                            <li><strong>4×4</strong>：每個 patch 是 4 像素寬 × 4 像素高 = <strong>16 個像素</strong></li>
+                            <li><strong>×3</strong>：每個像素有 3 個顏色通道（RGB：紅、綠、藍）</li>
+                            <li><strong>= 48</strong>：所以每個 patch 的特徵維度 = 4 × 4 × 3 = <strong>48 個數值</strong></li>
+                        </ul>
+                        <br><br>
+                        <strong>具體例子：</strong>
+                        <br><br>
+                        假設有一個 4×4 的 patch，裡面有 16 個像素。每個像素有 RGB 三個值，例如：
+                        <ul style="margin: 10px 0; padding-left: 25px;">
+                            <li>像素 1：(R₁, G₁, B₁)</li>
+                            <li>像素 2：(R₂, G₂, B₂)</li>
+                            <li>...</li>
+                            <li>像素 16：(R₁₆, G₁₆, B₁₆)</li>
+                        </ul>
+                        把這 16 個像素的 RGB 值全部「串聯」起來，就得到一個 48 維的向量：
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.9em;">
+                            [R₁, G₁, B₁, R₂, G₂, B₂, ..., R₁₆, G₁₆, B₁₆]
+                        </div>
+                        <br><br>
+                        <strong>第二步：Linear Embedding（線性嵌入）</strong>
+                        <br><br>
+                        這個 48 維的原始特徵向量會經過一個<strong>線性嵌入層</strong>，投影到任意維度（記為 C，例如 96、192、384 等，根據模型大小而定）。
+                        <br><br>
+                        <strong>💡 為什麼需要線性嵌入？</strong>
+                        <ul style="margin: 10px 0; padding-left: 25px;">
+                            <li>原始特徵（48 維）只是像素值的簡單串聯，沒有經過學習</li>
+                            <li>線性嵌入層可以將這些原始特徵轉換成更適合 Transformer 處理的表示</li>
+                            <li>同時可以調整維度，讓後續的 Transformer 層能夠統一處理</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -78,7 +122,7 @@
 
             <!-- AI 生成概念圖 -->
             <div class="figure figure-ai">
-                <img src="images/generated/concept_hierarchical_01.png" alt="層次化架構概念圖">
+                <img src="images/generated/concept_hierarchical_01.jpg" alt="層次化架構概念圖">
                 <div class="caption">
                     💡 <strong>AI 圖解：</strong>層次化特徵圖構建——從 Stage 1 到 Stage 4，解析度逐步降低，特徵逐步抽象
                 </div>
@@ -98,9 +142,9 @@
                     </div>
                     <div class="zh">
                         <strong>翻譯</strong><br><br>
-                        幾個具有修改後自注意力計算的 Transformer block（Swin Transformer blocks）應用於這些 patch token。Transformer blocks 保持 token 數量（$\frac{H}{4} \times \frac{W}{4}$），與線性嵌入一起稱為「Stage 1」。
+                        幾個具有修改後自注意力計算的 Transformer block（Swin Transformer blocks）應用於這些 patch token。Transformer blocks 保持 token 數量（(H/4) × (W/4)），與線性嵌入一起稱為「Stage 1」。
                         
-                        為了產生層次化表示，隨著網路變深，token 數量通過 patch merging 層減少。第一個 patch merging 層串聯每組 $2\times 2$ 相鄰 patch 的特徵，並在 $4C$ 維串聯特徵上應用線性層。這將 token 數量減少 $2\times2=4$ 倍（解析度的 $2\times$ 下採樣），輸出維度設置為 $2C$。之後應用 Swin Transformer blocks 進行特徵轉換，解析度保持在 $\frac{H}{8} \times \frac{W}{8}$。這個 patch merging 和特徵轉換的第一個 block 稱為「Stage 2」。該過程重複兩次，作為「Stage 3」和「Stage 4」，輸出解析度分別為 $\frac{H}{16} \times \frac{W}{16}$ 和 $\frac{H}{32} \times \frac{W}{32}$。
+                        為了產生層次化表示，隨著網路變深，token 數量通過 patch merging 層減少。第一個 patch merging 層串聯每組 2×2 相鄰 patch 的特徵，並在 4C 維串聯特徵上應用線性層。這將 token 數量減少 2×2=4 倍（解析度的 2× 下採樣），輸出維度設置為 2C。之後應用 Swin Transformer blocks 進行特徵轉換，解析度保持在 (H/8) × (W/8)。這個 patch merging 和特徵轉換的第一個 block 稱為「Stage 2」。該過程重複兩次，作為「Stage 3」和「Stage 4」，輸出解析度分別為 (H/16) × (W/16) 和 (H/32) × (W/32)。
                     </div>
                 </div>
             </div>
@@ -108,25 +152,25 @@
             <div class="paradigm-grid">
                 <div class="paradigm-card">
                     <h4>Stage 1</h4>
-                    <p><strong>解析度：</strong> $\frac{H}{4} \times \frac{W}{4}$</p>
+                    <p><strong>解析度：</strong> (H/4) × (W/4)</p>
                     <p><strong>操作：</strong> Patch Splitting + Linear Embedding + Swin Blocks</p>
                     <p>將圖像分割成 4×4 的 patch，每個 patch 成為一個 token</p>
                 </div>
                 <div class="paradigm-card">
                     <h4>Stage 2</h4>
-                    <p><strong>解析度：</strong> $\frac{H}{8} \times \frac{W}{8}$</p>
+                    <p><strong>解析度：</strong> (H/8) × (W/8)</p>
                     <p><strong>操作：</strong> Patch Merging (2×2) + Swin Blocks</p>
                     <p>將 2×2 的 patch 合併，解析度降低 2 倍，維度增加 2 倍</p>
                 </div>
                 <div class="paradigm-card">
                     <h4>Stage 3</h4>
-                    <p><strong>解析度：</strong> $\frac{H}{16} \times \frac{W}{16}$</p>
+                    <p><strong>解析度：</strong> (H/16) × (W/16)</p>
                     <p><strong>操作：</strong> Patch Merging (2×2) + Swin Blocks</p>
                     <p>繼續合併，構建中等尺度的特徵表示</p>
                 </div>
                 <div class="paradigm-card">
                     <h4>Stage 4</h4>
-                    <p><strong>解析度：</strong> $\frac{H}{32} \times \frac{W}{32}$</p>
+                    <p><strong>解析度：</strong> (H/32) × (W/32)</p>
                     <p><strong>操作：</strong> Patch Merging (2×2) + Swin Blocks</p>
                     <p>最終的高層語義特徵，類似於 CNN 的最後一層</p>
                 </div>
@@ -157,18 +201,12 @@
                 <div class="caption">🎬 層次化架構構建動畫：展示從 Stage 1 到 Stage 4 的特徵圖演變過程</div>
             </div>
 
-            <!-- 雙重類比 -->
+            <!-- 生活類比 -->
             <div class="analogy-section">
                 <div class="analogy-card life">
                     <h4>🏠 生活類比</h4>
                     <p>
                         就像城市規劃一樣：Stage 1 是街道級別，可以看到每個建築物的細節（4×4 patch）；Stage 2 是社區級別，可以看到幾個建築物組成的街區；Stage 3 是區域級別，可以看到整個社區的佈局；Stage 4 是城市級別，可以看到整個城市的宏觀結構。每一層都提供了不同尺度的視角，讓模型能夠同時理解細節和全局。
-                    </p>
-                </div>
-                <div class="analogy-card engineering">
-                    <h4>⚙️ 工程類比</h4>
-                    <p>
-                        在系統架構上，Swin Transformer 類似於微服務架構中的服務層級：Stage 1 是基礎服務層，處理原始數據；Stage 2-4 是業務邏輯層，逐步抽象和聚合資訊。每一層都可以獨立優化和擴展，同時通過標準化的接口（patch merging）進行通信。這種設計既保持了模組化，又實現了高效的資訊流動。
                     </p>
                 </div>
             </div>
@@ -195,6 +233,95 @@
                 <p>
                     層次化特徵圖是視覺任務的基礎。無論是目標檢測中的 FPN（Feature Pyramid Network），還是語義分割中的 U-Net，都需要多尺度的特徵表示。Swin Transformer 的層次化設計讓它能夠無縫替換 CNN 骨幹網路，同時利用 Transformer 的強大建模能力。
                 </p>
+                
+                <div style="margin-top: 25px; padding-top: 25px; border-top: 2px dashed #e5e7eb;">
+                    <h5>🔍 FPN（Feature Pyramid Network，特徵金字塔網路）</h5>
+                    <p><strong>📝 是什麼？</strong></p>
+                    <p>
+                        FPN 是 2017 年提出的用於<strong>目標檢測</strong>的架構。它的核心思想是：<strong>不同大小的物體需要不同解析度的特徵圖來檢測</strong>。
+                    </p>
+                    <p><strong>🏠 生活類比：</strong></p>
+                    <p>
+                        想像你在看一張照片，照片中有：
+                    </p>
+                    <ul style="margin: 10px 0; padding-left: 25px;">
+                        <li><strong>小物體</strong>：遠處的小鳥（需要高解析度特徵圖，才能看到細節）</li>
+                        <li><strong>中物體</strong>：中距離的汽車（需要中等解析度特徵圖）</li>
+                        <li><strong>大物體</strong>：近處的建築物（可以用低解析度特徵圖，因為很大，不需要太多細節）</li>
+                    </ul>
+                    <p>
+                        FPN 就像是一個「多層次的觀察系統」，同時提供多個解析度的「視角」，讓模型能夠同時檢測不同大小的物體。
+                    </p>
+                    <p><strong>⚙️ 技術細節：</strong></p>
+                    <ul style="margin: 10px 0; padding-left: 25px;">
+                        <li><strong>輸入</strong>：CNN 骨幹網路產生的多層特徵圖（例如：ResNet 的 conv2、conv3、conv4、conv5）</li>
+                        <li><strong>處理</strong>：從高層（低解析度）特徵開始，逐步「上採樣」並與低層（高解析度）特徵融合</li>
+                        <li><strong>輸出</strong>：多個解析度的特徵圖，每個都包含豐富的語義資訊</li>
+                        <li><strong>應用</strong>：在每個解析度的特徵圖上進行目標檢測，小物體用高解析度，大物體用低解析度</li>
+                    </ul>
+                    <p><strong>💡 為什麼需要 FPN？</strong></p>
+                    <p>
+                        傳統的目標檢測方法只使用最後一層的特徵圖（通常是低解析度），這導致：
+                    </p>
+                    <ul style="margin: 10px 0; padding-left: 25px;">
+                        <li>小物體檢測效果差（因為特徵圖解析度太低，細節丟失）</li>
+                        <li>大物體檢測效果也不理想（因為缺乏多尺度資訊）</li>
+                    </ul>
+                    <p>
+                        FPN 通過融合多層特徵，讓模型能夠同時處理不同大小的物體，大幅提升了目標檢測的準確率。
+                    </p>
+                </div>
+                
+                <div style="margin-top: 25px; padding-top: 25px; border-top: 2px dashed #e5e7eb;">
+                    <h5>🔍 U-Net</h5>
+                    <p><strong>📝 是什麼？</strong></p>
+                    <p>
+                        U-Net 是 2015 年提出的用於<strong>語義分割</strong>的架構。它的名字來自於其 U 形的網路結構：先「下採樣」（編碼器）提取特徵，再「上採樣」（解碼器）恢復解析度。
+                    </p>
+                    <p><strong>🏠 生活類比：</strong></p>
+                    <p>
+                        想像你要在一張地圖上標記每個區域的類型（例如：建築、道路、公園）。U-Net 的過程就像：
+                    </p>
+                    <ul style="margin: 10px 0; padding-left: 25px;">
+                        <li><strong>編碼器（下採樣）</strong>：先「縮小」地圖，理解整體結構（「這是城市區域」）</li>
+                        <li><strong>解碼器（上採樣）</strong>：再「放大」回原始大小，同時保留高層語義資訊（「這個區域是建築，那個區域是道路」）</li>
+                    </ul>
+                    <p>
+                        最終輸出一張與輸入圖片同樣大小的「標籤圖」，每個像素都被標記為對應的類別。
+                    </p>
+                    <p><strong>⚙️ 技術細節：</strong></p>
+                    <ul style="margin: 10px 0; padding-left: 25px;">
+                        <li><strong>編碼器（左側）</strong>：類似 CNN，逐步下採樣，提取高層語義特徵</li>
+                        <li><strong>解碼器（右側）</strong>：逐步上採樣，恢復解析度，同時融合編碼器對應層的特徵（跳躍連接）</li>
+                        <li><strong>跳躍連接（Skip Connections）</strong>：將編碼器的特徵直接傳遞到解碼器，保留細節資訊</li>
+                        <li><strong>輸出</strong>：與輸入圖片同樣大小的特徵圖，每個位置都包含類別預測</li>
+                    </ul>
+                    <p><strong>💡 為什麼需要 U-Net？</strong></p>
+                    <p>
+                        語義分割需要對<strong>每個像素</strong>進行分類，這意味著：
+                    </p>
+                    <ul style="margin: 10px 0; padding-left: 25px;">
+                        <li>需要<strong>高解析度的輸出</strong>（與輸入圖片同樣大小）</li>
+                        <li>需要<strong>多尺度的特徵</strong>（既要理解全局語義，又要保留局部細節）</li>
+                    </ul>
+                    <p>
+                        U-Net 的 U 形結構完美解決了這個問題：編碼器提取語義資訊，解碼器恢復解析度，跳躍連接保留細節。
+                    </p>
+                </div>
+                
+                <div style="margin-top: 25px; padding-top: 25px; border-top: 2px dashed #e5e7eb;">
+                    <h5>🔗 Swin Transformer 如何與 FPN 和 U-Net 結合？</h5>
+                    <p>
+                        Swin Transformer 的層次化設計讓它能夠<strong>無縫替換</strong> CNN 骨幹網路：
+                    </p>
+                    <ul style="margin: 10px 0; padding-left: 25px;">
+                        <li><strong>與 FPN 結合</strong>：Swin Transformer 的 Stage 1-4 產生的特徵圖可以直接輸入到 FPN，用於目標檢測</li>
+                        <li><strong>與 U-Net 結合</strong>：Swin Transformer 作為編碼器，後面接上 U-Net 的解碼器，用於語義分割</li>
+                    </ul>
+                    <p>
+                        這種設計讓 Swin Transformer 能夠在各種視覺任務上發揮作用，而不需要重新設計整個架構。
+                    </p>
+                </div>
             </div>
 
             <!-- Quote Block 金句 -->

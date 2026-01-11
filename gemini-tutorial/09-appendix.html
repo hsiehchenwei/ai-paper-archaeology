@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>附錄 - Gemini 論文深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="hero-section" style="background-image: url('images/generated/hero_09_appendix.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>技術細節與範例</h1>
+                <p class="hero-subtitle">深入理解 Gemini 的技術實現</p>
+                <div class="hero-meta">Gemini 論文深度解析 · 第 9 章</div>
+            </div>
+        </div>
+
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Gemini 深度解析</a>
+            <span>/</span>
+            <span class="current">第 9 章：附錄</span>
+        </nav>
+
+        <div class="story-container">
+            <p class="drop-cap">
+                附錄部分包含了 Gemini 論文的技術細節、模型卡片、基準測試詳情和定性範例。這些內容為深入理解 Gemini 的技術實現和實際應用提供了重要的補充資訊。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>Gemini Ultra 模型卡片</h2>
+
+            <div class="key-concept">
+                <h4>💡 模型卡片的重要性</h4>
+                <p>
+                    模型卡片提供了模型的詳細技術規格、訓練資訊、評估結果和使用指南。這對於理解模型的適用範圍、局限性和最佳實踐非常重要。
+                </p>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>MMLU Chain-of-Thought 比較</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        We find Gemini Ultra achieves highest accuracy when used in combination with a chain-of-thought prompting approach that accounts for model uncertainty. The model produces a chain of thought with k samples, for example 8 or 32. If there is a consensus above a preset threshold, it selects this answer, otherwise it reverts to a greedy sample based on maximum likelihood choice without chain of thought.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        我們發現 Gemini Ultra 在結合考慮模型不確定性的 chain-of-thought 提示方法時達到最高準確率。模型產生 k 個樣本的 chain of thought，例如 8 或 32 個。如果共識超過預設閾值，它選擇這個答案，否則它回退到基於最大似然選擇的貪婪樣本，不使用 chain of thought。
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>能力與基準測試任務</h2>
+
+            <div class="key-concept">
+                <h4>💡 評估基準的全面性</h4>
+                <p>
+                    Gemini 在超過 50 個基準測試上進行了評估，涵蓋了六個主要能力領域：
+                </p>
+                <ul>
+                    <li><strong>事實性</strong>：開放/封閉書籍檢索和問答任務</li>
+                    <li><strong>長上下文</strong>：長篇摘要、檢索和問答任務</li>
+                    <li><strong>數學/科學</strong>：數學問題解決、定理證明、科學考試</li>
+                    <li><strong>推理</strong>：算術、科學和常識推理任務</li>
+                    <li><strong>多語言</strong>：翻譯、摘要和多語言推理任務</li>
+                    <li><strong>多模態</strong>：圖像、影片、音訊理解任務</li>
+                </ul>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>定性範例</h2>
+
+            <p>
+                論文附錄中包含了大量 Gemini 模型的實際應用範例，展示了模型在各種任務中的表現：
+            </p>
+
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>📚 教育應用</h4>
+                    <p>物理問題解答驗證、數學問題求解、科學概念解釋</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>🎨 創意生成</h4>
+                    <p>圖像生成、文字創作、多模態內容創作</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>🔍 資訊處理</h4>
+                    <p>圖表理解、文檔分析、多模態摘要</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>🌍 多語言應用</h4>
+                    <p>翻譯、跨語言理解、多語言內容生成</p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>技術細節</h2>
+
+            <div class="key-concept">
+                <h4>💡 關鍵技術創新</h4>
+                <ul>
+                    <li><strong>統一多模態架構</strong>：從設計之初就支持多模態</li>
+                    <li><strong>高效注意力機制</strong>：多查詢注意力等優化</li>
+                    <li><strong>大規模訓練基礎設施</strong>：TPU SuperPods、跨資料中心訓練</li>
+                    <li><strong>創新故障恢復</strong>：記憶體冗餘副本、97% 訓練效率</li>
+                    <li><strong>後訓練方法</strong>：SFT、RM、RLHF 的綜合應用</li>
+                </ul>
+            </div>
+
+            <div class="quote-block">
+                「技術細節和範例為深入理解 Gemini 提供了重要補充」
+            </div>
+
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>模型卡片</strong>：詳細的技術規格和使用指南</li>
+                    <li><strong>MMLU CoT 比較</strong>：Chain-of-Thought 方法的最佳實踐</li>
+                    <li><strong>基準測試詳情</strong>：超過 50 個基準測試的全面評估</li>
+                    <li><strong>定性範例</strong>：實際應用場景的展示</li>
+                    <li><strong>技術細節</strong>：關鍵技術創新的深入解析</li>
+                    <li><strong>參考資料</strong>：完整的參考文獻和相關資源</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="chapter-nav">
+            <a href="08-conclusion.html" class="prev">← 上一章：討論與結論</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="#" class="next disabled">下一章 →</a>
+        </div>
+    </div>
+</body>
+</html>

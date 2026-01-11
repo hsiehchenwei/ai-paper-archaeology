@@ -57,7 +57,7 @@
 
             <!-- AI 生成概念圖 -->
             <div class="figure figure-ai">
-                <img src="images/generated/concept_hierarchical_01.png" alt="層次化架構概念圖">
+                <img src="images/generated/concept_hierarchical_01.jpg" alt="層次化架構概念圖">
                 <div class="caption">
                     💡 <strong>AI 圖解：</strong>層次化特徵圖構建——從小的 patch 逐步合併成大的特徵圖，就像俄羅斯套娃一樣
                 </div>
@@ -87,6 +87,146 @@
                         <strong>翻譯</strong><br><br>
                         在現有的基於 Transformer 的模型中，token 都是固定尺度的，這個特性不適合這些視覺應用。另一個差異是圖像中像素的解析度遠高於文字段落中的詞彙。存在許多視覺任務，如語義分割，需要在像素級別進行密集預測，這對於 Transformer 在高解析度圖像上來說是難以處理的，因為其自注意力的計算複雜度相對於圖像大小是二次的。
                     </div>
+                </div>
+            </div>
+
+            <!-- 三個核心概念的詳細解釋 -->
+            <div class="key-concept" style="background: linear-gradient(135deg, #fef3c720 0%, #fde68a20 100%); border-left: 5px solid #f59e0b; margin: 30px 0; padding: 25px;">
+                <h4>🔍 三個核心概念的深度解析</h4>
+                
+                <!-- AI 生成概念圖 -->
+                <div class="figure figure-ai" style="margin: 25px 0;">
+                    <img src="images/generated/swin_fixed_scale_tokens_explanation.jpg" alt="三個核心概念視覺化圖解">
+                    <div class="caption">
+                        💡 <strong>AI 圖解：</strong> 三個核心概念的視覺化說明——固定尺度 tokens、高解析度像素、語義分割密集預測
+                    </div>
+                </div>
+                
+                <div style="margin: 25px 0;">
+                    <h5>1️⃣ Token 都是固定尺度的（Fixed Scale Tokens）</h5>
+                    
+                    <p><strong>📝 文字解釋：</strong></p>
+                    <p>
+                        在 NLP 的 Transformer 中，每個 token（詞彙）代表一個「原子單位」，例如「我」、「愛」、「AI」都是同樣大小的 token。
+                        但在視覺任務中，物體的大小差異極大：一隻螞蟻可能只佔圖片的 0.01%，而一棟建築物可能佔據 50% 的畫面。
+                    </p>
+                    
+                    <p><strong>🏠 生活類比：</strong></p>
+                    <p>
+                        想像你在閱讀一本書，每個字的大小都一樣（固定尺度的 token）。但當你看一張照片時，照片中的物體大小完全不同：
+                        遠處的山可能很小，近處的花朵可能很大。如果我們用「固定大小」的方式來處理這些物體，就像用同樣大小的框框來框住螞蟻和大象一樣不合理。
+                    </p>
+                    
+                    <p><strong>⚙️ 工程上的例子：</strong></p>
+                    <p>
+                        在 ViT 中，一張 224×224 的圖片被切成 16×16 的 patches，每個 patch 都是同樣大小（16×16 像素）。
+                        這意味著：
+                    </p>
+                    <ul>
+                        <li>一個佔據 100×100 像素的大物體會被切成多個 patches，模型需要「拼湊」這些 patches 才能理解這是一個完整的物體</li>
+                        <li>一個只佔 5×5 像素的小物體可能只佔一個 patch 的一小部分，資訊可能被稀釋</li>
+                        <li>模型無法像 CNN 那樣自然地處理「多尺度」的物體（CNN 透過不同大小的卷積核來處理不同尺度的特徵）</li>
+                    </ul>
+                </div>
+
+                <div style="margin: 25px 0; padding-top: 25px; border-top: 2px dashed #e5e7eb;">
+                    <h5>2️⃣ 圖像中像素的解析度遠高於文字段落中的詞彙（High Resolution Pixels）</h5>
+                    
+                    <p><strong>📝 文字解釋：</strong></p>
+                    <p>
+                        一段文字可能只有幾十到幾百個詞彙（tokens），但一張高解析度圖片可能有數百萬個像素。
+                        例如：一張 1920×1080 的圖片有 2,073,600 個像素，而一段 500 字的文章可能只有 500-1000 個 tokens。
+                    </p>
+                    
+                    <p><strong>🏠 生活類比：</strong></p>
+                    <p>
+                        想像你在閱讀一本小說，整本書可能有 10 萬個字（詞彙），但一張 4K 照片可能有 800 萬個像素點。
+                        如果用處理文字的方式（每個 token 都要和其他所有 token 計算注意力），處理這張照片就像要讓每個像素都「認識」其他 800 萬個像素，這在計算上幾乎不可能。
+                    </p>
+                    
+                    <p><strong>⚙️ 工程上的例子：</strong></p>
+                    <p>
+                        <strong>文字處理（BERT/GPT）：</strong>
+                    </p>
+                    <ul>
+                        <li>一段文字：500 個 tokens</li>
+                        <li>Self-Attention 計算：500 × 500 = 250,000 次計算</li>
+                        <li>這是可以接受的計算量</li>
+                    </ul>
+                    
+                    <p><strong>圖像處理（ViT）：</strong></p>
+                    <ul>
+                        <li>一張 224×224 圖片 → 196 個 patches（16×16 切分）</li>
+                        <li>Self-Attention 計算：196 × 196 = 38,416 次計算（還可以接受）</li>
+                        <li>但如果是 1024×1024 的高解析度圖片 → 4,096 個 patches</li>
+                        <li>Self-Attention 計算：4,096 × 4,096 = <strong>16,777,216 次計算</strong>（計算量暴增！）</li>
+                    </ul>
+                    
+                    <p>
+                        這就是為什麼 ViT 在處理高解析度圖片時會遇到計算瓶頸。Swin Transformer 透過「局部視窗」機制，將計算限制在每個視窗內，讓計算複雜度從 O(n²) 降為 O(n)。
+                    </p>
+                </div>
+
+                <div style="margin: 25px 0; padding-top: 25px; border-top: 2px dashed #e5e7eb;">
+                    <h5>3️⃣ 語義分割需要在像素級別進行密集預測（Dense Prediction at Pixel Level）</h5>
+                    
+                    <p><strong>📝 文字解釋：</strong></p>
+                    <p>
+                        語義分割（Semantic Segmentation）是一個「密集預測」任務，需要對圖片的<strong>每一個像素</strong>都進行分類，判斷這個像素屬於哪個類別（例如：天空、建築、道路、車輛等）。
+                        這與圖像分類不同：分類只需要判斷「整張圖片是什麼」，而分割需要判斷「每個像素是什麼」。
+                    </p>
+                    
+                    <p><strong>🏠 生活類比：</strong></p>
+                    <p>
+                        <strong>圖像分類</strong>就像回答「這張照片裡有什麼？」（答案：一隻貓）
+                        <br>
+                        <strong>語義分割</strong>就像用不同顏色的筆，把照片中的每個區域都標記出來：
+                    </p>
+                    <ul>
+                        <li>藍色區域 = 天空</li>
+                        <li>綠色區域 = 草地</li>
+                        <li>灰色區域 = 道路</li>
+                        <li>紅色區域 = 車輛</li>
+                    </ul>
+                    <p>
+                        這就像是在一張地圖上，把每個區域都標上不同的顏色和名稱，需要「逐像素」地進行標記。
+                    </p>
+                    
+                    <p><strong>⚙️ 工程上的例子：</strong></p>
+                    <p>
+                        <strong>圖像分類任務（ImageNet）：</strong>
+                    </p>
+                    <ul>
+                        <li>輸入：224×224 圖片</li>
+                        <li>輸出：1 個類別標籤（例如：「貓」）</li>
+                        <li>預測數量：1 個</li>
+                    </ul>
+                    
+                    <p><strong>語義分割任務（Cityscapes）：</strong></p>
+                    <ul>
+                        <li>輸入：1024×512 圖片</li>
+                        <li>輸出：524,288 個像素標籤（1024 × 512 = 524,288）</li>
+                        <li>預測數量：524,288 個（每個像素都要預測）</li>
+                    </ul>
+                    
+                    <p>
+                        <strong>為什麼 ViT 難以處理？</strong>
+                    </p>
+                    <ul>
+                        <li>ViT 只產生<strong>單一低解析度的特徵圖</strong>（例如：14×14 = 196 個特徵點）</li>
+                        <li>但語義分割需要<strong>高解析度的預測</strong>（例如：1024×512 = 524,288 個預測點）</li>
+                        <li>ViT 缺乏像 CNN 那樣的「層次化特徵金字塔」，無法自然地從低解析度特徵「上採樣」到高解析度預測</li>
+                        <li>如果強行用 ViT 處理高解析度圖片，計算複雜度會是 O(n²)，對於 1024×1024 的圖片來說，這幾乎不可行</li>
+                    </ul>
+                    
+                    <p>
+                        <strong>Swin Transformer 的解決方案：</strong>
+                    </p>
+                    <ul>
+                        <li>構建<strong>層次化特徵圖</strong>：從 56×56 → 28×28 → 14×14 → 7×7，就像 CNN 的特徵金字塔</li>
+                        <li>使用<strong>局部視窗</strong>計算注意力，將複雜度從 O(n²) 降為 O(n)</li>
+                        <li>可以自然地與 FPN（Feature Pyramid Network）或 U-Net 結合，進行密集預測任務</li>
+                    </ul>
                 </div>
             </div>
 

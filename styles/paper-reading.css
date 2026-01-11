@@ -180,7 +180,7 @@
 }
 
 .original-quote::before {
-  content: """;
+  content: "“";
   position: absolute;
   top: -20px;
   left: 20px;
@@ -188,10 +188,6 @@
   color: rgba(59, 130, 246, 0.15); /* mag-primary with opacity */
   font-family: serif;
   line-height: 1;
-}
-
-.original-quote strong {
-  color: var(--mag-primary);
 }
 
 .original-quote strong {
@@ -348,6 +344,122 @@
   white-space: pre-wrap;
 }
 
+/* --- 共用 Utility Classes (禁止使用 inline style 背景色) --- */
+/* 
+  重要規則：所有背景色相關的樣式都必須使用這些 class，禁止使用 inline style。
+  每個 class 都同時設定了 background 和 color，確保對比度。
+*/
+
+/* 程式碼區塊 - 深色背景（預設） */
+.code-block {
+  background: #1e293b; /* Slate 800 */
+  color: #f1f5f9;      /* Slate 100 */
+  padding: 15px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+  margin: 20px 0;
+}
+
+.code-block code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  border: none;
+}
+
+/* 程式碼區塊 - 淺色背景（用於需要淺色主題時） */
+.code-block-light {
+  background: #f8f9fa; /* Gray 50 */
+  color: #2c3e50;      /* Gray 800 - 明確深色文字 */
+  padding: 15px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+  margin: 20px 0;
+}
+
+.code-block-light code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  border: none;
+}
+
+/* 數學公式區塊 */
+.math-formula {
+  background: #f8f9fa; /* Gray 50 */
+  color: #2c3e50;      /* Gray 800 - 明確深色文字 */
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  font-family: 'JetBrains Mono', monospace;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-sm);
+}
+
+/* 範例區塊（藍色主題） */
+.example-box {
+  background: #eff6ff; /* Blue 50 */
+  color: #1e40af;     /* Blue 800 */
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  border: 1px solid #bfdbfe; /* Blue 200 */
+  box-shadow: var(--shadow-sm);
+}
+
+/* 強調區塊（黃色主題） */
+.highlight-box {
+  background: #fef3c7; /* Amber 100 */
+  color: #92400e;      /* Amber 800 */
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  border: 1px solid #fcd34d; /* Amber 300 */
+  box-shadow: var(--shadow-sm);
+}
+
+/* 通用表格樣式（確保所有表格標題都有正確對比度） */
+/* 重要：禁止使用 inline style 設定表格背景色或文字顏色 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 30px 0;
+  box-shadow: var(--shadow-sm);
+  background: white;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+table th {
+  background: var(--mag-primary); /* Blue 500 - 深色背景 */
+  color: white;                   /* 白色文字 - 確保對比度 */
+  padding: 15px 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid var(--mag-primary-dark);
+}
+
+table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e5e7eb;
+  color: var(--mag-text); /* 確保文字顏色明確 */
+}
+
+table tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+table tr:last-child td {
+  border-bottom: none;
+}
+
 /* Table Styles Override */
 .arch-table,
 .results-table {
@@ -433,31 +545,63 @@
 }
 
 /* --- 5. Navigation --- */
-.navigation {
+.navigation,
+.chapter-navigation {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-top: 60px;
   padding-top: 30px;
   border-top: 1px solid var(--mag-border);
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
-.nav-button {
+.nav-button,
+.nav-link {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   padding: 12px 24px;
   background: white;
   border: 1px solid var(--mag-border);
   border-radius: var(--radius-md);
   color: var(--text-main);
   font-weight: 600;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  flex: 1;
+  min-width: 140px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
-.nav-button:hover {
+.nav-button:hover,
+.nav-link:hover {
   background: var(--mag-primary);
   color: white;
   border-color: var(--mag-primary);
   text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* 特別處理中間的「返回目錄」按鈕 */
+.nav-link[href*="index"] {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-secondary);
+  box-shadow: none;
+  flex: 0 0 auto;
+  min-width: auto;
+}
+
+.nav-link[href*="index"]:hover {
+  background: var(--mag-bg-light);
+  color: var(--mag-primary);
+  border-color: transparent;
+  transform: none;
+  box-shadow: none;
 }
 
 .chapter-summary {

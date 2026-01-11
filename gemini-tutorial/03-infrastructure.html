@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>訓練基礎設施 - Gemini 論文深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section" style="background-image: url('images/generated/hero_03_infrastructure.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>超大規模訓練的工程奇蹟</h1>
+                <p class="hero-subtitle">從 85% 到 97% 的訓練效率提升</p>
+                <div class="hero-meta">Gemini 論文深度解析 · 第 3 章</div>
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Gemini 深度解析</a>
+            <span>/</span>
+            <span class="current">第 3 章：訓練基礎設施</span>
+        </nav>
+
+        <div class="story-container">
+            <!-- Drop Cap 開場 -->
+            <p class="drop-cap">
+                訓練 Gemini Ultra 這樣規模的模型，需要的不僅僅是強大的硬體，更需要一套能夠應對超大規模挑戰的基礎設施。Google 使用了數千個 TPUv4 加速器，跨越多個資料中心，這帶來了前所未有的工程挑戰。但通過創新的架構設計和故障恢復機制，他們將訓練效率從 85% 提升到了 97%，這是一個令人驚艷的工程成就。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- TPU 基礎設施 -->
+            <h2>TPU SuperPods：超大規模計算單元</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        We trained Gemini models using TPUv5e and TPUv4, depending on their sizes and configuration. Training Gemini Ultra used a large fleet of TPUv4 accelerators owned by Google across multiple datacenters. This represents a significant increase in scale over our prior flagship model PaLM-2 which presented new infrastructure challenges.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        我們使用 TPUv5e 和 TPUv4 訓練 Gemini 模型，具體取決於它們的尺寸和配置。訓練 Gemini Ultra 使用了 Google 擁有的跨多個資料中心的大量 TPUv4 加速器。這代表著相較於我們之前的旗艦模型 PaLM-2，規模有了顯著增加，這帶來了新的基礎設施挑戰。
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI 生成概念圖 -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept_infrastructure_03.png" alt="分散式 TPU 集群概念圖">
+                <div class="caption">
+                    💡 <strong>AI 圖解：</strong>超大規模分散式 TPU 集群
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 TPU SuperPod 架構</h4>
+                <p>
+                    TPUv4 加速器部署在「SuperPods」中，每個 SuperPod 包含 4096 個晶片，連接到專用的光學交換機。這個交換機可以在約 10 秒內將 4x4x4 的晶片立方體動態重新配置為任意的 3D 環面拓撲。對於 Gemini Ultra，團隊決定在每個 SuperPod 中保留少量立方體，以支持熱備份和滾動維護。
+                </p>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 網路架構 -->
+            <h2>跨資料中心的網路連接</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        TPU accelerators primarily communicate over the high speed inter-chip-interconnect, but at Gemini Ultra scale, we combine SuperPods in multiple datacenters using Google's intra-cluster and inter-cluster network. Google's network latencies and bandwidths are sufficient to support the commonly used synchronous training paradigm, exploiting model parallelism within superpods and data-parallelism across superpods.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        TPU 加速器主要通過高速晶片間互連進行通信，但在 Gemini Ultra 的規模下，我們使用 Google 的集群內和集群間網路在多個資料中心中組合 SuperPod。Google 的網路延遲和頻寬足以支持常用的同步訓練範式，在 SuperPod 內利用模型並行，在 SuperPod 間利用資料並行。
+                    </div>
+                </div>
+            </div>
+
+            <div class="analogy-section">
+                <div class="analogy-card life">
+                    <h4>🏠 生活類比</h4>
+                    <p>
+                        想像一個巨大的交響樂團，樂手們分佈在多個音樂廳中，但通過先進的音訊系統，他們能夠完美同步演奏。每個 SuperPod 就像一個音樂廳，而 Google 的網路就像連接這些音樂廳的音訊系統，確保所有「樂手」（TPU）能夠協調一致地工作。
+                    </p>
+                </div>
+                <div class="analogy-card engineering">
+                    <h4>⚙️ 工程類比</h4>
+                    <p>
+                        這類似於微服務架構中的服務網格（Service Mesh）。每個 SuperPod 是一個獨立的服務單元，通過高速網路連接，實現：
+                        <ul>
+                            <li><strong>模型並行</strong>：在 SuperPod 內部，模型的不同部分分佈在不同 TPU 上</li>
+                            <li><strong>資料並行</strong>：不同的 SuperPod 處理不同的資料批次</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 單控制器編程模型 -->
+            <h2>Jax 和 Pathways：簡化的編程模型</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        The `single controller' programming model of Jax and Pathways allows a single Python process to orchestrate the entire training run, dramatically simplifying the development workflow. The GSPMD partitioner in the XLA compiler partitions the training step computation, and the MegaScale XLA compiler pass statically schedules appropriate collectives so that they maximally overlap with the computation with very little variation in step time.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        Jax 和 Pathways 的「單控制器」編程模型允許單個 Python 進程協調整個訓練運行，大幅簡化開發工作流程。XLA 編譯器中的 GSPMD 分區器對訓練步驟計算進行分區，而 MegaScale XLA 編譯器傳遞靜態調度適當的集合操作，使它們與計算最大程度重疊，步驟時間變化很小。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 為什麼單控制器模型很重要？</h4>
+                <p>
+                    傳統的分散式訓練需要複雜的協調邏輯，而 Jax 和 Pathways 的單控制器模型讓開發者可以用單一 Python 進程來控制整個訓練過程。這就像：
+                </p>
+                <ul>
+                    <li>從「指揮多個樂團」變成「指揮一個大樂團」</li>
+                    <li>從「管理多個微服務」變成「管理一個統一系統」</li>
+                    <li>大幅簡化了調試和開發流程</li>
+                </ul>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 故障恢復機制 -->
+            <h2>創新的故障恢復：從 85% 到 97% 的效率提升</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Maintaining a high goodput at this scale would have been impossible using the conventional approach of periodic checkpointing of weights to persistent cluster storage. For Gemini models, we instead made use of redundant in-memory copies of the model state, and on any unplanned hardware failures, we rapidly recover directly from an intact model replica. Compared to both PaLM and PaLM-2, this provided a substantial speedup in recovery time, despite the significantly larger training resources being used. As a result, the overall goodput for the largest-scale training job increased from 85\% to 97\%.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        在這種規模下，使用傳統的定期將權重檢查點保存到持久集群存儲的方法，不可能維持高吞吐量。對於 Gemini 模型，我們改為使用模型狀態的冗餘記憶體副本，在任何非計劃的硬體故障時，我們直接從完整的模型副本快速恢復。與 PaLM 和 PaLM-2 相比，儘管使用了顯著更大的訓練資源，這仍提供了恢復時間的大幅加速。結果，最大規模訓練作業的整體吞吐量從 85% 增加到 97%。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 Goodput：真正的訓練效率</h4>
+                <p>
+                    <strong>Goodput</strong> 定義為：在訓練作業的總時間中，用於計算有用新步驟的時間比例。
+                </p>
+                <p>
+                    傳統方法需要定期將模型權重保存到磁碟，這會：
+                </p>
+                <ul>
+                    <li>中斷訓練流程</li>
+                    <li>消耗大量 I/O 資源</li>
+                    <li>恢復時需要從磁碟讀取，耗時較長</li>
+                </ul>
+                <p>
+                    Gemini 的創新方法：
+                </p>
+                <ul>
+                    <li>在記憶體中維護冗餘的模型副本</li>
+                    <li>硬體故障時直接從記憶體恢復</li>
+                    <li>大幅減少恢復時間，提升整體效率</li>
+                </ul>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 靜默資料損壞 -->
+            <h2>應對靜默資料損壞（SDC）</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Training at unprecedented scale invariably surfaces new and interesting systems failure modes - and in this instance one of the problems that we needed to address was that of ``Silent Data Corruption (SDC)''. Although these are extremely rare, the scale of Gemini models means that we can expect SDC events to impact training every week or two. Rapidly detecting and removing faulty hardware required several new techniques that exploit deterministic replay to isolate incorrect computations, combined with proactive SDC scanners on idle machines and hot standbys.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        在史無前例的規模下進行訓練，不可避免地會出現新的和有趣的系統故障模式——在這種情況下，我們需要解決的問題之一是「靜默資料損壞（SDC）」。雖然這些情況極其罕見，但 Gemini 模型的規模意味著我們可以預期 SDC 事件每週或每兩週影響訓練一次。快速檢測和移除故障硬體需要幾種新技術，利用確定性重放來隔離不正確的計算，結合空閒機器上的主動 SDC 掃描器和熱備份。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 靜默資料損壞的挑戰</h4>
+                <p>
+                    在超大規模系統中，硬體故障是不可避免的。靜默資料損壞（SDC）是一種特別棘手的問題，因為：
+                </p>
+                <ul>
+                    <li>它不會導致系統崩潰，但會產生錯誤的計算結果</li>
+                    <li>在 Gemini 的規模下，每週或每兩週就會發生一次</li>
+                    <li>如果不及時發現，會污染整個訓練過程</li>
+                </ul>
+                <p>
+                    Google 的解決方案：
+                </p>
+                <ul>
+                    <li><strong>確定性重放</strong>：能夠重現計算過程，找出錯誤來源</li>
+                    <li><strong>主動掃描</strong>：在空閒機器上運行 SDC 掃描器</li>
+                    <li><strong>熱備份</strong>：隨時準備替換故障硬體</li>
+                </ul>
+            </div>
+
+            <!-- Quote Block 金句 -->
+            <div class="quote-block">
+                「從 85% 到 97% 的效率提升，展現了工程創新的力量」
+            </div>
+
+            <!-- 本章重點回顧 -->
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>TPU SuperPods</strong>：每個 SuperPod 包含 4096 個 TPU 晶片，支持動態拓撲重配置</li>
+                    <li><strong>跨資料中心訓練</strong>：使用 Google 的高速網路連接多個資料中心的 SuperPod</li>
+                    <li><strong>單控制器模型</strong>：Jax 和 Pathways 簡化了大規模訓練的編程複雜度</li>
+                    <li><strong>創新故障恢復</strong>：使用記憶體冗餘副本，將訓練效率從 85% 提升到 97%</li>
+                    <li><strong>SDC 應對</strong>：通過確定性重放、主動掃描和熱備份機制，快速檢測和處理靜默資料損壞</li>
+                    <li><strong>完全確定性</strong>：整個基礎設施的確定性設計，使故障診斷和修復變得快速可靠</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="chapter-nav">
+            <a href="02-architecture.html" class="prev">← 上一章：模型架構</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="04-dataset.html" class="next">下一章：預訓練資料集 →</a>
+        </div>
+    </div>
+</body>
+</html>

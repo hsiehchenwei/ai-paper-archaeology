@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>預訓練資料集 - Gemini 論文深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="hero-section" style="background-image: url('images/generated/hero_04_dataset.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>多模態多語言的知識海洋</h1>
+                <p class="hero-subtitle">品質勝於數量的資料策略</p>
+                <div class="hero-meta">Gemini 論文深度解析 · 第 4 章</div>
+            </div>
+        </div>
+
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Gemini 深度解析</a>
+            <span>/</span>
+            <span class="current">第 4 章：預訓練資料集</span>
+        </nav>
+
+        <div class="story-container">
+            <p class="drop-cap">
+                Gemini 模型的強大能力，不僅來自於架構設計，更來自於精心策劃的多模態、多語言訓練資料集。這個資料集包含了來自網頁文件、書籍、程式碼的文字資料，以及圖像、音訊和影片資料。但更重要的是，Google 採用了嚴格的品質過濾機制，確保資料的品質和安全性。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>多模態多語言的資料組成</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Gemini models are trained on a dataset that is both multimodal and multilingual. Our pre-training dataset uses data from web documents, books, and code, and includes image, audio, and video data.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        Gemini 模型在一個既多模態又多語言的資料集上訓練。我們的預訓練資料集使用來自網頁文件、書籍和程式碼的資料，並包括圖像、音訊和影片資料。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 為什麼多模態多語言很重要？</h4>
+                <p>
+                    真實世界的資訊是多模態的：我們同時看到圖像、聽到聲音、讀到文字。只有當模型在訓練時就接觸到這種多模態的資料，它才能真正理解不同模態之間的關係，進行跨模態推理。
+                </p>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>SentencePiece Tokenizer：高效的詞彙處理</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        We use the SentencePiece tokenizer and find that training the tokenizer on a large sample of the entire training corpus improves the inferred vocabulary and subsequently improves model performance. For example, we find Gemini models can efficiently tokenize non-Latin scripts which can, in turn, benefit model quality as well as training and inference speed.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        我們使用 SentencePiece tokenizer，發現在整個訓練語料庫的大樣本上訓練 tokenizer 可以改善推斷的詞彙，進而改善模型性能。例如，我們發現 Gemini 模型可以高效地對非拉丁文字進行 tokenize，這反過來可以改善模型品質以及訓練和推理速度。
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>資料品質過濾：品質勝於數量</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        We apply quality filters to all datasets, using both heuristic rules and model-based classifiers. We also perform safety filtering to remove harmful content based on our policies. To maintain the integrity of evaluations, we search for and remove any evaluation data that may have been in our training corpus before using data for training.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        我們對所有資料集應用品質過濾器，使用啟發式規則和基於模型的分類器。我們還執行安全過濾，根據我們的政策移除有害內容。為了維護評估的完整性，我們在將資料用於訓練之前，搜尋並移除可能出現在訓練語料庫中的任何評估資料。
+                    </div>
+                </div>
+            </div>
+
+            <div class="analogy-section">
+                <div class="analogy-card life">
+                    <h4>🏠 生活類比</h4>
+                    <p>
+                        就像一個嚴格的圖書館管理員，不僅要確保書籍的數量，更要確保書籍的品質。他會檢查每本書的內容是否準確、是否有價值，並移除那些不適合的書籍。這樣才能建立一個高品質的知識庫。
+                    </p>
+                </div>
+                <div class="analogy-card engineering">
+                    <h4>⚙️ 工程類比</h4>
+                    <p>
+                        在軟體開發中，這類似於代碼審查（Code Review）和品質保證（QA）流程。我們不僅要確保代碼能夠運行，還要確保代碼的品質、安全性和可維護性。同樣，訓練資料也需要經過嚴格的品質檢查。
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>分階段訓練：動態調整資料混合</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        The final data mixtures and weights were determined through ablations on smaller models. We stage training to alter the mixture composition during training – increasing the weight of domain-relevant data towards the end of training.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        最終的資料混合和權重是通過在較小模型上進行消融實驗確定的。我們分階段訓練，在訓練過程中改變混合組成——在訓練結束時增加領域相關資料的權重。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 分階段訓練的智慧</h4>
+                <p>
+                    就像學習一門新語言，我們會先學習基礎詞彙和語法，然後逐漸學習更專業的內容。Gemini 的訓練也是如此：
+                </p>
+                <ul>
+                    <li><strong>早期階段</strong>：廣泛接觸各種類型的資料，建立基礎理解能力</li>
+                    <li><strong>後期階段</strong>：增加特定領域資料的權重，提升專業能力</li>
+                </ul>
+            </div>
+
+            <div class="quote-block">
+                「資料品質是高性能模型的關鍵因素」
+            </div>
+
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>多模態多語言</strong>：包含文字、圖像、音訊、影片，支持多種語言</li>
+                    <li><strong>SentencePiece Tokenizer</strong>：在整個語料庫上訓練，支持非拉丁文字的高效處理</li>
+                    <li><strong>品質過濾</strong>：使用啟發式規則和模型分類器，確保資料品質</li>
+                    <li><strong>安全過濾</strong>：移除有害內容，確保模型安全性</li>
+                    <li><strong>評估資料去汙</strong>：移除訓練語料中的評估資料，確保評估的公正性</li>
+                    <li><strong>分階段訓練</strong>：動態調整資料混合，後期增加領域相關資料權重</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="chapter-nav">
+            <a href="03-infrastructure.html" class="prev">← 上一章：訓練基礎設施</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="05-evaluation.html" class="next">下一章：評估體系 →</a>
+        </div>
+    </div>
+</body>
+</html>
