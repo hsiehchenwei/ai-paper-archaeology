@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高效計算 - Swin Transformer 深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section" style="background-image: url('images/generated/hero_05_efficient_computation.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>Cyclic-Shift：巧妙的批次計算</h1>
+                <p class="hero-subtitle">從 2.25 倍開銷到高效實現</p>
+                <div class="hero-meta">Swin Transformer 深度解析 · 第 5 章</div>
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Swin Transformer 深度解析</a>
+            <span>/</span>
+            <span class="current">第 5 章：高效計算</span>
+        </nav>
+
+        <div class="story-container">
+            <!-- Drop Cap 開場 -->
+            <p class="drop-cap">
+                Shifted Windows 帶來了一個新的挑戰：移位後的視窗數量會增加，而且有些視窗會變小。如果簡單地用 padding 填充，計算量會增加 2.25 倍。Swin Transformer 提出了一個巧妙的解決方案：Cyclic-Shift（循環移位）。通過將特徵圖循環移位，然後使用 masking 機制，既保持了批次計算的效率，又實現了移位視窗的效果。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>移位視窗的計算挑戰</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        An issue with shifted window partitioning is that it will result in more windows, from $\lceil \frac{h}{M}\rceil  \times \lceil\frac{w}{M}\rceil$  to $(\lceil \frac{h}{M}\rceil +1) \times (\lceil\frac{w}{M}\rceil + 1)$ in the shifted configuration, and some of the windows will be smaller than $M\times M$. A naive solution is to pad the smaller windows to a size of $M\times M$ and mask out the padded values when computing attention. When the number of windows in regular partitioning is small, e.g. $2\times 2$, the increased computation with this naive solution is considerable ($2\times 2 \rightarrow 3\times 3$, which is 2.25 times greater).
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        移位視窗分區的一個問題是它會導致更多的視窗，從 $\lceil \frac{h}{M}\rceil  \times \lceil\frac{w}{M}\rceil$ 增加到移位配置中的 $(\lceil \frac{h}{M}\rceil +1) \times (\lceil\frac{w}{M}\rceil + 1)$，並且一些視窗會小於 $M\times M$。一個簡單的解決方案是將較小的視窗填充到 $M\times M$ 的大小，並在計算注意力時遮罩填充值。當常規分區中的視窗數量較少時，例如 $2\times 2$，使用這種簡單解決方案的計算增加是相當可觀的（$2\times 2 \rightarrow 3\times 3$，即 2.25 倍）。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>⚠️ 問題分析</h4>
+                <ul>
+                    <li><strong>視窗數量增加</strong>：從 2×2 增加到 3×3（增加 2.25 倍）</li>
+                    <li><strong>視窗大小不一致</strong>：有些視窗小於 M×M</li>
+                    <li><strong>簡單方案的問題</strong>：Padding 會導致計算量大幅增加</li>
+                </ul>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>Cyclic-Shift 的巧妙解決方案</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Here, we propose a <em>more efficient batch computation approach</em> by cyclic-shifting toward the top-left direction, as illustrated in Figure 4. After this shift, a batched window may be composed of several sub-windows that are not adjacent in the feature map, so a masking mechanism is employed to limit self-attention computation to within each sub-window. With the cyclic-shift, the number of batched windows remains the same as that of regular window partitioning, and thus is also efficient.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        在這裡，我們提出了一個<em>更高效的批次計算方法</em>，通過向左上方向進行循環移位，如圖 4 所示。在這個移位之後，一個批次視窗可能由特徵圖中不相鄰的幾個子視窗組成，因此使用遮罩機制將自注意力計算限制在每個子視窗內。通過循環移位，批次視窗的數量與常規視窗分區保持相同，因此也是高效的。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 原始圖片展示 -->
+            <div class="figure figure-original">
+                <img src="images/original/HiT-layer2.png" alt="高效批次計算示意圖">
+                <div class="caption">
+                    <strong>Figure 4:</strong> 高效批次計算方法示意圖（論文原圖）
+                </div>
+                <div class="explanation">
+                    <h4>🖼️ 原文圖表解析</h4>
+                    <p>
+                        這張圖展示了 Cyclic-Shift 的巧妙設計：
+                    </p>
+                    <ul>
+                        <li><strong>步驟 1</strong>：將特徵圖循環移位（cyclic-shift）</li>
+                        <li><strong>步驟 2</strong>：重新劃分視窗，現在所有視窗都是完整的 M×M 大小</li>
+                        <li><strong>步驟 3</strong>：使用 masking 機制，確保每個子視窗內的注意力計算不會跨越邊界</li>
+                        <li><strong>步驟 4</strong>：反向移位，恢復原始位置</li>
+                    </ul>
+                    <p>
+                        這種方法保持了視窗數量不變，避免了計算量的增加，同時實現了移位視窗的效果。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 雙重類比 -->
+            <div class="analogy-section">
+                <div class="analogy-card life">
+                    <h4>🏠 生活類比</h4>
+                    <p>
+                        就像拼圖重組一樣：當你有一塊不規則的拼圖區域時，你可以將整個拼圖板「循環移動」，讓不規則的部分移動到邊緣，然後重新劃分區域。這樣所有區域都是完整的矩形，處理起來更高效。處理完後，再將拼圖板「移回」原位，就得到了正確的結果。
+                    </p>
+                </div>
+                <div class="analogy-card engineering">
+                    <h4>⚙️ 工程類比</h4>
+                    <p>
+                        在系統架構上，這類似於記憶體映射（Memory Mapping）的技術：當數據在記憶體中的分佈不規則時，可以通過「虛擬記憶體映射」將不規則的數據重新組織成規則的塊，進行高效處理，然後再映射回原始位置。Cyclic-Shift 就是這種「虛擬重組」的實現，既保持了數據的邏輯關係，又優化了計算效率。
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>相對位置偏置（Relative Position Bias）</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        In computing self-attention, we follow previous works by including a relative position bias $B \in \mathbb{R}^{M^2 \times M^2}$ to each head in computing similarity:
+                        \begin{equation}
+                            \text{Attention}(Q, K, V) = \text{SoftMax}(QK^T/\sqrt{d}+B)V,
+                        \end{equation}
+                        where $Q, K, V \in \mathbb{R}^{M^2\times d}$ are the <em>query</em>, <em>key</em> and <em>value</em> matrices; $d$ is the <em>query</em>/<em>key</em> dimension, and $M^2$ is the number of patches in a window. Since the relative position along each axis lies in the range $[-M+1, M-1]$, we parameterize a smaller-sized bias matrix $\hat{B} \in \mathbb{R}^{(2M-1)\times (2M-1)}$, and values in $B$ are taken from $\hat{B}$.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        在計算自注意力時，我們遵循先前的工作，在計算相似度時為每個頭包含一個相對位置偏置 $B \in \mathbb{R}^{M^2 \times M^2}$：
+                        \begin{equation}
+                            \text{Attention}(Q, K, V) = \text{SoftMax}(QK^T/\sqrt{d}+B)V,
+                        \end{equation}
+                        其中 $Q, K, V \in \mathbb{R}^{M^2\times d}$ 是 <em>query</em>、<em>key</em> 和 <em>value</em> 矩陣；$d$ 是 <em>query</em>/<em>key</em> 維度，$M^2$ 是視窗中 patch 的數量。由於沿每個軸的相對位置在 $[-M+1, M-1]$ 範圍內，我們參數化一個較小尺寸的偏置矩陣 $\hat{B} \in \mathbb{R}^{(2M-1)\times (2M-1)}$，$B$ 中的值取自 $\hat{B}$。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 相對位置偏置的優勢</h4>
+                <ul>
+                    <li><strong>平移不變性</strong>：相對位置偏置讓模型對圖像的平移更加魯棒</li>
+                    <li><strong>參數效率</strong>：使用 $(2M-1)×(2M-1)$ 的偏置矩陣，而不是 $M^2×M^2$</li>
+                    <li><strong>實驗驗證</strong>：相比絕對位置嵌入，在密集預測任務上表現更好</li>
+                </ul>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>實驗結果：效率提升</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        We observe significant improvements over counterparts without this bias term or that use absolute position embedding, as shown in Table 4. Further adding absolute position embedding to the input as in ViT drops performance slightly, thus it is not adopted in our implementation.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        我們觀察到相比沒有偏置項或使用絕對位置嵌入的對應方法有顯著改進，如表 4 所示。進一步像 ViT 那樣在輸入中添加絕對位置嵌入會略微降低性能，因此在我們的實現中不採用。
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quote Block 金句 -->
+            <div class="quote-block">
+                「Cyclic-Shift + Masking = 高效的移位視窗實現」
+            </div>
+
+            <!-- 本章重點回顧 -->
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>移位視窗的挑戰</strong>：視窗數量增加，視窗大小不一致</li>
+                    <li><strong>Cyclic-Shift 解決方案</strong>：循環移位 + masking 機制，保持視窗數量不變</li>
+                    <li><strong>效率優勢</strong>：相比簡單 padding 方案，避免了 2.25 倍的計算增加</li>
+                    <li><strong>相對位置偏置</strong>：使用 $(2M-1)×(2M-1)$ 的參數矩陣，比絕對位置嵌入更有效</li>
+                    <li><strong>實驗驗證</strong>：在三個任務上都帶來顯著性能提升</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="chapter-nav">
+            <a href="04-shifted-windows.html" class="prev">← 上一章</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="06-experiments.html" class="next">下一章：實驗結果 →</a>
+        </div>
+    </div>
+</body>
+</html>

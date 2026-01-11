@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swin Transformer 論文深度解析 - 學習路徑導覽</title>
+    <meta name="description" content="深入解析 Swin Transformer 論文，了解其如何透過移位視窗機制解決 ViT 的局限性，成為電腦視覺領域的通用骨幹網路。">
+    <meta property="og:image" content="images/hero_swin.png">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* Specific background for this page only */
+        .hero-section {
+            background-image: url('images/hero_swin.png');
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-meta">ICCV 2021 Best Paper · Microsoft Research Asia</div>
+            <h1 class="hero-title">Swin Transformer</h1>
+            <p class="hero-subtitle">當 Transformer 遇見卷積思維：層次化架構與移位視窗，如何打造視覺領域的通用骨幹網路？</p>
+            <div style="margin-top: 2rem;">
+                <a href="#start" class="btn btn-primary" style="background: white; color: black; border: none;">開始閱讀</a>
+                <a href="https://arxiv.org/abs/2103.14030" target="_blank" style="color: white; margin-left: 20px; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.5);">原始論文 ↗</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="breadcrumb" style="margin-bottom: 3rem;">
+            <a href="../index.html">首頁</a>
+            <span class="separator">/</span>
+            <span class="current">Swin Transformer</span>
+        </div>
+
+        <div class="story-container" id="start">
+            <p class="drop-cap">
+                2020 年，Vision Transformer (ViT) 橫空出世，證明了純 Transformer 架構也能處理圖像。然而，這場革命並不完美。ViT 需要海量數據預訓練，且計算複雜度隨圖像解析度呈二次方增長，這讓它在面對高解析度任務（如物件偵測、語義分割）時顯得力不從心。
+            </p>
+            <p>
+                「我們能否結合 CNN 的高效與 Transformer 的強大？」
+            </p>
+            <p>
+                2021 年，Microsoft Research Asia 團隊給出了答案：<strong>Swin Transformer</strong>。通過引入「移位視窗 (Shifted Windows)」機制，他們成功構建了一個層次化（Hierarchical）的 Transformer，不僅恢復了線性複雜度，更在 ImageNet、COCO、ADE20K 等多個基準測試中全面超越了當時的 SOTA。
+            </p>
+            
+            <div class="section-divider">✦ ✦ ✦</div>
+
+            <p>
+                Swin Transformer 不僅僅是一個模型，它代表了卷積神經網路 (CNN) 的先驗知識（局部性、層次性）與 Transformer 的自注意力機制（全域建模）的完美融合。這篇論文的出現，標誌著 Transformer 正式具備了取代 CNN 成為通用視覺骨幹網路 (General-Purpose Vision Backbone) 的能力。
+            </p>
+        </div>
+
+        <!-- Visual Break -->
+        <div class="visual-break">
+            <img src="images/shifted_windows_art.png" alt="Shifted Windows Artistic Visualization">
+            <div class="visual-caption">Shifted Windows 機制的藝術化呈現：在不同層級間流動的資訊視窗</div>
+        </div>
+
+        <!-- Learning Path Grid -->
+        <h2 style="font-size: 2rem; font-weight: 800; margin: 4rem 0 2rem; text-align: center;">🗺️ 深度考古指南</h2>
+        
+        <div class="bento-grid">
+            <a href="01-introduction.html" class="bento-card">
+                <span class="chapter-number">CHAPTER 01</span>
+                <div class="chapter-title">引言與摘要</div>
+                <div class="chapter-desc">
+                    從 ViT 的局限性出發，理解為什麼我們需要「層次化」和「移位視窗」。Swin Transformer 的核心創新一覽。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 25 min</span>
+                    <span>⭐ 難度：中等</span>
+                </div>
+            </a>
+
+            <a href="02-related-work.html" class="bento-card">
+                <span class="chapter-number">CHAPTER 02</span>
+                <div class="chapter-title">相關工作</div>
+                <div class="chapter-desc">
+                    回顧 CNN 到 Transformer 的演進史。從 AlexNet 到 ViT，再到 Swin，看見視覺架構的傳承與突破。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 20 min</span>
+                    <span>⭐ 難度：入門</span>
+                </div>
+            </a>
+
+            <a href="03-architecture.html" class="bento-card" style="border-color: var(--primary-color); background: #f8fafc;">
+                <span class="chapter-number">CHAPTER 03</span>
+                <div class="chapter-title">整體架構详解</div>
+                <div class="chapter-desc">
+                    深入解剖 Swin 的四個 Stage。Patch Partition、Linear Embedding、Swin Transformer Block，一步步構建視覺骨幹。
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 30 min</span>
+                    <span>⭐⭐⭐ 核心章節</span>
+                </div>
+            </a>
+
+            <a href="04-shifted-windows.html" class="bento-card" style="grid-column: span 2; background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%);">
+                <span class="chapter-number">CHAPTER 04 · THE CORE INNOVATION</span>
+                <div class="chapter-title">移位視窗 (Shifted Windows)</div>
+                <div class="chapter-desc">
+                    這是 Swin 的靈魂。如何通過簡單的視窗移動，實現跨視窗的資訊交流？如何在保持線性複雜度的同時，獲得全域感受野？
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 30 min</span>
+                    <span>⭐⭐⭐ 必讀</span>
+                </div>
+            </a>
+
+            <a href="05-efficient-computation.html" class="bento-card">
+                <span class="chapter-number">CHAPTER 05</span>
+                <div class="chapter-title">高效計算技巧</div>
+                <div class="chapter-desc">
+                    Cyclic-Shift 與 Masking 的巧妙設計。如何用程式碼高效實現移位視窗，避免不必要的計算浪費？
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 25 min</span>
+                    <span>⭐⭐⭐ 進階</span>
+                </div>
+            </a>
+
+            <a href="06-experiments.html" class="bento-card">
+                <span class="chapter-number">CHAPTER 06</span>
+                <div class="chapter-title">實驗與評測</div>
+                <div class="chapter-desc">
+                    ImageNet 分類、COCO 物件偵測、ADE20K 語義分割。Swin 如何在三大戰場全面擊敗 ResNet 和 DeiT？
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 30 min</span>
+                    <span>⭐ 數據分析</span>
+                </div>
+            </a>
+
+            <a href="07-conclusion.html" class="bento-card">
+                <span class="chapter-number">CHAPTER 07</span>
+                <div class="chapter-title">結論與展望</div>
+                <div class="chapter-desc">
+                    Swin Transformer 對未來統一架構的啟示。從這裡出發，我們將走向何方？
+                </div>
+                <div class="chapter-meta">
+                    <span>⏱️ 20 min</span>
+                    <span>⭐ 總結</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Key Concepts -->
+        <div class="story-container" style="max-width: 1000px; margin-top: 5rem;">
+            <h3 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 2rem; text-align: center;">🔑 核心概念速覽</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                <div style="padding: 1.5rem; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">Hierarchical Maps</h4>
+                    <p style="font-size: 0.95rem; color: #666;">
+                        像 CNN 一樣，隨著層數加深，特徵圖尺寸變小，感受野變大。這讓 Swin 適合處理多尺度任務（如偵測）。
+                    </p>
+                </div>
+                <div style="padding: 1.5rem; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <h4 style="color: var(--secondary-color); margin-bottom: 0.5rem;">Linear Complexity</h4>
+                    <p style="font-size: 0.95rem; color: #666;">
+                        自注意力計算被限制在局部視窗內，複雜度與圖像大小成線性關係 $O(N)$，而非 ViT 的平方關係 $O(N^2)$。
+                    </p>
+                </div>
+                <div style="padding: 1.5rem; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <h4 style="color: var(--accent-color); margin-bottom: 0.5rem;">Shifted Windows</h4>
+                    <p style="font-size: 0.95rem; color: #666;">
+                        通過在連續層之間移動視窗劃分，建立了跨視窗的連接。這是在不增加計算量的情況下增強建模能力的關鍵。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quote Block -->
+        <div class="quote-block">
+            <div class="quote-text">
+                "Swin Transformer serves as a general-purpose backbone for computer vision."
+            </div>
+            <div class="quote-author">—— Ze Liu et al., ICCV 2021</div>
+        </div>
+
+        <!-- Footer Navigation -->
+        <div class="related-reading" style="text-align: center; margin-top: 5rem; padding-top: 3rem; border-top: 1px solid #eee;">
+            <p style="font-size: 0.9rem; color: #888; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;">CONTINUE THE JOURNEY</p>
+            <h3 style="font-size: 1.5rem; margin-bottom: 2rem;">下一站，去哪裡？</h3>
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <a href="../vit-tutorial/index.html" class="btn btn-secondary" style="padding: 10px 25px; border-radius: 25px; border: 1px solid #ddd; text-decoration: none; color: #666;">← 回顧 ViT</a>
+                <a href="../clip-tutorial/index.html" class="btn btn-primary" style="padding: 10px 25px; border-radius: 25px; background: var(--primary-color); color: white; text-decoration: none;">前往 CLIP 多模態 →</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer" style="margin-top: 5rem; background: #f8f9fa; padding: 3rem 0; border-top: 1px solid #eee;">
+        <div class="container" style="text-align: center; color: #666;">
+            <p>&copy; 2026 AI Paper Archaeology. Made with ❤️ for AI Learners.</p>
+        </div>
+    </footer>
+</body>
+</html>

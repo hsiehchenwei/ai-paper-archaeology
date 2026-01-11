@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>引言與摘要 - Swin Transformer 深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section" style="background-image: url('images/generated/hero_01_introduction.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>層次化視覺 Transformer 的誕生</h1>
+                <p class="hero-subtitle">從 ViT 的局限到 Swin 的突破</p>
+                <div class="hero-meta">Swin Transformer 深度解析 · 第 1 章</div>
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Swin Transformer 深度解析</a>
+            <span>/</span>
+            <span class="current">第 1 章：引言與摘要</span>
+        </nav>
+
+        <div class="story-container">
+            <!-- Drop Cap 開場 -->
+            <p class="drop-cap">
+                2021 年 3 月，Microsoft Research Asia 的研究團隊提出了一個革命性的想法：如果我們能讓 Transformer 在視覺領域像在 NLP 領域一樣強大，會發生什麼？這個想法催生了 Swin Transformer——一個能夠作為通用視覺骨幹網路的層次化 Transformer。與 ViT 不同，Swin Transformer 不僅解決了單一解析度的問題，更實現了線性計算複雜度，讓 Transformer 真正成為視覺任務的通用解決方案。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <!-- 論文摘要 -->
+            <div class="original-quote">
+                <div class="icon">📄</div>
+                <div class="content">
+                    <div class="en">
+                        <strong>論文原文（Abstract）</strong><br><br>
+                        This paper presents a new vision Transformer, called Swin Transformer, that capably serves as a general-purpose backbone for computer vision. Challenges in adapting Transformer from language to vision arise from differences between the two domains, such as large variations in the scale of visual entities and the high resolution of pixels in images compared to words in text. To address these differences, we propose a hierarchical Transformer whose representation is computed with <strong>S</strong>hifted <strong>win</strong>dows. The shifted windowing scheme brings greater efficiency by limiting self-attention computation to non-overlapping local windows while also allowing for cross-window connection. This hierarchical architecture has the flexibility to model at various scales and has linear computational complexity with respect to image size.
+                    </div>
+                    <div class="zh">
+                        <strong>中文翻譯</strong><br><br>
+                        本論文提出了一個新的視覺 Transformer，稱為 Swin Transformer，能夠作為電腦視覺的通用骨幹網路。將 Transformer 從語言領域適配到視覺領域的挑戰源於兩個領域之間的差異，例如視覺實體尺度的巨大變化，以及圖像中像素相較於文字中詞彙的高解析度。為了解決這些差異，我們提出了一個層次化 Transformer，其表示是通過<strong>移位視窗</strong>（Shifted Windows）計算的。移位視窗方案通過將自注意力計算限制在非重疊的局部視窗內，同時允許跨視窗連接，帶來了更高的效率。這種層次化架構具有在不同尺度建模的靈活性，並且相對於圖像大小具有線性計算複雜度。
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI 生成概念圖 -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept_hierarchical_01.png" alt="層次化架構概念圖">
+                <div class="caption">
+                    💡 <strong>AI 圖解：</strong>層次化特徵圖構建——從小的 patch 逐步合併成大的特徵圖，就像俄羅斯套娃一樣
+                </div>
+            </div>
+
+            <h2>ViT 的局限性</h2>
+
+            <p>
+                在 Swin Transformer 出現之前，Vision Transformer (ViT) 已經證明了 Transformer 可以在視覺任務上取得優秀的表現。然而，ViT 有兩個關鍵的局限性：
+            </p>
+
+            <div class="key-concept">
+                <h4>⚠️ ViT 的兩個核心問題</h4>
+                <ul>
+                    <li><strong>單一解析度</strong>：ViT 只產生單一低解析度的特徵圖，無法像 CNN 那樣構建多尺度特徵金字塔</li>
+                    <li><strong>二次複雜度</strong>：全局自注意力的計算複雜度是 O(n²)，對於高解析度圖像來說計算成本過高</li>
+                </ul>
+            </div>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        In existing Transformer-based models, tokens are all of a fixed scale, a property unsuitable for these vision applications. Another difference is the much higher resolution of pixels in images compared to words in passages of text. There exist many vision tasks such as semantic segmentation that require dense prediction at the pixel level, and this would be intractable for Transformer on high-resolution images, as the computational complexity of its self-attention is quadratic to image size.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        在現有的基於 Transformer 的模型中，token 都是固定尺度的，這個特性不適合這些視覺應用。另一個差異是圖像中像素的解析度遠高於文字段落中的詞彙。存在許多視覺任務，如語義分割，需要在像素級別進行密集預測，這對於 Transformer 在高解析度圖像上來說是難以處理的，因為其自注意力的計算複雜度相對於圖像大小是二次的。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 原始圖片展示 -->
+            <div class="figure figure-original">
+                <img src="images/original/teaser11.png" alt="Swin vs ViT 對比圖">
+                <div class="caption">
+                    <strong>Figure 1:</strong> Swin Transformer vs ViT 架構對比（論文原圖）
+                </div>
+                <div class="explanation">
+                    <h4>🖼️ 原文圖表解析</h4>
+                    <p>
+                        這張圖清晰地展示了 Swin Transformer 與 ViT 的關鍵差異：
+                    </p>
+                    <ul>
+                        <li><strong>左圖 (Swin)</strong>：構建層次化特徵圖，從小的 patch（灰色）逐步合併，在每個局部視窗（紅色）內計算自注意力，實現線性複雜度</li>
+                        <li><strong>右圖 (ViT)</strong>：只產生單一低解析度的特徵圖，全局自注意力導致二次複雜度</li>
+                    </ul>
+                    <p>
+                        Swin Transformer 的設計讓它能夠作為通用骨幹網路，同時適用於圖像分類和密集識別任務（如目標檢測和語義分割）。
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>Swin Transformer 的解決方案</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        To overcome these issues, we propose a general-purpose Transformer backbone, called Swin Transformer, which constructs hierarchical feature maps and has linear computational complexity to image size. As illustrated in Figure 1(a), Swin Transformer constructs a hierarchical representation by starting from small-sized patches (outlined in gray) and gradually merging neighboring patches in deeper Transformer layers. With these hierarchical feature maps, the Swin Transformer model can conveniently leverage advanced techniques for dense prediction such as feature pyramid networks (FPN) or U-Net. The linear computational complexity is achieved by computing self-attention locally within non-overlapping windows that partition an image (outlined in red). The number of patches in each window is fixed, and thus the complexity becomes linear to image size.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        為了解決這些問題，我們提出了一個通用 Transformer 骨幹網路，稱為 Swin Transformer，它構建層次化特徵圖，並且相對於圖像大小具有線性計算複雜度。如圖 1(a) 所示，Swin Transformer 通過從小的 patch（灰色輪廓）開始，在更深的 Transformer 層中逐漸合併相鄰的 patch 來構建層次化表示。有了這些層次化特徵圖，Swin Transformer 模型可以方便地利用先進的密集預測技術，如特徵金字塔網路（FPN）或 U-Net。線性計算複雜度是通過在劃分圖像的非重疊視窗（紅色輪廓）內局部計算自注意力來實現的。每個視窗中的 patch 數量是固定的，因此複雜度變為相對於圖像大小的線性。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 雙重類比 -->
+            <div class="analogy-section">
+                <div class="analogy-card life">
+                    <h4>🏠 生活類比</h4>
+                    <p>
+                        就像俄羅斯套娃一樣，Swin Transformer 從最小的「娃娃」（4×4 的 patch）開始，一層一層地合併，最終形成一個完整的「大娃娃」（整個圖像的特徵表示）。每一層都能看到不同尺度的資訊，就像從近距離看細節，到遠距離看整體一樣。
+                    </p>
+                </div>
+                <div class="analogy-card engineering">
+                    <h4>⚙️ 工程類比</h4>
+                    <p>
+                        在系統架構上，Swin Transformer 類似於多解析度的金字塔結構。就像地圖應用程式會提供不同縮放級別的地圖（街道級、城市級、國家級），Swin Transformer 也構建了多個解析度的特徵圖，讓模型能夠同時處理細節和全局資訊。而移位視窗機制就像是在不同層級之間建立「橋樑」，讓資訊能夠在不同尺度之間流動。
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>核心創新：Shifted Windows</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        A key design element of Swin Transformer is its <em>shift</em> of the window partition between consecutive self-attention layers, as illustrated in Figure 2. The shifted windows bridge the windows of the preceding layer, providing connections among them that significantly enhance modeling power. This strategy is also efficient in regards to real-world latency: all <em>query</em> patches within a window share the same <em>key</em> set, which facilitates memory access in hardware.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        Swin Transformer 的一個關鍵設計元素是在連續的自注意力層之間對視窗分區進行<em>移位</em>，如圖 2 所示。移位的視窗橋接了前一層的視窗，在它們之間提供連接，顯著增強了建模能力。這個策略在實際延遲方面也很高效：視窗內的所有 <em>query</em> patch 共享相同的 <em>key</em> 集合，這有利於硬體中的記憶體訪問。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 原始圖片展示 -->
+            <div class="figure figure-original">
+                <img src="images/original/teaser_v4.png" alt="Shifted Window 機制示意圖">
+                <div class="caption">
+                    <strong>Figure 2:</strong> Shifted Window 機制示意圖（論文原圖）
+                </div>
+                <div class="explanation">
+                    <h4>🖼️ 原文圖表解析</h4>
+                    <p>
+                        這張圖展示了 Swin Transformer 的核心創新——移位視窗機制：
+                    </p>
+                    <ul>
+                        <li><strong>左圖（Layer l）</strong>：使用常規視窗分區，將 8×8 的特徵圖均勻劃分為 2×2 個 4×4 的視窗</li>
+                        <li><strong>右圖（Layer l+1）</strong>：視窗分區被移位，新的視窗跨越了前一層視窗的邊界，建立了跨視窗連接</li>
+                    </ul>
+                    <p>
+                        這種設計既保持了局部計算的效率，又通過移位實現了跨視窗的資訊交流，是 Swin Transformer 成功的關鍵。
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>卓越的實驗結果</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        The proposed Swin Transformer achieves strong performance on the recognition tasks of image classification, object detection and semantic segmentation. It outperforms the ViT / DeiT and ResNe(X)t models significantly with similar latency on the three tasks. Its 58.7 box AP and 51.1 mask AP on the COCO test-dev set surpass the previous state-of-the-art results by +2.7 box AP (Copy-paste without external data) and +2.6 mask AP (DetectoRS). On ADE20K semantic segmentation, it obtains 53.5 mIoU on the val set, an improvement of +3.2 mIoU over the previous state-of-the-art (SETR). It also achieves a top-1 accuracy of 87.3% on ImageNet-1K image classification.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        提出的 Swin Transformer 在圖像分類、目標檢測和語義分割的識別任務上取得了強勁的表現。它在三個任務上以相似的延遲顯著超越了 ViT / DeiT 和 ResNe(X)t 模型。它在 COCO test-dev 集上取得了 58.7 box AP 和 51.1 mask AP，超過了之前的最佳結果 +2.7 box AP（Copy-paste，無外部數據）和 +2.6 mask AP（DetectoRS）。在 ADE20K 語義分割上，它在 val 集上取得了 53.5 mIoU，比之前的最佳結果（SETR）提高了 +3.2 mIoU。它還在 ImageNet-1K 圖像分類上取得了 87.3% 的 top-1 準確率。
+                    </div>
+                </div>
+            </div>
+
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>📊 ImageNet-1K</h4>
+                    <p><strong>87.3%</strong> top-1 準確率</p>
+                    <p>超越 ViT 和 ResNet 的表現</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>🎯 COCO 目標檢測</h4>
+                    <p><strong>58.7</strong> box AP</p>
+                    <p><strong>51.1</strong> mask AP</p>
+                    <p>超越之前 SOTA +2.7/+2.6</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>🖼️ ADE20K 語義分割</h4>
+                    <p><strong>53.5</strong> mIoU</p>
+                    <p>超越之前 SOTA +3.2</p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>統一架構的願景</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        It is our belief that a unified architecture across computer vision and natural language processing could benefit both fields, since it would facilitate joint modeling of visual and textual signals and the modeling knowledge from both domains can be more deeply shared. We hope that Swin Transformer's strong performance on various vision problems can drive this belief deeper in the community and encourage unified modeling of vision and language signals.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        我們相信，電腦視覺和自然語言處理之間的統一架構可以讓兩個領域都受益，因為它將促進視覺和文字信號的聯合建模，並且兩個領域的建模知識可以更深入地共享。我們希望 Swin Transformer 在各種視覺問題上的強勁表現能夠在社群中深化這一信念，並鼓勵視覺和語言信號的統一建模。
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quote Block 金句 -->
+            <div class="quote-block">
+                「層次化架構 + 移位視窗 = 線性複雜度的通用視覺骨幹網路」
+            </div>
+
+            <!-- 本章重點回顧 -->
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>核心問題</strong>：ViT 的局限性（單一解析度、二次複雜度）阻礙了 Transformer 成為通用視覺骨幹網路</li>
+                    <li><strong>Swin 的解決方案</strong>：層次化架構 + 移位視窗機制，實現線性複雜度</li>
+                    <li><strong>關鍵創新</strong>：Shifted Windows 在保持效率的同時建立跨視窗連接</li>
+                    <li><strong>卓越表現</strong>：在 ImageNet、COCO、ADE20K 三個任務上都達到 SOTA</li>
+                    <li><strong>願景</strong>：統一視覺和語言的架構，促進跨領域知識共享</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="chapter-nav">
+            <a href="#" class="prev disabled">← 上一章</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="02-related-work.html" class="next">下一章：相關工作 →</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>整體架構 - Swin Transformer 深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section" style="background-image: url('images/generated/hero_03_architecture.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>層次化架構的設計智慧</h1>
+                <p class="hero-subtitle">從 Patch 到特徵金字塔的構建</p>
+                <div class="hero-meta">Swin Transformer 深度解析 · 第 3 章</div>
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Swin Transformer 深度解析</a>
+            <span>/</span>
+            <span class="current">第 3 章：整體架構</span>
+        </nav>
+
+        <div class="story-container">
+            <!-- Drop Cap 開場 -->
+            <p class="drop-cap">
+                Swin Transformer 的架構設計體現了對視覺任務本質的深刻理解。它不像 ViT 那樣將圖像「壓平」成單一序列，而是像 CNN 一樣構建多尺度的特徵金字塔。從 4×4 的 patch 開始，通過四個 Stage 的層次化處理，逐步構建出從細節到全局的完整特徵表示。這種設計讓 Swin Transformer 能夠同時處理圖像分類和密集預測任務，真正成為通用的視覺骨幹網路。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>整體架構概覽</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        An overview of the Swin Transformer architecture is presented in Figure 3, which illustrates the tiny version (Swin-T). It first splits an input RGB image into non-overlapping patches by a patch splitting module, like ViT. Each patch is treated as a ``token'' and its feature is set as a concatenation of the raw pixel RGB values. In our implementation, we use a patch size of $4\times 4$ and thus the feature dimension of each patch is $4\times4\times 3=48$. A linear embedding layer is applied on this raw-valued feature to project it to an arbitrary dimension (denoted as $C$).
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        Swin Transformer 架構的概覽如圖 3 所示，展示了 tiny 版本（Swin-T）。它首先通過 patch splitting 模組將輸入的 RGB 圖像分割成非重疊的 patch，就像 ViT 一樣。每個 patch 被視為一個「token」，其特徵被設置為原始像素 RGB 值的串聯。在我們的實現中，我們使用 $4\times 4$ 的 patch 大小，因此每個 patch 的特徵維度是 $4\times4\times 3=48$。一個線性嵌入層應用於這個原始值特徵，將其投影到任意維度（記為 $C$）。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 原始圖片展示 -->
+            <div class="figure figure-original">
+                <img src="images/original/HiT-arch-v2.png" alt="Swin Transformer 完整架構圖">
+                <div class="caption">
+                    <strong>Figure 3:</strong> Swin Transformer 架構圖（論文原圖）
+                </div>
+                <div class="explanation">
+                    <h4>🖼️ 原文圖表解析</h4>
+                    <p>
+                        這張架構圖展示了 Swin Transformer 的完整設計：
+                    </p>
+                    <ul>
+                        <li><strong>圖 (a)</strong>：整體架構，展示了從輸入圖像到四個 Stage 的層次化處理流程</li>
+                        <li><strong>圖 (b)</strong>：兩個連續的 Swin Transformer Block，展示了 W-MSA 和 SW-MSA 的交替使用</li>
+                    </ul>
+                    <p>
+                        架構的核心是通過 Patch Merging 逐步降低解析度，同時增加特徵維度，構建出類似 CNN 的多尺度特徵金字塔。
+                    </p>
+                </div>
+            </div>
+
+            <!-- AI 生成概念圖 -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept_hierarchical_01.png" alt="層次化架構概念圖">
+                <div class="caption">
+                    💡 <strong>AI 圖解：</strong>層次化特徵圖構建——從 Stage 1 到 Stage 4，解析度逐步降低，特徵逐步抽象
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>四個 Stage 的層次化設計</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Several Transformer blocks with modified self-attention computation (Swin Transformer blocks) are applied on these patch tokens. The Transformer blocks maintain the number of tokens ($\frac{H}{4} \times \frac{W}{4}$), and together with the linear embedding are referred to as ``Stage 1''.
+                        
+                        To produce a hierarchical representation, the number of tokens is reduced by patch merging layers as the network gets deeper. The first patch merging layer concatenates the features of each group of $2\times 2$ neighboring patches, and applies a linear layer on the $4C$-dimensional concatenated features. This reduces the number of tokens by a multiple of $2\times2=4$ ($2\times$ downsampling of resolution), and the output dimension is set to $2C$. Swin Transformer blocks are applied afterwards for feature transformation, with the resolution kept at $\frac{H}{8} \times \frac{W}{8}$. This first block of patch merging and feature transformation is denoted as ``Stage 2''. The procedure is repeated twice, as ``Stage 3'' and ``Stage 4'', with output resolutions of $\frac{H}{16} \times \frac{W}{16}$ and $\frac{H}{32} \times \frac{W}{32}$, respectively.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        幾個具有修改後自注意力計算的 Transformer block（Swin Transformer blocks）應用於這些 patch token。Transformer blocks 保持 token 數量（$\frac{H}{4} \times \frac{W}{4}$），與線性嵌入一起稱為「Stage 1」。
+                        
+                        為了產生層次化表示，隨著網路變深，token 數量通過 patch merging 層減少。第一個 patch merging 層串聯每組 $2\times 2$ 相鄰 patch 的特徵，並在 $4C$ 維串聯特徵上應用線性層。這將 token 數量減少 $2\times2=4$ 倍（解析度的 $2\times$ 下採樣），輸出維度設置為 $2C$。之後應用 Swin Transformer blocks 進行特徵轉換，解析度保持在 $\frac{H}{8} \times \frac{W}{8}$。這個 patch merging 和特徵轉換的第一個 block 稱為「Stage 2」。該過程重複兩次，作為「Stage 3」和「Stage 4」，輸出解析度分別為 $\frac{H}{16} \times \frac{W}{16}$ 和 $\frac{H}{32} \times \frac{W}{32}$。
+                    </div>
+                </div>
+            </div>
+
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>Stage 1</h4>
+                    <p><strong>解析度：</strong> $\frac{H}{4} \times \frac{W}{4}$</p>
+                    <p><strong>操作：</strong> Patch Splitting + Linear Embedding + Swin Blocks</p>
+                    <p>將圖像分割成 4×4 的 patch，每個 patch 成為一個 token</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>Stage 2</h4>
+                    <p><strong>解析度：</strong> $\frac{H}{8} \times \frac{W}{8}$</p>
+                    <p><strong>操作：</strong> Patch Merging (2×2) + Swin Blocks</p>
+                    <p>將 2×2 的 patch 合併，解析度降低 2 倍，維度增加 2 倍</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>Stage 3</h4>
+                    <p><strong>解析度：</strong> $\frac{H}{16} \times \frac{W}{16}$</p>
+                    <p><strong>操作：</strong> Patch Merging (2×2) + Swin Blocks</p>
+                    <p>繼續合併，構建中等尺度的特徵表示</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>Stage 4</h4>
+                    <p><strong>解析度：</strong> $\frac{H}{32} \times \frac{W}{32}$</p>
+                    <p><strong>操作：</strong> Patch Merging (2×2) + Swin Blocks</p>
+                    <p>最終的高層語義特徵，類似於 CNN 的最後一層</p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>Swin Transformer Block</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Swin Transformer is built by replacing the standard multi-head self attention (MSA) module in a Transformer block by a module based on shifted windows (described in Section 4), with other layers kept the same. As illustrated in Figure 3(b), a Swin Transformer block consists of a shifted window based MSA module, followed by a 2-layer MLP with GELU non-linearity in between. A LayerNorm (LN) layer is applied before each MSA module and each MLP, and a residual connection is applied after each module.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        Swin Transformer 是通過將 Transformer block 中的標準多頭自注意力（MSA）模組替換為基於移位視窗的模組（在第 4 節中描述）而構建的，其他層保持不變。如圖 3(b) 所示，Swin Transformer block 由一個基於移位視窗的 MSA 模組組成，後面是一個 2 層 MLP，中間有 GELU 非線性。在每個 MSA 模組和每個 MLP 之前應用 LayerNorm (LN) 層，在每個模組之後應用殘差連接。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 概念動畫 -->
+            <div class="video-container">
+                <video autoplay loop muted playsinline>
+                    <source src="images/videos/hierarchical_architecture.mp4" type="video/mp4">
+                </video>
+                <div class="caption">🎬 層次化架構構建動畫：展示從 Stage 1 到 Stage 4 的特徵圖演變過程</div>
+            </div>
+
+            <!-- 雙重類比 -->
+            <div class="analogy-section">
+                <div class="analogy-card life">
+                    <h4>🏠 生活類比</h4>
+                    <p>
+                        就像城市規劃一樣：Stage 1 是街道級別，可以看到每個建築物的細節（4×4 patch）；Stage 2 是社區級別，可以看到幾個建築物組成的街區；Stage 3 是區域級別，可以看到整個社區的佈局；Stage 4 是城市級別，可以看到整個城市的宏觀結構。每一層都提供了不同尺度的視角，讓模型能夠同時理解細節和全局。
+                    </p>
+                </div>
+                <div class="analogy-card engineering">
+                    <h4>⚙️ 工程類比</h4>
+                    <p>
+                        在系統架構上，Swin Transformer 類似於微服務架構中的服務層級：Stage 1 是基礎服務層，處理原始數據；Stage 2-4 是業務邏輯層，逐步抽象和聚合資訊。每一層都可以獨立優化和擴展，同時通過標準化的接口（patch merging）進行通信。這種設計既保持了模組化，又實現了高效的資訊流動。
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>與 CNN 的對應關係</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        These stages jointly produce a hierarchical representation, with the same feature map resolutions as those of typical convolutional networks, e.g., VGG and ResNet. As a result, the proposed architecture can conveniently replace the backbone networks in existing methods for various vision tasks.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        這些 stage 共同產生層次化表示，具有與典型卷積網路（例如 VGG 和 ResNet）相同的特徵圖解析度。因此，提出的架構可以方便地替換現有方法中各種視覺任務的骨幹網路。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 為什麼層次化設計如此重要？</h4>
+                <p>
+                    層次化特徵圖是視覺任務的基礎。無論是目標檢測中的 FPN（Feature Pyramid Network），還是語義分割中的 U-Net，都需要多尺度的特徵表示。Swin Transformer 的層次化設計讓它能夠無縫替換 CNN 骨幹網路，同時利用 Transformer 的強大建模能力。
+                </p>
+            </div>
+
+            <!-- Quote Block 金句 -->
+            <div class="quote-block">
+                「層次化架構 + 移位視窗 = CNN 的歸納偏置 + Transformer 的建模能力」
+            </div>
+
+            <!-- 本章重點回顧 -->
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>Patch Splitting</strong>：將圖像分割成 4×4 的 patch，每個 patch 成為一個 token</li>
+                    <li><strong>四個 Stage</strong>：通過 Patch Merging 逐步降低解析度（H/4 → H/8 → H/16 → H/32）</li>
+                    <li><strong>層次化特徵</strong>：與 CNN（VGG、ResNet）相同的特徵圖解析度，可無縫替換</li>
+                    <li><strong>Swin Block</strong>：W-MSA 和 SW-MSA 交替使用，保持效率的同時建立跨視窗連接</li>
+                    <li><strong>通用骨幹</strong>：適用於圖像分類、目標檢測、語義分割等多種視覺任務</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="chapter-nav">
+            <a href="02-related-work.html" class="prev">← 上一章</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="04-shifted-windows.html" class="next">下一章：移位視窗機制 →</a>
+        </div>
+    </div>
+</body>
+</html>

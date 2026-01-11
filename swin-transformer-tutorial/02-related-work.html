@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>相關工作 - Swin Transformer 深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section" style="background-image: url('images/generated/hero_02_related_work.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>從 CNN 到 Transformer 的演進</h1>
+                <p class="hero-subtitle">視覺 AI 架構的歷史脈絡</p>
+                <div class="hero-meta">Swin Transformer 深度解析 · 第 2 章</div>
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Swin Transformer 深度解析</a>
+            <span>/</span>
+            <span class="current">第 2 章：相關工作</span>
+        </nav>
+
+        <div class="story-container">
+            <!-- Drop Cap 開場 -->
+            <p class="drop-cap">
+                要理解 Swin Transformer 的創新，我們必須先回顧視覺 AI 的發展歷程。從 2012 年 AlexNet 開啟深度學習視覺時代，到 2020 年 ViT 證明 Transformer 在視覺領域的潛力，再到 2021 年 Swin Transformer 實現真正的通用視覺骨幹網路，這是一段從卷積到注意力的演進史。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>CNN 時代的巔峰</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Modeling in computer vision has long been dominated by convolutional neural networks (CNNs). Beginning with AlexNet and its revolutionary performance on the ImageNet image classification challenge, CNN architectures have evolved to become increasingly powerful through greater scale, more extensive connections, and more sophisticated forms of convolution. With CNNs serving as backbone networks for a variety of vision tasks, these architectural advances have led to performance improvements that have broadly lifted the entire field.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        電腦視覺中的建模長期以來一直由卷積神經網路（CNN）主導。從 AlexNet 及其在 ImageNet 圖像分類挑戰中的革命性表現開始，CNN 架構通過更大的規模、更廣泛的連接和更複雜的卷積形式，演進得越來越強大。隨著 CNN 作為各種視覺任務的骨幹網路，這些架構進步帶來了性能提升，廣泛推動了整個領域的發展。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>📚 CNN 演進史</h4>
+                <ul>
+                    <li><strong>AlexNet (2012)</strong>：開啟深度學習視覺時代</li>
+                    <li><strong>VGG (2014)</strong>：深度網路設計原則</li>
+                    <li><strong>ResNet (2015)</strong>：殘差學習，解決深度網路訓練問題</li>
+                    <li><strong>DenseNet (2017)</strong>：密集連接，特徵重用</li>
+                    <li><strong>EfficientNet (2019)</strong>：複合縮放策略</li>
+                </ul>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>Transformer 在 NLP 的成功</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        On the other hand, the evolution of network architectures in natural language processing (NLP) has taken a different path, where the prevalent architecture today is instead the Transformer. Designed for sequence modeling and transduction tasks, the Transformer is notable for its use of attention to model long-range dependencies in the data. Its tremendous success in the language domain has led researchers to investigate its adaptation to computer vision, where it has recently demonstrated promising results on certain tasks, specifically image classification and joint vision-language modeling.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        另一方面，自然語言處理（NLP）中網路架構的演進走了一條不同的道路，今天的主流架構是 Transformer。Transformer 專為序列建模和轉導任務而設計，以其使用注意力來建模數據中的長程依賴關係而著稱。它在語言領域的巨大成功促使研究人員研究其在電腦視覺中的適配，最近在特定任務上展現了有希望的結果，特別是圖像分類和聯合視覺-語言建模。
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>ViT 的開創與局限</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Most related to our work is the Vision Transformer (ViT) and its follow-ups. The pioneering work of ViT directly applies a Transformer architecture on non-overlapping medium-sized image patches for image classification. It achieves an impressive speed-accuracy trade-off on image classification compared to convolutional networks. While ViT requires large-scale training datasets (i.e., JFT-300M) to perform well, DeiT introduces several training strategies that allow ViT to also be effective using the smaller ImageNet-1K dataset. The results of ViT on image classification are encouraging, but its architecture is unsuitable for use as a general-purpose backbone network on dense vision tasks or when the input image resolution is high, due to its low-resolution feature maps and the quadratic increase in complexity with image size.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        與我們的工作最相關的是 Vision Transformer (ViT) 及其後續工作。ViT 的開創性工作直接將 Transformer 架構應用於非重疊的中等大小圖像 patch 進行圖像分類。與卷積網路相比，它在圖像分類上取得了令人印象深刻的速度-準確率權衡。雖然 ViT 需要大規模訓練數據集（即 JFT-300M）才能表現良好，但 DeiT 引入了幾種訓練策略，使 ViT 也能在使用較小的 ImageNet-1K 數據集時有效。ViT 在圖像分類上的結果令人鼓舞，但其架構不適合作為密集視覺任務或輸入圖像解析度較高時的通用骨幹網路，這是由於其低解析度特徵圖和複雜度隨圖像大小呈二次增長。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 雙重類比 -->
+            <div class="analogy-section">
+                <div class="analogy-card life">
+                    <h4>🏠 生活類比</h4>
+                    <p>
+                        就像建築風格的演進：CNN 時代像是古典建築，每一層都有明確的結構和功能（卷積層、池化層）。Transformer 時代像是現代建築，更加靈活和開放（注意力機制）。ViT 是第一座「現代風格」的視覺建築，證明了可行性，但還不夠實用。Swin Transformer 則是真正實用的「現代建築」，既保持了現代風格的美感，又解決了實際使用的問題。
+                    </p>
+                </div>
+                <div class="analogy-card engineering">
+                    <h4>⚙️ 工程類比</h4>
+                    <p>
+                        在軟體架構上，這類似於從單體架構（CNN）到微服務架構（Transformer）的演進。ViT 就像是第一次嘗試微服務架構，證明了概念可行，但還有很多問題（單一解析度、高複雜度）。Swin Transformer 則是成熟的微服務架構，通過層次化設計和局部計算，既保持了微服務的靈活性，又解決了性能和複雜度的問題。
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>自注意力在視覺中的早期嘗試</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Also inspired by the success of self-attention layers and Transformer architectures in the NLP field, some works employ self-attention layers to replace some or all of the spatial convolution layers in the popular ResNet. In these works, the self-attention is computed within a local window of each pixel to expedite optimization, and they achieve slightly better accuracy/FLOPs trade-offs than the counterpart ResNet architecture. However, their costly memory access causes their actual latency to be significantly larger than that of the convolutional networks. Instead of using sliding windows, we propose to <em>shift</em> windows between consecutive layers, which allows for a more efficient implementation in general hardware.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        同樣受到自注意力層和 Transformer 架構在 NLP 領域成功的啟發，一些工作使用自注意力層來替換流行 ResNet 中的部分或全部空間卷積層。在這些工作中，自注意力在每個像素的局部視窗內計算以加快優化，它們取得了比對應 ResNet 架構稍好的準確率/FLOPs 權衡。然而，它們昂貴的記憶體訪問導致其實際延遲明顯大於卷積網路。我們不是使用滑動視窗，而是提出在連續層之間<em>移位</em>視窗，這允許在通用硬體上實現更高效的實現。
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quote Block 金句 -->
+            <div class="quote-block">
+                「從 CNN 的歸納偏置到 Transformer 的靈活性，Swin 找到了最佳平衡點」
+            </div>
+
+            <!-- 本章重點回顧 -->
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>CNN 時代</strong>：從 AlexNet 到 EfficientNet，通過規模和架構創新不斷提升性能</li>
+                    <li><strong>Transformer 在 NLP</strong>：注意力機制在語言領域取得巨大成功</li>
+                    <li><strong>ViT 的開創</strong>：首次將 Transformer 應用到視覺，證明了可行性</li>
+                    <li><strong>ViT 的局限</strong>：單一解析度、二次複雜度，不適合作為通用骨幹網路</li>
+                    <li><strong>Swin 的定位</strong>：在 ViT 的基礎上，解決通用性和效率問題</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="chapter-nav">
+            <a href="01-introduction.html" class="prev">← 上一章</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="03-architecture.html" class="next">下一章：整體架構 →</a>
+        </div>
+    </div>
+</body>
+</html>

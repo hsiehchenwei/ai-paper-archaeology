@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>實驗結果 - Swin Transformer 深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section" style="background-image: url('images/generated/hero_06_experiments.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>全面超越：三個任務的 SOTA</h1>
+                <p class="hero-subtitle">ImageNet、COCO、ADE20K 的卓越表現</p>
+                <div class="hero-meta">Swin Transformer 深度解析 · 第 6 章</div>
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Swin Transformer 深度解析</a>
+            <span>/</span>
+            <span class="current">第 6 章：實驗結果</span>
+        </nav>
+
+        <div class="story-container">
+            <!-- Drop Cap 開場 -->
+            <p class="drop-cap">
+                Swin Transformer 的實驗結果證明了其設計的優越性。在 ImageNet-1K 圖像分類上達到 87.3% 的 top-1 準確率，在 COCO 目標檢測上取得 58.7 box AP 和 51.1 mask AP，在 ADE20K 語義分割上達到 53.5 mIoU。這些結果不僅超越了 ViT 和 ResNet，更在多個任務上達到了新的 SOTA，證明了 Swin Transformer 作為通用視覺骨幹網路的強大能力。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>ImageNet-1K 圖像分類</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Compared to the previous state-of-the-art Transformer-based architecture, i.e. DeiT, Swin Transformers noticeably surpass the counterpart DeiT architectures with similar complexities: +1.5% for Swin-T (81.3%) over DeiT-S (79.8%) using 224² input, and +1.5%/1.4% for Swin-B (83.3%/84.5%) over DeiT-B (81.8%/83.1%) using 224²/384² input, respectively.
+                        
+                        The larger Swin-L model achieves 87.3% top-1 accuracy, +0.9% better than that of the Swin-B model.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        與之前最先進的基於 Transformer 的架構（即 DeiT）相比，Swin Transformer 在相似複雜度下明顯超越了對應的 DeiT 架構：使用 224² 輸入時，Swin-T (81.3%) 比 DeiT-S (79.8%) 高 +1.5%，使用 224²/384² 輸入時，Swin-B (83.3%/84.5%) 比 DeiT-B (81.8%/83.1%) 分別高 +1.5%/+1.4%。
+                        
+                        更大的 Swin-L 模型達到 87.3% 的 top-1 準確率，比 Swin-B 模型高 +0.9%。
+                    </div>
+                </div>
+            </div>
+
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>Swin-T</h4>
+                    <p><strong>81.3%</strong> top-1 (224²)</p>
+                    <p>29M 參數，4.5G FLOPs</p>
+                    <p>超越 DeiT-S +1.5%</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>Swin-S</h4>
+                    <p><strong>83.0%</strong> top-1 (224²)</p>
+                    <p>50M 參數，8.7G FLOPs</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>Swin-B</h4>
+                    <p><strong>83.5%</strong> top-1 (224²)</p>
+                    <p><strong>84.5%</strong> top-1 (384²)</p>
+                    <p>88M 參數，超越 DeiT-B</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>Swin-L</h4>
+                    <p><strong>87.3%</strong> top-1 (384²)</p>
+                    <p>197M 參數，103.9G FLOPs</p>
+                    <p>ImageNet-22K 預訓練</p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>COCO 目標檢測</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        Table 5(a) lists the results of Swin-T and ResNet-50 on the four object detection frameworks. Our Swin-T architecture brings consistent +3.4~4.2 box AP gains over ResNet-50, with slightly larger model size, FLOPs and latency.
+                        
+                        Our best model achieves 58.7 box AP and 51.1 mask AP on COCO test-dev, surpassing the previous best results by +2.7 box AP (Copy-paste without external data) and +2.6 mask AP (DetectoRS).
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        表 5(a) 列出了 Swin-T 和 ResNet-50 在四個目標檢測框架上的結果。我們的 Swin-T 架構在 ResNet-50 基礎上帶來一致的 +3.4~4.2 box AP 提升，模型大小、FLOPs 和延遲略大。
+                        
+                        我們的最佳模型在 COCO test-dev 上達到 58.7 box AP 和 51.1 mask AP，超過之前最佳結果 +2.7 box AP（Copy-paste，無外部數據）和 +2.6 mask AP（DetectoRS）。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>📊 COCO 實驗結果摘要</h4>
+                <ul>
+                    <li><strong>Swin-T vs ResNet-50</strong>：在四個框架上都帶來 +3.4~4.2 box AP 提升</li>
+                    <li><strong>Swin-B</strong>：51.9 box AP，45.0 mask AP（Cascade Mask R-CNN）</li>
+                    <li><strong>Swin-L (HTC++)</strong>：58.7 box AP，51.1 mask AP（系統級對比）</li>
+                    <li><strong>超越 SOTA</strong>：+2.7 box AP，+2.6 mask AP</li>
+                </ul>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>ADE20K 語義分割</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        From the results in Table 6, it can be seen that Swin-S is +5.3 mIoU higher (49.3 vs. 44.0) than DeiT-S with similar computation cost. It is also +4.4 mIoU higher than ResNet-101, and +2.4 mIoU higher than ResNeSt-101. Our Swin-L model with ImageNet-22K pre-training achieves 53.5 mIoU on the val set, surpassing the previous best model by +3.2 mIoU (50.3 mIoU by SETR which has a larger model size).
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        從表 6 的結果可以看出，Swin-S 在相似計算成本下比 DeiT-S 高 +5.3 mIoU (49.3 vs. 44.0)。它也比 ResNet-101 高 +4.4 mIoU，比 ResNeSt-101 高 +2.4 mIoU。我們使用 ImageNet-22K 預訓練的 Swin-L 模型在 val 集上達到 53.5 mIoU，超過之前最佳模型 +3.2 mIoU（SETR 的 50.3 mIoU，模型尺寸更大）。
+                    </div>
+                </div>
+            </div>
+
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>Swin-T</h4>
+                    <p><strong>46.1</strong> mIoU</p>
+                    <p>60M 參數，945G FLOPs</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>Swin-S</h4>
+                    <p><strong>49.3</strong> mIoU</p>
+                    <p>81M 參數，1038G FLOPs</p>
+                    <p>超越 DeiT-S +5.3</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>Swin-B</h4>
+                    <p><strong>51.6</strong> mIoU</p>
+                    <p>121M 參數（ImageNet-22K 預訓練）</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>Swin-L</h4>
+                    <p><strong>53.5</strong> mIoU</p>
+                    <p>234M 參數（ImageNet-22K 預訓練）</p>
+                    <p>超越 SETR +3.2</p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>與 ResNet 和 ViT 的對比</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        It outperforms the ViT / DeiT and ResNe(X)t models significantly with similar latency on the three tasks. The performance of DeiT-S using the Cascade Mask R-CNN framework is shown in Table 5(b). The results of Swin-T are +2.5 box AP and +2.3 mask AP higher than DeiT-S with similar model size (86M vs. 80M) and significantly higher inference speed (15.3 FPS vs. 10.4 FPS).
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        它在三個任務上以相似的延遲顯著超越了 ViT / DeiT 和 ResNe(X)t 模型。使用 Cascade Mask R-CNN 框架的 DeiT-S 的性能如表 5(b) 所示。Swin-T 的結果比 DeiT-S 高 +2.5 box AP 和 +2.3 mask AP，模型大小相似（86M vs. 80M），推理速度顯著更高（15.3 FPS vs. 10.4 FPS）。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 雙重類比 -->
+            <div class="analogy-section">
+                <div class="analogy-card life">
+                    <h4>🏠 生活類比</h4>
+                    <p>
+                        就像競賽成績一樣：Swin Transformer 在三個不同的「競賽項目」（圖像分類、目標檢測、語義分割）中都取得了優異成績。不僅在單一項目上表現出色，更難能可貴的是在所有項目上都保持領先，這證明了它是一個真正的「全能選手」，而不是只擅長某一項目的「專項運動員」。
+                    </p>
+                </div>
+                <div class="analogy-card engineering">
+                    <h4>⚙️ 工程類比</h4>
+                    <p>
+                        在系統架構上，這類似於基準測試（Benchmark）的全面評估：一個好的系統不僅要在單一基準上表現優秀，更要在多個不同類型的基準上都達到最佳性能。Swin Transformer 在三個完全不同類型的視覺任務上都達到 SOTA，證明了其架構設計的通用性和優越性。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Quote Block 金句 -->
+            <div class="quote-block">
+                「三個任務，三個 SOTA：Swin Transformer 證明了通用視覺骨幹網路的可能性」
+            </div>
+
+            <!-- 本章重點回顧 -->
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>ImageNet-1K</strong>：Swin-L 達到 87.3% top-1，超越 ViT 和 ResNet</li>
+                    <li><strong>COCO 目標檢測</strong>：58.7 box AP，51.1 mask AP，超越之前 SOTA +2.7/+2.6</li>
+                    <li><strong>ADE20K 語義分割</strong>：53.5 mIoU，超越 SETR +3.2</li>
+                    <li><strong>與 ResNet 對比</strong>：Swin-T 在四個檢測框架上都帶來 +3.4~4.2 box AP 提升</li>
+                    <li><strong>與 ViT/DeiT 對比</strong>：相似模型大小下性能更好，推理速度更快</li>
+                    <li><strong>通用性驗證</strong>：在三個完全不同類型的任務上都達到 SOTA</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="chapter-nav">
+            <a href="05-efficient-computation.html" class="prev">← 上一章</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="07-conclusion.html" class="next">下一章：結論 →</a>
+        </div>
+    </div>
+</body>
+</html>

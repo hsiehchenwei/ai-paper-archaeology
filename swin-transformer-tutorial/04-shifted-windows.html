@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>移位視窗機制 - Swin Transformer 深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section" style="background-image: url('images/generated/hero_04_shifted_windows.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>Shifted Windows：效率與建模能力的平衡</h1>
+                <p class="hero-subtitle">Swin Transformer 的核心創新</p>
+                <div class="hero-meta">Swin Transformer 深度解析 · 第 4 章</div>
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Swin Transformer 深度解析</a>
+            <span>/</span>
+            <span class="current">第 4 章：移位視窗機制</span>
+        </nav>
+
+        <div class="story-container">
+            <!-- Drop Cap 開場 -->
+            <p class="drop-cap">
+                Shifted Windows 是 Swin Transformer 最核心的創新。它巧妙地解決了一個看似矛盾的問題：如何在保持局部計算效率的同時，建立跨視窗的連接？答案是「移位」——通過在連續層之間移動視窗分區，讓資訊能夠在不同視窗之間流動，既保持了線性複雜度，又大幅提升了建模能力。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>全局自注意力的問題</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        The standard Transformer architecture and its adaptation for image classification both conduct global self-attention, where the relationships between a token and all other tokens are computed. The global computation leads to quadratic complexity with respect to the number of tokens, making it unsuitable for many vision problems requiring an immense set of tokens for dense prediction or to represent a high-resolution image.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        標準 Transformer 架構及其對圖像分類的適配都進行全局自注意力，其中計算 token 與所有其他 token 之間的關係。全局計算導致相對於 token 數量的二次複雜度，使其不適合許多需要大量 token 進行密集預測或表示高解析度圖像的視覺問題。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>⚠️ 複雜度問題</h4>
+                <p>
+                    對於一個 $h \times w$ 的圖像，全局自注意力的計算複雜度是 $O((hw)^2)$。當圖像解析度為 224×224 時，需要計算 50,176 個 token 之間的關係，這在計算上是不可行的。
+                </p>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>局部視窗自注意力</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        For efficient modeling, we propose to compute self-attention within local windows. The windows are arranged to evenly partition the image in a non-overlapping manner. Supposing each window contains $M\times M$ patches, the computational complexity of a global MSA module and a window based one on an image of $h\times w$ patches are:
+                        \begin{align}
+                        &\Omega (\text{MSA}) = 4hwC^2 + 2 (hw)^2C, \\
+                        &\Omega (\text{W-MSA}) = 4hwC^2 + 2 M^2 hwC,
+                        \end{align}
+                        where the former is quadratic to patch number $hw$, and the latter is linear when $M$ is fixed (set to $7$ by default).
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        為了高效建模，我們提出在局部視窗內計算自注意力。視窗以非重疊的方式均勻劃分圖像。假設每個視窗包含 $M\times M$ 個 patch，全局 MSA 模組和基於視窗的模組在 $h\times w$ 個 patch 的圖像上的計算複雜度為：
+                        \begin{align}
+                        &\Omega (\text{MSA}) = 4hwC^2 + 2 (hw)^2C, \\
+                        &\Omega (\text{W-MSA}) = 4hwC^2 + 2 M^2 hwC,
+                        \end{align}
+                        其中前者相對於 patch 數量 $hw$ 是二次的，後者在 $M$ 固定時（預設為 $7$）是線性的。
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI 生成概念圖 -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept_complexity_03.png" alt="複雜度對比圖">
+                <div class="caption">
+                    💡 <strong>AI 圖解：</strong>計算複雜度對比——從 O(n²) 到 O(n) 的效率提升
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>Shifted Window 的關鍵創新</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        The window-based self-attention module lacks connections across windows, which limits its modeling power. To introduce cross-window connections while maintaining the efficient computation of non-overlapping windows, we propose a shifted window partitioning approach which alternates between two partitioning configurations in consecutive Swin Transformer blocks.
+                        
+                        As illustrated in Figure 2, the first module uses a regular window partitioning strategy which starts from the top-left pixel, and the $8\times 8$ feature map is evenly partitioned into $2\times2$ windows of size $4\times4$ ($M=4$). Then, the next module adopts a windowing configuration that is shifted from that of the preceding layer, by displacing the windows by $ (\lfloor\frac{M}{2} \rfloor, \lfloor\frac{M}{2} \rfloor)$ pixels from the regularly partitioned windows.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        基於視窗的自注意力模組缺乏跨視窗的連接，這限制了其建模能力。為了在保持非重疊視窗高效計算的同時引入跨視窗連接，我們提出了一種移位視窗分區方法，在連續的 Swin Transformer block 之間交替使用兩種分區配置。
+                        
+                        如圖 2 所示，第一個模組使用從左上角像素開始的常規視窗分區策略，$8\times 8$ 的特徵圖被均勻劃分為 $2\times2$ 個大小為 $4\times4$（$M=4$）的視窗。然後，下一個模組採用從前一層移位的視窗配置，通過將視窗從常規分區視窗移動 $ (\lfloor\frac{M}{2} \rfloor, \lfloor\frac{M}{2} \rfloor)$ 個像素。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 原始圖片展示 -->
+            <div class="figure figure-original">
+                <img src="images/original/teaser_v4.png" alt="Shifted Window 機制示意圖">
+                <div class="caption">
+                    <strong>Figure 2:</strong> Shifted Window 機制示意圖（論文原圖）
+                </div>
+                <div class="explanation">
+                    <h4>🖼️ 原文圖表解析</h4>
+                    <p>
+                        這張圖清晰地展示了 Shifted Window 的工作原理：
+                    </p>
+                    <ul>
+                        <li><strong>左圖（Layer l）</strong>：常規視窗分區，8×8 特徵圖被劃分為 2×2 個 4×4 視窗</li>
+                        <li><strong>右圖（Layer l+1）</strong>：視窗被移位（移動 ⌊M/2⌋ = 2 個像素），新的視窗跨越了前一層視窗的邊界</li>
+                    </ul>
+                    <p>
+                        這種設計讓資訊能夠在不同視窗之間流動，同時保持了局部計算的效率。
+                    </p>
+                </div>
+            </div>
+
+            <!-- AI 生成概念圖 -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept_shifted_window_02.png" alt="Shifted Window 機制圖解">
+                <div class="caption">
+                    💡 <strong>AI 圖解：</strong>Shifted Window 機制詳解——視窗如何在層之間移動並建立連接
+                </div>
+            </div>
+
+            <!-- 概念動畫 -->
+            <div class="video-container">
+                <video autoplay loop muted playsinline>
+                    <source src="images/videos/shifted_window_mechanism.mp4" type="video/mp4">
+                </video>
+                <div class="caption">🎬 Shifted Window 機制動畫：展示視窗如何在連續層之間移位並建立跨視窗連接</div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>數學公式：Swin Transformer Block</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        With the shifted window partitioning approach, consecutive Swin Transformer blocks are computed as
+                        \begin{align}
+                            &{{\hat{\bf{z}}}^{l}} = \text{W-MSA}\left( {\text{LN}\left( {{{\bf{z}}^{l - 1}}} \right)} \right) + {\bf{z}}^{l - 1},\nonumber\\
+                            &{{\bf{z}}^l} = \text{MLP}\left( {\text{LN}\left( {{{\hat{\bf{z}}}^{l}}} \right)} \right) + {{\hat{\bf{z}}}^{l}},\nonumber\\
+                            &{{\hat{\bf{z}}}^{l+1}} = \text{SW-MSA}\left( {\text{LN}\left( {{{\bf{z}}^{l}}} \right)} \right) + {\bf{z}}^{l}, \nonumber\\
+                            &{{\bf{z}}^{l+1}} = \text{MLP}\left( {\text{LN}\left( {{{\hat{\bf{z}}}^{l+1}}} \right)} \right) + {{\hat{\bf{z}}}^{l+1}}, \label{eq.swin}
+                        \end{align}
+                        where ${\hat{\bf{z}}}^l$ and ${\bf{z}}^l$ denote the output features of the (S)W-MSA module and the MLP module for block $l$, respectively; $\text{W-MSA}$ and $\text{SW-MSA}$ denote window based multi-head self-attention using regular and shifted window partitioning configurations, respectively.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        使用移位視窗分區方法，連續的 Swin Transformer block 計算如下：
+                        \begin{align}
+                            &{{\hat{\bf{z}}}^{l}} = \text{W-MSA}\left( {\text{LN}\left( {{{\bf{z}}^{l - 1}}} \right)} \right) + {\bf{z}}^{l - 1},\nonumber\\
+                            &{{\bf{z}}^l} = \text{MLP}\left( {\text{LN}\left( {{{\hat{\bf{z}}}^{l}}} \right)} \right) + {{\hat{\bf{z}}}^{l}},\nonumber\\
+                            &{{\hat{\bf{z}}}^{l+1}} = \text{SW-MSA}\left( {\text{LN}\left( {{{\bf{z}}^{l}}} \right)} \right) + {\bf{z}}^{l}, \nonumber\\
+                            &{{\bf{z}}^{l+1}} = \text{MLP}\left( {\text{LN}\left( {{{\hat{\bf{z}}}^{l+1}}} \right)} \right) + {{\hat{\bf{z}}}^{l+1}}, \label{eq.swin}
+                        \end{align}
+                        其中 ${\hat{\bf{z}}}^l$ 和 ${\bf{z}}^l$ 分別表示 block $l$ 的 (S)W-MSA 模組和 MLP 模組的輸出特徵；$\text{W-MSA}$ 和 $\text{SW-MSA}$ 分別表示使用常規和移位視窗分區配置的基於視窗的多頭自注意力。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>💡 公式解析</h4>
+                <p>
+                    這個公式展示了 Swin Transformer Block 的完整計算流程：
+                </p>
+                <ul>
+                    <li><strong>Block l</strong>：使用 W-MSA（常規視窗）+ MLP</li>
+                    <li><strong>Block l+1</strong>：使用 SW-MSA（移位視窗）+ MLP</li>
+                </ul>
+                <p>
+                    兩個 block 成對出現，交替使用常規和移位視窗，既保持了效率，又建立了跨視窗連接。
+                </p>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>為什麼 Shifted Windows 如此有效？</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        The shifted window partitioning approach introduces connections between neighboring non-overlapping windows in the previous layer and is found to be effective in image classification, object detection, and semantic segmentation, as shown in Table 4. This strategy is also efficient in regards to real-world latency: all <em>query</em> patches within a window share the same <em>key</em> set, which facilitates memory access in hardware.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        移位視窗分區方法在前一層的相鄰非重疊視窗之間引入連接，並被發現在圖像分類、目標檢測和語義分割中有效，如表 4 所示。這個策略在實際延遲方面也很高效：視窗內的所有 <em>query</em> patch 共享相同的 <em>key</em> 集合，這有利於硬體中的記憶體訪問。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 雙重類比 -->
+            <div class="analogy-section">
+                <div class="analogy-card life">
+                    <h4>🏠 生活類比</h4>
+                    <p>
+                        就像滑動拼圖一樣：第一層將拼圖分成固定的 4×4 區塊，每個區塊內部可以自由移動（局部注意力）。第二層將拼圖稍微滑動一下，新的區塊跨越了原來區塊的邊界，這樣不同區塊之間就能「看到」彼此了。通過這種方式，既保持了每個區塊內部的效率，又建立了區塊之間的連接。
+                    </p>
+                </div>
+                <div class="analogy-card engineering">
+                    <h4>⚙️ 工程類比</h4>
+                    <p>
+                        在系統架構上，這類似於分片資料庫（Sharded Database）的設計：每個視窗就像一個資料庫分片，內部查詢非常高效（局部計算）。Shifted Windows 就像在不同分片之間建立「複製」或「同步」機制，讓資訊能夠在不同分片之間流動，既保持了分片的效率優勢，又實現了全局的一致性。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Quote Block 金句 -->
+            <div class="quote-block">
+                「移位視窗：在效率與建模能力之間找到完美平衡的設計智慧」
+            </div>
+
+            <!-- 本章重點回顧 -->
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>全局自注意力的問題</strong>：O(n²) 複雜度，不適合高解析度圖像</li>
+                    <li><strong>局部視窗解決方案</strong>：將計算限制在 M×M 視窗內，實現 O(n) 複雜度</li>
+                    <li><strong>Shifted Windows 創新</strong>：在連續層之間移位視窗，建立跨視窗連接</li>
+                    <li><strong>W-MSA 和 SW-MSA</strong>：交替使用常規和移位視窗分區</li>
+                    <li><strong>硬體效率</strong>：同一視窗內的 query 共享 key 集合，優化記憶體訪問</li>
+                    <li><strong>實驗驗證</strong>：在三個任務上都帶來顯著性能提升</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="chapter-nav">
+            <a href="03-architecture.html" class="prev">← 上一章</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="05-efficient-computation.html" class="next">下一章：高效計算 →</a>
+        </div>
+    </div>
+</body>
+</html>

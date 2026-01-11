@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>結論與展望 - Swin Transformer 深度解析</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section" style="background-image: url('images/generated/hero_07_conclusion.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>統一架構的願景</h1>
+                <p class="hero-subtitle">從視覺到語言的橋樑</p>
+                <div class="hero-meta">Swin Transformer 深度解析 · 第 7 章</div>
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">Swin Transformer 深度解析</a>
+            <span>/</span>
+            <span class="current">第 7 章：結論與展望</span>
+        </nav>
+
+        <div class="story-container">
+            <!-- Drop Cap 開場 -->
+            <p class="drop-cap">
+                Swin Transformer 的成功不僅在於其卓越的實驗結果，更在於它為視覺和語言領域的統一架構鋪平了道路。通過層次化設計和移位視窗機制，Swin Transformer 證明了 Transformer 可以像 CNN 一樣成為通用的視覺骨幹網路，同時保持了 Transformer 在建模長程依賴方面的優勢。這為未來的多模態 AI 系統奠定了堅實的基礎。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>主要貢獻總結</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        This paper presents Swin Transformer, a new vision Transformer which produces a hierarchical feature representation and has linear computational complexity with respect to input image size. Swin Transformer achieves the state-of-the-art performance on COCO object detection and ADE20K semantic segmentation, significantly surpassing previous best methods.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        本論文提出了 Swin Transformer，一個新的視覺 Transformer，它產生層次化特徵表示，並且相對於輸入圖像大小具有線性計算複雜度。Swin Transformer 在 COCO 目標檢測和 ADE20K 語義分割上達到最先進的性能，顯著超越了之前的最佳方法。
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-concept">
+                <h4>🎯 Swin Transformer 的三個核心貢獻</h4>
+                <ul>
+                    <li><strong>層次化架構</strong>：構建多尺度特徵圖，適用於各種視覺任務</li>
+                    <li><strong>移位視窗機制</strong>：在保持效率的同時建立跨視窗連接</li>
+                    <li><strong>線性複雜度</strong>：相對於圖像大小的線性計算複雜度，可擴展到高解析度圖像</li>
+                </ul>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>統一架構的願景</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        It is our belief that a unified architecture across computer vision and natural language processing could benefit both fields, since it would facilitate joint modeling of visual and textual signals and the modeling knowledge from both domains can be more deeply shared. We hope that Swin Transformer's strong performance on various vision problems can drive this belief deeper in the community and encourage unified modeling of vision and language signals.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        我們相信，電腦視覺和自然語言處理之間的統一架構可以讓兩個領域都受益，因為它將促進視覺和文字信號的聯合建模，並且兩個領域的建模知識可以更深入地共享。我們希望 Swin Transformer 在各種視覺問題上的強勁表現能夠在社群中深化這一信念，並鼓勵視覺和語言信號的統一建模。
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>Shifted Windows 的通用性</h2>
+
+            <div class="original-quote">
+                <div class="content">
+                    <div class="en">
+                        <strong>📄 論文原文</strong><br><br>
+                        As a key element of Swin Transformer, the <em>shifted window</em> based self-attention is shown to be effective and efficient on vision problems, and we look forward to investigating its use in natural language processing as well.
+                    </div>
+                    <div class="zh">
+                        <strong>翻譯</strong><br><br>
+                        作為 Swin Transformer 的關鍵元素，基於<em>移位視窗</em>的自注意力在視覺問題上被證明是有效和高效的，我們期待在自然語言處理中也研究其使用。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 雙重類比 -->
+            <div class="analogy-section">
+                <div class="analogy-card life">
+                    <h4>🏠 生活類比</h4>
+                    <p>
+                        就像橋樑建設一樣：Swin Transformer 在視覺和語言之間架起了一座橋樑。以前，視覺 AI 和語言 AI 就像兩個隔河相望的城市，各自發展。Swin Transformer 的出現，讓這兩個城市之間有了通行的橋樑，資訊和知識可以在兩邊自由流動，促進了兩個領域的共同發展。
+                    </p>
+                </div>
+                <div class="analogy-card engineering">
+                    <h4>⚙️ 工程類比</h4>
+                    <p>
+                        在系統架構上，這類似於統一平台的建設：以前視覺和語言使用不同的架構（CNN vs Transformer），就像兩個不同的作業系統。Swin Transformer 證明了可以用統一的架構（Transformer）處理兩種不同的數據類型，就像建立了一個統一的操作平台，讓不同類型的應用可以在同一個基礎上運行，大大提高了開發效率和系統整合性。
+                    </p>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>對未來 AI 發展的啟示</h2>
+
+            <div class="key-concept">
+                <h4>🔮 Swin Transformer 的歷史意義</h4>
+                <ul>
+                    <li><strong>架構統一</strong>：證明了 Transformer 可以成為視覺和語言的統一架構</li>
+                    <li><strong>效率突破</strong>：解決了 Transformer 在視覺領域的效率問題</li>
+                    <li><strong>通用骨幹</strong>：為多模態 AI 系統奠定了基礎</li>
+                    <li><strong>設計典範</strong>：層次化 + 移位視窗的設計模式影響深遠</li>
+                </ul>
+            </div>
+
+            <!-- Quote Block 金句 -->
+            <div class="quote-block">
+                「Swin Transformer：從視覺到語言的橋樑，統一架構的開端」
+            </div>
+
+            <!-- 本章重點回顧 -->
+            <div class="chapter-summary">
+                <h3>💡 本章重點</h3>
+                <ul>
+                    <li><strong>核心貢獻</strong>：層次化架構、移位視窗、線性複雜度</li>
+                    <li><strong>實驗成就</strong>：在三個任務上都達到 SOTA，證明通用性</li>
+                    <li><strong>統一願景</strong>：促進視覺和語言領域的架構統一</li>
+                    <li><strong>設計通用性</strong>：移位視窗機制也可應用於 NLP</li>
+                    <li><strong>歷史意義</strong>：為多模態 AI 系統奠定基礎，影響深遠</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="chapter-nav">
+            <a href="06-experiments.html" class="prev">← 上一章</a>
+            <a href="index.html" class="home">📑 目錄</a>
+            <a href="#" class="next disabled">下一章 →</a>
+        </div>
+    </div>
+</body>
+</html>
