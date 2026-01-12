@@ -411,5 +411,49 @@
     <priority>0.7</priority>
   </url>
   
+  <!-- Nested Learning Tutorial -->
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/index.html</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/01-introduction.html</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/02-associative-memory.html</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/03-knowledge-transfer.html</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/04-optimizers.html</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/05-continuum-memory.html</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/06-hope-experiments.html</loc>
+    <lastmod>2026-01-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
 </urlset>
 

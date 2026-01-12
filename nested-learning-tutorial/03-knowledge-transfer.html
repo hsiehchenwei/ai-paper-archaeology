@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Primary Meta Tags -->
+    <title>層級間的知識傳遞 - Nested Learning 論文導讀 | AI Paper Archaeology</title>
+    <meta
+      name="description"
+      content="當模型變成一組巢狀的優化問題，知識如何在不同層級間流動？探討 Meta-learning、Hypernetworks、In-context Learning 與 Nested Learning 的關係。"
+    />
+    <meta
+      name="keywords"
+      content="知識傳遞, Knowledge Transfer, Meta-learning, MAML, Hypernetworks, In-context Learning, ICL, Nested Learning, 巢狀優化"
+    />
+    <meta name="author" content="謝承緯 (Chen Wei Hsieh)" />
+    <meta name="robots" content="index, follow" />
+    <link
+      rel="canonical"
+      href="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/03-knowledge-transfer.html"
+    />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/03-knowledge-transfer.html"
+    />
+    <meta
+      property="og:title"
+      content="層級間的知識傳遞 - Nested Learning 論文導讀"
+    />
+    <meta
+      property="og:description"
+      content="當模型變成一組巢狀的優化問題，知識如何在不同層級間流動？探討 Meta-learning、Hypernetworks 與 Nested Learning 的關係。"
+    />
+    <meta
+      property="og:image"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/images/generated/hero-03-knowledge.png"
+    />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:site_name" content="AI Paper Archaeology" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/03-knowledge-transfer.html"
+    />
+    <meta
+      property="twitter:title"
+      content="層級間的知識傳遞 - Nested Learning 論文導讀"
+    />
+    <meta
+      property="twitter:description"
+      content="當模型變成一組巢狀的優化問題，知識如何在不同層級間流動？探討 Meta-learning、Hypernetworks 與 Nested Learning 的關係。"
+    />
+    <meta
+      property="twitter:image"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/images/generated/hero-03-knowledge.png"
+    />
+
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">🔗 Nested Learning</a>
+            <span>/</span>
+            <span class="current">03 層級間的知識傳遞</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero-section" style="background-image: url('images/generated/hero-03-knowledge.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>知識的流動</h1>
+                <div class="hero-subtitle">當模型變成一組巢狀的優化問題，層與層之間如何對話？</div>
+                <div class="hero-meta">Chapter 3 · 架構設計</div>
+            </div>
+        </div>
+
+        <!-- Story Container -->
+        <div class="story-container">
+            <div class="story-lead">
+                如果每個學習模組都是一個獨立的優化問題，那麼它們是如何組合成一個強大的整體呢？答案在於「連接」。
+            </div>
+
+            <p class="drop-cap">
+                在前一章，我們發現了 MLP 訓練和動量優化器本質上都是聯想記憶系統。Nested Learning (NL) 範式將整個機器學習模型視為一個由多個層級組成的生態系統。
+            </p>
+
+            <p>
+                這些層級不僅僅是平行運作，它們是<strong>互相嵌套 (Nested)</strong> 的。就像俄羅斯娃娃一樣，一個層級的輸出可能定義了另一個層級的優化目標，或者一個層級的參數可能是由另一個層級生成的。
+            </p>
+
+            <!-- AI Concept Image: Matryoshka -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept-matryoshka.png" alt="Nested Optimization Matryoshka">
+                <div class="caption">
+                    <strong>🎨 視覺化類比：</strong> 巢狀優化就像俄羅斯套娃。最外層可能是 SGD（慢速更新），中間層可能是模型權重（中速），最內層可能是 In-context Activation（快速）。每一層都在解決自己的優化問題，同時包覆著下一層。
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>五種知識傳遞方式</h2>
+
+            <p>
+                論文詳細分類了不同層級之間進行「知識傳遞」的五種主要機制。這些機制解釋了許多現有的先進技術（如 Meta-learning, Hypernetworks）其實都是 Nested Learning 的特例。
+            </p>
+
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>1. 直接參數連接 (Parametric)</h4>
+                    <p>低頻層（慢）的參數直接影響高頻層（快）的運算。例如：標準神經網路的前向傳播。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>2. 非參數連接 (Non-Parametric)</h4>
+                    <p>低頻層（慢）的輸出依賴於高頻層（快）的 context 或非參數解。例如：Transformer 的 Softmax Attention（作為一種非參數回歸）。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>3. 反向傳播 (Backpropagation)</h4>
+                    <p>這是最常見的連接。不同層級共享同一個梯度流，但在不同的時間尺度上更新。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>4. 初始化 (Initialization)</h4>
+                    <p>低頻層（外循環）負責學習高頻層（內循環）的「最佳初始狀態」，使其能快速適應新任務。這正是 <strong>MAML (Model-Agnostic Meta-Learning)</strong> 的核心思想。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>5. 生成 (Generation)</h4>
+                    <p>一層直接「生成」另一層的權重或 Context。例如：<strong>Hypernetworks</strong> 和 <strong>Learned Optimizers</strong>。</p>
+                </div>
+            </div>
+
+            <!-- Original Image: Nested Main -->
+            <div class="figure figure-original">
+                <img src="images/original/Nested_main.png" alt="Nested Learning Architecture">
+                <div class="caption">
+                    <strong>🖼️ 論文原圖：</strong> (左) 混合架構示例，展示了不同模組如何協同工作。(右) 神經學習模組 (Neural Learning Module)，一個自我壓縮 Context Flow 的計算模型。注意看不同層級（Levels）是如何堆疊的。
+                </div>
+            </div>
+
+            <div class="original-quote">
+                "We argue that the optimization process and the learning algorithms/architectures are fundamentally the same concepts but are in different levels of a system with different context (i.e., gradient vs. tokens)."
+                <br><br>
+                <strong>翻譯：</strong> 我們主張，優化過程和學習算法/架構本質上是相同的概念，只是處於系統中不同的層級，並面對不同的 context（例如：梯度 vs. token）。
+            </div>
+
+            <h2>重新定義 Meta-learning</h2>
+
+            <p>
+                在 NL 的框架下，<strong>Meta-learning (元學習)</strong> 不再是一個神秘的高級技術，而只是 Nested Learning 的一種自然表現形式。
+            </p>
+            
+            <p>
+                當我們有兩個嵌套的優化循環：
+            </p>
+            <ul>
+                <li><strong>內循環 (Inner Loop)</strong>：快速適應當前任務（例如：Few-shot learning）。</li>
+                <li><strong>外循環 (Outer Loop)</strong>：慢速優化內循環的參數（例如：學習如何學習）。</li>
+            </ul>
+
+            <p>
+                這就是一個典型的 2-Level Nested System。
+            </p>
+
+            <h3>In-context Learning 是什麼？</h3>
+
+            <p>
+                論文提出了一個深刻的洞察：<strong>In-context Learning (ICL)</strong> 其實就是「擁有多個嵌套層級」的特性。
+            </p>
+            
+            <p>
+                Transformer 之所以能做 ICL，是因為它本質上是一個非參數化的回歸模型，它在 Inference 階段（內層）直接利用 Context 來構建預測，而不需要更新權重。相比之下，傳統 RNN 需要更新隱藏狀態（參數化過程）。
+            </p>
+
+            <div class="quote-block">
+                「Pre-training 本質上就是一種 In-context Learning，只是它的 Context 是整個網際網路的數據。」
+            </div>
+
+            <p>
+                這句話打破了 Pre-training 和 ICL 的界限。它們只是在不同規模 Context 上運作的同一種機制。
+            </p>
+
+            <!-- Navigation -->
+            <div class="chapter-nav">
+                <a href="02-associative-memory.html" class="nav-btn">⬅️ 上一章：聯想記憶與巢狀學習</a>
+                <a href="04-optimizers.html" class="nav-btn">下一章：優化器也是學習模組 ➡️</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Primary Meta Tags -->
+    <title>連續體記憶系統 (CMS) - Nested Learning 論文導讀 | AI Paper Archaeology</title>
+    <meta
+      name="description"
+      content="超越「長期/短期記憶」的二分法。介紹 Continuum Memory System，如何利用頻譜般的更新頻率，實現更自然的記憶機制。探索 Hope 架構如何解決災難性遺忘問題。"
+    />
+    <meta
+      name="keywords"
+      content="Continuum Memory System, CMS, 連續體記憶系統, Hope 架構, 災難性遺忘, Catastrophic Forgetting, 持續學習, 多頻率更新, Nested Learning"
+    />
+    <meta name="author" content="謝承緯 (Chen Wei Hsieh)" />
+    <meta name="robots" content="index, follow" />
+    <link
+      rel="canonical"
+      href="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/05-continuum-memory.html"
+    />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/05-continuum-memory.html"
+    />
+    <meta
+      property="og:title"
+      content="連續體記憶系統 (CMS) - Nested Learning 論文導讀"
+    />
+    <meta
+      property="og:description"
+      content="超越「長期/短期記憶」的二分法。介紹 Continuum Memory System，如何利用頻譜般的更新頻率，實現更自然的記憶機制。"
+    />
+    <meta
+      property="og:image"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/images/generated/hero-05-continuum.png"
+    />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:site_name" content="AI Paper Archaeology" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/05-continuum-memory.html"
+    />
+    <meta
+      property="twitter:title"
+      content="連續體記憶系統 (CMS) - Nested Learning 論文導讀"
+    />
+    <meta
+      property="twitter:description"
+      content="超越「長期/短期記憶」的二分法。介紹 Continuum Memory System，如何利用頻譜般的更新頻率，實現更自然的記憶機制。"
+    />
+    <meta
+      property="twitter:image"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/images/generated/hero-05-continuum.png"
+    />
+
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">🔗 Nested Learning</a>
+            <span>/</span>
+            <span class="current">05 連續體記憶系統</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero-section" style="background-image: url('images/generated/hero-05-continuum.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>記憶不是二元對立，而是光譜</h1>
+                <div class="hero-subtitle">告別「長期」與「短期」的粗糙劃分，迎接頻率的連續體</div>
+                <div class="hero-meta">Chapter 5 · 創新架構</div>
+            </div>
+        </div>
+
+        <!-- Story Container -->
+        <div class="story-container">
+            <div class="story-lead">
+                長久以來，我們一直將記憶簡單地分為兩類：短期記憶（如 RAM）和長期記憶（如硬碟）。但大腦真的是這樣運作的嗎？
+            </div>
+
+            <p class="drop-cap">
+                當然不是。人類的記憶是一個<strong>連續體 (Continuum)</strong>。
+            </p>
+
+            <p>
+                有些記憶只能維持幾秒鐘（剛剛看到的車牌號），有些能維持幾天（昨天的晚餐），有些則是一輩子（童年的回憶）。我們的大腦並沒有兩個分開的盒子分別裝「短期」和「長期」，而是使用了一系列不同頻率的神經振盪。
+            </p>
+
+            <!-- AI Concept Image: Frequency Waves -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept-frequency-waves.png" alt="Brain Waves Continuum">
+                <div class="caption">
+                    <strong>🎨 視覺化類比：</strong> 就像光譜有紅橙黃綠藍靛紫，記憶也有不同的頻率。高頻波（左）代表快速適應但易逝的記憶，低頻波（右）代表穩定持久的知識。Nested Learning 試圖在模型中重現這種豐富的頻譜。
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>Continuum Memory System (CMS)</h2>
+
+            <p>
+                為了模擬這種機制，論文提出了 <strong>Continuum Memory System (CMS)</strong>。
+            </p>
+            
+            <p>
+                CMS 不是單一層的記憶模組，而是一組<strong>多層級、多頻率</strong>的記憶單元。
+            </p>
+
+            <div class="original-quote">
+                "We generalize the traditional viewpoint of 'long-term/short-term memory' (LSM) by presenting the Continuum Memory Systems (CMSs) and see memory as a distributed inter-connected system with a spectrum of frequency updates."
+                <br><br>
+                <strong>📄 論文原文翻譯：</strong> 我們通過提出連續體記憶系統 (CMS) 來推廣傳統的「長期/短期記憶」(LSM) 觀點，將記憶視為一個具有頻率更新頻譜的分佈式互連系統。
+            </div>
+
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>高頻單元 (High Frequency)</h4>
+                    <p>更新速度極快。對當前的 Context 非常敏感，能迅速適應新任務，但也很容易遺忘。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>中頻單元 (Mid Frequency)</h4>
+                    <p>更新速度適中。負責連接當下與過去，形成連貫的敘事。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>低頻單元 (Low Frequency)</h4>
+                    <p>更新速度極慢（甚至接近靜止）。存儲那些經過時間考驗、不應輕易改變的核心知識。</p>
+                </div>
+            </div>
+
+            <h3>Hope 架構：超越 Transformer</h3>
+
+            <p>
+                基於 CMS 和 Self-Modifying Titans，作者提出了 <strong>Hope</strong>（A Self-Referential Learning Module with Continuum Memory）架構。
+            </p>
+
+            <p>
+                傳統的 Transformer 使用 MLP 作為靜態的知識存儲（更新頻率 = 0）。而在 Hope 中，MLP 被替換成了具有多層級適應能力的 CMS 模組。這意味著模型的每一部分都是「活」的，都在以不同的速度學習和適應。同時，投影層 \( W_k, W_v, W_q \) 也能夠進行 In-context 更新，實現「自我修改」的能力。
+            </p>
+
+            <!-- Original Image: HOPE vs Transformer -->
+            <div class="figure figure-original">
+                <img src="images/original/Hope-vs-transformer.png" alt="HOPE vs Transformer">
+                <div class="caption">
+                    <strong>🖼️ 論文原圖：</strong> 對比 Transformer 和 HOPE 架構。左邊的 Transformer 依賴靜態的 MLP；右邊的 HOPE 則引入了多層級的記憶模組，每個模組都有自己的更新頻率 \( f \)。
+                </div>
+            </div>
+
+            <h2>解決災難性遺忘</h2>
+
+            <p>
+                為什麼 CMS 能幫助解決持續學習中的<strong>災難性遺忘 (Catastrophic Forgetting)</strong>？
+            </p>
+            
+            <p>
+                因為有了分工。
+            </p>
+
+            <ul>
+                <li>當新知識進來時，<strong>高頻單元</strong>首先負責吸收它，保護<strong>低頻單元</strong>不受干擾。</li>
+                <li>只有當某個知識反覆出現，證明它足夠重要時，它才會慢慢滲透到<strong>低頻單元</strong>中，成為長期記憶。</li>
+            </ul>
+
+            <p>
+                這就像大腦的記憶鞏固過程（Memory Consolidation）：白天的經歷先暫存在海馬體（高頻），晚上睡覺時再慢慢轉移到大腦皮層（低頻）。
+            </p>
+
+            <!-- Original Image: Ablation Context Length -->
+            <div class="figure figure-original">
+                <img src="images/original/ablation-context-length.png" alt="Ablation Study on Context Length">
+                <div class="caption">
+                    <strong>🖼️ 論文原圖：</strong> 消融研究展示了不同上下文長度對模型性能的影響。CMS 設計讓模型在處理長上下文時保持穩定表現，而不是像傳統架構那樣快速退化。
+                </div>
+            </div>
+
+            <div class="quote-block">
+                「要學得快，也要記得久。秘訣在於不要讓所有神經元都以同樣的速度奔跑。」
+            </div>
+
+            <!-- Navigation -->
+            <div class="chapter-nav">
+                <a href="04-optimizers.html" class="nav-btn">⬅️ 上一章：優化器也是學習模組</a>
+                <a href="06-hope-experiments.html" class="nav-btn">下一章：HOPE 模型與實驗結果 ➡️</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Primary Meta Tags -->
+    <title>優化器也是學習模組 - Nested Learning 論文導讀 | AI Paper Archaeology</title>
+    <meta
+      name="description"
+      content="打破「模型」與「優化器」的界線。從 Adam 到 Muon，看這些演算法如何作為一種特殊的聯想記憶，幫助模型壓縮梯度資訊。深入解析 M3 優化器的多尺度動量設計。"
+    />
+    <meta
+      name="keywords"
+      content="優化器, Optimizer, Adam, Muon, M3 優化器, 梯度壓縮, 聯想記憶, 動量優化器, 多尺度動量, Nested Learning"
+    />
+    <meta name="author" content="謝承緯 (Chen Wei Hsieh)" />
+    <meta name="robots" content="index, follow" />
+    <link
+      rel="canonical"
+      href="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/04-optimizers.html"
+    />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/04-optimizers.html"
+    />
+    <meta
+      property="og:title"
+      content="優化器也是學習模組 - Nested Learning 論文導讀"
+    />
+    <meta
+      property="og:description"
+      content="打破「模型」與「優化器」的界線。從 Adam 到 Muon，看這些演算法如何作為一種特殊的聯想記憶，幫助模型壓縮梯度資訊。"
+    />
+    <meta
+      property="og:image"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/images/generated/hero-04-optimizers.png"
+    />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:site_name" content="AI Paper Archaeology" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/04-optimizers.html"
+    />
+    <meta
+      property="twitter:title"
+      content="優化器也是學習模組 - Nested Learning 論文導讀"
+    />
+    <meta
+      property="twitter:description"
+      content="打破「模型」與「優化器」的界線。從 Adam 到 Muon，看這些演算法如何作為一種特殊的聯想記憶，幫助模型壓縮梯度資訊。"
+    />
+    <meta
+      property="twitter:image"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/images/generated/hero-04-optimizers.png"
+    />
+
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">🔗 Nested Learning</a>
+            <span>/</span>
+            <span class="current">04 優化器也是學習模組</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero-section" style="background-image: url('images/generated/hero-04-optimizers.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>優化器不只是工具，它是大腦</h1>
+                <div class="hero-subtitle">從 Adam 到 Muon，優化算法其實是特殊的記憶系統</div>
+                <div class="hero-meta">Chapter 4 · 深度解析</div>
+            </div>
+        </div>
+
+        <!-- Story Container -->
+        <div class="story-container">
+            <div class="story-lead">
+                如果我說 Adam 優化器和 Transformer 模型本質上是一樣的，你可能會覺得我瘋了。但請聽我解釋。
+            </div>
+
+            <p class="drop-cap">
+                在傳統的機器學習觀念中，我們習慣將「模型架構」（Architecture）和「優化器」（Optimizer）分開來看。模型負責學習，優化器負責調整模型。
+            </p>
+
+            <p>
+                但在 Nested Learning 的視角下，這兩者之間的界線消失了。
+            </p>
+
+            <div class="myboxi">
+                <strong>關鍵洞察：</strong><br>
+                優化器本身就是一個<strong>聯想記憶模組</strong>，它的任務是學習並壓縮「梯度流」(Gradient Flow)。
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>Adam：梯度的預測者</h2>
+
+            <p>
+                讓我們看看最流行的優化器 Adam。它維護了兩個狀態：
+            </p>
+            <ul>
+                <li>一階矩（動量 \( m \)）：梯度的平均值。</li>
+                <li>二階矩（\( v \)）：梯度的平方平均值（變異數）。</li>
+            </ul>
+
+            <p>
+                論文證明，Adam 可以被視為一個<strong>最優聯想記憶</strong>，它試圖預測梯度的變異數（Variance）。換句話說，Adam 其實是在學習 loss landscape 的幾何形狀！
+            </p>
+
+            <p>
+                這意味著，當我們在訓練一個 Transformer 時，其實有兩個學習過程在同時進行：
+            </p>
+            <ol>
+                <li><strong>模型層級</strong>：Transformer 正在學習預測下一個 Token。</li>
+                <li><strong>優化器層級</strong>：Adam 正在學習預測下一個 Gradient。</li>
+            </ol>
+
+            <p>
+                這就是為什麼優化器的選擇如此重要——它不僅僅是調整步長，它是在對「學習過程本身」進行建模。
+            </p>
+
+            <div class="original-quote">
+                "We show that known gradient-based optimizers, such as Adam, SGD with Momentum, etc., are in fact associative memory modules that aim to compress the gradients' information (by gradient descent)."
+                <br><br>
+                <strong>📄 論文原文翻譯：</strong> 我們證明了已知的梯度優化器，如 Adam、帶動量的 SGD 等，實際上是聯想記憶模組，其目的是（通過梯度下降）壓縮梯度的資訊。
+            </div>
+
+            <h2>Muon 與正交化：學習正確的坐標系</h2>
+
+            <p>
+                除了 Adam，論文還深入探討了最近非常熱門的 <strong>Muon</strong> 優化器。
+            </p>
+            
+            <p>
+                Muon 引入了 <strong>Newton-Schulz 迭代</strong> 來對梯度進行正交化。在 NL 的視角下，這是一個更高層級的優化：
+            </p>
+            
+            <p>
+                <strong>Preconditioner (預處理器)</strong> 是一個聯想記憶，它學習將梯度映射到一個更好的坐標系（正交空間）。
+            </p>
+
+            <p>
+                \[ W_{t+1} = W_t - \eta P^{-1}(g_t) \]
+            </p>
+
+            <p>
+                這裡的 \( P \) 就在學習這種映射。Muon 試圖讓梯度彼此正交，這樣每次更新就不會干擾之前的學習成果，從而提高學習效率。
+            </p>
+
+            <!-- Original Image: Optimizer Time -->
+            <div class="figure figure-original">
+                <img src="images/original/optimizer-time.png" alt="Optimizer Efficiency">
+                <div class="caption">
+                    <strong>🖼️ 論文原圖：</strong> 比較不同優化器（Muon, AdaMuon, M3）在 140M 和 1.3B 參數模型上的訓練時間。優化器的設計直接影響學習效率。
+                </div>
+            </div>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>M3：多尺度動量 Muon (Multi-scale Momentum Muon)</h2>
+
+            <p>
+                基於這些洞察，論文提出了一個新的優化器：<strong>M3</strong>。
+            </p>
+            
+            <div class="myboxi">
+                <strong>🚨 動量的記憶問題：</strong> 論文指出，以常見的 \(\beta = 0.9\) 計算，最近的 6 個梯度就佔據了動量累積貢獻的 50%，而 43 個梯度就佔據了 99%。這意味著超過 43 步之前的梯度資訊，對當前動量的貢獻不到 1%！這嚴重限制了優化器對全局 Loss Landscape 的理解。
+            </div>
+
+            <p>
+                M3 (Multi-scale Momentum Muon) 引入了類似 CMS（連續體記憶系統）的概念到優化器中，使用了多個不同時間尺度的動量項：
+            </p>
+
+            <ul>
+                <li><strong>短期動量</strong>：快速適應當前的梯度變化，負責局部調整。</li>
+                <li><strong>長期動量</strong>：保持長期的優化方向，避免遺忘過去學過的任務。</li>
+            </ul>
+
+            <!-- Original Image: Optimization State -->
+            <div class="figure figure-original">
+                <img src="images/original/Optimization-state.png" alt="Optimization State Visualization">
+                <div class="caption">
+                    <strong>🖼️ 論文原圖：</strong> 展示了不同優化狀態下的損失曲面與收斂路徑。M3 優化器通過多重記憶機制，能更平穩地穿越複雜的 Loss Landscape。
+                </div>
+            </div>
+
+            <p>
+                實驗結果顯示，M3 在 ImageNet 訓練中表現優異，這證明了將「多層級記憶」概念引入優化器是正確的方向。
+            </p>
+
+            <!-- Original Image: ImageNet Results -->
+            <div class="bento-grid">
+                <div class="bento-card">
+                    <img src="images/original/24M-ImageNet21K.png" alt="24M ImageNet Results" style="width:100%">
+                    <p style="text-align:center; font-size:0.9em; color:#666">24M 參數模型 (ImageNet-21K)</p>
+                </div>
+                <div class="bento-card">
+                    <img src="images/original/86M-ImageNet21K.png" alt="86M ImageNet Results" style="width:100%">
+                    <p style="text-align:center; font-size:0.9em; color:#666">86M 參數模型 (ImageNet-21K)</p>
+                </div>
+            </div>
+            
+            <div class="myboxi">
+                <strong>📊 實驗解讀：</strong> 
+                上圖展示了 ViT 在 ImageNet-21K 上的訓練曲線。可以看到 M3 優化器（綠線）在訓練和測試損失上都達到了最低點，證明了多尺度動量設計的有效性。
+            </div>
+
+            <div class="quote-block">
+                「優化器就是模型的潛意識，它默默記住了所有失敗與成功的路徑。」
+            </div>
+
+            <!-- Navigation -->
+            <div class="chapter-nav">
+                <a href="03-knowledge-transfer.html" class="nav-btn">⬅️ 上一章：層級間的知識傳遞</a>
+                <a href="05-continuum-memory.html" class="nav-btn">下一章：連續體記憶系統 ➡️</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

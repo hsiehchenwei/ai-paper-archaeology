@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Primary Meta Tags -->
+    <title>引言與動機：LLM 的失憶症 - Nested Learning 論文導讀 | AI Paper Archaeology</title>
+    <meta
+      name="description"
+      content="為什麼強大的 LLM 只能活在當下？從神經科學的角度，探索大腦如何透過多重時間尺度來實現持續學習，並對比當前深度學習架構的局限。"
+    />
+    <meta
+      name="keywords"
+      content="Nested Learning, LLM 失憶症, 順行性失憶症, 持續學習, 多時間尺度, 神經科學, 深度學習, AI 論文解析"
+    />
+    <meta name="author" content="謝承緯 (Chen Wei Hsieh)" />
+    <meta name="robots" content="index, follow" />
+    <link
+      rel="canonical"
+      href="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/01-introduction.html"
+    />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/01-introduction.html"
+    />
+    <meta
+      property="og:title"
+      content="引言與動機：LLM 的失憶症 - Nested Learning 論文導讀"
+    />
+    <meta
+      property="og:description"
+      content="為什麼強大的 LLM 只能活在當下？從神經科學的角度，探索大腦如何透過多重時間尺度來實現持續學習。"
+    />
+    <meta
+      property="og:image"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/images/generated/hero-01-intro.png"
+    />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:site_name" content="AI Paper Archaeology" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta
+      property="twitter:url"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/01-introduction.html"
+    />
+    <meta
+      property="twitter:title"
+      content="引言與動機：LLM 的失憶症 - Nested Learning 論文導讀"
+    />
+    <meta
+      property="twitter:description"
+      content="為什麼強大的 LLM 只能活在當下？從神經科學的角度，探索大腦如何透過多重時間尺度來實現持續學習。"
+    />
+    <meta
+      property="twitter:image"
+      content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/images/generated/hero-01-intro.png"
+    />
+
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/paper-reading.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="../index.html">🏠 首頁</a>
+            <span>/</span>
+            <a href="index.html">🔗 Nested Learning</a>
+            <span>/</span>
+            <span class="current">01 引言與動機</span>
+        </div>
+
+        <!-- Hero Section -->
+        <div class="hero-section" style="background-image: url('images/generated/hero-01-intro.png');">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1>LLM 的失憶症與大腦的啟示</h1>
+                <div class="hero-subtitle">為什麼最強大的 AI 只能活在當下？</div>
+                <div class="hero-meta">Chapter 1 · 核心問題與動機</div>
+            </div>
+        </div>
+
+        <!-- Story Container -->
+        <div class="story-container">
+            <div class="story-lead">
+                如果我們把現在的大型語言模型（LLM）比作一個人，那麼這個人雖然博學多聞，卻患有一種特殊的疾病——順行性失憶症（Anterograde Amnesia）。
+            </div>
+
+            <p class="drop-cap">
+                想像一下，你擁有一位無所不知的助手。它讀過互聯網上幾乎所有的書籍、文章和代碼。當你問它關於 18 世紀法國歷史的問題時，它能侃侃而談；當你請它寫一段 Python 代碼時，它能信手拈來。
+            </p>
+
+            <p>
+                但是，這位助手有一個致命的缺陷：一旦對話結束，它就會忘記你剛才跟它說過的一切。無論你教了它多少新知識，無論你們共同經歷了多少次修正與優化，在下一次對話開始時，它又回到了「出廠設置」。
+            </p>
+
+            <!-- AI Concept Image: Amnesia -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept-amnesia.png" alt="AI with Amnesia">
+                <div class="caption">
+                    <strong>💡 AI 觀點：</strong> 就像患有順行性失憶症的患者，現有的 LLM 雖然擁有豐富的長期記憶（預訓練知識），卻無法將新的短期經驗（Context）轉化為長期記憶。
+                </div>
+            </div>
+
+            <p>
+                這就是目前深度學習架構面臨的最大挑戰之一：<strong>靜態性（Static Nature）</strong>。模型在訓練完成後就「定型」了，它只能在有限的 Context Window 中進行短暫的適應（In-context Learning），卻無法真正地「持續學習」。
+            </p>
+
+            <div class="section-divider"><span>✦</span></div>
+
+            <h2>大腦是如何解決這個問題的？</h2>
+
+            <p>
+                與 LLM 不同，人類的大腦是一個驚人的持續學習機器。我們不需要重新「預訓練」整個大腦就能學會騎腳踏車或一門新語言。神經科學告訴我們，大腦之所以能做到這一點，依賴於兩個關鍵特性：
+            </p>
+
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>1. 多時間尺度處理（Multi Time-scale Processing）</h4>
+                    <p>大腦並不是以單一頻率運作的：</p>
+                    <ul>
+                        <li><strong>Gamma 波 (30-150 Hz)</strong>：快速處理感官信息</li>
+                        <li><strong>Beta 波 (13-30 Hz)</strong>：活躍思考與專注</li>
+                        <li><strong>Delta/Theta 波 (0.5-8 Hz)</strong>：記憶鞏固與學習</li>
+                    </ul>
+                    <p>不同頻率的腦波協同工作，讓短期記憶能有效地轉化為長期記憶。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>2. 統一且可重用的結構（Uniform & Reusable Structure）</h4>
+                    <p>大腦具有神經可塑性（Neuroplasticity）。即使切除一半大腦（大腦半球切除術 Hemispherectomy），剩下的一半也能重組並承擔起原來的功能。這意味著神經元並非僵化地綁定在單一功能上，記憶是分佈式的。</p>
+                </div>
+            </div>
+
+            <!-- Original Image: Teaser -->
+            <div class="figure figure-original">
+                <img src="images/original/NL_teaser.png" alt="Nested Learning Teaser">
+                <div class="caption">
+                    <strong>🖼️ 論文原圖：</strong> 左圖展示了大腦的多時間尺度更新機制，右圖則是 Nested Learning (NL) 的核心概念——將神經網路視為多層級的嵌套系統，每個組件都有自己的更新頻率。
+                </div>
+            </div>
+
+            <div class="original-quote">
+                "In this paper, we present a new learning paradigm, called Nested Learning (NL), that coherently represents a machine learning model with a set of nested, multi-level, and/or parallel optimization problems, each of which with its own 'context flow'."
+                <br><br>
+                <strong>翻譯：</strong> 在本文中，我們提出了一種新的學習範式，稱為巢狀學習 (Nested Learning, NL)，它將機器學習模型一致地表示為一組巢狀、多層級和/或平行的優化問題，每個問題都有自己的「context flow」。
+            </div>
+
+            <h2>打破「深度」的迷思</h2>
+
+            <p>
+                過去十年，我們一直在追求「更深」的網路（Deep Learning）。我們相信層數越多，模型就越強大。但論文指出，單純的堆疊層數（Stacking Layers）並不能解決所有問題：
+            </p>
+
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>(i) 計算深度不等於層數</h4>
+                    <p>深層模型的實際計算深度可能不會隨著層數增加而增加。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>(ii) 參數容量邊際遞減</h4>
+                    <p>某些參數類別的容量可能隨深度/寬度增加只有邊際改善。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>(iii) 可能收斂到次優解</h4>
+                    <p>主要因為優化器或其超參數的次優選擇。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>(iv) 無法快速適應與持續學習</h4>
+                    <p>模型快速適應新任務、持續學習、分佈外泛化的能力，不會因為更多層而改變。</p>
+                </div>
+            </div>
+
+            <p>
+                <strong>Nested Learning</strong> 提出了一個全新的視角：我們需要的不是更多的「層」，而是更多的「級」（Levels）。
+            </p>
+
+            <p>
+                想像一下，如果我們不再把模型看作是一堆靜態的矩陣乘法，而是看作是一組<strong>互相嵌套的優化器</strong>？
+            </p>
+            
+            <ul>
+                <li>最外層的優化器（如 SGD）負責長期的知識積累。</li>
+                <li>中間層的優化器負責適應當前的任務。</li>
+                <li>最內層的優化器（如 Attention 機制）負責處理當下的輸入。</li>
+            </ul>
+
+            <!-- AI Concept Image: Frequency Waves -->
+            <div class="figure figure-ai">
+                <img src="images/generated/concept-frequency-waves.png" alt="Frequency Waves">
+                <div class="caption">
+                    <strong>🎨 視覺化類比：</strong> 就像不同頻率的腦波或聲波，Nested Learning 讓模型的不同部分以不同的節奏「呼吸」和更新。有的部分像低音一樣沉穩（長期記憶），有的部分像高音一樣靈活（快速適應）。
+                </div>
+            </div>
+
+            <p>
+                這種視角徹底改變了我們對「架構」和「優化器」的看法。在接下來的章節中，我們將會發現，原來我們熟悉的 Transformer、Momentum 優化器，甚至反向傳播算法本身，全都是同一種東西——<strong>聯想記憶（Associative Memory）</strong>。
+            </p>
+
+            <div class="quote-block">
+                「我們需要的不是更深的網路，而是更豐富的時間尺度。」
+            </div>
+
+            <!-- Navigation -->
+            <div class="chapter-nav">
+                <a href="index.html" class="nav-btn">⬅️ 返回目錄</a>
+                <a href="02-associative-memory.html" class="nav-btn">下一章：聯想記憶與巢狀學習 ➡️</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
