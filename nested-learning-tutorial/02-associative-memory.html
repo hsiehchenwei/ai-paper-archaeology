@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Primary Meta Tags -->
-    <title>聯想記憶與巢狀學習 - Nested Learning 論文導讀 | AI Paper Archaeology</title>
+    <title>
+      聯想記憶與巢狀學習 - Nested Learning 論文導讀 | AI Paper Archaeology
+    </title>
     <meta
       name="description"
       content="重新定義「學習」與「記憶」。深入解析 MLP 訓練與動量優化器，揭示它們本質上都是在進行「驚訝值」的壓縮與記憶。理解反向傳播作為聯想記憶的本質。"
@@ -61,183 +63,416 @@
       content="https://hsiehchenwei.github.io/ai-paper-archaeology/nested-learning-tutorial/images/generated/hero-02-memory.png"
     />
 
-    <link rel="stylesheet" href="../styles/global.css">
-    <link rel="stylesheet" href="../styles/paper-reading.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <!-- MathJax for rendering formulas -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-</head>
-<body>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+
+    <style>
+      /* 背景知識速覽區塊樣式 */
+      .background-primer {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 2px solid var(--mag-primary);
+        border-left: 5px solid var(--mag-primary);
+        border-radius: var(--radius-md);
+        padding: 0;
+        margin: 40px 0;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .background-primer summary {
+        font-family: var(--font-serif-tc);
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--mag-primary);
+        padding: 20px 24px;
+        cursor: pointer;
+        list-style: none;
+        user-select: none;
+        transition: background-color 0.2s;
+      }
+
+      .background-primer summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .background-primer summary::before {
+        content: "▶ ";
+        display: inline-block;
+        margin-right: 8px;
+        transition: transform 0.2s;
+      }
+
+      .background-primer[open] summary::before {
+        transform: rotate(90deg);
+      }
+
+      .background-primer summary:hover {
+        background-color: rgba(59, 130, 246, 0.1);
+      }
+
+      .primer-content {
+        padding: 0 24px 24px 24px;
+      }
+
+      .primer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .primer-card {
+        background: white;
+        padding: 20px;
+        border-radius: var(--radius-sm);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .primer-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .primer-card h4 {
+        color: var(--mag-primary);
+        margin-top: 0;
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+        font-family: var(--font-serif-tc);
+      }
+
+      .primer-card p {
+        margin: 0 0 12px 0;
+        line-height: 1.6;
+        color: var(--text-primary);
+      }
+
+      .primer-link {
+        display: inline-block;
+        color: var(--mag-primary);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-top: 8px;
+        transition: color 0.2s;
+      }
+
+      .primer-link:hover {
+        color: var(--mag-primary-dark);
+        text-decoration: underline;
+      }
+
+      .primer-link::after {
+        content: " →";
+      }
+
+      @media (max-width: 768px) {
+        .primer-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
     <div class="container">
-        <!-- Breadcrumb -->
-        <div class="breadcrumb">
-            <a href="../index.html">🏠 首頁</a>
-            <span>/</span>
-            <a href="index.html">🔗 Nested Learning</a>
-            <span>/</span>
-            <span class="current">02 聯想記憶與巢狀學習</span>
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="../index.html">🏠 首頁</a>
+        <span>/</span>
+        <a href="index.html">🔗 Nested Learning</a>
+        <span>/</span>
+        <span class="current">02 聯想記憶與巢狀學習</span>
+      </div>
+
+      <!-- Hero Section -->
+      <div
+        class="hero-section"
+        style="background-image: url('images/generated/hero-02-memory.png')"
+      >
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <h1>萬物皆是聯想記憶</h1>
+          <div class="hero-subtitle">
+            從 MLP 到優化器，揭開學習本質的神秘面紗
+          </div>
+          <div class="hero-meta">Chapter 2 · 核心理論</div>
+        </div>
+      </div>
+
+      <!-- Story Container -->
+      <div class="story-container">
+        <div class="story-lead">
+          如果我告訴你，你以為截然不同的東西——神經網路的「層」和訓練它的「優化器」——其實是同一種東西，你會相信嗎？
         </div>
 
-        <!-- Hero Section -->
-        <div class="hero-section" style="background-image: url('images/generated/hero-02-memory.png');">
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-                <h1>萬物皆是聯想記憶</h1>
-                <div class="hero-subtitle">從 MLP 到優化器，揭開學習本質的神秘面紗</div>
-                <div class="hero-meta">Chapter 2 · 核心理論</div>
+        <!-- 背景知識速覽 -->
+        <details class="background-primer">
+          <summary>📚 背景知識速覽（點擊展開）</summary>
+          <div class="primer-content">
+            <p style="margin-bottom: 20px; color: var(--text-secondary)">
+              如果你對以下概念還不熟悉，可以先快速了解基本概念，或點擊連結深入學習：
+            </p>
+            <div class="primer-grid">
+              <div class="primer-card">
+                <h4>MLP (多層感知機)</h4>
+                <p>
+                  神經網路的基本單元，由多層「神經元」組成。每層先做線性變換（矩陣乘法），再通過非線性激活函數（如
+                  ReLU），讓模型能學習複雜的輸入輸出關係。
+                </p>
+                <a
+                  href="../llm-visualization-zh/chapters/05-feed-forward-mlp.html"
+                  class="primer-link"
+                  target="_blank"
+                >
+                  深入學習 MLP
+                </a>
+              </div>
+              <div class="primer-card">
+                <h4>動量 (Momentum)</h4>
+                <p>
+                  優化器的加速技巧，就像滾球下坡會保持慣性一樣。動量會累積過去梯度的「慣性」，幫助模型更快收斂，避免在局部最優解附近震盪。
+                </p>
+                <p
+                  style="
+                    font-size: 0.9rem;
+                    color: var(--text-secondary);
+                    margin-top: 8px;
+                  "
+                >
+                  💡
+                  在本章中，你會看到動量其實是一個「記憶系統」，在壓縮過去的梯度資訊。
+                </p>
+              </div>
+              <div class="primer-card">
+                <h4>Linear Attention</h4>
+                <p>
+                  Attention 機制的簡化版本，去掉 Softmax
+                  正規化步驟，讓計算複雜度從 O(n²) 降到
+                  O(n)。雖然失去了一些理論保證，但在長序列任務上更高效。
+                </p>
+                <a
+                  href="../transformer-tutorial/03-1-model-architecture-attention.html"
+                  class="primer-link"
+                  target="_blank"
+                >
+                  理解 Attention 機制
+                </a>
+                <br />
+                <a
+                  href="../llm-visualization-zh/chapters/03a-self-attention-qkv.html"
+                  class="primer-link"
+                  target="_blank"
+                  style="margin-top: 8px"
+                >
+                  視覺化教學
+                </a>
+              </div>
             </div>
+          </div>
+        </details>
+
+        <p class="drop-cap">
+          在深入 Nested Learning
+          的世界之前，我們必須先重新定義一個核心概念：<strong
+            >聯想記憶 (Associative Memory)</strong
+          >。
+        </p>
+
+        <p>在神經科學中，「記憶」和「學習」是有區別的：</p>
+        <ul>
+          <li><strong>記憶 (Memory)</strong>：是由輸入引起的神经更新。</li>
+          <li>
+            <strong>學習 (Learning)</strong>：是獲取有效和有用記憶的過程。
+          </li>
+        </ul>
+
+        <div class="myboxi">
+          <strong>定義：聯想記憶</strong><br />
+          給定一組 Keys \( \mathcal{K} \) 和 Values \( \mathcal{V}
+          \)，聯想記憶是一個運算符 \( \mathcal{M}(\cdot) \)，它將 Keys 映射到
+          Values。而「學習」就是通過優化目標函數 \( \tilde{\mathcal{L}} \)
+          來找到最佳的 \( \mathcal{M} \)。
         </div>
 
-        <!-- Story Container -->
-        <div class="story-container">
-            <div class="story-lead">
-                如果我告訴你，你以為截然不同的東西——神經網路的「層」和訓練它的「優化器」——其實是同一種東西，你會相信嗎？
-            </div>
-
-            <p class="drop-cap">
-                在深入 Nested Learning 的世界之前，我們必須先重新定義一個核心概念：<strong>聯想記憶 (Associative Memory)</strong>。
-            </p>
-            
-            <p>
-                在神經科學中，「記憶」和「學習」是有區別的：
-            </p>
-            <ul>
-                <li><strong>記憶 (Memory)</strong>：是由輸入引起的神经更新。</li>
-                <li><strong>學習 (Learning)</strong>：是獲取有效和有用記憶的過程。</li>
-            </ul>
-
-            <div class="myboxi">
-                <strong>定義：聯想記憶</strong><br>
-                給定一組 Keys \( \mathcal{K} \) 和 Values \( \mathcal{V} \)，聯想記憶是一個運算符 \( \mathcal{M}(\cdot) \)，它將 Keys 映射到 Values。而「學習」就是通過優化目標函數 \( \tilde{\mathcal{L}} \) 來找到最佳的 \( \mathcal{M} \)。
-            </div>
-
-            <!-- AI Concept Image: Library Analogy -->
-            <div class="figure figure-ai">
-                <img src="images/generated/concept-library-analogy.png" alt="Library Analogy">
-                <div class="caption">
-                    <strong>💡 生活類比：</strong> 想像一個未來的圖書館。聯想記憶就像是圖書館的索引系統。輸入（Key）是讀者的需求，輸出（Value）是相應的書籍。「學習」就是圖書管理員（優化算法）不斷調整索引規則，讓讀者能更快找到對的書。
-                </div>
-            </div>
-
-            <div class="section-divider"><span>✦</span></div>
-
-            <h2>MLP 訓練：壓縮「驚訝」的記憶</h2>
-
-            <p>
-                讓我們看一個最簡單的例子：訓練一個單層 MLP。
-            </p>
-            
-            <p>
-                當我們用梯度下降 (Gradient Descent) 更新權重 \( W \) 時，我們通常寫成：
-                \[ W_{t+1} = W_t - \eta \nabla_W \mathcal{L} \]
-            </p>
-
-            <p>
-                但如果我們換個角度看，梯度 \( \nabla_W \mathcal{L} \) 其實代表了模型對當前數據的<strong>驚訝程度 (Surprise)</strong>。論文稱之為「<strong>局部驚訝信號 (Local Surprise Signal, LSS)</strong>」——它量化了當前輸出與目標結構之間的不匹配程度。如果預測完全準確，梯度為 0，驚訝度為 0。
-            </p>
-
-            <p>
-                論文提出了一個震撼的觀點：<strong>反向傳播其實是一個優化問題</strong>。我們在尋找一個權重 \( W \)，使得它能將輸入 \( x \) 映射到它對應的 LSS 值。
-            </p>
-            
-            <div class="original-quote">
-                "A linear layer trained with backpropagation learns from data by memorizing how surprising their predicted outputs are; i.e., backpropagation can be viewed as an associative memory that maps each data point to the error in its corresponding prediction."
-                <br><br>
-                <strong>📄 論文原文翻譯：</strong> 用反向傳播訓練的線性層通過記憶其預測輸出的驚訝程度來從數據中學習；也就是說，反向傳播可以被視為一個聯想記憶，它將每個數據點映射到其對應預測的誤差。
-            </div>
-            
-            <div class="quote-block">
-                「MLP 層學會了將數據映射到它們對應的預測誤差。它在記憶它的錯誤。」
-            </div>
-
-            <!-- AI Concept Image: Surprise Learning -->
-            <div class="figure figure-ai">
-                <img src="images/generated/concept-surprise-learning.png" alt="Surprise Learning Comic">
-                <div class="caption">
-                    <strong>🎨 漫畫圖解：</strong> 機器人預測失敗時感到的「驚訝」，正是驅動它更新內部電路的動力。這就是梯度下降的本質——記憶錯誤，以便下次修正。
-                </div>
-            </div>
-
-            <div class="section-divider"><span>✦</span></div>
-
-            <h2>動量 (Momentum)：雙層巢狀優化</h2>
-
-            <p>
-                現在，事情變得更有趣了。如果我們在梯度下降中加入<strong>動量 (Momentum)</strong> 呢？
-            </p>
-            
-            <p>
-                傳統觀點認為動量只是為了加速收斂的物理慣性。但在 Nested Learning 的視角下，動量是一個<strong>二級 (Level-2) 聯想記憶</strong>。
-            </p>
-
-            <p>
-                論文使用的動量更新形式是：
-                \[ m_{t+1} = m_t + \eta_{t+1} \nabla_W \mathcal{L}(W_t; x_{t+1}) \]
-                \[ W_{t+1} = W_t - m_{t+1} \]
-            </p>
-
-            <p>
-                這個公式告訴我們：動量 \( m \) 在不斷累積過去的梯度資訊。它本質上是一個正在學習壓縮「過去所有梯度」的記憶模組！
-            </p>
-
-            <div class="paradigm-grid">
-                <div class="paradigm-card">
-                    <h4>Level 1: 權重 W</h4>
-                    <p>負責壓縮<strong>數據 (Data)</strong> 與<strong>標籤 (Label)</strong> 之間的關係。</p>
-                </div>
-                <div class="paradigm-card">
-                    <h4>Level 2: 動量 m</h4>
-                    <p>負責壓縮<strong>梯度 (Gradient)</strong> 的歷史資訊。</p>
-                </div>
-            </div>
-
-            <!-- AI Concept Image: Momentum Car -->
-            <div class="figure figure-ai">
-                <img src="images/generated/concept-momentum-car.png" alt="Momentum Car">
-                <div class="caption">
-                    <strong>🏎️ 物理類比：</strong> 動量就像這輛未來賽車的慣性。即使引擎（當前的梯度）稍微改變方向，慣性記憶（過去的梯度總和）仍會引導它平穩前進。這是一個更高層級的優化過程。
-                </div>
-            </div>
-
-            <h3>巢狀結構的誕生</h3>
-
-            <p>
-                這就是 Nested Learning 的核心：我們不再將模型看作是單一層級的運算，而是看作是<strong>俄羅斯娃娃 (Matryoshka dolls)</strong> 般的巢狀結構。
-            </p>
-
-            <ul>
-                <li>內層優化問題（訓練動量 m）</li>
-                <li>外層優化問題（利用 m 更新 W）</li>
-            </ul>
-            
-            <p>
-                這種觀點讓我們發現，Transformer 中的 Linear Attention 其實和帶有動量的 SGD 有著驚人的相似性！它們都是在做同樣的事情：壓縮歷史資訊。
-            </p>
-
-            <!-- Original Image: MLP vs Linear Attention -->
-            <div class="figure figure-original">
-                <img src="images/original/MLP-vs-linearatt.png" alt="MLP vs Linear Attention">
-                <div class="caption">
-                    <strong>🖼️ 論文原圖：</strong> 這張圖比較了 MLP 和 Linear Attention。在 Nested Learning 的視角下，Linear Attention 其實就是一個具有 In-context Learning 能力的 MLP 層，它在更快的時間尺度上進行更新。
-                </div>
-            </div>
-
-            <p>
-                理解了這一點，我們就打開了新世界的大門：既然動量是一個記憶系統，我們是不是可以設計更強大的動量？比如用一個神經網路來當動量？或者有多個不同時間尺度的動量？
-            </p>
-
-            <p>
-                這正是我們將在後續章節探討的。
-            </p>
-
-            <!-- Navigation -->
-            <div class="chapter-navigation">
-                <a href="01-introduction.html" class="nav-button">⬅️ 上一章：引言與動機</a>
-                <a href="03-knowledge-transfer.html" class="nav-button">下一章：層級間的知識傳遞 ➡️</a>
-            </div>
+        <!-- AI Concept Image: Library Analogy -->
+        <div class="figure figure-ai">
+          <img
+            src="images/generated/concept-library-analogy.png"
+            alt="Library Analogy"
+          />
+          <div class="caption">
+            <strong>💡 生活類比：</strong>
+            想像一個未來的圖書館。聯想記憶就像是圖書館的索引系統。輸入（Key）是讀者的需求，輸出（Value）是相應的書籍。「學習」就是圖書管理員（優化算法）不斷調整索引規則，讓讀者能更快找到對的書。
+          </div>
         </div>
+
+        <div class="section-divider"><span>✦</span></div>
+
+        <h2>MLP 訓練：壓縮「驚訝」的記憶</h2>
+
+        <p>讓我們看一個最簡單的例子：訓練一個單層 MLP。</p>
+
+        <p>
+          當我們用梯度下降 (Gradient Descent) 更新權重 \( W \)
+          時，我們通常寫成： \[ W_{t+1} = W_t - \eta \nabla_W \mathcal{L} \]
+        </p>
+
+        <p>
+          但如果我們換個角度看，梯度 \( \nabla_W \mathcal{L} \)
+          其實代表了模型對當前數據的<strong>驚訝程度 (Surprise)</strong
+          >。論文稱之為「<strong
+            >局部驚訝信號 (Local Surprise Signal, LSS)</strong
+          >」——它量化了當前輸出與目標結構之間的不匹配程度。如果預測完全準確，梯度為
+          0，驚訝度為 0。
+        </p>
+
+        <p>
+          論文提出了一個震撼的觀點：<strong>反向傳播其實是一個優化問題</strong>。我們在尋找一個權重
+          \( W \)，使得它能將輸入 \( x \) 映射到它對應的 LSS 值。
+        </p>
+
+        <div class="original-quote">
+          "A linear layer trained with backpropagation learns from data by
+          memorizing how surprising their predicted outputs are; i.e.,
+          backpropagation can be viewed as an associative memory that maps each
+          data point to the error in its corresponding prediction."
+          <br /><br />
+          <strong>📄 論文原文翻譯：</strong>
+          用反向傳播訓練的線性層通過記憶其預測輸出的驚訝程度來從數據中學習；也就是說，反向傳播可以被視為一個聯想記憶，它將每個數據點映射到其對應預測的誤差。
+        </div>
+
+        <div class="quote-block">
+          「MLP 層學會了將數據映射到它們對應的預測誤差。它在記憶它的錯誤。」
+        </div>
+
+        <!-- AI Concept Image: Surprise Learning -->
+        <div class="figure figure-ai">
+          <img
+            src="images/generated/concept-surprise-learning.png"
+            alt="Surprise Learning Comic"
+          />
+          <div class="caption">
+            <strong>🎨 漫畫圖解：</strong>
+            機器人預測失敗時感到的「驚訝」，正是驅動它更新內部電路的動力。這就是梯度下降的本質——記憶錯誤，以便下次修正。
+          </div>
+        </div>
+
+        <div class="section-divider"><span>✦</span></div>
+
+        <h2>動量 (Momentum)：雙層巢狀優化</h2>
+
+        <p>
+          現在，事情變得更有趣了。如果我們在梯度下降中加入<strong
+            >動量 (Momentum)</strong
+          >
+          呢？
+        </p>
+
+        <p>
+          傳統觀點認為動量只是為了加速收斂的物理慣性。但在 Nested Learning
+          的視角下，動量是一個<strong>二級 (Level-2) 聯想記憶</strong>。
+        </p>
+
+        <p>
+          論文使用的動量更新形式是： \[ m_{t+1} = m_t + \eta_{t+1} \nabla_W
+          \mathcal{L}(W_t; x_{t+1}) \] \[ W_{t+1} = W_t - m_{t+1} \]
+        </p>
+
+        <p>
+          這個公式告訴我們：動量 \( m \)
+          在不斷累積過去的梯度資訊。它本質上是一個正在學習壓縮「過去所有梯度」的記憶模組！
+        </p>
+
+        <div class="paradigm-grid">
+          <div class="paradigm-card">
+            <h4>Level 1: 權重 W</h4>
+            <p>
+              負責壓縮<strong>數據 (Data)</strong> 與<strong
+                >標籤 (Label)</strong
+              >
+              之間的關係。
+            </p>
+          </div>
+          <div class="paradigm-card">
+            <h4>Level 2: 動量 m</h4>
+            <p>負責壓縮<strong>梯度 (Gradient)</strong> 的歷史資訊。</p>
+          </div>
+        </div>
+
+        <!-- AI Concept Image: Momentum Car -->
+        <div class="figure figure-ai">
+          <img
+            src="images/generated/concept-momentum-car.png"
+            alt="Momentum Car"
+          />
+          <div class="caption">
+            <strong>🏎️ 物理類比：</strong>
+            動量就像這輛未來賽車的慣性。即使引擎（當前的梯度）稍微改變方向，慣性記憶（過去的梯度總和）仍會引導它平穩前進。這是一個更高層級的優化過程。
+          </div>
+        </div>
+
+        <h3>巢狀結構的誕生</h3>
+
+        <p>
+          這就是 Nested Learning
+          的核心：我們不再將模型看作是單一層級的運算，而是看作是<strong
+            >俄羅斯娃娃 (Matryoshka dolls)</strong
+          >
+          般的巢狀結構。
+        </p>
+
+        <ul>
+          <li>內層優化問題（訓練動量 m）</li>
+          <li>外層優化問題（利用 m 更新 W）</li>
+        </ul>
+
+        <p>
+          這種觀點讓我們發現，Transformer 中的 Linear Attention 其實和帶有動量的
+          SGD 有著驚人的相似性！它們都是在做同樣的事情：壓縮歷史資訊。
+        </p>
+
+        <!-- Original Image: MLP vs Linear Attention -->
+        <div class="figure figure-original">
+          <img
+            src="images/original/MLP-vs-linearatt.png"
+            alt="MLP vs Linear Attention"
+          />
+          <div class="caption">
+            <strong>🖼️ 論文原圖：</strong> 這張圖比較了 MLP 和 Linear
+            Attention。在 Nested Learning 的視角下，Linear Attention
+            其實就是一個具有 In-context Learning 能力的 MLP
+            層，它在更快的時間尺度上進行更新。
+          </div>
+        </div>
+
+        <p>
+          理解了這一點，我們就打開了新世界的大門：既然動量是一個記憶系統，我們是不是可以設計更強大的動量？比如用一個神經網路來當動量？或者有多個不同時間尺度的動量？
+        </p>
+
+        <p>這正是我們將在後續章節探討的。</p>
+
+        <!-- Navigation -->
+        <div class="chapter-navigation">
+          <a href="01-introduction.html" class="nav-button"
+            >⬅️ 上一章：引言與動機</a
+          >
+          <a href="03-knowledge-transfer.html" class="nav-button"
+            >下一章：層級間的知識傳遞 ➡️</a
+          >
+        </div>
+      </div>
     </div>
-</body>
+  </body>
 </html>

@@ -114,6 +114,27 @@
                 這是本次論文的重頭戲。在 Class-Incremental Learning 任務中，模型需要不斷學習新的類別，同時不忘記舊的類別。
             </p>
 
+            <div class="myboxi" style="background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border-color: #f97316;">
+                <strong>📖 什麼是「災難性遺忘」(Catastrophic Forgetting)？</strong><br><br>
+                
+                想像你今天學了法文，明天學了德文。如果學完德文之後，你突然忘記了所有的法文，這就是<strong>災難性遺忘</strong>。<br><br>
+                
+                在神經網路中，當模型學習新任務時，為了儲存新知識而覆蓋了舊知識的神經元連接，導致在舊任務上的表現急劇下降。這是深度學習的一個經典難題。<br><br>
+                
+                <div class="original-quote" style="margin-top: 16px;">
+                    "From nested learning viewpoint on learning and backpropagation process, catastrophic forgetting is a natural consequence of compression, where the limited capacity of the network forces the model to forget so that it retains capacity for new information."
+                    <br><br>
+                    <strong>📄 論文原文翻譯：</strong> 從巢狀學習對學習和反向傳播過程的觀點來看，災難性遺忘是壓縮的自然結果——網路的有限容量迫使模型遺忘舊知識，以便為新資訊保留空間。
+                </div>
+                <br>
+                
+                <strong>💡 為什麼會發生？</strong><br>
+                傳統神經網路的所有參數都在同一個時間尺度上更新。當學習新任務時，梯度下降會調整權重以適應新數據，但這些調整往往會破壞之前學到的模式。就像在同一張紙上不斷擦掉舊字寫新字，最後什麼都看不清了。<br><br>
+                
+                <strong>🎯 Hope 如何解決？</strong><br>
+                Hope 的多層級記憶設計（CMS）讓不同的記憶層以不同的頻率更新。當一個快速更新的層可能遺忘某些知識時，慢速更新的層仍然保留著這些知識，並且可以透過反向傳播將知識「傳回」給快速層。這形成了一個時間維度上的循環，讓重要知識難以被完全遺忘。
+            </div>
+
             <div class="bento-grid">
                 <div class="bento-card">
                     <img src="images/original/CLINC.png" alt="CLINC Results" style="width:100%">
@@ -130,8 +151,27 @@
             </div>
 
             <div class="myboxi">
-                <strong>📊 解讀：</strong> 
-                看看那條紅線（Hope）！在所有測試中，Hope 都顯著超越了其他方法（包括 Llama-3 的 In-context Learning 和 EWC）。這證明了多層級記憶設計確實能有效抵抗災難性遺忘。
+                <strong>📊 圖表解讀指南</strong><br><br>
+                
+                <strong>🎨 顏色系統：</strong><br>
+                <ul style="margin-top: 8px; margin-bottom: 12px;">
+                    <li><strong style="color: #ef4444;">紅色系（四種深淺）：</strong>Llama-3B 模型（3B 參數）的四種訓練方法</li>
+                    <li style="margin-top: 6px;"><strong style="color: #3b82f6;">藍色系（四種深淺）：</strong>Llama3-8B 模型（8B 參數）的四種訓練方法</li>
+                </ul>
+                
+                <strong>🔧 四種訓練方法（按顏色由淺到深）：</strong><br>
+                <ul style="margin-top: 8px; margin-bottom: 12px;">
+                    <li><strong>最淺色 - In-Context (ICL)：</strong>標準的 Llama-3，只靠上下文學習，不修改模型架構。</li>
+                    <li style="margin-top: 6px;"><strong>中淺色 - EWC (Elastic Weight Consolidation)：</strong>傳統的持續學習方法，透過限制重要權重的變化來防止遺忘。</li>
+                    <li style="margin-top: 6px;"><strong>中深色 - InCA (In-context Continual Learning with External Learner)：</strong>使用外部學習器的持續學習方法。</li>
+                    <li style="margin-top: 6px;"><strong>最深色 - Hope（本研究）：</strong>把 Llama-3 的 MLP 層改造成「可適應的多層級記憶系統」（CMS），然後用 15B tokens 進行持續預訓練。</li>
+                </ul>
+                
+                <strong>📈 關鍵發現：</strong>
+                <ul style="margin-top: 8px; margin-bottom: 0;">
+                    <li>在所有三個測試中，<strong style="color: #7c2d12;">最深色的柱子（Hope）</strong>都是最高的，無論是 3B 還是 8B 模型。</li>
+                    <li style="margin-top: 6px;">這證明了<strong>同一個 Llama-3 基底模型</strong>，只要用對訓練方式（多層級記憶設計），就能顯著提升持續學習能力，有效抵抗災難性遺忘。</li>
+                </ul>
             </div>
 
             <h2>實驗 2：長上下文理解 (Long Context)</h2>
@@ -180,22 +220,169 @@
 
             <h2>實驗 3：持續翻譯新語言 (Continual Translation)</h2>
 
+            <p>
+                這個實驗非常有趣——它讓 AI 模型像人類一樣「連續學習」兩種完全陌生的語言。
+            </p>
+
+            <p>
+                想像你今天學了滿洲語，明天學了 Kalamang 語（一種印尼的稀有語言）。如果你學完 Kalamang 之後，突然忘記了所有的滿洲語，那就是「災難性遺忘」。
+            </p>
+
+            <h3>實驗設計：CTNL (Continual Translation of a Novel Language)</h3>
+
+            <p>
+                論文設計了一個新的基準測試，結合了兩個現有的稀有語言資料集（MTOB 和 Manchu），讓模型：
+            </p>
+
+            <ol>
+                <li><strong>第一階段：</strong>先學習滿洲語 → 英文的翻譯</li>
+                <li><strong>第二階段：</strong>再學習 Kalamang 語 → 英文的翻譯</li>
+                <li><strong>測試：</strong>看看學完第二種語言後，是否還記得第一種語言</li>
+            </ol>
+
+            <div class="myboxi">
+                <strong>🎯 兩種測試設定</strong><br><br>
+                
+                <strong style="color: #dc2626;">紅色點 - 「單獨學習」：</strong>模型分別學習兩種語言，沒有遺忘的問題。這是理想狀態的基準線。<br><br>
+                
+                <strong style="color: #2563eb;">藍色點 - 「連續學習」：</strong>模型先學滿洲語，再學 Kalamang 語。這會觸發災難性遺忘——學新的會忘記舊的。
+            </div>
+
             <!-- Original Image: ICL Translate -->
             <div class="figure figure-original">
                 <img src="images/original/ICL-Translate.png" alt="ICL Translation Results">
                 <div class="caption">
-                    <strong>🖼️ 論文原圖：</strong> 持續學習翻譯任務 (CTNL)。模型需要先後學習兩種新語言（Manchu 和 Kalamang）並翻譯成英文。藍色點表示「連續學習」設定，紅色點表示「單獨學習」設定。可以看到 Hope-3（最多層級）幾乎不受災難性遺忘影響。
+                    <strong>🖼️ 論文原圖：</strong> 持續學習翻譯任務 (CTNL)。橫軸是滿洲語→英文的翻譯品質（ChRF 分數），縱軸是 Kalamang 語→英文的翻譯品質。每個點代表一個模型。紅點是「單獨學習」（理想狀態），藍點是「連續學習」（會遺忘）。
                 </div>
             </div>
 
-            <h2>實驗 4：語言建模 (Language Modeling)</h2>
+            <h3>結果解讀：記憶層級越多，遺忘越少</h3>
 
             <p>
-                除了特技表演，基本功如何？在標準的語言建模任務（WikiText, PIQA 等）上，Hope 也展現出了強大的實力。
+                圖中有四個模型的對比：
+            </p>
+
+            <ul>
+                <li><strong>ICL（標準 Llama-3）：</strong>藍點掉到左下角，幾乎完全忘記了滿洲語。這是典型的災難性遺忘。</li>
+                <li><strong>Hope-1（1 層額外記憶）：</strong>稍微好一點，但還是有明顯遺忘。</li>
+                <li><strong>Hope-2（2 層額外記憶）：</strong>表現更好，開始接近紅點。</li>
+                <li><strong>Hope-3（3 層額外記憶）：</strong>藍點幾乎和紅點重疊！這代表即使連續學習兩種新語言，Hope-3 也幾乎不會遺忘第一種語言。</li>
+            </ul>
+
+            <div class="quote-block">
+                「在第一種設定（單獨學習）中，所有 Hope 變體的表現都優於或持平於 ICL。但在第二種設定（連續學習）中，ICL 面臨劇烈的性能下降，幾乎只能依靠預訓練時的能力——這就是對上下文知識的災難性遺忘。相反，增加記憶層級的 Hope-3 幾乎完全恢復了第一種設定的能力。」
+            </div>
+
+            <p>
+                這個實驗的意義在於：它直接驗證了論文的核心論點——<strong>更多的記憶層級 = 更強的持續學習能力</strong>。當模型有多個不同頻率的記憶層級時，它可以在學習新知識的同時，保留舊知識。
+            </p>
+
+            <h2>實驗 4：語言建模與常識推理 (Language Modeling & Common-Sense Reasoning)</h2>
+
+            <p>
+                前面的實驗展示了 Hope 在持續學習和長上下文任務上的「特技」。但一個模型要真正有用，基本功也要扎實。那麼，Hope 在最基礎的語言建模任務上表現如何？
+            </p>
+
+            <h3>實驗設定</h3>
+
+            <p>
+                論文使用了兩種規模的模型，從零開始訓練：
+            </p>
+
+            <div class="paradigm-grid">
+                <div class="paradigm-card">
+                    <h4>760M 參數模型</h4>
+                    <p>用 30B tokens 訓練，來自 FineWeb-Edu 和長上下文文檔的混合數據集。</p>
+                </div>
+                <div class="paradigm-card">
+                    <h4>1.3B 參數模型</h4>
+                    <p>用 100B tokens 訓練，同樣的數據來源，但訓練規模更大。</p>
+                </div>
+            </div>
+
+            <h3>評測基準</h3>
+
+            <p>
+                論文在兩大類任務上測試模型：
+            </p>
+
+            <div class="myboxi">
+                <strong>📚 語言建模任務：</strong><br>
+                <ul style="margin-top: 8px; margin-bottom: 12px;">
+                    <li><strong>WikiText：</strong>測試模型對維基百科文本的理解和預測能力（Perplexity 越低越好）</li>
+                    <li><strong>LAMBADA (LMB)：</strong>測試長距離依賴理解，需要根據長上下文預測最後一個詞</li>
+                </ul>
+                
+                <strong>🧠 常識推理任務：</strong><br>
+                <ul style="margin-top: 8px; margin-bottom: 0;">
+                    <li><strong>PIQA：</strong>物理常識問答（如「如何讓鞋子防滑？」）</li>
+                    <li><strong>HellaSwag：</strong>情境延續判斷（給定情境，選擇最合理的後續）</li>
+                    <li><strong>WinoGrande：</strong>代詞消歧（考驗對句子結構和常識的理解）</li>
+                    <li><strong>ARC-easy & ARC-challenge：</strong>科學問題（從簡單到困難）</li>
+                    <li><strong>SIQA：</strong>社交情境推理</li>
+                    <li><strong>BoolQ：</strong>是非題問答</li>
+                </ul>
+            </div>
+
+            <h3>對手陣容：三大類基線模型</h3>
+
+            <p>
+                論文對比了非常全面的基線模型：
+            </p>
+
+            <ol>
+                <li><strong>Transformer 系列：</strong>標準 Transformer 和 Samba（Attention + 線性 RNN 的混合體）</li>
+                <li><strong>線性 RNN：</strong>RetNet、DeltaNet、RWKV-7、Comba（基於 Hebbian 或 Delta 規則的現代遞迴模型）</li>
+                <li><strong>深度記憶模組：</strong>TTT、Miras、DLA、Titans（無 Attention 的深度記憶架構）</li>
+            </ol>
+
+            <h3>實驗結果：Hope 全面領先</h3>
+
+            <div class="myboxi">
+                <strong>🏆 760M 模型（30B tokens 訓練）</strong><br><br>
+                
+                <strong>語言建模：</strong><br>
+                • WikiText Perplexity: <strong>18.68</strong>（Hope）vs 20.08（Titans，次佳）vs 24.18（Transformer）<br>
+                • LAMBADA Perplexity: <strong>20.07</strong>（Hope）vs 21.52（Titans）vs 24.27（Transformer）<br><br>
+                
+                <strong>常識推理平均：</strong><br>
+                • Hope: <strong>52.28%</strong><br>
+                • Titans: 51.68%<br>
+                • Samba (混合架構): 51.46%<br>
+                • Transformer: 50.11%<br><br>
+                
+                <hr style="margin: 16px 0; border: none; border-top: 1px solid rgba(0,0,0,0.1);">
+                
+                <strong>🏆 1.3B 模型（100B tokens 訓練）</strong><br><br>
+                
+                <strong>語言建模：</strong><br>
+                • WikiText Perplexity: <strong>14.39</strong>（Hope）vs 15.60（Titans）vs 17.92（Transformer）<br>
+                • LAMBADA Perplexity: <strong>10.08</strong>（Hope）vs 11.41（Titans）vs 17.73（Transformer）<br><br>
+                
+                <strong>常識推理平均：</strong><br>
+                • Hope: <strong>58.04%</strong><br>
+                • Titans: 56.82%<br>
+                • TTT: 55.58%<br>
+                • Samba: 54.46%<br>
+                • Transformer: 53.38%
+            </div>
+
+            <h3>關鍵發現</h3>
+
+            <p>
+                論文指出了一個重要趨勢：<strong>「隨著參數規模擴大，Hope 的性能增益比其他無 Attention 模型更明顯。」</strong>
             </p>
 
             <p>
-                它不僅擊敗了同量級的 Transformer，甚至在參數效率上超越了許多現代的線性 RNN 模型（如 Mamba, RWKV）。這說明 Nested Learning 不僅是為了解決邊緣案例，它本身就是一個更高效的通用架構。
+                在 760M 模型中，Hope 比 Titans 只領先約 0.6%。但在 1.3B 模型中，這個差距擴大到 1.22%。這暗示了 Hope 的架構設計（多層級記憶 + 自我修改）在更大規模下會有更好的擴展性。
+            </p>
+
+            <div class="quote-block">
+                「Hope 在語言建模和常識推理基準上的平均表現超越了所有基線模型。有趣的是，隨著參數的擴展，Hope 相比其他無 Attention 模型展現出更高的性能增益。」
+            </div>
+
+            <p>
+                這個實驗的意義在於：<strong>Hope 不僅是為了解決特殊問題（持續學習、長上下文）而設計的專用架構，它本身就是一個高效的通用語言模型骨幹。</strong>它不僅擊敗了同量級的 Transformer，甚至在參數效率上超越了許多現代的線性 RNN 模型（如 Mamba、RWKV）。
             </p>
 
             <div class="section-divider"><span>✦</span></div>
