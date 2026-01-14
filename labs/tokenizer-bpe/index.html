@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>手寫 BPE Tokenizer - AI 實驗室</title>
+    <link rel="stylesheet" href="../../styles/global.css" />
+    <link rel="stylesheet" href="../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../styles/labs.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Hero Section -->
+      <div class="hero-section" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); height: 40vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <h1>手寫 BPE Tokenizer</h1>
+          <p class="hero-subtitle">從零開始實作 Byte Pair Encoding 演算法</p>
+          <p class="hero-meta">理解 GPT-2 和 GPT-3 如何將文字轉換成 tokens</p>
+        </div>
+      </div>
+
+      <!-- Lab Meta -->
+      <div class="lab-meta">
+        <div class="lab-meta-item">
+          <span class="lab-meta-icon">⏱️</span>
+          <span><strong>時間：</strong>20 分鐘</span>
+        </div>
+        <div class="lab-meta-item">
+          <span class="lab-meta-icon">📚</span>
+          <span><strong>難度：</strong>入門</span>
+        </div>
+        <div class="lab-meta-item">
+          <span class="lab-meta-icon">💻</span>
+          <span><strong>技術：</strong>Python</span>
+        </div>
+        <div class="lab-meta-item">
+          <span class="lab-meta-icon">🔗</span>
+          <span><strong>相關論文：</strong><a href="../../gpt2-tutorial/index.html">GPT-2</a>, <a href="../../gpt3-tutorial/index.html">GPT-3</a></span>
+        </div>
+      </div>
+
+      <!-- Lab Steps Navigation -->
+      <div class="lab-steps">
+        <a href="index.html" class="lab-step active">概覽</a>
+        <a href="01-setup.html" class="lab-step">環境設置</a>
+        <a href="02-implement.html" class="lab-step">實作步驟</a>
+        <a href="03-test.html" class="lab-step">測試運行</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h2>這個實驗會學到什麼？</h2>
+        <p>
+          Byte Pair Encoding (BPE) 是 GPT-2 和 GPT-3 使用的 tokenization 演算法。
+          透過這個實驗，你將：
+        </p>
+        <ul>
+          <li>理解 BPE 演算法的核心原理</li>
+          <li>實作一個簡化版的 BPE tokenizer</li>
+          <li>學會如何將文字轉換成 tokens</li>
+          <li>理解為什麼 BPE 比傳統方法更有效</li>
+        </ul>
+
+        <h2>為什麼需要 BPE？</h2>
+        <p>
+          傳統的 tokenization 方法（如按空格分割）有幾個問題：
+        </p>
+        <ul>
+          <li><strong>詞彙表爆炸：</strong>每個單字都需要一個 token，詞彙表會變得非常大</li>
+          <li><strong>未知詞問題：</strong>遇到沒見過的單字就無法處理</li>
+          <li><strong>效率問題：</strong>需要儲存大量單字對應的 embedding</li>
+        </ul>
+        <p>
+          BPE 透過「合併最常見的符號對」來解決這些問題，讓模型可以處理任意文字組合。
+        </p>
+
+        <h2>BPE 演算法簡介</h2>
+        <p>
+          BPE 的核心思想很簡單：
+        </p>
+        <ol>
+          <li>將文字拆分成字元（characters）</li>
+          <li>統計相鄰字元對的出現頻率</li>
+          <li>合併出現最頻繁的字元對</li>
+          <li>重複步驟 2-3，直到達到目標詞彙表大小</li>
+        </ol>
+
+        <div class="key-concept">
+          <h4>核心概念</h4>
+          <p>
+            BPE 是一種「自下而上」的 tokenization 方法：從最小的單位（字元）開始，
+            逐步合併成更大的單位（subwords），最終形成一個平衡的詞彙表。
+          </p>
+        </div>
+
+        <h2>實驗流程</h2>
+        <p>這個實驗分為三個步驟：</p>
+        <ol>
+          <li><strong>環境設置：</strong>建立 Python 開發環境，安裝必要套件</li>
+          <li><strong>實作步驟：</strong>一步步實作 BPE 演算法的核心功能</li>
+          <li><strong>測試運行：</strong>測試 tokenizer 並查看結果</li>
+        </ol>
+
+        <div class="lab-setup">
+          <h4>開始前準備</h4>
+          <ul>
+            <li>Python 3.8+ 已安裝</li>
+            <li>文字編輯器（推薦使用 Cursor 或 VS Code）</li>
+            <li>終端機（Terminal）</li>
+            <li>AI 輔助工具（Cursor / Claude Code）</li>
+          </ul>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="../../index.html" class="home">← 返回首頁</a>
+          <a href="01-setup.html" class="nav-link">開始實驗：環境設置 →</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

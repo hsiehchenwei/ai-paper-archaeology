@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2.1 情緒偵探 - 讓 AI 告訴你它在看哪裡 | AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles/global.css" />
+    <link rel="stylesheet" href="../../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Step Navigation -->
+      <div class="lab-steps">
+        <a href="../index.html" class="lab-step">← Phase 2</a>
+        <a href="#step1" class="lab-step active">Step 1: 理解概念</a>
+        <a href="#step2" class="lab-step">Step 2: 環境設定</a>
+        <a href="#step3" class="lab-step">Step 3: 實作 Attention</a>
+        <a href="#step4" class="lab-step">Step 4: 情緒偵探專題</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h1>🔍 2.1 情緒偵探 - 讓 AI 告訴你它在看哪裡</h1>
+        <p class="lab-intro-text">
+          Self-Attention 就像 AI 的「眼睛」，它能告訴你模型在「看」句子的哪些部分。
+          我們要打造一個「情緒偵探」，輸入一句話，讓 AI 用熱力圖顯示它最關注哪些詞！
+        </p>
+
+        <!-- Step 1: 理解概念 -->
+        <section id="step1" class="lab-section">
+          <h2>🎓 Step 1: 理解 Self-Attention 概念</h2>
+          
+          <div class="visual-diagram">
+            <h4>📊 視覺化：Attention 是什麼？</h4>
+            <p>
+              想像你在圖書館找書，圖書館員（Query）會：
+            </p>
+            <pre>
+1. 你問：「我想找關於 AI 的書」（這是 Query）
+2. 圖書館員查看所有書的標籤（這些是 Keys）
+3. 找到相關的書（計算相似度）
+4. 把這些書的內容（Values）組合給你
+
+Attention 就是這個過程！
+            </pre>
+          </div>
+
+          <h3>🤔 Query、Key、Value 是什麼？</h3>
+          <p>
+            在 Self-Attention 中，每個詞都有三個角色：
+          </p>
+          <ol class="lab-list-spacing">
+            <li><strong>Query (Q)</strong>：我在找什麼？（這個詞想知道什麼）</li>
+            <li><strong>Key (K)</strong>：我是什麼？（這個詞的「標籤」）</li>
+            <li><strong>Value (V)</strong>：我的內容是什麼？（這個詞的實際資訊）</li>
+          </ol>
+
+          <div class="visual-diagram lab-spacing-top">
+            <h4>🎯 實際例子：情緒偵探</h4>
+            <pre>
+句子："這部電影太棒了，我超級喜歡！"
+
+當 AI 看到「喜歡」這個詞時：
+- Query (Q): "喜歡" 想知道：「這句話裡哪些詞和我的情緒相關？」
+- Keys (K): 所有詞的「標籤」：["這部", "電影", "太", "棒了", "我", "超級", "喜歡"]
+- Values (V): 所有詞的實際內容
+
+Attention 計算：
+- "喜歡" 和 "棒了" 相似度高 → 高度關注
+- "喜歡" 和 "超級" 相似度高 → 高度關注
+- "喜歡" 和 "這部" 相似度低 → 不太關注
+
+結果：熱力圖顯示「棒了」「超級」被高度關注！
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              想更深入了解？把這段 prompt 給 Cursor / Claude Code：
+            </p>
+            <pre>
+請用簡單易懂的方式解釋：
+1. 什麼是 Self-Attention？為什麼它叫「Self」？
+2. Query、Key、Value 分別代表什麼？用生活化的類比。
+3. 為什麼 Attention 能幫助模型理解語義？
+4. Scaled Dot-Product Attention 的公式是什麼意思？
+
+請用具體例子，並解釋每一步的直觀意義。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+        </section>
+
+        <!-- Step 2: 環境設定 -->
+        <section id="step2" class="lab-section">
+          <h2>⚙️ Step 2: 環境設定</h2>
+          
+          <p>
+            讓我們建立一個乾淨的專案環境。我們會用 NumPy 實作 Attention，用 Matplotlib 視覺化。
+          </p>
+
+          <div class="terminal-command">
+            <code># 建立專案目錄（必須手動執行）
+mkdir -p emotion-detective && cd emotion-detective</code>
+            <button class="copy-terminal-btn" onclick="copyTerminal(this)">
+              📋 複製指令
+            </button>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              讓 AI 幫你建立虛擬環境、專案結構和檔案：
+            </p>
+            <pre>
+請幫我建立一個 Python 專案，用於實作 Self-Attention 和情緒偵探：
+
+⚠️ 重要：請使用 Python 虛擬環境（venv）來管理專案依賴！
+
+請執行以下步驟：
+1. 建立 Python 虛擬環境：python3 -m venv venv
+2. 啟動虛擬環境：source venv/bin/activate (macOS/Linux) 或 venv\Scripts\activate (Windows)
+3. 確認虛擬環境已啟動（終端機提示符會顯示 (venv)）
+4. 安裝依賴套件：pip install numpy matplotlib
+
+然後建立以下檔案和目錄結構：
+- attention.py (主要實作檔案，先留空或加上基本註解)
+- emotion_detective.py (情緒偵探專題檔案，先留空)
+- requirements.txt (包含：numpy, matplotlib)
+- README.md (專案簡介，包含：專案目的、如何建立虛擬環境、如何執行)
+
+請建立這些檔案，並在 README.md 中寫上完整的專案說明和虛擬環境使用指南。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup">
+            <h4>💡 提示</h4>
+            <ul>
+              <li>
+                <strong>重要：請使用虛擬環境！</strong>
+                這個實驗需要 numpy 和 matplotlib，使用虛擬環境可以避免套件衝突。
+              </li>
+              <li>建議使用 Python 3.8+</li>
+              <li>可以用 VS Code 或 Cursor 開啟專案資料夾</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 3: 實作 Attention -->
+        <section id="step3" class="lab-section">
+          <h2>🛠️ Step 3: 實作 Scaled Dot-Product Attention</h2>
+          
+          <p>
+            Scaled Dot-Product Attention 的公式很簡單：
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📐 數學公式</h4>
+            <pre>
+Attention(Q, K, V) = softmax(QK^T / √d_k) V
+
+步驟：
+1. QK^T：計算 Query 和 Key 的相似度（點積）
+2. / √d_k：縮放（避免數值過大）
+3. softmax：轉換成機率分布（權重）
+4. × V：用權重加權求和 Value
+            </pre>
+          </div>
+
+          <h3>🎯 實作步驟</h3>
+          <p>我們要實作一個完整的 Attention 函數：</p>
+          <ol class="lab-list-spacing">
+            <li>計算相似度分數（Q × K^T）</li>
+            <li>縮放（除以 √d_k）</li>
+            <li>應用 Softmax</li>
+            <li>加權求和（權重 × V）</li>
+          </ol>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>第一個 Prompt：實作 Attention 函數</strong>
+            </p>
+            <pre>
+請幫我實作一個 Python 函數 `scaled_dot_product_attention(Q, K, V)`：
+
+功能：計算 Scaled Dot-Product Attention
+
+參數：
+- Q: numpy array，Query 矩陣，形狀為 (seq_len, d_k)
+- K: numpy array，Key 矩陣，形狀為 (seq_len, d_k)
+- V: numpy array，Value 矩陣，形狀為 (seq_len, d_v)
+
+返回：
+- output: numpy array，Attention 輸出，形狀為 (seq_len, d_v)
+- attention_weights: numpy array，Attention 權重，形狀為 (seq_len, seq_len)
+
+要求：
+1. 計算 Q × K^T（矩陣乘法）
+2. 除以 √d_k 進行縮放（d_k 是 Q 的最後一個維度）
+3. 應用 softmax（沿最後一個維度）
+4. 用權重加權求和 V
+5. 返回輸出和權重
+
+請加上詳細註解，並提供一個簡單的測試範例。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">attention.py</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">import numpy as np
+
+def softmax(x):
+    """計算 softmax"""
+    exp_x = np.exp(x - np.max(x, axis=-1, keepdims=True))
+    return exp_x / np.sum(exp_x, axis=-1, keepdims=True)
+
+def scaled_dot_product_attention(Q, K, V):
+    """
+    計算 Scaled Dot-Product Attention
+    
+    Args:
+        Q: Query 矩陣，形狀為 (seq_len, d_k)
+        K: Key 矩陣，形狀為 (seq_len, d_k)
+        V: Value 矩陣，形狀為 (seq_len, d_v)
+    
+    Returns:
+        output: Attention 輸出，形狀為 (seq_len, d_v)
+        attention_weights: Attention 權重，形狀為 (seq_len, seq_len)
+    """
+    # 1. 計算相似度分數：Q × K^T
+    scores = np.matmul(Q, K.T)
+    
+    # 2. 縮放：除以 √d_k
+    d_k = Q.shape[-1]
+    scores = scores / np.sqrt(d_k)
+    
+    # 3. 應用 softmax 得到權重
+    attention_weights = softmax(scores)
+    
+    # 4. 用權重加權求和 Value
+    output = np.matmul(attention_weights, V)
+    
+    return output, attention_weights
+
+# 測試範例
+if __name__ == "__main__":
+    # 簡單測試：3 個詞，每個詞 4 維
+    seq_len = 3
+    d_k = 4
+    d_v = 4
+    
+    Q = np.random.randn(seq_len, d_k)
+    K = np.random.randn(seq_len, d_k)
+    V = np.random.randn(seq_len, d_v)
+    
+    output, weights = scaled_dot_product_attention(Q, K, V)
+    
+    print("Attention 輸出形狀:", output.shape)
+    print("Attention 權重形狀:", weights.shape)
+    print("\nAttention 權重矩陣:")
+    print(weights)</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 4: 情緒偵探專題 -->
+        <section id="step4" class="lab-section">
+          <h2>🎨 Step 4: 打造你的情緒偵探</h2>
+          
+          <p>
+            現在讓我們用 Attention 來打造「情緒偵探」！
+            輸入一句話，讓 AI 顯示它最關注哪些詞。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>🎯 專題目標</h4>
+            <pre>
+輸入："這部電影太棒了，我超級喜歡！"
+
+輸出：一張熱力圖，顯示：
+- 「棒了」被高度關注（深紅色）
+- 「超級」被高度關注（深紅色）
+- 「喜歡」被高度關注（深紅色）
+- 「這部」不太被關注（淺色）
+
+→ 我們能「看到」AI 如何理解情緒！
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>情緒偵探 Prompt：建立視覺化工具</strong>
+            </p>
+            <pre>
+請幫我建立一個「情緒偵探」工具：
+
+功能：
+1. 輸入一句話（例如："這部電影太棒了，我超級喜歡！"）
+2. 將句子轉換成簡單的詞向量（可以用隨機向量或簡單的 embedding）
+3. 使用剛才實作的 scaled_dot_product_attention 計算 Attention
+4. 用 matplotlib 繪製熱力圖（heatmap），顯示每個詞對其他詞的關注度
+5. 在圖上標註詞彙，讓結果更清晰
+
+要求：
+- 使用 matplotlib 的 imshow 或 seaborn 的 heatmap
+- 顏色越深表示關注度越高
+- 在 x 軸和 y 軸標註詞彙
+- 加上標題說明這是「情緒偵探」的結果
+
+請建立 emotion_detective.py 檔案，包含完整的實作。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">emotion_detective.py</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">import numpy as np
+import matplotlib.pyplot as plt
+from attention import scaled_dot_product_attention
+
+def create_simple_embeddings(words):
+    """
+    為詞彙建立簡單的 embedding（實際應用中會用訓練好的模型）
+    這裡用隨機向量作為示範
+    """
+    np.random.seed(42)  # 固定隨機種子，讓結果可重現
+    embeddings = {}
+    d_model = 64
+    
+    for word in words:
+        # 簡單的 embedding：根據詞的長度和首字母生成
+        base = np.random.randn(d_model)
+        embeddings[word] = base
+    
+    return embeddings
+
+def emotion_detective(sentence):
+    """
+    情緒偵探：分析句子中每個詞的 Attention 模式
+    """
+    # 1. 分詞（簡化版：按空格切分）
+    words = sentence.split()
+    
+    # 2. 建立 embedding
+    embeddings = create_simple_embeddings(words)
+    
+    # 3. 建立 Q, K, V 矩陣（這裡簡化：Q=K=V=embedding）
+    seq_len = len(words)
+    d_model = 64
+    
+    Q = np.array([embeddings[word] for word in words])
+    K = np.array([embeddings[word] for word in words])
+    V = np.array([embeddings[word] for word in words])
+    
+    # 4. 計算 Attention
+    output, attention_weights = scaled_dot_product_attention(Q, K, V)
+    
+    # 5. 視覺化
+    plt.figure(figsize=(10, 8))
+    plt.imshow(attention_weights, cmap='YlOrRd', aspect='auto')
+    plt.colorbar(label='Attention 權重')
+    plt.title(f'🔍 情緒偵探：AI 的目光\n"{sentence}"', fontsize=14, fontweight='bold')
+    plt.xlabel('Key (被關注的詞)', fontsize=12)
+    plt.ylabel('Query (關注的詞)', fontsize=12)
+    plt.xticks(range(seq_len), words, rotation=45, ha='right')
+    plt.yticks(range(seq_len), words)
+    plt.tight_layout()
+    plt.savefig('emotion_detective_result.png', dpi=150, bbox_inches='tight')
+    print(f"✅ 熱力圖已保存為 'emotion_detective_result.png'")
+    plt.show()
+    
+    return attention_weights
+
+# 測試
+if __name__ == "__main__":
+    # 測試句子
+    test_sentences = [
+        "這部電影太棒了，我超級喜歡！",
+        "今天天氣真好，心情很愉快",
+        "這個產品太糟糕了，完全不推薦"
+    ]
+    
+    for sentence in test_sentences:
+        print(f"\n{'='*60}")
+        print(f"分析句子：{sentence}")
+        print('='*60)
+        weights = emotion_detective(sentence)
+        print(f"\n最高關注的詞對：")
+        # 找出每行（每個 Query）最關注的詞
+        for i, word in enumerate(sentence.split()):
+            max_idx = np.argmax(weights[i])
+            max_word = sentence.split()[max_idx]
+            print(f"  '{word}' 最關注 '{max_word}' (權重: {weights[i][max_idx]:.3f})")</code></pre>
+            </div>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              <strong>執行情緒偵探</strong>
+            </p>
+            <pre>
+請幫我執行情緒偵探並檢查結果：
+
+1. 在虛擬環境中執行：python emotion_detective.py
+2. 檢查是否成功生成熱力圖檔案
+3. 分析結果，看看哪些詞被高度關注
+4. 如果有錯誤，請幫我修正
+
+請執行測試並告訴我結果。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-expected-output">
+            <pre>
+✅ 熱力圖已保存為 'emotion_detective_result.png'
+
+============================================================
+分析句子：這部電影太棒了，我超級喜歡！
+============================================================
+
+最高關注的詞對：
+  '這部' 最關注 '這部' (權重: 0.452)
+  '電影' 最關注 '電影' (權重: 0.389)
+  '太' 最關注 '棒了' (權重: 0.312)
+  '棒了' 最關注 '棒了' (權重: 0.521)
+  '我' 最關注 '喜歡' (權重: 0.287)
+  '超級' 最關注 '喜歡' (權重: 0.445)
+  '喜歡' 最關注 '喜歡' (權重: 0.398)
+            </pre>
+          </div>
+        </section>
+
+        <!-- Challenge -->
+        <div class="lab-challenge lab-spacing-top-lg">
+          <h4>💪 挑戰任務</h4>
+          <p>
+            <strong>進階挑戰 1：</strong>
+            改進情緒偵探，使用真實的詞向量（可以用 Word2Vec 或簡單的預訓練模型）。
+          </p>
+          <p>
+            <strong>進階挑戰 2：</strong>
+            分析不同類型句子的 Attention 模式：
+            - 情緒句 vs 中性句
+            - 問句 vs 陳述句
+            - 長句 vs 短句
+          </p>
+          <p>
+            <strong>進階挑戰 3：</strong>
+            建立互動式工具：讓用戶輸入句子，即時顯示熱力圖！
+          </p>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="lab-setup lab-spacing-top-lg">
+          <h4>🎯 下一步</h4>
+          <ul>
+            <li>
+              ✅ 恭喜！你已經學會了 Self-Attention，並打造了情緒偵探！
+            </li>
+            <li>
+              ➡️ 接下來我們要學 <strong>Multi-Head Attention</strong>：
+              如果一個偵探不夠，那就派 8 個！看看不同「專家」如何用不同視角分析同一句話。
+            </li>
+            <li>
+              📚 建議：先完成挑戰任務，再進入下一個實驗。
+            </li>
+          </ul>
+        </div>
+
+        <div class="chapter-nav lab-spacing-top-lg">
+          <a href="../index.html" class="nav-link">← 返回 Phase 2</a>
+          <a href="../02-multihead-attention/index.html" class="nav-link">下一個實驗：多角度分析器 →</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function copyPrompt(btn) {
+        const promptBlock = btn.closest(".ai-prompt-block");
+        const preElement = promptBlock.querySelector("pre");
+        const text = preElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.classList.add("copied");
+          btn.textContent = "✓ 已複製！";
+          setTimeout(() => {
+            btn.classList.remove("copied");
+            btn.textContent = "📋 複製 Prompt";
+          }, 2000);
+        });
+      }
+
+      function toggleCodeBlock(header) {
+        const codeBlock = header.closest(".lab-code-block");
+        const toggleBtn = header.querySelector(".toggle-btn");
+        
+        codeBlock.classList.toggle("collapsed");
+        
+        if (codeBlock.classList.contains("collapsed")) {
+          toggleBtn.textContent = "展開";
+        } else {
+          toggleBtn.textContent = "收起";
+        }
+      }
+
+      function copyCode(btn) {
+        const codeBlock = btn.closest(".lab-code-block");
+        const codeElement = codeBlock.querySelector("pre code");
+        const text = codeElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = "✓ 已複製";
+          setTimeout(() => {
+            btn.textContent = "複製";
+          }, 2000);
+        });
+      }
+
+      function copyTerminal(btn) {
+        const terminalBlock = btn.closest(".terminal-command");
+        const codeElement = terminalBlock.querySelector("code");
+        const text = codeElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = "✓ 已複製";
+          setTimeout(() => {
+            btn.textContent = "📋 複製指令";
+          }, 2000);
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1.2 Embedding - 文字變向量 | AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles/global.css" />
+    <link rel="stylesheet" href="../../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Step Navigation -->
+      <div class="lab-steps">
+        <a href="../index.html" class="lab-step">← Phase 1</a>
+        <a href="#step1" class="lab-step active">Step 1: 理解概念</a>
+        <a href="#step2" class="lab-step">Step 2: 環境設定</a>
+        <a href="#step3" class="lab-step">Step 3: 實作 Word2Vec</a>
+        <a href="#step4" class="lab-step">Step 4: 視覺化 Embedding</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h1>🔢 1.2 Embedding - 文字變向量</h1>
+        <p class="lab-intro-text">
+          還記得 Tokenization 嗎？我們把文字「切」成了 tokens。
+          現在要更進一步：把這些 tokens 變成「向量」（一組數字）！
+          這就是 Embedding，它是 AI「理解」文字的關鍵。
+        </p>
+
+        <!-- Step 1: 理解概念 -->
+        <section id="step1" class="lab-section">
+          <h2>🎓 Step 1: 理解 Embedding 概念</h2>
+          
+          <div class="visual-diagram">
+            <h4>📊 視覺化：什麼是 Embedding？</h4>
+            <p>
+              把文字轉換成向量的過程：
+            </p>
+            <pre>
+文字: "貓"
+  ↓ Tokenization
+Token: "貓" (ID: 1234)
+  ↓ Embedding
+向量: [0.2, -0.5, 0.8, 0.1, ...]  (例如 128 維)
+
+文字: "狗"
+  ↓ Tokenization
+Token: "狗" (ID: 5678)
+  ↓ Embedding
+向量: [0.3, -0.4, 0.7, 0.2, ...]  (相似的數字！)
+
+✨ 重點：相似的詞彙會有相似的向量！
+   "貓" 和 "狗" 都是動物，所以向量很接近
+            </pre>
+          </div>
+
+          <h3>🤔 為什麼需要 Embedding？</h3>
+          <p>
+            AI 模型本質上是「數學函數」，它們只能計算數字。
+            Embedding 讓我們可以用「數學」來處理「語義」：
+          </p>
+          <ul class="lab-list-spacing">
+            <li><strong>語義相似性</strong>：計算兩個詞的「距離」就知道它們是否相似</li>
+            <li><strong>數學運算</strong>：可以做「國王 - 男人 + 女人 = 女王」這種神奇運算</li>
+            <li><strong>模型輸入</strong>：Transformer 需要向量作為輸入</li>
+          </ul>
+
+          <div class="ai-prompt-block">
+            <p>
+              想更深入了解？把這段 prompt 給 Cursor / Claude Code：
+            </p>
+            <pre>
+請用簡單易懂的方式解釋：
+1. 什麼是 Embedding？為什麼 AI 需要它？
+2. Word2Vec 的基本原理是什麼？（Skip-gram 和 CBOW）
+3. Embedding 和傳統的 one-hot encoding 有什麼不同？
+4. 為什麼相似的詞彙會有相似的向量？
+5. 如何用 Embedding 做「國王 - 男人 + 女人 = 女王」這種運算？
+
+請用生活化的類比，並提供具體例子。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+        </section>
+
+        <!-- Step 2: 環境設定 -->
+        <section id="step2" class="lab-section">
+          <h2>⚙️ Step 2: 環境設定</h2>
+          
+          <p>
+            我們會用 <code>gensim</code> 庫來實作 Word2Vec，這是 Python 最流行的 Embedding 庫。
+          </p>
+
+          <div class="terminal-command">
+            <code># 建立專案目錄（必須手動執行）
+mkdir -p word2vec-lab && cd word2vec-lab</code>
+            <button class="copy-terminal-btn" onclick="copyTerminal(this)">
+              📋 複製指令
+            </button>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              讓 AI 幫你建立虛擬環境、專案結構和檔案：
+            </p>
+            <pre>
+請幫我建立一個 Python 專案，用於實作 Word2Vec Embedding：
+
+⚠️ 重要：請使用 Python 虛擬環境（venv）來管理專案依賴！
+
+請執行以下步驟：
+1. 建立 Python 虛擬環境：python3 -m venv venv
+2. 啟動虛擬環境：source venv/bin/activate (macOS/Linux) 或 venv\Scripts\activate (Windows)
+3. 確認虛擬環境已啟動（終端機提示符會顯示 (venv)）
+4. 在虛擬環境中安裝依賴：pip install gensim matplotlib numpy scikit-learn
+
+然後建立以下檔案和目錄結構：
+- train_word2vec.py (訓練 Word2Vec 模型，先留空或加上基本註解)
+- visualize_embeddings.py (視覺化 Embedding，先留空)
+- requirements.txt (列出所有依賴：gensim, matplotlib, numpy, scikit-learn)
+- README.md (專案簡介，包含：專案目的、如何建立虛擬環境、如何安裝依賴、如何執行)
+- .gitignore (忽略 venv/ 和 __pycache__/ 目錄)
+
+請建立這些檔案，並在 requirements.txt 中正確列出所有依賴套件和版本。
+在 README.md 中加入完整的專案說明和虛擬環境使用指南。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup">
+            <h4>💡 提示</h4>
+            <ul>
+              <li>
+                <strong>重要：請使用虛擬環境！</strong>
+                所有依賴套件都應該安裝在虛擬環境中，避免污染系統 Python。
+              </li>
+              <li>我們會用一個簡單的文本資料集來訓練</li>
+              <li>Word2Vec 不需要 GPU，可以在 Mac 本機運行</li>
+              <li>訓練時間約 1-2 分鐘（取決於資料大小）</li>
+              <li>記得在 .gitignore 中加入 <code>venv/</code> 和 <code>__pycache__/</code></li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 3: 實作 Word2Vec -->
+        <section id="step3" class="lab-section">
+          <h2>🛠️ Step 3: 訓練 Word2Vec 模型</h2>
+          
+          <p>
+            Word2Vec 有兩種方法：<strong>Skip-gram</strong> 和 <strong>CBOW</strong>。
+            我們會用 Skip-gram，它更容易理解。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 Skip-gram 原理</h4>
+            <pre>
+目標：從中心詞預測周圍的詞
+
+範例句子: "the quick brown fox"
+
+訓練樣本：
+  中心詞: "quick"
+  周圍詞: ["the", "brown"]
+  
+  模型學習：看到 "quick" 時，應該預測到 "the" 和 "brown"
+
+結果：相似的詞（如 "quick" 和 "fast"）會有相似的向量！
+            </pre>
+          </div>
+
+          <h3>🎯 實作步驟</h3>
+          <p>我們要：</p>
+          <ol class="lab-list-spacing">
+            <li>準備訓練資料（文本語料）</li>
+            <li>用 gensim 訓練 Word2Vec 模型</li>
+            <li>查看詞彙表和向量</li>
+            <li>測試語義相似性</li>
+          </ol>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>第一個 Prompt：準備訓練資料</strong>
+            </p>
+            <pre>
+請幫我寫一個 Python 腳本，準備 Word2Vec 的訓練資料：
+
+要求：
+1. 建立一個簡單的文本語料（可以用幾個句子，例如關於動物的）
+2. 將文本分割成詞彙列表（tokenization）
+3. 清理資料（移除標點、轉小寫等）
+4. 返回一個列表，每個元素是一個句子的詞彙列表
+
+範例輸出：
+  [
+    ["the", "quick", "brown", "fox"],
+    ["the", "lazy", "dog"],
+    ["a", "cat", "jumps", "over", "the", "dog"]
+  ]
+
+請加上詳細註解。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">train_word2vec.py</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">import re
+from gensim.models import Word2Vec
+
+def prepare_corpus():
+    """
+    準備 Word2Vec 的訓練資料
+    """
+    # 簡單的文本語料（關於動物）
+    texts = [
+        "the quick brown fox jumps over the lazy dog",
+        "a cat sits on the mat",
+        "dogs are loyal animals",
+        "cats are independent pets",
+        "the fox is clever and fast",
+        "dogs love to play fetch",
+        "cats enjoy sleeping in the sun",
+        "the brown dog runs in the park",
+        "a lazy cat naps all day",
+        "foxes are wild animals"
+    ]
+    
+    # 清理和分割
+    corpus = []
+    for text in texts:
+        # 轉小寫、移除標點、分割
+        words = re.findall(r'\b\w+\b', text.lower())
+        corpus.append(words)
+    
+    return corpus
+
+# 準備資料
+corpus = prepare_corpus()
+print(f"語料包含 {len(corpus)} 個句子")
+print(f"範例句子: {corpus[0]}")</code></pre>
+            </div>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              <strong>第二個 Prompt：訓練 Word2Vec 模型</strong>
+            </p>
+            <pre>
+請幫我使用 gensim 訓練一個 Word2Vec 模型：
+
+要求：
+1. 使用剛才準備的語料
+2. 設定參數：
+   - vector_size: 100 (向量維度)
+   - window: 5 (上下文窗口大小)
+   - min_count: 1 (最小詞頻)
+   - sg: 1 (使用 Skip-gram)
+   - epochs: 100 (訓練輪數)
+3. 訓練模型
+4. 打印詞彙表大小
+5. 測試幾個詞的相似性（例如 "dog" 和 "cat"）
+
+請加上詳細註解，並在訓練時顯示進度。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">train_word2vec.py</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python"># 訓練 Word2Vec 模型
+print("\n開始訓練 Word2Vec 模型...")
+model = Word2Vec(
+    sentences=corpus,
+    vector_size=100,      # 向量維度
+    window=5,             # 上下文窗口大小
+    min_count=1,          # 最小詞頻
+    sg=1,                 # 1 = Skip-gram, 0 = CBOW
+    epochs=100            # 訓練輪數
+)
+
+print(f"\n訓練完成！")
+print(f"詞彙表大小: {len(model.wv.key_to_index)}")
+print(f"向量維度: {model.wv.vector_size}")
+
+# 測試相似性
+print("\n測試詞彙相似性:")
+if "dog" in model.wv and "cat" in model.wv:
+    similarity = model.wv.similarity("dog", "cat")
+    print(f"  'dog' 和 'cat' 的相似度: {similarity:.4f}")
+
+# 找出最相似的詞
+if "dog" in model.wv:
+    similar_words = model.wv.most_similar("dog", topn=5)
+    print(f"\n與 'dog' 最相似的詞:")
+    for word, score in similar_words:
+        print(f"  {word}: {score:.4f}")
+
+# 保存模型
+model.save("word2vec.model")
+print("\n模型已保存為 'word2vec.model'")</code></pre>
+            </div>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              <strong>執行訓練</strong>
+            </p>
+            <pre>
+請幫我執行訓練腳本並檢查結果：
+
+1. 在虛擬環境中執行：python train_word2vec.py
+2. 檢查訓練過程是否正常
+3. 確認模型是否成功保存
+4. 如果有錯誤，請幫我修正
+
+請執行訓練並告訴我結果。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-expected-output">
+            <pre>
+語料包含 10 個句子
+範例句子: ['the', 'quick', 'brown', 'fox', 'jumps', 'over', 'the', 'lazy', 'dog']
+
+開始訓練 Word2Vec 模型...
+
+訓練完成！
+詞彙表大小: 25
+向量維度: 100
+
+測試詞彙相似性:
+  'dog' 和 'cat' 的相似度: 0.7234
+
+與 'dog' 最相似的詞:
+  cat: 0.7234
+  fox: 0.6891
+  animals: 0.6543
+  lazy: 0.6123
+  brown: 0.5890
+
+模型已保存為 'word2vec.model'
+            </pre>
+          </div>
+        </section>
+
+        <!-- Step 4: 視覺化 -->
+        <section id="step4" class="lab-section">
+          <h2>🎨 Step 4: 視覺化 Embedding</h2>
+          
+          <p>
+            最有趣的部分來了！我們要把高維向量「壓縮」到 2D 平面，用圖表畫出來。
+            這樣你就能「看到」詞彙之間的關係！
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 視覺化原理</h4>
+            <pre>
+高維向量 (100 維): [0.2, -0.5, 0.8, ...]
+  ↓ t-SNE 降維
+2D 座標: (x, y)
+  ↓ 畫在圖表上
+視覺化圖表：可以看到哪些詞彙聚集在一起！
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              讓 AI 幫你寫視覺化腳本：
+            </p>
+            <pre>
+請幫我寫一個 Python 腳本，視覺化 Word2Vec 的 Embedding：
+
+要求：
+1. 載入訓練好的 Word2Vec 模型
+2. 選取一些詞彙（例如：dog, cat, fox, lazy, quick, brown）
+3. 取得這些詞彙的向量
+4. 使用 t-SNE 將高維向量降維到 2D
+5. 用 matplotlib 畫出散點圖
+6. 在每個點旁邊標註詞彙名稱
+7. 用不同顏色標示不同類別的詞（例如：動物 vs 形容詞）
+
+請加上詳細註解，並讓圖表美觀易讀。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">visualize_embeddings.py</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">from gensim.models import Word2Vec
+import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
+import numpy as np
+
+# 載入模型
+model = Word2Vec.load("word2vec.model")
+
+# 選取要視覺化的詞彙
+words = ["dog", "cat", "fox", "lazy", "quick", "brown", 
+         "animals", "pets", "jumps", "runs", "sits"]
+
+# 過濾存在的詞彙
+words = [w for w in words if w in model.wv]
+
+# 取得向量
+vectors = [model.wv[word] for word in words]
+
+# 使用 t-SNE 降維到 2D
+print("正在降維...")
+tsne = TSNE(n_components=2, random_state=42, perplexity=min(30, len(words)-1))
+vectors_2d = tsne.fit_transform(vectors)
+
+# 繪圖
+plt.figure(figsize=(12, 8))
+plt.scatter(vectors_2d[:, 0], vectors_2d[:, 1], s=200, alpha=0.6)
+
+# 標註詞彙
+for i, word in enumerate(words):
+    plt.annotate(word, (vectors_2d[i, 0], vectors_2d[i, 1]), 
+                fontsize=12, fontweight='bold')
+
+plt.title("Word2Vec Embedding 視覺化", fontsize=16, fontweight='bold')
+plt.xlabel("t-SNE 維度 1")
+plt.ylabel("t-SNE 維度 2")
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.savefig("embedding_visualization.png", dpi=150, bbox_inches='tight')
+print("圖表已保存為 'embedding_visualization.png'")
+plt.show()</code></pre>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              <strong>執行視覺化</strong>
+            </p>
+            <pre>
+請幫我執行視覺化腳本並檢查結果：
+
+1. 在虛擬環境中執行：python visualize_embeddings.py
+2. 檢查是否成功生成圖表檔案
+3. 如果有錯誤，請幫我修正
+
+請執行視覺化並告訴我結果。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="visual-diagram">
+            <h4>🎨 預期視覺化結果</h4>
+            <p>
+              你應該會看到類似這樣的圖表：
+            </p>
+            <pre>
+        y
+        ↑
+        |
+    dog ●
+        |
+  cat ●     ● fox
+        |
+        |        ● animals
+        |
+        |  ● lazy  ● quick
+        |    ● brown
+        |
+        ───────────────────→ x
+
+✨ 觀察：
+- 動物詞彙（dog, cat, fox）會聚集在一起
+- 形容詞（lazy, quick, brown）會聚集在一起
+- 這證明了 Embedding 確實捕捉到了語義！
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              <strong>進階：測試語義運算</strong>
+            </p>
+            <pre>
+請幫我測試 Word2Vec 的語義運算功能：
+
+任務：
+1. 載入訓練好的模型
+2. 測試 "dog" - "loyal" + "independent" 是否接近 "cat"
+3. 測試 "fox" - "wild" + "pet" 是否接近 "dog" 或 "cat"
+4. 打印運算結果和相似度分數
+
+提示：使用 model.wv.most_similar() 和正負樣本列表。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+        </section>
+
+        <!-- Challenge -->
+        <div class="lab-challenge lab-spacing-top-lg">
+          <h4>💪 挑戰任務</h4>
+          <p>
+            <strong>進階挑戰 1：</strong>
+            用更大的語料訓練 Word2Vec（例如：下載 Wikipedia 的小型資料集）。
+            比較不同參數（vector_size, window）對結果的影響。
+          </p>
+          <p>
+            <strong>進階挑戰 2：</strong>
+            實作一個簡單的「詞彙類比」遊戲：
+            給定 "dog : loyal = cat : ?"，讓模型預測答案。
+          </p>
+          <p>
+            <strong>進階挑戰 3：</strong>
+            比較 Word2Vec 和 GloVe 的差異。
+            安裝 glove-python 並訓練一個 GloVe 模型，比較兩者的視覺化結果。
+          </p>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="lab-setup lab-spacing-top-lg">
+          <h4>🎯 下一步</h4>
+          <ul>
+            <li>
+              ✅ 恭喜！你已經學會了 Embedding。現在文字可以變成向量了！
+            </li>
+            <li>
+              ➡️ 接下來我們要學 <strong>位置編碼</strong>：
+              Transformer 如何知道詞彙的「順序」？這是理解 Transformer 的關鍵！
+            </li>
+            <li>
+              📚 建議：先完成視覺化，看看你的 Embedding 是否合理。
+            </li>
+          </ul>
+        </div>
+
+        <div class="chapter-nav lab-spacing-top-lg">
+          <a href="../index.html" class="nav-link">← 返回 Phase 1</a>
+          <a href="../01-tokenization/index.html" class="nav-link">← 上一個實驗</a>
+          <a href="../03-positional-encoding/index.html" class="nav-link">下一個實驗：位置編碼 →</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function copyPrompt(btn) {
+        const promptBlock = btn.closest(".ai-prompt-block");
+        const preElement = promptBlock.querySelector("pre");
+        const text = preElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.classList.add("copied");
+          btn.textContent = "✓ 已複製！";
+          setTimeout(() => {
+            btn.classList.remove("copied");
+            btn.textContent = "📋 複製 Prompt";
+          }, 2000);
+        });
+      }
+
+      function toggleCodeBlock(header) {
+        const codeBlock = header.closest(".lab-code-block");
+        const toggleBtn = header.querySelector(".toggle-btn");
+        
+        codeBlock.classList.toggle("collapsed");
+        
+        if (codeBlock.classList.contains("collapsed")) {
+          toggleBtn.textContent = "展開";
+        } else {
+          toggleBtn.textContent = "收起";
+        }
+      }
+
+      function copyCode(btn) {
+        const codeBlock = btn.closest(".lab-code-block");
+        const codeElement = codeBlock.querySelector("pre code");
+        const text = codeElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = "✓ 已複製";
+          setTimeout(() => {
+            btn.textContent = "複製";
+          }, 2000);
+        });
+      }
+
+      function copyTerminal(btn) {
+        const terminalBlock = btn.closest(".terminal-command");
+        const codeElement = terminalBlock.querySelector("code");
+        const text = codeElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = "✓ 已複製";
+          setTimeout(() => {
+            btn.textContent = "📋 複製指令";
+          }, 2000);
+        });
+      }
+    </script>
+  </body>
+</html>

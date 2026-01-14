@@ -1,0 +1,2736 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
+    <title>
+      RAG 的真實故事：從學術突破到企業妥協方案 | AI Paper Archaeology
+    </title>
+    <meta name="title" content="RAG 的真實故事：從學術突破到企業妥協方案" />
+    <meta
+      name="description"
+      content="從 2020 年到 2026 年，Retrieval-Augmented Generation 的完整演進史。不只是成功敘事，更包含批判性檢驗與平衡觀點。探索 RAG 的真實影響力、技術局限與未來定位。"
+    />
+    <meta
+      name="keywords"
+      content="RAG, Retrieval-Augmented Generation, 檢索增強生成, REALM, RETRO, Self-RAG, GraphRAG, Agentic RAG, 向量資料庫, 企業AI"
+    />
+
+    <!-- Google Fonts: Modern Professional -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Poppins:wght@400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../styles/articles.css" />
+
+    <style>
+      /* Modern Magazine Theme - Swiss Modernism 2.0 */
+      :root {
+        /* Primary Palette - Professional SaaS */
+        --color-primary: #2563eb;
+        --color-primary-light: #3b82f6;
+        --color-primary-dark: #1e40af;
+        --color-secondary: #10b981;
+        --color-accent: #f97316;
+
+        /* Neutral Palette */
+        --color-bg: #f8fafc;
+        --color-bg-elevated: #ffffff;
+        --color-text-primary: #1e293b;
+        --color-text-secondary: #475569;
+        --color-text-muted: #64748b;
+        --color-border: #e2e8f0;
+        --color-border-light: #f1f5f9;
+
+        /* Typography Scale */
+        --font-heading: "Poppins", "Noto Sans TC", sans-serif;
+        --font-body: "Open Sans", "Noto Sans TC", sans-serif;
+        --font-serif: "Noto Serif TC", serif;
+
+        /* Spacing System */
+        --spacing-xs: 0.5rem;
+        --spacing-sm: 1rem;
+        --spacing-md: 1.5rem;
+        --spacing-lg: 2rem;
+        --spacing-xl: 3rem;
+        --spacing-2xl: 4rem;
+
+        /* Border Radius */
+        --radius-sm: 0.375rem;
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+        --radius-xl: 1rem;
+
+        /* Shadows */
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: var(--font-body);
+        font-size: 1rem;
+        line-height: 1.75;
+        color: var(--color-text-primary);
+        background-color: var(--color-bg);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Typography Hierarchy */
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: var(--font-heading);
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        color: var(--color-text-primary);
+      }
+
+      h1 {
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        font-weight: 900;
+      }
+      h2 {
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 800;
+      }
+      h3 {
+        font-size: clamp(1.5rem, 3vw, 2.25rem);
+        font-weight: 700;
+      }
+      h4 {
+        font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+        font-weight: 600;
+      }
+      h5 {
+        font-size: clamp(1.125rem, 2vw, 1.5rem);
+        font-weight: 600;
+      }
+
+      p {
+        margin-bottom: var(--spacing-md);
+        color: var(--color-text-secondary);
+      }
+
+      strong {
+        font-weight: 600;
+        color: var(--color-text-primary);
+      }
+
+      /* Drop Cap - Magazine Style */
+      .drop-cap::first-letter {
+        font-size: 5rem;
+        line-height: 0.85;
+        float: left;
+        margin: 0.1em 0.15em 0 0;
+        font-family: var(--font-heading);
+        font-weight: 900;
+        color: var(--color-primary);
+        text-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+      }
+
+      /* Container System */
+      .container-narrow {
+        max-width: 42rem;
+        margin: 0 auto;
+        padding: 0 var(--spacing-md);
+      }
+
+      .container-medium {
+        max-width: 56rem;
+        margin: 0 auto;
+        padding: 0 var(--spacing-md);
+      }
+
+      .container-wide {
+        max-width: 72rem;
+        margin: 0 auto;
+        padding: 0 var(--spacing-md);
+      }
+
+      /* Card Styles */
+      .card {
+        background: var(--color-bg-elevated);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        transition: all 0.2s ease-out;
+      }
+
+      .card:hover {
+        box-shadow: var(--shadow-lg);
+        border-color: var(--color-primary-light);
+        transform: translateY(-2px);
+      }
+
+      /* Link Styles */
+      a {
+        color: var(--color-primary);
+        text-decoration: none;
+        transition: color 0.2s ease-out;
+      }
+
+      a:hover {
+        color: var(--color-primary-dark);
+      }
+
+      /* Button Styles */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-family: var(--font-heading);
+        font-weight: 600;
+        font-size: 0.9375rem;
+        border-radius: var(--radius-md);
+        transition: all 0.2s ease-out;
+        cursor: pointer;
+        border: none;
+        text-decoration: none;
+      }
+
+      .btn-primary {
+        background: var(--color-primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: var(--color-primary-dark);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-1px);
+      }
+
+      /* Responsive Grid */
+      .grid {
+        display: grid;
+        gap: var(--spacing-lg);
+      }
+
+      .grid-2 {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+
+      /* Timeline Styles */
+      .timeline-container {
+        position: relative;
+        padding: var(--spacing-2xl) 0;
+      }
+
+      .timeline-line {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(
+          180deg,
+          var(--color-primary-light),
+          var(--color-secondary)
+        );
+        transform: translateX(-50%);
+      }
+
+      /* Section Divider */
+      .section-divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: var(--spacing-2xl) 0;
+        color: var(--color-text-muted);
+      }
+
+      .section-divider span {
+        font-size: 1.5rem;
+        padding: 0 var(--spacing-md);
+        background: var(--color-bg);
+      }
+
+      .section-divider::before,
+      .section-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--color-border);
+      }
+
+      /* Accessibility */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      /* Responsive Typography */
+      @media (max-width: 768px) {
+        body {
+          font-size: 0.9375rem;
+        }
+
+        .container-narrow,
+        .container-medium,
+        .container-wide {
+          padding: 0 var(--spacing-sm);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hero Section -->
+    <div
+      class="hero-section"
+      style="
+        background: linear-gradient(
+          135deg,
+          #1e3a8a 0%,
+          #3b82f6 50%,
+          #10b981 100%
+        );
+        height: 85vh;
+        position: relative;
+        overflow: hidden;
+      "
+    >
+      <div
+        style="
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0.4) 0%,
+            rgba(0, 0, 0, 0.7) 100%
+          );
+        "
+      ></div>
+      <div
+        style="
+          position: relative;
+          z-index: 1;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          padding: 40px 20px;
+        "
+      >
+        <h1
+          style="
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+            margin: 0;
+            line-height: 1.1;
+          "
+        >
+          RAG 的真實故事
+        </h1>
+        <p
+          style="
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            color: rgba(255, 255, 255, 0.95);
+            margin: 30px 0;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+            font-family: 'Noto Serif TC', serif;
+          "
+        >
+          從學術突破到企業妥協方案
+        </p>
+        <p
+          style="
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            color: rgba(255, 255, 255, 0.85);
+            margin: 20px 0;
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+          "
+        >
+          2020-2026 · 演進、質疑與未來定位
+        </p>
+        <div style="margin-top: 40px">
+          <a
+            href="#story-start"
+            style="
+              background: rgba(255, 255, 255, 0.2);
+              backdrop-filter: blur(10px);
+              color: white;
+              padding: 15px 40px;
+              border-radius: 50px;
+              text-decoration: none;
+              font-weight: 600;
+              border: 2px solid rgba(255, 255, 255, 0.3);
+              transition: all 0.3s;
+            "
+          >
+            探索故事 ↓
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- 麵包屑導航 -->
+      <div class="breadcrumb">
+        <a href="../index.html">🏠 首頁</a> / 📚 RAG 專題報導
+      </div>
+
+      <!-- Story Container -->
+      <div id="story-start" class="story-container">
+        <p class="drop-cap">
+          二零二零年五月，當全世界還在適應疫情帶來的混亂時，Meta（當時的
+          Facebook）AI 研究院發表了一篇論文。
+          論文標題很學術：「Retrieval-Augmented Generation for
+          Knowledge-Intensive NLP Tasks」。 但它提出的想法卻簡單得驚人：<strong
+            >讓 AI 在回答問題前，先去「查資料」</strong
+          >。
+        </p>
+
+        <p
+          style="
+            font-size: 1.1rem;
+            line-height: 1.9;
+            color: var(--text-main);
+            margin: 30px 0;
+          "
+        >
+          就像開卷考試 vs 閉卷考試——AI
+          不需要把所有知識死記硬背在「腦中」（參數裡），
+          而是在需要時去圖書館（向量資料庫）查閱相關資料。<strong
+            >這個簡單但實用的想法，在 5
+            年內從學術研究走向企業應用，成為成本效益平衡的解決方案。</strong
+          >
+        </p>
+
+        <div class="section-divider"><span>✦</span></div>
+
+        <h2
+          style="
+            font-size: 2.2rem;
+            margin-top: 60px;
+            color: var(--primary-color);
+          "
+        >
+          為什麼 AI 需要「查資料」？
+        </h2>
+
+        <div class="key-concept" style="margin-top: 30px">
+          <h4 style="color: var(--danger-color)">🚨 大語言模型的兩大致命傷</h4>
+
+          <div
+            style="
+              background: linear-gradient(135deg, #fee2e2, #fecaca);
+              padding: 30px;
+              border-radius: 16px;
+              margin: 25px 0;
+            "
+          >
+            <h5
+              style="
+                color: var(--danger-color);
+                margin-top: 0;
+                font-size: 1.3rem;
+              "
+            >
+              1. 幻覺 (Hallucination)
+            </h5>
+            <p style="font-size: 1.05rem; line-height: 1.8">
+              LLM
+              會一本正經地「胡說八道」。當它不知道答案時，不會誠實說「我不知道」，
+              而是編造一個聽起來很合理的答案。就像學生考試時不會的題目，也要硬著頭皮寫滿。
+            </p>
+            <p
+              style="
+                margin-top: 15px;
+                font-style: italic;
+                color: var(--text-secondary);
+              "
+            >
+              例子：問
+              ChatGPT「台灣第一座核電廠是誰設計的？」，它可能會編造一個不存在的建築師名字。
+            </p>
+          </div>
+
+          <div
+            style="
+              background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+              padding: 30px;
+              border-radius: 16px;
+              margin: 25px 0;
+            "
+          >
+            <h5
+              style="
+                color: var(--primary-color);
+                margin-top: 0;
+                font-size: 1.3rem;
+              "
+            >
+              2. 知識過時
+            </h5>
+            <p style="font-size: 1.05rem; line-height: 1.8">
+              LLM 的訓練資料有截止日期。GPT-4 的知識截止於 2023 年某月，
+              它無法知道昨天發生的新聞、今天的股價、剛發布的新產品。
+            </p>
+            <p
+              style="
+                margin-top: 15px;
+                font-style: italic;
+                color: var(--text-secondary);
+              "
+            >
+              這就像一個 2023 年就冬眠的人，醒來後還以為世界停在那一刻。
+            </p>
+          </div>
+        </div>
+
+        <div class="analogy" style="margin-top: 40px">
+          <h4 style="font-size: 1.4rem">💡 RAG 的解法：開卷考試</h4>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 25px;
+              margin-top: 25px;
+            "
+          >
+            <div
+              style="
+                background: var(--bg-card);
+                padding: 25px;
+                border-radius: 12px;
+                border-left: 4px solid var(--danger-color);
+              "
+            >
+              <h5 style="color: var(--danger-color); margin-top: 0">
+                ❌ 傳統 LLM = 閉卷考
+              </h5>
+              <ul style="line-height: 1.8">
+                <li>所有知識必須事先「背」在參數裡</li>
+                <li>答題時只能靠記憶</li>
+                <li>記錯就錯了，還不自知</li>
+                <li>知識更新 = 重新訓練整個模型</li>
+              </ul>
+            </div>
+            <div
+              style="
+                background: var(--bg-card);
+                padding: 25px;
+                border-radius: 12px;
+                border-left: 4px solid var(--secondary-color);
+              "
+            >
+              <h5 style="color: var(--secondary-color); margin-top: 0">
+                ✅ RAG = 開卷考
+              </h5>
+              <ul style="line-height: 1.8">
+                <li>可以帶「參考書」（向量資料庫）</li>
+                <li>答題前先翻書找相關資料</li>
+                <li>答案有出處，可追溯來源</li>
+                <li>知識更新 = 更新資料庫即可</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider"><span>✦</span></div>
+
+        <!-- 過渡段落 -->
+        <div
+          style="
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 30px;
+            border-radius: 16px;
+            margin: 40px 0;
+            border-left: 5px solid var(--primary-color);
+          "
+        >
+          <p
+            style="
+              font-size: 1.1rem;
+              line-height: 1.9;
+              margin: 0;
+              color: #1e293b;
+            "
+          >
+            <strong>這就是 RAG 誕生的背景。</strong>既然 LLM
+            有這兩個致命傷，何不讓它在回答前先「查資料」？
+            接下來，讓我們深入了解 RAG
+            的正式定義、技術細節，以及它六年來的演進歷程。
+          </p>
+        </div>
+
+        <!-- RAG 正式定義 -->
+        <section class="story-section" style="margin-top: 60px">
+          <h2
+            style="
+              font-size: 2.2rem;
+              margin-bottom: 30px;
+              color: var(--primary-color);
+            "
+          >
+            📖 什麼是 RAG？正式定義
+          </h2>
+
+          <div
+            class="key-concept"
+            style="
+              background: linear-gradient(135deg, #fef3c7, #fde68a);
+              padding: 40px;
+              border-radius: 16px;
+              margin: 30px 0;
+            "
+          >
+            <h3
+              style="
+                color: var(--accent-color);
+                margin-top: 0;
+                font-size: 1.6rem;
+              "
+            >
+              🎯 RAG 的學術定義
+            </h3>
+            <div
+              class="original-quote"
+              style="
+                background: white;
+                padding: 25px;
+                border-radius: 12px;
+                margin: 20px 0;
+              "
+            >
+              <p style="font-size: 1.15rem; line-height: 1.9; margin: 0">
+                <strong>Retrieval-Augmented Generation (RAG)</strong>
+                是一種混合式架構，
+                結合<strong>非參數記憶（外部知識庫）</strong>與<strong>參數記憶（語言模型）</strong>，
+                在生成回答前先從外部知識源檢索相關資訊，再將檢索結果與輸入一起送給生成模型。
+              </p>
+            </div>
+            <p style="margin-top: 20px; font-size: 1.05rem; line-height: 1.8">
+              📄 來源：Patrick Lewis et al., "Retrieval-Augmented Generation for
+              Knowledge-Intensive NLP Tasks" (2020)
+            </p>
+          </div>
+
+          <h3
+            style="
+              font-size: 1.8rem;
+              margin-top: 50px;
+              color: var(--secondary-color);
+            "
+          >
+            ✅ RAG 的三大核心要素
+          </h3>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+              gap: 25px;
+              margin-top: 30px;
+            "
+          >
+            <div
+              style="
+                background: var(--primary-light);
+                padding: 30px;
+                border-radius: 12px;
+                border-left: 5px solid var(--primary-color);
+              "
+            >
+              <h4
+                style="
+                  margin-top: 0;
+                  color: var(--primary-color);
+                  font-size: 1.3rem;
+                "
+              >
+                1️⃣ 外部知識庫
+              </h4>
+              <p style="line-height: 1.8">
+                <strong>必須有</strong>一個獨立於模型參數之外的知識來源：
+              </p>
+              <ul style="line-height: 1.9; margin-top: 15px">
+                <li>向量資料庫（最常見）</li>
+                <li>傳統搜尋引擎</li>
+                <li>知識圖譜</li>
+                <li>結構化資料庫</li>
+                <li>文檔集合</li>
+              </ul>
+            </div>
+
+            <div
+              style="
+                background: var(--secondary-light);
+                padding: 30px;
+                border-radius: 12px;
+                border-left: 5px solid var(--secondary-color);
+              "
+            >
+              <h4
+                style="
+                  margin-top: 0;
+                  color: var(--secondary-color);
+                  font-size: 1.3rem;
+                "
+              >
+                2️⃣ 檢索機制
+              </h4>
+              <p style="line-height: 1.8">
+                <strong>必須有</strong>一個檢索器（Retriever）動態查詢知識庫：
+              </p>
+              <ul style="line-height: 1.9; margin-top: 15px">
+                <li>Dense Retrieval（DPR、BERT）</li>
+                <li>Sparse Retrieval（BM25、TF-IDF）</li>
+                <li>混合檢索（Hybrid）</li>
+                <li>可微分檢索器</li>
+                <li>神經檢索模型</li>
+              </ul>
+            </div>
+
+            <div
+              style="
+                background: var(--accent-light);
+                padding: 30px;
+                border-radius: 12px;
+                border-left: 5px solid var(--accent-color);
+              "
+            >
+              <h4
+                style="
+                  margin-top: 0;
+                  color: var(--accent-color);
+                  font-size: 1.3rem;
+                "
+              >
+                3️⃣ 生成模型
+              </h4>
+              <p style="line-height: 1.8">
+                <strong>必須有</strong>一個語言模型基於檢索結果生成回答：
+              </p>
+              <ul style="line-height: 1.9; margin-top: 15px">
+                <li>Seq2Seq 模型（BART、T5）</li>
+                <li>Decoder-only LLM（GPT 系列）</li>
+                <li>Encoder-Decoder 架構</li>
+                <li>任何支援條件生成的模型</li>
+              </ul>
+            </div>
+          </div>
+
+          <h3
+            style="
+              font-size: 1.8rem;
+              margin-top: 60px;
+              color: var(--danger-color);
+            "
+          >
+            ❌ 什麼「不算」RAG？邊界劃分
+          </h3>
+
+          <div
+            style="
+              background: linear-gradient(135deg, #fef2f2, #fee2e2);
+              padding: 35px;
+              border-radius: 16px;
+              margin-top: 30px;
+              border: 3px solid var(--danger-color);
+            "
+          >
+            <table
+              style="
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0 15px;
+              "
+            >
+              <thead>
+                <tr style="background: white">
+                  <th
+                    style="
+                      padding: 15px;
+                      text-align: left;
+                      border-radius: 8px 0 0 8px;
+                      font-size: 1.1rem;
+                    "
+                  >
+                    技術
+                  </th>
+                  <th
+                    style="padding: 15px; text-align: center; font-size: 1.1rem"
+                  >
+                    是 RAG？
+                  </th>
+                  <th
+                    style="
+                      padding: 15px;
+                      text-align: left;
+                      border-radius: 0 8px 8px 0;
+                      font-size: 1.1rem;
+                    "
+                  >
+                    原因
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="background: white">
+                  <td style="padding: 20px; border-radius: 8px 0 0 8px">
+                    <strong>純 LLM（如 GPT-4）</strong>
+                  </td>
+                  <td
+                    style="padding: 20px; text-align: center; font-size: 1.5rem"
+                  >
+                    ❌
+                  </td>
+                  <td style="padding: 20px; border-radius: 0 8px 8px 0">
+                    沒有外部檢索，所有知識在參數中
+                  </td>
+                </tr>
+                <tr style="background: white">
+                  <td style="padding: 20px; border-radius: 8px 0 0 8px">
+                    <strong>Fine-tuning LLM</strong>
+                  </td>
+                  <td
+                    style="padding: 20px; text-align: center; font-size: 1.5rem"
+                  >
+                    ❌
+                  </td>
+                  <td style="padding: 20px; border-radius: 0 8px 8px 0">
+                    知識融入參數，不是檢索外部資料
+                  </td>
+                </tr>
+                <tr style="background: white">
+                  <td style="padding: 20px; border-radius: 8px 0 0 8px">
+                    <strong>Long Context LLM（如 Claude 200K）</strong>
+                  </td>
+                  <td
+                    style="padding: 20px; text-align: center; font-size: 1.5rem"
+                  >
+                    ❌
+                  </td>
+                  <td style="padding: 20px; border-radius: 0 8px 8px 0">
+                    把所有內容放 context，不是動態檢索
+                  </td>
+                </tr>
+                <tr style="background: rgba(16, 185, 129, 0.2)">
+                  <td style="padding: 20px; border-radius: 8px 0 0 8px">
+                    <strong>DPR + BART（RAG 原始論文）</strong>
+                  </td>
+                  <td
+                    style="padding: 20px; text-align: center; font-size: 1.5rem"
+                  >
+                    ✅
+                  </td>
+                  <td style="padding: 20px; border-radius: 0 8px 8px 0">
+                    檢索器 + 生成器，經典 RAG
+                  </td>
+                </tr>
+                <tr style="background: rgba(16, 185, 129, 0.2)">
+                  <td style="padding: 20px; border-radius: 8px 0 0 8px">
+                    <strong>Vector DB + LLM（企業常用）</strong>
+                  </td>
+                  <td
+                    style="padding: 20px; text-align: center; font-size: 1.5rem"
+                  >
+                    ✅
+                  </td>
+                  <td style="padding: 20px; border-radius: 0 8px 8px 0">
+                    動態檢索向量庫，符合 RAG 定義
+                  </td>
+                </tr>
+                <tr style="background: rgba(16, 185, 129, 0.2)">
+                  <td style="padding: 20px; border-radius: 8px 0 0 8px">
+                    <strong>GraphRAG（知識圖譜）</strong>
+                  </td>
+                  <td
+                    style="padding: 20px; text-align: center; font-size: 1.5rem"
+                  >
+                    ✅
+                  </td>
+                  <td style="padding: 20px; border-radius: 0 8px 8px 0">
+                    檢索圖譜社群摘要，Modular RAG
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="analogy" style="margin-top: 40px">
+            <h4 style="font-size: 1.4rem">🎯 關鍵判斷標準</h4>
+            <div
+              style="
+                background: var(--bg-card);
+                padding: 30px;
+                border-radius: 12px;
+                margin-top: 20px;
+                border-left: 5px solid var(--secondary-color);
+              "
+            >
+              <p style="font-size: 1.1rem; line-height: 1.9; margin: 0">
+                一個系統是否為 RAG，問自己三個問題：
+              </p>
+              <ol style="font-size: 1.05rem; line-height: 2; margin-top: 20px">
+                <li>
+                  <strong>它有外部知識庫嗎？</strong>（不是模型參數裡的知識）
+                </li>
+                <li><strong>它會動態檢索嗎？</strong>（根據輸入查詢知識庫）</li>
+                <li>
+                  <strong>檢索結果影響生成嗎？</strong>（不是只是附加顯示）
+                </li>
+              </ol>
+              <p
+                style="
+                  font-size: 1.1rem;
+                  line-height: 1.9;
+                  margin-top: 25px;
+                  font-weight: 600;
+                  color: var(--secondary-color);
+                "
+              >
+                三個都是「Yes」→ 就是 RAG！<br />
+                任何一個「No」→ 不是 RAG！
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider"><span>✦</span></div>
+
+        <h2
+          style="
+            font-size: 2.2rem;
+            margin-top: 60px;
+            color: var(--primary-color);
+          "
+        >
+          六年演進：從突破到質疑
+        </h2>
+
+        <p
+          style="
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--color-text-secondary);
+            margin: 20px 0 40px 0;
+            max-width: 50rem;
+          "
+        >
+          RAG 的故事不是單純的成功敘事。從 2020 年的理論突破，到 2024
+          年企業廣泛應用， 再到同年學術界發現其效能不如 Long
+          Context——這是一個<strong>持續演進與反思</strong>的過程。
+        </p>
+
+        <!-- 視覺化時間線圖 -->
+        <div style="text-align: center; margin: 50px 0">
+          <img
+            src="images/rag-timeline-evolution.png"
+            alt="RAG 演進時間線 2020-2026"
+            style="
+              max-width: 100%;
+              border-radius: 12px;
+              box-shadow: var(--shadow-lg);
+            "
+          />
+          <p
+            style="
+              margin-top: 20px;
+              color: var(--text-secondary);
+              font-size: 0.95rem;
+            "
+          >
+            📊 從 REALM 到 Agentic RAG：6 年間的技術革命
+          </p>
+        </div>
+
+        <div class="timeline-container" style="margin: 50px 0">
+          <div class="timeline-line"></div>
+
+          <!-- 2020: 起源 -->
+          <div class="timeline-item left">
+            <div
+              class="timeline-dot"
+              style="border-color: #6366f1; width: 24px; height: 24px"
+            ></div>
+            <div class="timeline-card" style="border-left-color: #6366f1">
+              <h3 style="color: #6366f1; font-size: 1.5rem">🏛️ 2020：起源</h3>
+              <p
+                style="
+                  font-size: 0.9rem;
+                  color: var(--text-secondary);
+                  margin-bottom: 15px;
+                "
+              >
+                Google & Meta 的平行創新
+              </p>
+
+              <div
+                style="
+                  background: rgba(99, 102, 241, 0.1);
+                  padding: 15px;
+                  border-radius: 8px;
+                  margin-bottom: 12px;
+                "
+              >
+                <h4 style="margin: 0 0 8px 0; font-size: 1.1rem">
+                  REALM (2 月)
+                </h4>
+                <p style="margin: 0; font-size: 0.95rem">
+                  Google Research
+                  首創在<strong>預訓練階段</strong>整合檢索器。證明「可微分檢索」可行。
+                </p>
+              </div>
+
+              <div
+                style="
+                  background: rgba(16, 185, 129, 0.1);
+                  padding: 15px;
+                  border-radius: 8px;
+                "
+              >
+                <h4 style="margin: 0 0 8px 0; font-size: 1.1rem">
+                  ⭐ RAG 原始論文 (5 月)
+                </h4>
+                <p style="margin: 0; font-size: 0.95rem">
+                  <strong>Patrick Lewis</strong> 等人正式定義 RAG 架構：DPR +
+                  BART。成為後續所有 RAG 系統的基礎。
+                </p>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  gap: 10px;
+                  margin-top: 15px;
+                  flex-wrap: wrap;
+                "
+              >
+                <a
+                  href="01-realm.html"
+                  class="quick-link"
+                  style="font-size: 0.85rem"
+                  >📖 REALM 解析</a
+                >
+                <a
+                  href="02-rag-original.html"
+                  class="quick-link"
+                  style="font-size: 0.85rem"
+                  >📖 RAG 解析</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- 2021: 規模化 -->
+          <div class="timeline-item right">
+            <div
+              class="timeline-dot"
+              style="border-color: #f59e0b; width: 24px; height: 24px"
+            ></div>
+            <div class="timeline-card" style="border-left-color: #f59e0b">
+              <h3 style="color: #f59e0b; font-size: 1.5rem">
+                🚀 2021：規模化突破
+              </h3>
+              <p
+                style="
+                  font-size: 0.9rem;
+                  color: var(--text-secondary);
+                  margin-bottom: 15px;
+                "
+              >
+                DeepMind 證明參數效率
+              </p>
+
+              <div
+                style="
+                  background: rgba(245, 158, 11, 0.1);
+                  padding: 20px;
+                  border-radius: 8px;
+                "
+              >
+                <h4 style="margin: 0 0 10px 0; font-size: 1.2rem">RETRO</h4>
+                <p style="margin: 0 0 15px 0; font-size: 1.05rem">
+                  使用 <strong>2 兆 token</strong> 檢索資料庫，7.5B 參數模型達到
+                  GPT-3 175B 水準！
+                </p>
+                <div
+                  style="
+                    background: white;
+                    padding: 12px;
+                    border-radius: 6px;
+                    text-align: center;
+                  "
+                >
+                  <span
+                    style="
+                      font-size: 2rem;
+                      font-weight: 700;
+                      color: var(--accent-color);
+                    "
+                    >25×</span
+                  >
+                  <p
+                    style="
+                      margin: 5px 0 0 0;
+                      font-size: 0.9rem;
+                      color: var(--text-secondary);
+                    "
+                  >
+                    參數效率提升
+                  </p>
+                </div>
+              </div>
+
+              <a
+                href="03-retro.html"
+                class="quick-link"
+                style="
+                  display: inline-block;
+                  margin-top: 15px;
+                  font-size: 0.9rem;
+                "
+                >📖 深度解析 →</a
+              >
+            </div>
+          </div>
+
+          <!-- 2022: 企業落地 -->
+          <div class="timeline-item left">
+            <div
+              class="timeline-dot"
+              style="border-color: #06b6d4; width: 24px; height: 24px"
+            ></div>
+            <div class="timeline-card" style="border-left-color: #06b6d4">
+              <h3 style="color: #06b6d4; font-size: 1.5rem">
+                🏢 2022：企業落地
+              </h3>
+              <p
+                style="
+                  font-size: 0.9rem;
+                  color: var(--text-secondary);
+                  margin-bottom: 15px;
+                "
+              >
+                向量資料庫與 RAG 框架興起
+              </p>
+
+              <div
+                style="
+                  background: rgba(6, 182, 212, 0.1);
+                  padding: 15px;
+                  border-radius: 8px;
+                "
+              >
+                <ul style="margin: 0; font-size: 0.95rem; line-height: 1.9">
+                  <li><strong>Pinecone</strong> 等向量資料庫快速成長</li>
+                  <li><strong>LangChain</strong> 開源，RAG 開發變簡單</li>
+                  <li>企業開始將 RAG 用於內部知識庫</li>
+                  <li>「ChatGPT 時刻」前的基礎建設期</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2023: 自我反思 -->
+          <div class="timeline-item right">
+            <div
+              class="timeline-dot"
+              style="border-color: #8b5cf6; width: 24px; height: 24px"
+            ></div>
+            <div class="timeline-card" style="border-left-color: #8b5cf6">
+              <h3 style="color: #8b5cf6; font-size: 1.5rem">
+                🧠 2023：自我反思
+              </h3>
+              <p
+                style="
+                  font-size: 0.9rem;
+                  color: var(--text-secondary);
+                  margin-bottom: 15px;
+                "
+              >
+                從 Naive RAG 到 Advanced RAG
+              </p>
+
+              <div
+                style="
+                  background: rgba(139, 92, 246, 0.1);
+                  padding: 18px;
+                  border-radius: 8px;
+                "
+              >
+                <h4 style="margin: 0 0 10px 0; font-size: 1.1rem">Self-RAG</h4>
+                <p style="margin: 0 0 12px 0">
+                  引入 <strong>Reflection Tokens</strong>，模型學會問自己：
+                </p>
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.8">
+                  <li>我該檢索嗎？</li>
+                  <li>檢索結果相關嗎？</li>
+                  <li>我的回答有依據嗎？</li>
+                </ul>
+              </div>
+
+              <a
+                href="04-self-rag.html"
+                class="quick-link"
+                style="
+                  display: inline-block;
+                  margin-top: 15px;
+                  font-size: 0.9rem;
+                "
+                >📖 深度解析 →</a
+              >
+            </div>
+          </div>
+
+          <!-- 2024: 知識圖譜 -->
+          <div class="timeline-item left">
+            <div
+              class="timeline-dot"
+              style="border-color: #10b981; width: 24px; height: 24px"
+            ></div>
+            <div class="timeline-card" style="border-left-color: #10b981">
+              <h3 style="color: #10b981; font-size: 1.5rem">
+                🕸️ 2024：知識圖譜時代
+              </h3>
+              <p
+                style="
+                  font-size: 0.9rem;
+                  color: var(--text-secondary);
+                  margin-bottom: 15px;
+                "
+              >
+                Microsoft 解決全局推理難題
+              </p>
+
+              <div
+                style="
+                  background: rgba(16, 185, 129, 0.1);
+                  padding: 18px;
+                  border-radius: 8px;
+                "
+              >
+                <h4 style="margin: 0 0 10px 0; font-size: 1.1rem">GraphRAG</h4>
+                <p style="margin: 0 0 12px 0">
+                  整合知識圖譜，突破傳統 RAG 的「局部問題」限制：
+                </p>
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 10px;
+                    margin-top: 12px;
+                  "
+                >
+                  <div
+                    style="
+                      background: white;
+                      padding: 10px;
+                      border-radius: 6px;
+                      text-align: center;
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        color: var(--secondary-color);
+                      "
+                    >
+                      Local
+                    </div>
+                    <div
+                      style="
+                        font-size: 0.85rem;
+                        color: var(--text-secondary);
+                        margin-top: 4px;
+                      "
+                    >
+                      精確查詢
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      background: white;
+                      padding: 10px;
+                      border-radius: 6px;
+                      text-align: center;
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        color: var(--secondary-color);
+                      "
+                    >
+                      Global
+                    </div>
+                    <div
+                      style="
+                        font-size: 0.85rem;
+                        color: var(--text-secondary);
+                        margin-top: 4px;
+                      "
+                    >
+                      跨文檔摘要
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <a
+                href="05-graphrag.html"
+                class="quick-link"
+                style="
+                  display: inline-block;
+                  margin-top: 15px;
+                  font-size: 0.9rem;
+                "
+                >📖 深度解析 →</a
+              >
+            </div>
+          </div>
+
+          <!-- 2024 中: 批判性檢驗 -->
+          <div class="timeline-item right">
+            <div
+              class="timeline-dot"
+              style="
+                border-color: #dc2626;
+                width: 24px;
+                height: 24px;
+                border-width: 3px;
+              "
+            ></div>
+            <div
+              class="timeline-card"
+              style="
+                border-left-color: #dc2626;
+                background: linear-gradient(135deg, #fef2f2, #fee2e2);
+              "
+            >
+              <h3 style="color: #dc2626; font-size: 1.5rem">
+                ⚠️ 2024：批判性檢驗
+              </h3>
+              <p
+                style="
+                  font-size: 0.9rem;
+                  color: var(--text-secondary);
+                  margin-bottom: 15px;
+                "
+              >
+                學術界質疑 RAG 的真實效能
+              </p>
+
+              <div
+                style="
+                  background: rgba(220, 38, 38, 0.1);
+                  padding: 18px;
+                  border-radius: 8px;
+                  margin-bottom: 12px;
+                "
+              >
+                <h4
+                  style="margin: 0 0 10px 0; font-size: 1.15rem; color: #991b1b"
+                >
+                  RAG vs Long Context 實證研究
+                </h4>
+                <p style="margin: 0 0 12px 0; line-height: 1.7">
+                  多項研究（包含 EMNLP 2024 等）顯示，在資源充足的情況下：
+                </p>
+                <div
+                  style="
+                    background: white;
+                    padding: 15px;
+                    border-radius: 6px;
+                    margin: 10px 0;
+                  "
+                >
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: 1fr 1fr;
+                      gap: 15px;
+                      text-align: center;
+                    "
+                  >
+                    <div>
+                      <div
+                        style="
+                          font-size: 2rem;
+                          font-weight: 800;
+                          color: #dc2626;
+                        "
+                      >
+                        56.3%
+                      </div>
+                      <div
+                        style="
+                          font-size: 0.85rem;
+                          color: var(--text-secondary);
+                          margin-top: 4px;
+                        "
+                      >
+                        Long Context 正確率
+                      </div>
+                    </div>
+                    <div>
+                      <div
+                        style="
+                          font-size: 2rem;
+                          font-weight: 800;
+                          color: #dc2626;
+                        "
+                      >
+                        49.0%
+                      </div>
+                      <div
+                        style="
+                          font-size: 0.85rem;
+                          color: var(--text-secondary);
+                          margin-top: 4px;
+                        "
+                      >
+                        RAG 正確率
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p
+                  style="
+                    margin: 12px 0 0 0;
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    color: #991b1b;
+                  "
+                >
+                  結論：在理想條件下（資源充足、context 足夠長），Long Context
+                  往往表現更好
+                </p>
+              </div>
+
+              <div
+                style="
+                  background: white;
+                  padding: 15px;
+                  border-radius: 8px;
+                  border-left: 3px solid #dc2626;
+                "
+              >
+                <h5
+                  style="margin: 0 0 8px 0; font-size: 0.95rem; color: #dc2626"
+                >
+                  其他批判性研究
+                </h5>
+                <ul
+                  style="
+                    margin: 0;
+                    padding-left: 20px;
+                    font-size: 0.9rem;
+                    line-height: 1.8;
+                    color: var(--text-secondary);
+                  "
+                >
+                  <li>
+                    <strong>RefusalBench</strong>：錯誤上下文時無法拒絕回答
+                  </li>
+                  <li><strong>RAGProbe</strong>：組合問題有高失敗率</li>
+                  <li><strong>RAGCHECKER</strong>：系統性揭露檢索錯誤</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2025-2026: Agentic -->
+          <div class="timeline-item right">
+            <div
+              class="timeline-dot"
+              style="border-color: #ef4444; width: 28px; height: 28px"
+            ></div>
+            <div
+              class="timeline-card"
+              style="
+                border-left-color: #ef4444;
+                background: linear-gradient(135deg, #fef2f2, #fee2e2);
+              "
+            >
+              <h3 style="color: #ef4444; font-size: 1.6rem">
+                🤖 2025-2026：Agentic 時代
+              </h3>
+              <p
+                style="
+                  font-size: 0.9rem;
+                  color: var(--text-secondary);
+                  margin-bottom: 15px;
+                "
+              >
+                RAG 與 AI Agent 深度融合
+              </p>
+
+              <div
+                style="
+                  background: white;
+                  padding: 20px;
+                  border-radius: 8px;
+                  margin-bottom: 15px;
+                "
+              >
+                <h4 style="margin: 0 0 12px 0; font-size: 1.2rem">
+                  技術百花齊放
+                </h4>
+                <ul style="margin: 0; line-height: 2; font-size: 0.95rem">
+                  <li><strong>CRAG</strong>：Corrective RAG 自我糾正</li>
+                  <li><strong>HiRAG</strong>：階層式檢索</li>
+                  <li><strong>VideoRAG</strong>：多模態擴展</li>
+                  <li><strong>Multi-Agent RAG</strong>：協作式檢索</li>
+                </ul>
+              </div>
+
+              <a
+                href="06-agentic-rag.html"
+                class="quick-link"
+                style="
+                  display: inline-block;
+                  margin-top: 15px;
+                  font-size: 0.9rem;
+                  background: white;
+                  color: var(--danger-color);
+                  border: 2px solid var(--danger-color);
+                "
+                >📖 深度解析 →</a
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- 技術論證總結 -->
+        <div style="margin: 60px 0">
+          <h3
+            style="
+              font-size: 1.8rem;
+              margin-bottom: 30px;
+              color: var(--primary-color);
+              text-align: center;
+            "
+          >
+            ⚖️ 技術論證總結：RAG 的價值與局限
+          </h3>
+          <p
+            style="
+              font-size: 1.05rem;
+              line-height: 1.8;
+              color: var(--color-text-secondary);
+              margin: 0 0 30px 0;
+              text-align: center;
+              max-width: 50rem;
+              margin-left: auto;
+              margin-right: auto;
+            "
+          >
+            基於上述六年演進的論文，我們可以歸納出 RAG
+            技術的核心價值與已知局限。
+          </p>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 30px;
+              margin-top: 40px;
+            "
+          >
+            <!-- 正方：支持 RAG -->
+            <div
+              style="
+                background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+                padding: 35px;
+                border-radius: 16px;
+                border: 2px solid #10b981;
+              "
+            >
+              <h4
+                style="
+                  color: #047857;
+                  margin: 0 0 20px 0;
+                  font-size: 1.4rem;
+                  font-weight: 700;
+                "
+              >
+                ✅ 支持 RAG 的論據
+              </h4>
+
+              <div
+                style="
+                  background: white;
+                  padding: 20px;
+                  border-radius: 8px;
+                  margin-bottom: 15px;
+                "
+              >
+                <h5
+                  style="color: #059669; margin: 0 0 10px 0; font-size: 1.1rem"
+                >
+                  🎯 解決知識時效性問題
+                </h5>
+                <p style="margin: 0; line-height: 1.8; color: #475569">
+                  <strong>RAG 原始論文證明：</strong>在開放域問答任務上超越純
+                  LLM。
+                  外部知識庫可即時更新，<strong>無需重新訓練模型</strong>。
+                </p>
+              </div>
+
+              <div
+                style="
+                  background: white;
+                  padding: 20px;
+                  border-radius: 8px;
+                  margin-bottom: 15px;
+                "
+              >
+                <h5
+                  style="color: #059669; margin: 0 0 10px 0; font-size: 1.1rem"
+                >
+                  💰 成本效益優於 Fine-tuning
+                </h5>
+                <p style="margin: 0; line-height: 1.8; color: #475569">
+                  <strong>RETRO 證明：</strong>僅 7B 參數，檢索 2 兆 token
+                  資料庫， 達到 <strong>25x 參數效率</strong>，效能等同 175B
+                  模型。
+                </p>
+              </div>
+
+              <div
+                style="
+                  background: white;
+                  padding: 20px;
+                  border-radius: 8px;
+                  margin-bottom: 15px;
+                "
+              >
+                <h5
+                  style="color: #059669; margin: 0 0 10px 0; font-size: 1.1rem"
+                >
+                  🔍 可追溯來源、降低幻覺
+                </h5>
+                <p style="margin: 0; line-height: 1.8; color: #475569">
+                  <strong>Self-RAG 證明：</strong>加入反思機制後，在事實性任務上
+                  顯著優於 ChatGPT，提供<strong>可驗證的來源引用</strong>。
+                </p>
+              </div>
+
+              <div style="background: white; padding: 20px; border-radius: 8px">
+                <h5
+                  style="color: #059669; margin: 0 0 10px 0; font-size: 1.1rem"
+                >
+                  🚀 2025-2026 持續演進
+                </h5>
+                <p style="margin: 0; line-height: 1.8; color: #475569">
+                  <strong>Agentic RAG：</strong
+                  >加入多輪規劃，動態決定何時檢索，解決「盲目檢索」問題。<br />
+                  <strong>HiRAG/Modular RAG：</strong
+                  >階層式檢索，克服單一檢索瓶頸，提升組合問題成功率。<br />
+                  <strong>混合架構：</strong>RAG + Long Context
+                  結合，在成本與效能間取得平衡。
+                </p>
+              </div>
+            </div>
+
+            <!-- 反方：質疑 RAG -->
+            <div
+              style="
+                background: linear-gradient(135deg, #fef2f2, #fee2e2);
+                padding: 35px;
+                border-radius: 16px;
+                border: 2px solid #dc2626;
+              "
+            >
+              <h4
+                style="
+                  color: #991b1b;
+                  margin: 0 0 20px 0;
+                  font-size: 1.4rem;
+                  font-weight: 700;
+                "
+              >
+                ⚠️ 質疑 RAG 的論據
+              </h4>
+
+              <div
+                style="
+                  background: white;
+                  padding: 20px;
+                  border-radius: 8px;
+                  margin-bottom: 15px;
+                "
+              >
+                <h5
+                  style="color: #dc2626; margin: 0 0 10px 0; font-size: 1.1rem"
+                >
+                  📊 效能比較研究
+                </h5>
+                <p style="margin: 0; line-height: 1.8; color: #1e293b">
+                  多項研究顯示，Long Context 在特定條件下表現更優：<br />
+                  Long Context <strong style="color: #dc2626">~56%</strong> vs
+                  RAG <strong style="color: #dc2626">~49%</strong><br />
+                  <span style="font-size: 0.9rem; color: #475569"
+                    >註：數據來自特定實驗設定，不同場景結果可能不同</span
+                  >
+                </p>
+              </div>
+
+              <div
+                style="
+                  background: white;
+                  padding: 20px;
+                  border-radius: 8px;
+                  margin-bottom: 15px;
+                "
+              >
+                <h5
+                  style="color: #dc2626; margin: 0 0 10px 0; font-size: 1.1rem"
+                >
+                  🎯 系統性失敗
+                </h5>
+                <ul
+                  style="
+                    margin: 0;
+                    padding-left: 20px;
+                    line-height: 1.9;
+                    color: #1e293b;
+                  "
+                >
+                  <li>錯誤上下文時無法拒絕</li>
+                  <li>組合問題有高失敗率</li>
+                  <li>檢索品質嚴重影響輸出</li>
+                </ul>
+              </div>
+
+              <div style="background: white; padding: 20px; border-radius: 8px">
+                <h5
+                  style="color: #dc2626; margin: 0 0 10px 0; font-size: 1.1rem"
+                >
+                  ⚡ 無法根除幻覺
+                </h5>
+                <p style="margin: 0; line-height: 1.8; color: #475569">
+                  即使檢索到正確資訊，仍可能產生錯誤答案。<strong
+                    >降低但不消除。</strong
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 平衡結論 -->
+          <div
+            style="
+              background: white;
+              padding: 40px;
+              border-radius: 16px;
+              margin: 40px 0;
+              border: 3px solid #3b82f6;
+              box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            "
+          >
+            <h4
+              style="
+                color: #1e40af;
+                margin: 0 0 20px 0;
+                font-size: 1.5rem;
+                font-weight: 700;
+                text-align: center;
+              "
+            >
+              🎯 專題報導結論
+            </h4>
+            <p
+              style="
+                font-size: 1.15rem;
+                line-height: 1.9;
+                color: #1e293b;
+                margin: 0 0 20px 0;
+                text-align: center;
+                max-width: 42rem;
+                margin-left: auto;
+                margin-right: auto;
+              "
+            >
+              RAG
+              是<strong>實用主義的勝利</strong>——不追求理論完美，而是解決真實問題。
+            </p>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 25px;
+                margin-top: 30px;
+              "
+            >
+              <div
+                style="
+                  background: #f0f9ff;
+                  padding: 25px;
+                  border-radius: 12px;
+                  border-left: 4px solid #3b82f6;
+                "
+              >
+                <h5
+                  style="color: #1e40af; margin: 0 0 12px 0; font-size: 1.1rem"
+                >
+                  ✅ RAG 擅長的場景
+                </h5>
+                <ul
+                  style="
+                    margin: 0;
+                    padding-left: 20px;
+                    line-height: 1.9;
+                    color: #475569;
+                  "
+                >
+                  <li>成本敏感的企業應用</li>
+                  <li>知識頻繁更新的場景</li>
+                  <li>需要來源追溯的場合</li>
+                  <li>中小規模的知識庫</li>
+                </ul>
+              </div>
+
+              <div
+                style="
+                  background: #fff7ed;
+                  padding: 25px;
+                  border-radius: 12px;
+                  border-left: 4px solid #f97316;
+                "
+              >
+                <h5
+                  style="color: #c2410c; margin: 0 0 12px 0; font-size: 1.1rem"
+                >
+                  ⚠️ 不適合 RAG 的場景
+                </h5>
+                <ul
+                  style="
+                    margin: 0;
+                    padding-left: 20px;
+                    line-height: 1.9;
+                    color: #475569;
+                  "
+                >
+                  <li>對效能要求極高（用 LC）</li>
+                  <li>需要深度推理（用 Fine-tuning）</li>
+                  <li>安全性要求嚴格</li>
+                  <li>低延遲即時應用</li>
+                </ul>
+              </div>
+            </div>
+            <p
+              style="
+                margin-top: 30px;
+                font-size: 1.1rem;
+                line-height: 1.9;
+                color: #1e293b;
+                font-weight: 600;
+                text-align: center;
+              "
+            >
+              → RAG 的價值在於<strong style="color: #2563eb"
+                >讓 AI 應用更快落地</strong
+              >：低成本、可追溯、易更新。它不是唯一解，但在許多場景是<strong>最務實的選擇</strong>。
+            </p>
+          </div>
+        </div>
+
+        <!-- RAG 使用決策流程圖 -->
+        <div style="margin: 60px 0">
+          <h2
+            style="
+              font-size: 2.2rem;
+              margin-bottom: 30px;
+              color: var(--primary-color);
+              text-align: center;
+            "
+          >
+            📊 RAG 使用決策流程圖
+          </h2>
+          <div
+            style="
+              background: white;
+              padding: 40px;
+              border-radius: 16px;
+              box-shadow: var(--shadow-lg);
+              max-width: 800px;
+              margin: 0 auto;
+            "
+          >
+            <div style="display: grid; gap: 20px">
+              <div
+                style="
+                  background: #f0f9ff;
+                  padding: 25px;
+                  border-radius: 12px;
+                  border-left: 4px solid #3b82f6;
+                "
+              >
+                <h3
+                  style="color: #1e40af; margin: 0 0 15px 0; font-size: 1.3rem"
+                >
+                  步驟 1：預算評估
+                </h3>
+                <p style="margin: 0 0 15px 0; line-height: 1.8; color: #475569">
+                  <strong>預算是否充足？</strong>
+                </p>
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 15px;
+                    margin-top: 15px;
+                  "
+                >
+                  <div
+                    style="
+                      background: white;
+                      padding: 15px;
+                      border-radius: 8px;
+                      text-align: center;
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        color: #059669;
+                      "
+                    >
+                      ✅ 是
+                    </div>
+                    <div
+                      style="font-size: 0.9rem; color: #475569; margin-top: 5px"
+                    >
+                      考慮 Long Context LLM<br />（效能更好）
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      background: white;
+                      padding: 15px;
+                      border-radius: 8px;
+                      text-align: center;
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        color: #dc2626;
+                      "
+                    >
+                      ❌ 否
+                    </div>
+                    <div
+                      style="font-size: 0.9rem; color: #475569; margin-top: 5px"
+                    >
+                      繼續評估 →
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  background: #f0fdf4;
+                  padding: 25px;
+                  border-radius: 12px;
+                  border-left: 4px solid #10b981;
+                "
+              >
+                <h3
+                  style="color: #047857; margin: 0 0 15px 0; font-size: 1.3rem"
+                >
+                  步驟 2：知識更新頻率
+                </h3>
+                <p style="margin: 0 0 15px 0; line-height: 1.8; color: #475569">
+                  <strong>知識是否需要頻繁更新？</strong>（每週/每月）
+                </p>
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 15px;
+                    margin-top: 15px;
+                  "
+                >
+                  <div
+                    style="
+                      background: white;
+                      padding: 15px;
+                      border-radius: 8px;
+                      text-align: center;
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        color: #059669;
+                      "
+                    >
+                      ✅ 是
+                    </div>
+                    <div
+                      style="font-size: 0.9rem; color: #475569; margin-top: 5px"
+                    >
+                      RAG 是好選擇<br />（無需重新訓練）
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      background: white;
+                      padding: 15px;
+                      border-radius: 8px;
+                      text-align: center;
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        color: #dc2626;
+                      "
+                    >
+                      ❌ 否
+                    </div>
+                    <div
+                      style="font-size: 0.9rem; color: #475569; margin-top: 5px"
+                    >
+                      考慮 Fine-tuning<br />（知識固定）
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  background: #fffbeb;
+                  padding: 25px;
+                  border-radius: 12px;
+                  border-left: 4px solid #f59e0b;
+                "
+              >
+                <h3
+                  style="color: #92400e; margin: 0 0 15px 0; font-size: 1.3rem"
+                >
+                  步驟 3：來源追溯需求
+                </h3>
+                <p style="margin: 0 0 15px 0; line-height: 1.8; color: #475569">
+                  <strong>是否需要來源追溯？</strong>（合規、審計）
+                </p>
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 15px;
+                    margin-top: 15px;
+                  "
+                >
+                  <div
+                    style="
+                      background: white;
+                      padding: 15px;
+                      border-radius: 8px;
+                      text-align: center;
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        color: #059669;
+                      "
+                    >
+                      ✅ 是
+                    </div>
+                    <div
+                      style="font-size: 0.9rem; color: #475569; margin-top: 5px"
+                    >
+                      RAG 有優勢<br />（可提供引用）
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      background: white;
+                      padding: 15px;
+                      border-radius: 8px;
+                      text-align: center;
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        color: #dc2626;
+                      "
+                    >
+                      ❌ 否
+                    </div>
+                    <div
+                      style="font-size: 0.9rem; color: #475569; margin-top: 5px"
+                    >
+                      Long Context<br />可能更適合
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2026 年真實應用最佳建議 -->
+        <div style="margin: 60px 0">
+          <h2
+            style="
+              font-size: 2.2rem;
+              margin-bottom: 30px;
+              color: var(--primary-color);
+              text-align: center;
+            "
+          >
+            💡 2026 年真實應用最佳建議
+          </h2>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 30px;
+              margin-top: 40px;
+            "
+          >
+            <div
+              style="
+                background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+                padding: 35px;
+                border-radius: 16px;
+                border: 2px solid #10b981;
+              "
+            >
+              <h3
+                style="
+                  color: #047857;
+                  margin: 0 0 20px 0;
+                  font-size: 1.5rem;
+                  font-weight: 700;
+                "
+              >
+                ✅ 何時該用 RAG
+              </h3>
+              <ul
+                style="
+                  margin: 0;
+                  padding-left: 20px;
+                  line-height: 2.2;
+                  color: #1e293b;
+                "
+              >
+                <li>預算有限，無法負擔 Long Context API 成本</li>
+                <li>知識庫需要每週/每月更新（產品文件、法規）</li>
+                <li>需要提供來源引用（合規、審計需求）</li>
+                <li>知識庫規模在 10GB 以內</li>
+                <li>中小型企業，追求成本效益平衡</li>
+              </ul>
+            </div>
+
+            <div
+              style="
+                background: linear-gradient(135deg, #fef2f2, #fee2e2);
+                padding: 35px;
+                border-radius: 16px;
+                border: 2px solid #dc2626;
+              "
+            >
+              <h3
+                style="
+                  color: #991b1b;
+                  margin: 0 0 20px 0;
+                  font-size: 1.5rem;
+                  font-weight: 700;
+                "
+              >
+                ❌ 何時不該用 RAG
+              </h3>
+              <ul
+                style="
+                  margin: 0;
+                  padding-left: 20px;
+                  line-height: 2.2;
+                  color: #1e293b;
+                "
+              >
+                <li>預算充足且追求最高準確率 → 直接用 Long Context</li>
+                <li>知識固定不變 → Fine-tuning 更有效</li>
+                <li>需要深度推理（多步驟邏輯） → Long Context 勝出</li>
+                <li>安全性要求極高（醫療診斷、法律判決）</li>
+                <li>低延遲即時應用（< 100ms 響應）</li>
+              </ul>
+            </div>
+          </div>
+
+          <div
+            style="
+              background: white;
+              padding: 40px;
+              border-radius: 16px;
+              margin-top: 40px;
+              border: 3px solid #3b82f6;
+              box-shadow: var(--shadow-lg);
+            "
+          >
+            <h3
+              style="
+                color: #1e40af;
+                margin: 0 0 25px 0;
+                font-size: 1.6rem;
+                text-align: center;
+              "
+            >
+              🎯 最佳組合建議
+            </h3>
+            <div style="display: grid; gap: 25px">
+              <div
+                style="
+                  background: #f0f9ff;
+                  padding: 25px;
+                  border-radius: 12px;
+                  border-left: 4px solid #3b82f6;
+                "
+              >
+                <h4
+                  style="color: #1e40af; margin: 0 0 12px 0; font-size: 1.2rem"
+                >
+                  小型專案
+                </h4>
+                <p style="margin: 0; line-height: 1.9; color: #475569">
+                  <strong>RAG（LangChain + Pinecone + GPT-4o-mini）</strong
+                  ><br />
+                  成本：約 $50-200/月，適合 MVP 和概念驗證
+                </p>
+              </div>
+
+              <div
+                style="
+                  background: #f0fdf4;
+                  padding: 25px;
+                  border-radius: 12px;
+                  border-left: 4px solid #10b981;
+                "
+              >
+                <h4
+                  style="color: #047857; margin: 0 0 12px 0; font-size: 1.2rem"
+                >
+                  中型專案
+                </h4>
+                <p style="margin: 0; line-height: 1.9; color: #475569">
+                  <strong>Agentic RAG（動態判斷是否需要檢索）</strong><br />
+                  成本：約 $500-2000/月，平衡成本與效能
+                </p>
+              </div>
+
+              <div
+                style="
+                  background: #fffbeb;
+                  padding: 25px;
+                  border-radius: 12px;
+                  border-left: 4px solid #f59e0b;
+                "
+              >
+                <h4
+                  style="color: #92400e; margin: 0 0 12px 0; font-size: 1.2rem"
+                >
+                  大型專案
+                </h4>
+                <p style="margin: 0; line-height: 1.9; color: #475569">
+                  <strong>Hybrid（RAG + Long Context 混合策略）</strong><br />
+                  成本：約 $2000-10000/月，關鍵查詢用 LC，一般查詢用 RAG
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 未來預測：2027 展望 -->
+        <div style="margin: 60px 0">
+          <h2
+            style="
+              font-size: 2.2rem;
+              margin-bottom: 30px;
+              color: var(--primary-color);
+              text-align: center;
+            "
+          >
+            🔮 未來預測：2027 展望
+          </h2>
+
+          <div
+            style="
+              background: white;
+              padding: 40px;
+              border-radius: 16px;
+              box-shadow: var(--shadow-lg);
+              margin-bottom: 30px;
+            "
+          >
+            <h3 style="color: #dc2626; margin: 0 0 20px 0; font-size: 1.5rem">
+              威脅 1：Long Context 持續擴展
+            </h3>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15px;
+                margin-top: 20px;
+              "
+            >
+              <div
+                style="
+                  background: #fef2f2;
+                  padding: 20px;
+                  border-radius: 8px;
+                  text-align: center;
+                "
+              >
+                <div
+                  style="font-size: 1.5rem; font-weight: 700; color: #dc2626"
+                >
+                  2024
+                </div>
+                <div style="font-size: 0.9rem; color: #78350f; margin-top: 5px">
+                  Claude 200K<br />GPT-4 128K
+                </div>
+              </div>
+              <div
+                style="
+                  background: #fef2f2;
+                  padding: 20px;
+                  border-radius: 8px;
+                  text-align: center;
+                "
+              >
+                <div
+                  style="font-size: 1.5rem; font-weight: 700; color: #dc2626"
+                >
+                  2025
+                </div>
+                <div style="font-size: 0.9rem; color: #78350f; margin-top: 5px">
+                  Gemini 2M<br />context
+                </div>
+              </div>
+              <div
+                style="
+                  background: #fef2f2;
+                  padding: 20px;
+                  border-radius: 8px;
+                  text-align: center;
+                "
+              >
+                <div
+                  style="font-size: 1.5rem; font-weight: 700; color: #dc2626"
+                >
+                  2026
+                </div>
+                <div style="font-size: 0.9rem; color: #78350f; margin-top: 5px">
+                  主流模型<br />1M+ tokens
+                </div>
+              </div>
+              <div
+                style="
+                  background: #fef2f2;
+                  padding: 20px;
+                  border-radius: 8px;
+                  text-align: center;
+                  border: 2px solid #dc2626;
+                "
+              >
+                <div
+                  style="font-size: 1.5rem; font-weight: 700; color: #dc2626"
+                >
+                  2027?
+                </div>
+                <div style="font-size: 0.9rem; color: #78350f; margin-top: 5px">
+                  預測：10M tokens<br />RAG 被取代？
+                </div>
+              </div>
+            </div>
+            <p style="margin-top: 25px; line-height: 1.9; color: #475569">
+              <strong>問題：</strong>當 context 達到 10M
+              tokens，大多數常見知識庫都能完整放入， RAG
+              在許多場景的優勢將減弱。
+            </p>
+          </div>
+
+          <div
+            style="
+              background: white;
+              padding: 40px;
+              border-radius: 16px;
+              box-shadow: var(--shadow-lg);
+              margin-bottom: 30px;
+            "
+          >
+            <h3 style="color: #dc2626; margin: 0 0 20px 0; font-size: 1.5rem">
+              威脅 2：持續學習模型（Continual Learning）
+            </h3>
+            <p style="margin: 0 0 20px 0; line-height: 1.9; color: #475569">
+              模型能在推理時動態更新知識，無需外部檢索，知識直接融入參數。
+              目前仍在研究階段，但進展快速。
+            </p>
+            <div
+              style="
+                background: #fffbeb;
+                padding: 20px;
+                border-radius: 8px;
+                border-left: 4px solid #f59e0b;
+              "
+            >
+              <p style="margin: 0; line-height: 1.8; color: #78350f">
+                <strong>影響：</strong>如果持續學習模型成熟，RAG
+                的核心價值（動態知識更新）將被削弱。
+              </p>
+            </div>
+          </div>
+
+          <div
+            style="
+              background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+              padding: 40px;
+              border-radius: 16px;
+              border: 2px solid #10b981;
+            "
+          >
+            <h3
+              style="
+                color: #047857;
+                margin: 0 0 25px 0;
+                font-size: 1.6rem;
+                text-align: center;
+              "
+            >
+              RAG 的生存空間
+            </h3>
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px"
+            >
+              <div>
+                <h4 style="color: #059669; margin: 0 0 15px 0">
+                  ✅ 仍會使用 RAG 的場景
+                </h4>
+                <ul
+                  style="
+                    margin: 0;
+                    padding-left: 20px;
+                    line-height: 2;
+                    color: #1e293b;
+                  "
+                >
+                  <li>成本敏感場景（Long Context 仍然昂貴）</li>
+                  <li>超大規模知識庫（>10GB，無法全部放入 context）</li>
+                  <li>來源追溯需求（法規合規）</li>
+                  <li>多源異質資料整合</li>
+                </ul>
+              </div>
+              <div>
+                <h4 style="color: #dc2626; margin: 0 0 15px 0">
+                  ❌ 將被取代的場景
+                </h4>
+                <ul
+                  style="
+                    margin: 0;
+                    padding-left: 20px;
+                    line-height: 2;
+                    color: #1e293b;
+                  "
+                >
+                  <li>中小型知識庫（< 1GB）</li>
+                  <li>預算充足的企業</li>
+                  <li>不需要來源追溯的應用</li>
+                  <li>單一資料源場景</li>
+                </ul>
+              </div>
+            </div>
+            <p
+              style="
+                margin-top: 30px;
+                font-size: 1.2rem;
+                line-height: 1.9;
+                color: #1e293b;
+                text-align: center;
+                font-weight: 600;
+              "
+            >
+              → 結論：RAG 將<strong>分化演進</strong>——簡單場景被 Long Context
+              取代，複雜場景則與 Agent 融合成更強大的 Agentic RAG
+            </p>
+          </div>
+
+          <!-- RAG 的發展機會 -->
+          <div
+            style="
+              background: linear-gradient(135deg, #eff6ff, #dbeafe);
+              padding: 40px;
+              border-radius: 16px;
+              border: 2px solid #3b82f6;
+              margin-top: 30px;
+            "
+          >
+            <h3
+              style="
+                color: #1e40af;
+                margin: 0 0 25px 0;
+                font-size: 1.6rem;
+                text-align: center;
+              "
+            >
+              🚀 RAG 的發展機會
+            </h3>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+              "
+            >
+              <div
+                style="background: white; padding: 20px; border-radius: 12px"
+              >
+                <h4
+                  style="color: #2563eb; margin: 0 0 10px 0; font-size: 1.1rem"
+                >
+                  多模態 RAG
+                </h4>
+                <p
+                  style="
+                    margin: 0;
+                    line-height: 1.8;
+                    color: #475569;
+                    font-size: 0.95rem;
+                  "
+                >
+                  不只檢索文字，還能檢索圖片、影片、音訊。VideoRAG、ImageRAG
+                  正在興起。
+                </p>
+              </div>
+              <div
+                style="background: white; padding: 20px; border-radius: 12px"
+              >
+                <h4
+                  style="color: #2563eb; margin: 0 0 10px 0; font-size: 1.1rem"
+                >
+                  即時 RAG
+                </h4>
+                <p
+                  style="
+                    margin: 0;
+                    line-height: 1.8;
+                    color: #475569;
+                    font-size: 0.95rem;
+                  "
+                >
+                  結合串流資料（新聞、社群媒體），提供真正即時的知識更新。
+                </p>
+              </div>
+              <div
+                style="background: white; padding: 20px; border-radius: 12px"
+              >
+                <h4
+                  style="color: #2563eb; margin: 0 0 10px 0; font-size: 1.1rem"
+                >
+                  個人化 RAG
+                </h4>
+                <p
+                  style="
+                    margin: 0;
+                    line-height: 1.8;
+                    color: #475569;
+                    font-size: 0.95rem;
+                  "
+                >
+                  為每個使用者建立專屬知識庫，實現真正的個人 AI 助理。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 導航卡片 -->
+        <div style="margin: 60px 0">
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 30px;
+              max-width: 900px;
+              margin: 0 auto;
+            "
+          >
+            <a
+              href="technical-analysis.html"
+              style="
+                text-decoration: none;
+                display: block;
+                background: linear-gradient(135deg, #3b82f6, #2563eb);
+                padding: 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: var(--shadow-lg);
+                transition: transform 0.3s;
+              "
+            >
+              <h3 style="margin: 0 0 15px 0; font-size: 1.8rem">
+                🔬 技術深度分析
+              </h3>
+              <p style="margin: 0; opacity: 0.9; line-height: 1.8">
+                深入了解 RAG 的技術缺陷、檢索演進與運作原理
+              </p>
+            </a>
+
+            <a
+              href="practical-guide.html"
+              style="
+                text-decoration: none;
+                display: block;
+                background: linear-gradient(135deg, #10b981, #059669);
+                padding: 40px;
+                border-radius: 16px;
+                color: white;
+                box-shadow: var(--shadow-lg);
+                transition: transform 0.3s;
+              "
+            >
+              <h3 style="margin: 0 0 15px 0; font-size: 1.8rem">
+                💼 實務應用指南
+              </h3>
+              <p style="margin: 0; opacity: 0.9; line-height: 1.8">
+                企業案例、RAG vs Long Context、Agentic RAG 趨勢
+              </p>
+            </a>
+          </div>
+        </div>
+
+        <div class="section-divider"><span>✦</span></div>
+
+        <div
+          style="
+            margin-top: 50px;
+            text-align: center;
+            padding: 40px;
+            background: var(--bg-body);
+            border-radius: var(--radius-md);
+          "
+        >
+          <h3 style="color: var(--primary-color); margin-bottom: 20px">
+            📚 相關資源
+          </h3>
+          <div class="quick-links">
+            <a href="../index.html" class="quick-link">← 回到首頁</a>
+            <a
+              href="https://arxiv.org/abs/2005.11401"
+              class="quick-link"
+              target="_blank"
+              >📄 RAG 原始論文</a
+            >
+            <a
+              href="https://arxiv.org/abs/2312.10997"
+              class="quick-link"
+              target="_blank"
+              >📊 RAG Survey (2023)</a
+            >
+          </div>
+          <div class="quick-links" style="margin-top: 15px">
+            <a href="../topics/nlp-trilogy.html" class="quick-link"
+              >🌟 NLP 三部曲</a
+            >
+            <a href="../gpt3-tutorial/index.html" class="quick-link"
+              >📖 GPT-3 教學</a
+            >
+            <a href="../transformer-tutorial/index.html" class="quick-link"
+              >⚡ Transformer 教學</a
+            >
+          </div>
+        </div>
+
+        <div
+          style="
+            margin-top: 60px;
+            padding: 50px 30px;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6, #10b981);
+            border-radius: 16px;
+            text-align: center;
+            color: white;
+          "
+        >
+          <h3
+            style="
+              font-size: 2rem;
+              margin: 0 0 25px 0;
+              text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+            "
+          >
+            關於本專題報導
+          </h3>
+          <p
+            style="
+              font-size: 1.1rem;
+              line-height: 1.9;
+              max-width: 700px;
+              margin: 0 auto;
+              text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
+            "
+          >
+            本專題報導系統性地介紹 RAG (Retrieval-Augmented Generation)
+            的歷史演進， 從 2020 年的起源到 2026 年的 Agentic 時代。
+            用<strong>雜誌敘事</strong>的方式講述技術故事，
+            配合<strong>視覺化時間軸</strong>與<strong>產業應用案例</strong>，
+            讓你不只理解「是什麼」，更能看見「為什麼重要」與「如何改變世界」。
+          </p>
+          <p
+            style="
+              font-size: 1.3rem;
+              font-weight: 700;
+              margin-top: 30px;
+              font-family: 'Noto Serif TC', serif;
+              text-shadow: 0 2px 15px rgba(0, 0, 0, 0.4);
+            "
+          >
+            AI Paper Archaeology
+          </p>
+          <p style="font-size: 0.95rem; margin-top: 8px; opacity: 0.9">
+            考古改變世界的 AI 論文
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

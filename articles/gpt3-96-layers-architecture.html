@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GPT-3 的 96 層架構解析</title>
     <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/articles.css" />
     <link rel="stylesheet" href="../styles/paper-reading.css" />
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script
@@ -12,59 +13,7 @@
       async
       src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
     ></script>
-    <style>
-      .architecture-diagram {
-        background: white;
-        padding: 40px;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-lg);
-        margin: 30px 0;
-      }
-      .layer-block {
-        border: 3px solid var(--primary-color);
-        border-radius: var(--radius-md);
-        padding: 20px;
-        margin: 10px 0;
-        background: var(--primary-light);
-      }
-      .layer-block h5 {
-        margin: 0 0 10px 0;
-        color: var(--primary-color);
-      }
-      .sublayer {
-        background: white;
-        padding: 12px;
-        margin: 8px 0;
-        border-left: 4px solid var(--secondary-color);
-        border-radius: var(--radius-sm);
-      }
-      .stack-visual {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        margin: 20px 0;
-      }
-      .mini-layer {
-        height: 8px;
-        background: linear-gradient(
-          90deg,
-          var(--primary-color),
-          var(--secondary-color)
-        );
-        border-radius: 2px;
-        position: relative;
-      }
-      .layer-label {
-        position: absolute;
-        right: -80px;
-        top: -4px;
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-      }
-      .comparison-table {
-        margin: 30px 0;
-      }
-    </style>
+    
   </head>
   <body>
     <div class="container">

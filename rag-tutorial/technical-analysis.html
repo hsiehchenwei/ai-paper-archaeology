@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>技術深度分析：RAG 的運作原理與技術缺陷 | RAG 演進史</title>
+    <meta name="description" content="深入了解 RAG 的技術缺陷、檢索演進與運作原理。從 BM25 到 Dense Retrieval，從向量資料庫到檢索器設計，全面解析 RAG 的技術細節。" />
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../styles/articles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- 麵包屑導航 -->
+      <div class="breadcrumb">
+        <a href="../index.html">🏠 首頁</a> / 
+        <a href="index.html">📚 RAG 演進史</a> / 
+        技術深度分析
+      </div>
+
+      <!-- 頁面標題 -->
+      <div class="index-header" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+        <h1>🔬 技術深度分析</h1>
+        <p>RAG 的運作原理、技術缺陷與檢索演進</p>
+        <p style="font-size: 0.9rem; margin-top: 15px; opacity: 0.95;">
+          <strong>深入理解 RAG 的技術細節</strong>
+        </p>
+        <p style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; margin-top: 15px; font-size: 0.9rem;">
+          🎯 從架構設計到實作挑戰
+        </p>
+      </div>
+
+      <!-- 導言 -->
+      <div class="key-concept">
+        <h4>💡 本頁面目標</h4>
+        <p style="font-size: 1.1rem; line-height: 1.9;">
+          本頁面深入探討 RAG 的<strong>技術層面</strong>：從檢索器如何運作、生成器如何整合檢索結果，
+          到 RAG 面臨的技術挑戰與解決方案。適合想要<strong>實作 RAG 系統</strong>或<strong>理解技術細節</strong>的讀者。
+        </p>
+      </div>
+
+      <!-- RAG 架構運作原理 -->
+      <h2>🏗️ RAG 架構運作原理</h2>
+
+      <div class="section-block">
+        <h3>1. 核心架構：檢索器 + 生成器</h3>
+        <p style="font-size: 1.05rem; line-height: 1.9;">
+          RAG 系統由兩個核心組件組成：<strong>檢索器（Retriever）</strong>和<strong>生成器（Generator）</strong>。
+          這兩個組件協同工作，實現「先查資料再回答」的流程。
+        </p>
+
+        <div style="text-align: center; margin: 40px 0;">
+          <img
+            src="images/rag-architecture.png"
+            alt="RAG 架構流程圖"
+            style="max-width: 100%; border-radius: 12px; box-shadow: var(--shadow-lg);"
+          />
+          <p style="margin-top: 15px; color: var(--text-secondary); font-size: 0.95rem;">
+            📊 RAG 架構流程：Query → Retrieve → Augment → Generate
+          </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 30px;">
+          <div style="background: var(--primary-light); padding: 25px; border-radius: 12px; border-left: 4px solid var(--primary-color);">
+            <h4 style="color: var(--primary-color); margin-top: 0;">🔍 檢索器（Retriever）</h4>
+            <p style="line-height: 1.8; margin-bottom: 15px;">
+              <strong>職責：</strong>根據使用者查詢，從知識庫中找出最相關的文檔片段。
+            </p>
+            <ul style="line-height: 1.9; font-size: 0.95rem;">
+              <li>將查詢轉換為向量表示</li>
+              <li>在向量資料庫中進行相似度搜尋</li>
+              <li>返回 Top-K 個最相關的文檔</li>
+            </ul>
+          </div>
+
+          <div style="background: var(--secondary-light); padding: 25px; border-radius: 12px; border-left: 4px solid var(--secondary-color);">
+            <h4 style="color: var(--secondary-color); margin-top: 0;">✍️ 生成器（Generator）</h4>
+            <p style="line-height: 1.8; margin-bottom: 15px;">
+              <strong>職責：</strong>基於檢索到的文檔和使用者查詢，生成最終回答。
+            </p>
+            <ul style="line-height: 1.9; font-size: 0.95rem;">
+              <li>接收查詢 + 檢索文檔</li>
+              <li>理解上下文關係</li>
+              <li>生成自然語言回答</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block" style="margin-top: 40px;">
+        <h3>2. 完整流程解析</h3>
+        <div style="background: white; padding: 30px; border-radius: 12px; margin-top: 20px;">
+          <ol style="line-height: 2.2; font-size: 1.05rem;">
+            <li>
+              <strong>步驟 1：查詢編碼（Query Encoding）</strong><br />
+              <span style="color: var(--text-secondary); font-size: 0.95rem;">
+                使用者輸入「台灣第一座核電廠是誰設計的？」，檢索器將此查詢轉換為向量表示。
+              </span>
+            </li>
+            <li>
+              <strong>步驟 2：向量檢索（Vector Retrieval）</strong><br />
+              <span style="color: var(--text-secondary); font-size: 0.95rem;">
+                在向量資料庫中搜尋與查詢向量最相似的文檔向量，通常使用餘弦相似度或點積。
+              </span>
+            </li>
+            <li>
+              <strong>步驟 3：文檔排序（Re-ranking，可選）</strong><br />
+              <span style="color: var(--text-secondary); font-size: 0.95rem;">
+                使用更精細的模型（如 Cross-Encoder）對檢索結果重新排序，提升準確度。
+              </span>
+            </li>
+            <li>
+              <strong>步驟 4：上下文構建（Context Construction）</strong><br />
+              <span style="color: var(--text-secondary); font-size: 0.95rem;">
+                將檢索到的文檔片段與原始查詢組合成 prompt，例如：「基於以下文檔回答問題：...」
+              </span>
+            </li>
+            <li>
+              <strong>步驟 5：生成回答（Answer Generation）</strong><br />
+              <span style="color: var(--text-secondary); font-size: 0.95rem;">
+                語言模型基於上下文生成最終回答，並可選擇性地提供來源引用。
+              </span>
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 檢索技術演進 -->
+      <h2>📈 檢索技術演進：從 BM25 到 Hybrid</h2>
+
+      <div class="key-concept">
+        <h4>🔍 檢索技術的三個時代</h4>
+        <p style="font-size: 1.05rem; line-height: 1.9; margin-top: 15px;">
+          檢索技術從傳統的關鍵字匹配，演進到語義理解，再到混合式檢索。
+          每個階段都有其優勢與限制。
+        </p>
+      </div>
+
+      <div class="timeline-container" style="margin: 40px 0;">
+        <div class="timeline-line"></div>
+
+        <!-- BM25 -->
+        <div class="timeline-item left">
+          <div class="timeline-dot" style="border-color: #6366f1;"></div>
+          <div class="timeline-card" style="border-left-color: #6366f1;">
+            <h3 style="color: #6366f1;">1. Sparse Retrieval (稀疏檢索)</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 15px;">
+              代表：BM25、TF-IDF
+            </p>
+            <div style="background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 8px;">
+              <h4 style="margin: 0 0 10px 0; font-size: 1.1rem;">工作原理</h4>
+              <ul style="margin: 0; line-height: 1.8; font-size: 0.95rem;">
+                <li>基於<strong>關鍵字匹配</strong>，計算查詢與文檔的詞彙重疊度</li>
+                <li>BM25 考慮詞頻、逆文檔頻率、文檔長度正規化</li>
+                <li>速度快，但無法理解語義</li>
+              </ul>
+            </div>
+            <div style="margin-top: 15px; padding: 12px; background: white; border-radius: 6px;">
+              <strong>優點：</strong>速度快、可解釋性高、無需訓練<br />
+              <strong>缺點：</strong>無法處理同義詞、語義理解弱
+            </div>
+          </div>
+        </div>
+
+        <!-- Dense Retrieval -->
+        <div class="timeline-item right">
+          <div class="timeline-dot" style="border-color: #10b981;"></div>
+          <div class="timeline-card" style="border-left-color: #10b981;">
+            <h3 style="color: #10b981;">2. Dense Retrieval (密集檢索)</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 15px;">
+              代表：DPR、Sentence-BERT、OpenAI Embeddings
+            </p>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px;">
+              <h4 style="margin: 0 0 10px 0; font-size: 1.1rem;">工作原理</h4>
+              <ul style="margin: 0; line-height: 1.8; font-size: 0.95rem;">
+                <li>使用<strong>神經網路</strong>將查詢和文檔編碼為密集向量</li>
+                <li>透過向量相似度（餘弦相似度）進行檢索</li>
+                <li>能理解語義，處理同義詞和語義相關性</li>
+              </ul>
+            </div>
+            <div style="margin-top: 15px; padding: 12px; background: white; border-radius: 6px;">
+              <strong>優點：</strong>語義理解強、能處理同義詞<br />
+              <strong>缺點：</strong>需要訓練、計算成本高、可能遺漏關鍵字
+            </div>
+          </div>
+        </div>
+
+        <!-- Hybrid -->
+        <div class="timeline-item left">
+          <div class="timeline-dot" style="border-color: #f59e0b; width: 28px; height: 28px;"></div>
+          <div class="timeline-card" style="border-left-color: #f59e0b; background: linear-gradient(135deg, #fffbeb, #fef3c7);">
+            <h3 style="color: #f59e0b;">3. Hybrid Retrieval (混合檢索)</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 15px;">
+              代表：BM25 + Dense、ColBERT、SPLADE
+            </p>
+            <div style="background: rgba(245, 158, 11, 0.1); padding: 15px; border-radius: 8px;">
+              <h4 style="margin: 0 0 10px 0; font-size: 1.1rem;">工作原理</h4>
+              <ul style="margin: 0; line-height: 1.8; font-size: 0.95rem;">
+                <li><strong>結合</strong> Sparse 和 Dense 檢索的優勢</li>
+                <li>使用加權分數融合兩種檢索結果</li>
+                <li>例如：<code>score = α × BM25_score + (1-α) × Dense_score</code></li>
+              </ul>
+            </div>
+            <div style="margin-top: 15px; padding: 12px; background: white; border-radius: 6px;">
+              <strong>優點：</strong>結合兩者優勢，準確度最高<br />
+              <strong>缺點：</strong>計算成本最高、需要調參
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 檢索技術比較表 -->
+      <div style="margin: 50px 0;">
+        <h3>📊 檢索技術詳細比較</h3>
+        <div style="overflow-x: auto; margin-top: 25px;">
+          <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+            <thead>
+              <tr style="background: var(--primary-color); color: white;">
+                <th style="padding: 15px; text-align: left; border-radius: 8px 0 0 0;">技術</th>
+                <th style="padding: 15px; text-align: center;">速度</th>
+                <th style="padding: 15px; text-align: center;">準確度</th>
+                <th style="padding: 15px; text-align: center;">語義理解</th>
+                <th style="padding: 15px; text-align: center; border-radius: 0 8px 0 0;">適用場景</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background: white;">
+                <td style="padding: 20px;"><strong>BM25</strong></td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">⭐</td>
+                <td style="padding: 20px;">關鍵字明確的查詢</td>
+              </tr>
+              <tr style="background: #f8fafc;">
+                <td style="padding: 20px;"><strong>DPR</strong></td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐⭐</td>
+                <td style="padding: 20px;">語義相關性查詢</td>
+              </tr>
+              <tr style="background: white;">
+                <td style="padding: 20px;"><strong>Hybrid</strong></td>
+                <td style="padding: 20px; text-align: center;">⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                <td style="padding: 20px;">高準確度要求的場景</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RAG 的技術缺陷 -->
+      <h2>⚠️ RAG 的技術缺陷與挑戰</h2>
+
+      <div class="key-concept" style="background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 2px solid var(--danger-color);">
+        <h4 style="color: var(--danger-color);">🚨 為什麼 RAG 不是萬能解藥？</h4>
+        <p style="font-size: 1.05rem; line-height: 1.9; margin-top: 15px;">
+          儘管 RAG 解決了 LLM 的知識時效性問題，但它本身也面臨許多技術挑戰。
+          理解這些缺陷，有助於在實作時做出正確的技術選擇。
+        </p>
+      </div>
+
+      <div style="margin: 40px 0;">
+        <div style="display: grid; gap: 30px;">
+          <!-- 缺陷 1 -->
+          <div style="background: white; padding: 30px; border-radius: 12px; border-left: 5px solid var(--danger-color); box-shadow: var(--shadow-md);">
+            <h3 style="color: var(--danger-color); margin-top: 0;">1. 檢索品質問題</h3>
+            <p style="line-height: 1.9; margin-bottom: 15px;">
+              <strong>問題：</strong>檢索器可能返回不相關的文檔，導致生成器基於錯誤資訊產生答案。
+            </p>
+            <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin-top: 15px;">
+              <h4 style="margin: 0 0 10px 0; font-size: 1.1rem;">具體表現</h4>
+              <ul style="margin: 0; line-height: 1.9;">
+                <li><strong>語義漂移：</strong>查詢「蘋果公司」卻檢索到「蘋果水果」相關文檔</li>
+                <li><strong>關鍵字匹配失敗：</strong>查詢「AI 模型」但文檔使用「機器學習模型」</li>
+                <li><strong>上下文缺失：</strong>檢索到片段但缺少必要的上下文資訊</li>
+              </ul>
+            </div>
+            <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 3px solid var(--secondary-color);">
+              <strong>解決方案：</strong>Query Rewriting、Re-ranking、Hybrid Retrieval、Self-RAG 反思機制
+            </div>
+          </div>
+
+          <!-- 缺陷 2 -->
+          <div style="background: white; padding: 30px; border-radius: 12px; border-left: 5px solid var(--danger-color); box-shadow: var(--shadow-md);">
+            <h3 style="color: var(--danger-color); margin-top: 0;">2. 上下文長度限制</h3>
+            <p style="line-height: 1.9; margin-bottom: 15px;">
+              <strong>問題：</strong>檢索到的文檔片段需要放入 LLM 的 context window，但 context 長度有限。
+            </p>
+            <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin-top: 15px;">
+              <h4 style="margin: 0 0 10px 0; font-size: 1.1rem;">具體表現</h4>
+              <ul style="margin: 0; line-height: 1.9;">
+                <li><strong>資訊截斷：</strong>只能放入 Top-K 個文檔，可能遺漏關鍵資訊</li>
+                <li><strong>長文檔處理：</strong>單一文檔過長時，需要分塊但可能破壞語義完整性</li>
+                <li><strong>多輪對話：</strong>對話歷史 + 檢索文檔可能超過 context 限制</li>
+              </ul>
+            </div>
+            <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 3px solid var(--secondary-color);">
+              <strong>解決方案：</strong>智能分塊（Semantic Chunking）、文檔摘要、Long Context LLM、階層式檢索（HiRAG）
+            </div>
+          </div>
+
+          <!-- 缺陷 3 -->
+          <div style="background: white; padding: 30px; border-radius: 12px; border-left: 5px solid var(--danger-color); box-shadow: var(--shadow-md);">
+            <h3 style="color: var(--danger-color); margin-top: 0;">3. 組合問題失敗</h3>
+            <p style="line-height: 1.9; margin-bottom: 15px;">
+              <strong>問題：</strong>需要整合多個文檔資訊才能回答的問題，RAG 表現不佳。
+            </p>
+            <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin-top: 15px;">
+              <h4 style="margin: 0 0 10px 0; font-size: 1.1rem;">具體表現</h4>
+              <ul style="margin: 0; line-height: 1.9;">
+                <li><strong>跨文檔推理：</strong>「比較 A 和 B 的差異」需要檢索兩個文檔並整合</li>
+                <li><strong>多步驟問題：</strong>「先做 X 再做 Y 的結果是什麼？」需要多輪檢索</li>
+                <li><strong>全局資訊：</strong>需要理解整個知識庫的結構（GraphRAG 試圖解決）</li>
+              </ul>
+            </div>
+            <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 3px solid var(--secondary-color);">
+              <strong>解決方案：</strong>GraphRAG（知識圖譜）、Multi-Agent RAG、Iterative Retrieval、Agentic RAG
+            </div>
+          </div>
+
+          <!-- 缺陷 4 -->
+          <div style="background: white; padding: 30px; border-radius: 12px; border-left: 5px solid var(--danger-color); box-shadow: var(--shadow-md);">
+            <h3 style="color: var(--danger-color); margin-top: 0;">4. 無法根除幻覺</h3>
+            <p style="line-height: 1.9; margin-bottom: 15px;">
+              <strong>問題：</strong>即使檢索到正確資訊，LLM 仍可能產生錯誤答案或無法拒絕錯誤上下文。
+            </p>
+            <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin-top: 15px;">
+              <h4 style="margin: 0 0 10px 0; font-size: 1.1rem;">具體表現</h4>
+              <ul style="margin: 0; line-height: 1.9;">
+                <li><strong>錯誤上下文接受：</strong>RefusalBench 研究顯示，RAG 系統在錯誤上下文時無法拒絕</li>
+                <li><strong>資訊混淆：</strong>將多個文檔的資訊錯誤組合</li>
+                <li><strong>過度推斷：</strong>基於檢索資訊做出超出範圍的推斷</li>
+              </ul>
+            </div>
+            <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 3px solid var(--secondary-color);">
+              <strong>解決方案：</strong>Self-RAG 反思機制、Fact-checking、來源驗證、Prompt Engineering
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 向量資料庫比較 -->
+      <h2>🗄️ 向量資料庫比較</h2>
+
+      <div class="key-concept">
+        <h4>💾 選擇合適的向量資料庫</h4>
+        <p style="font-size: 1.05rem; line-height: 1.9; margin-top: 15px;">
+          向量資料庫是 RAG 系統的基礎設施。不同的資料庫有不同的特性，選擇合適的資料庫對系統效能至關重要。
+        </p>
+      </div>
+
+      <div style="margin: 40px 0;">
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.95rem;">
+            <thead>
+              <tr style="background: var(--primary-color); color: white;">
+                <th style="padding: 15px; text-align: left; border-radius: 8px 0 0 0;">資料庫</th>
+                <th style="padding: 15px; text-align: center;">類型</th>
+                <th style="padding: 15px; text-align: center;">擴展性</th>
+                <th style="padding: 15px; text-align: center;">易用性</th>
+                <th style="padding: 15px; text-align: center;">成本</th>
+                <th style="padding: 15px; text-align: center; border-radius: 0 8px 0 0;">適用場景</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background: white;">
+                <td style="padding: 20px;"><strong>Pinecone</strong></td>
+                <td style="padding: 20px; text-align: center;">雲端 SaaS</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">$$$</td>
+                <td style="padding: 20px;">快速原型、中小型專案</td>
+              </tr>
+              <tr style="background: #f8fafc;">
+                <td style="padding: 20px;"><strong>Weaviate</strong></td>
+                <td style="padding: 20px; text-align: center;">開源 / 雲端</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">$$</td>
+                <td style="padding: 20px;">中大型專案、自託管</td>
+              </tr>
+              <tr style="background: white;">
+                <td style="padding: 20px;"><strong>Qdrant</strong></td>
+                <td style="padding: 20px; text-align: center;">開源</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">$</td>
+                <td style="padding: 20px;">自託管、成本敏感</td>
+              </tr>
+              <tr style="background: #f8fafc;">
+                <td style="padding: 20px;"><strong>Chroma</strong></td>
+                <td style="padding: 20px; text-align: center;">開源</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">$</td>
+                <td style="padding: 20px;">開發測試、小型專案</td>
+              </tr>
+              <tr style="background: white;">
+                <td style="padding: 20px;"><strong>Milvus</strong></td>
+                <td style="padding: 20px; text-align: center;">開源</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">$</td>
+                <td style="padding: 20px;">超大規模、企業級</td>
+              </tr>
+              <tr style="background: #f8fafc;">
+                <td style="padding: 20px;"><strong>pgvector</strong></td>
+                <td style="padding: 20px; text-align: center;">PostgreSQL 擴展</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">⭐⭐⭐</td>
+                <td style="padding: 20px; text-align: center;">$</td>
+                <td style="padding: 20px;">已有 PostgreSQL 基礎設施</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 選擇建議 -->
+      <div style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); padding: 30px; border-radius: 12px; border: 2px solid var(--secondary-color); margin: 40px 0;">
+        <h3 style="color: var(--secondary-color); margin-top: 0;">💡 選擇建議</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+          <div style="background: white; padding: 20px; border-radius: 8px;">
+            <h4 style="margin: 0 0 10px 0; color: var(--primary-color);">快速原型</h4>
+            <p style="margin: 0; line-height: 1.8; font-size: 0.95rem;">
+              <strong>推薦：</strong>Pinecone 或 Chroma<br />
+              易於使用，快速上手
+            </p>
+          </div>
+          <div style="background: white; padding: 20px; border-radius: 8px;">
+            <h4 style="margin: 0 0 10px 0; color: var(--secondary-color);">生產環境</h4>
+            <p style="margin: 0; line-height: 1.8; font-size: 0.95rem;">
+              <strong>推薦：</strong>Weaviate 或 Qdrant<br />
+              平衡效能與成本
+            </p>
+          </div>
+          <div style="background: white; padding: 20px; border-radius: 8px;">
+            <h4 style="margin: 0 0 10px 0; color: var(--accent-color);">超大規模</h4>
+            <p style="margin: 0; line-height: 1.8; font-size: 0.95rem;">
+              <strong>推薦：</strong>Milvus<br />
+              企業級擴展性
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 導航 -->
+      <div style="margin: 60px 0; text-align: center;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-width: 900px; margin: 0 auto;">
+          <a
+            href="index.html"
+            style="
+              text-decoration: none;
+              display: block;
+              background: linear-gradient(135deg, #6366f1, #4f46e5);
+              padding: 30px;
+              border-radius: 16px;
+              color: white;
+              box-shadow: var(--shadow-lg);
+            "
+          >
+            <h3 style="margin: 0 0 10px 0; font-size: 1.5rem">← 回到 RAG 演進史</h3>
+          </a>
+          <a
+            href="practical-guide.html"
+            style="
+              text-decoration: none;
+              display: block;
+              background: linear-gradient(135deg, #10b981, #059669);
+              padding: 30px;
+              border-radius: 16px;
+              color: white;
+              box-shadow: var(--shadow-lg);
+            "
+          >
+            <h3 style="margin: 0 0 10px 0; font-size: 1.5rem">實務應用指南 →</h3>
+          </a>
+        </div>
+      </div>
+
+      <!-- 相關資源 -->
+      <div style="margin-top: 50px; text-align: center; padding: 40px; background: var(--bg-body); border-radius: var(--radius-md);">
+        <h3 style="color: var(--primary-color); margin-bottom: 20px">📚 相關資源</h3>
+        <div class="quick-links">
+          <a href="../index.html" class="quick-link">← 回到首頁</a>
+          <a href="index.html" class="quick-link">📚 RAG 演進史</a>
+          <a href="https://arxiv.org/abs/2005.11401" class="quick-link" target="_blank">📄 RAG 原始論文</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

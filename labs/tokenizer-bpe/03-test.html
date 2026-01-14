@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>測試運行 - 手寫 BPE Tokenizer</title>
+    <link rel="stylesheet" href="../../styles/global.css" />
+    <link rel="stylesheet" href="../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../styles/labs.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Hero Section -->
+      <div class="hero-section" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); height: 30vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <h1>測試運行</h1>
+          <p class="hero-subtitle">驗證 BPE Tokenizer 功能</p>
+        </div>
+      </div>
+
+      <!-- Lab Steps Navigation -->
+      <div class="lab-steps">
+        <a href="index.html" class="lab-step">概覽</a>
+        <a href="01-setup.html" class="lab-step">環境設置</a>
+        <a href="02-implement.html" class="lab-step">實作步驟</a>
+        <a href="03-test.html" class="lab-step active">測試運行</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h2>建立測試腳本</h2>
+        <p>
+          建立一個測試腳本來驗證我們的 BPE tokenizer 是否正常運作。
+        </p>
+
+        <div class="ai-prompt-block">
+          <p>
+            <strong>給 Cursor / Claude Code 的 prompt：</strong>
+          </p>
+          <pre>在 test_tokenizer.py 中建立一個測試腳本，包含以下功能：
+
+1. 匯入 BPETokenizer
+2. 建立一個 tokenizer 實例
+3. 使用範例文字訓練 tokenizer
+4. 測試 encode() 和 decode() 方法
+5. 顯示編碼前後的結果
+
+請建立完整的測試腳本。</pre>
+          <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">複製 Prompt</button>
+        </div>
+
+        <h2>測試程式碼</h2>
+        <p>
+          以下是完整的測試腳本：
+        </p>
+
+        <div class="lab-code-block">
+          <div class="lab-code-block-header">
+            <span class="filename">test_tokenizer.py</span>
+            <button class="copy-btn" onclick="copyCode(this)">複製</button>
+          </div>
+          <pre><code>from tokenizer import BPETokenizer
+
+# 建立 tokenizer
+tokenizer = BPETokenizer()
+
+# 訓練資料（簡單的範例）
+training_text = "hello world hello world"
+print("訓練文字:", training_text)
+
+# 訓練 tokenizer
+vocab = tokenizer.train(training_text, vocab_size=50)
+print(f"\n詞彙表大小: {len(vocab)}")
+print(f"前 10 個 tokens: {list(vocab.items())[:10]}")
+
+# 測試編碼
+test_text = "hello world"
+print(f"\n測試文字: {test_text}")
+token_ids = tokenizer.encode(test_text)
+print(f"Token IDs: {token_ids}")
+
+# 測試解碼
+decoded_text = tokenizer.decode(token_ids)
+print(f"解碼結果: {decoded_text}")
+
+# 驗證往返轉換
+if decoded_text == test_text:
+    print("\n✅ 測試通過！編碼和解碼功能正常。")
+else:
+    print(f"\n❌ 測試失敗。預期: '{test_text}', 實際: '{decoded_text}'")</code></pre>
+        </div>
+
+        <h2>執行測試</h2>
+        <p>
+          在終端機中執行測試腳本：
+        </p>
+
+        <div class="lab-code-block">
+          <div class="lab-code-block-header">
+            <span class="filename">終端機指令</span>
+            <button class="copy-btn" onclick="copyCode(this)">複製</button>
+          </div>
+          <pre><code>python test_tokenizer.py</code></pre>
+        </div>
+
+        <div class="lab-expected-output">
+          <pre><code>訓練文字: hello world hello world
+詞彙表大小: 50
+前 10 個 tokens: [('h', 104), ('e', 101), ('l', 108), ('o', 111), (' ', 32), ...]
+
+測試文字: hello world
+Token IDs: [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100]
+解碼結果: hello world
+
+✅ 測試通過！編碼和解碼功能正常。</code></pre>
+        </div>
+
+        <h2>進階測試</h2>
+        <p>
+          嘗試更複雜的測試案例：
+        </p>
+
+        <div class="lab-code-block">
+          <div class="lab-code-block-header">
+            <span class="filename">進階測試</span>
+            <button class="copy-btn" onclick="copyCode(this)">複製</button>
+          </div>
+          <pre><code># 測試更長的文字
+long_text = "the quick brown fox jumps over the lazy dog"
+tokenizer2 = BPETokenizer()
+tokenizer2.train(long_text, vocab_size=100)
+
+test_sentences = [
+    "the quick fox",
+    "lazy dog",
+    "brown fox jumps"
+]
+
+for sentence in test_sentences:
+    tokens = tokenizer2.encode(sentence)
+    decoded = tokenizer2.decode(tokens)
+    print(f"原文: {sentence}")
+    print(f"Tokens: {tokens}")
+    print(f"解碼: {decoded}")
+    print(f"匹配: {sentence == decoded}\n")</code></pre>
+        </div>
+
+        <h2>理解結果</h2>
+        <p>
+          觀察測試結果，你應該注意到：
+        </p>
+        <ul>
+          <li><strong>Token IDs：</strong>每個 token 都被轉換成一個唯一的數字 ID</li>
+          <li><strong>詞彙表：</strong>隨著訓練進行，詞彙表會逐漸增長</li>
+          <li><strong>往返轉換：</strong>編碼後再解碼應該得到原始文字</li>
+        </ul>
+
+        <div class="key-concept">
+          <h4>BPE 的優勢</h4>
+          <p>
+            透過 BPE，我們可以：
+          </p>
+          <ul>
+            <li>處理任意文字組合（包括未見過的單字）</li>
+            <li>保持詞彙表大小可控</li>
+            <li>提高 tokenization 的效率</li>
+          </ul>
+        </div>
+
+        <h2>延伸挑戰</h2>
+        <div class="lab-challenge">
+          <h4>挑戰 1：處理中文</h4>
+          <p>
+            修改 tokenizer 以支援中文文字。中文沒有空格分隔，需要調整演算法。
+          </p>
+        </div>
+
+        <div class="lab-challenge">
+          <h4>挑戰 2：儲存和載入模型</h4>
+          <p>
+            實作 <code>save()</code> 和 <code>load()</code> 方法，讓 tokenizer 可以儲存訓練好的詞彙表到檔案，並從檔案載入。
+          </p>
+        </div>
+
+        <div class="lab-challenge">
+          <h4>挑戰 3：效能優化</h4>
+          <p>
+            目前的實作在處理大量文字時可能較慢。嘗試優化 <code>train()</code> 方法的效能。
+          </p>
+        </div>
+
+        <h2>相關資源</h2>
+        <div class="lab-related">
+          <h4>進一步學習</h4>
+          <div class="lab-related-links">
+            <a href="../../gpt2-tutorial/index.html" class="lab-related-link">
+              <span class="lab-related-link-icon">📄</span>
+              <span>GPT-2 論文解析 - 了解 GPT-2 如何使用 BPE</span>
+            </a>
+            <a href="../../gpt3-tutorial/index.html" class="lab-related-link">
+              <span class="lab-related-link-icon">📄</span>
+              <span>GPT-3 論文解析 - 了解 GPT-3 的 tokenization</span>
+            </a>
+            <a href="../../articles/tokenizer-embedding-explained.html" class="lab-related-link">
+              <span class="lab-related-link-icon">📝</span>
+              <span>知識筆記：從文字到向量 - Tokenizer & Embedding</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="02-implement.html" class="nav-link">← 返回實作步驟</a>
+          <a href="index.html" class="nav-link">返回概覽</a>
+          <a href="../../index.html" class="home">返回首頁</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function copyPrompt(btn) {
+        const block = btn.closest('.ai-prompt-block');
+        const pre = block.querySelector('pre');
+        const text = pre.textContent;
+        
+        navigator.clipboard.writeText(text).then(() => {
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      }
+
+      function copyCode(btn) {
+        const block = btn.closest('.lab-code-block');
+        const code = block.querySelector('code');
+        const text = code.textContent;
+        
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = '已複製';
+          setTimeout(() => {
+            btn.textContent = '複製';
+          }, 2000);
+        });
+      }
+    </script>
+  </body>
+</html>

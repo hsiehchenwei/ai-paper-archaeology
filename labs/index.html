@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 實驗室學習路線圖 - 動手做</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../styles/labs.css" />
+    <style>
+      /* Playful Typography Override */
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      .phase-info h2,
+      .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Hero Section -->
+      <div class="hero-section-labs">
+        <div class="hero-content">
+          <h1>🎮 AI 實驗 Playground</h1>
+          <p class="hero-subtitle">
+            從零開始，用雙手創造 AI 魔法！從 Token 到多模態，每一步都是冒險 🚀
+          </p>
+          <p class="hero-meta">
+            6 個關卡 × 20 挑戰任務 × 真實資料集 = 成為 AI 工程師！
+          </p>
+        </div>
+      </div>
+
+      <!-- Roadmap Overview -->
+      <div class="story-container">
+        <h2>🗺️ 冒險地圖總覽</h2>
+        <p>
+          這是一條從新手村到最終 Boss 的冒險之旅！每個關卡都會解鎖新技能。
+          從最基礎的文字處理開始，逐步深入到 Transformer
+          的神秘機制、訓練自己的語言模型、開發 LLM 應用（RAG、Agent），
+          最後挑戰多模態和生成式 AI 的終極關卡！
+        </p>
+        <p
+          style="
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 20px;
+            border-radius: 16px;
+            border: 3px solid #f59e0b;
+            box-shadow: 4px 4px 0 #f59e0b;
+            margin-top: 20px;
+          "
+        >
+          <strong>💡 學習秘訣：</strong>每個實驗都有「AI
+          助手提示」，可以直接複製給 Cursor 或 Claude Code，讓 AI
+          成為你的程式導師！
+        </p>
+
+        <!-- Phase 1 -->
+        <div class="phase-card">
+          <div class="phase-header">
+            <div class="phase-icon-box">📝</div>
+            <div class="phase-info">
+              <h2>Phase 1: 文字處理基礎</h2>
+              <div class="phase-badges">
+                <span class="phase-badge phase-badge-beginner">入門</span>
+                <span class="phase-badge phase-badge-intermediate"
+                  >1.5 小時</span
+                >
+              </div>
+            </div>
+            <div class="phase-number">01</div>
+          </div>
+          <div class="phase-body">
+            <p class="phase-description">
+              理解 AI 如何處理文字：從 Tokenization、Embedding 到位置編碼。
+              這是所有 NLP 模型的基礎。
+            </p>
+            <div class="phase-labs">
+              <a
+                href="phase1-text-basics/01-tokenization/index.html"
+                class="lab-card"
+              >
+                <div class="lab-card-header">
+                  <span class="lab-number">1.1</span>
+                </div>
+                <h3>Tokenization</h3>
+                <p>文字切割的藝術</p>
+                <div class="lab-meta">
+                  <span>30 分鐘</span>
+                  <span>BPE</span>
+                  <span>tiktoken</span>
+                </div>
+              </a>
+              <a
+                href="phase1-text-basics/02-embedding/index.html"
+                class="lab-card"
+              >
+                <div class="lab-card-header">
+                  <span class="lab-number">1.2</span>
+                </div>
+                <h3>Embedding</h3>
+                <p>文字變向量</p>
+                <div class="lab-meta">
+                  <span>45 分鐘</span>
+                  <span>Word2Vec</span>
+                  <span>視覺化</span>
+                </div>
+              </a>
+              <a
+                href="phase1-text-basics/03-positional-encoding/index.html"
+                class="lab-card"
+              >
+                <div class="lab-card-header">
+                  <span class="lab-number">1.3</span>
+                </div>
+                <h3>位置編碼</h3>
+                <p>讓模型理解順序</p>
+                <div class="lab-meta">
+                  <span>30 分鐘</span>
+                  <span>正弦編碼</span>
+                  <span>RoPE</span>
+                </div>
+              </a>
+            </div>
+            <a href="phase1-text-basics/index.html" class="phase-link"
+              >進入 Phase 1</a
+            >
+          </div>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="phase-card">
+          <div class="phase-header">
+            <div class="phase-icon-box">⚡</div>
+            <div class="phase-info">
+              <h2>Phase 2: Transformer 核心機制</h2>
+              <div class="phase-badges">
+                <span class="phase-badge phase-badge-intermediate"
+                  >入門-中階</span
+                >
+                <span class="phase-badge phase-badge-intermediate"
+                  >3-3.5 小時</span
+                >
+              </div>
+            </div>
+            <div class="phase-number">02</div>
+          </div>
+          <div class="phase-body">
+            <p class="phase-description">
+              深入理解 Transformer 的核心：Self-Attention、Multi-Head
+              Attention，最後組裝完整的 Transformer 架構。每個實驗都有有趣的小專題！
+            </p>
+            <div class="phase-labs">
+              <a
+                href="phase2-transformer-core/01-self-attention/index.html"
+                class="lab-card"
+              >
+                <div class="lab-card-header">
+                  <span class="lab-number">2.1</span>
+                </div>
+                <h3>情緒偵探</h3>
+                <p>讓 AI 告訴你它在看哪裡</p>
+                <div class="lab-meta">
+                  <span>45 分鐘</span>
+                  <span>QKV</span>
+                  <span>Heatmap</span>
+                </div>
+              </a>
+              <a
+                href="phase2-transformer-core/02-multihead-attention/index.html"
+                class="lab-card"
+              >
+                <div class="lab-card-header">
+                  <span class="lab-number">2.2</span>
+                </div>
+                <h3>多角度分析器</h3>
+                <p>8 個專家同時看一句話</p>
+                <div class="lab-meta">
+                  <span>45 分鐘</span>
+                  <span>並行處理</span>
+                  <span>視覺化</span>
+                </div>
+              </a>
+              <a
+                href="phase2-transformer-core/03-transformer-architecture/index.html"
+                class="lab-card"
+              >
+                <div class="lab-card-header">
+                  <span class="lab-number">2.3</span>
+                </div>
+                <h3>名字生成器</h3>
+                <p>訓練你的第一個 AI 創作者</p>
+                <div class="lab-meta">
+                  <span>90 分鐘</span>
+                  <span>PyTorch</span>
+                  <span>訓練</span>
+                </div>
+              </a>
+            </div>
+            <a href="phase2-transformer-core/index.html" class="phase-link"
+              >進入 Phase 2</a
+            >
+          </div>
+        </div>
+
+        <!-- Phase 3 (Coming Soon) -->
+        <div class="phase-card coming-soon">
+          <div class="phase-header">
+            <div class="phase-icon-box">🧠</div>
+            <div class="phase-info">
+              <h2>Phase 3: 語言模型訓練</h2>
+              <div class="phase-badges">
+                <span class="phase-badge phase-badge-intermediate">中階</span>
+                <span class="phase-badge phase-badge-intermediate"
+                  >6-8 小時</span
+                >
+              </div>
+            </div>
+            <div class="phase-number">03</div>
+          </div>
+          <div class="phase-body">
+            <p class="phase-description">
+              從零訓練 GPT、實作文本生成策略，最後用 LoRA 高效微調大模型。
+              這是現代 LLM 的核心技能。
+            </p>
+            <div class="phase-labs">
+              <div class="lab-card locked">
+                <div class="lab-card-header">
+                  <span class="lab-number">3.1</span>
+                </div>
+                <h3>nanoGPT</h3>
+                <p>訓練你的第一個 GPT</p>
+                <div class="lab-meta">
+                  <span>2-3 小時</span>
+                  <span>Shakespeare</span>
+                </div>
+              </div>
+              <div class="lab-card locked">
+                <div class="lab-card-header">
+                  <span class="lab-number">3.2</span>
+                </div>
+                <h3>文本生成</h3>
+                <p>讓模型說話</p>
+                <div class="lab-meta">
+                  <span>1 小時</span>
+                  <span>Sampling</span>
+                </div>
+              </div>
+              <div class="lab-card locked">
+                <div class="lab-card-header">
+                  <span class="lab-number">3.3</span>
+                </div>
+                <h3>LoRA 微調</h3>
+                <p>高效微調大模型</p>
+                <div class="lab-meta">
+                  <span>3-4 小時</span>
+                  <span>MLX</span>
+                </div>
+              </div>
+            </div>
+            <span class="phase-link">施工中...</span>
+          </div>
+        </div>
+
+        <!-- Phase 4 (Coming Soon) - NEW: LLM 應用開發 -->
+        <div class="phase-card coming-soon">
+          <div class="phase-header">
+            <div class="phase-icon-box">🔗</div>
+            <div class="phase-info">
+              <h2>Phase 4: LLM 應用開發</h2>
+              <div class="phase-badges">
+                <span class="phase-badge phase-badge-intermediate">中階</span>
+                <span class="phase-badge phase-badge-intermediate"
+                  >8-9 小時</span
+                >
+              </div>
+            </div>
+            <div class="phase-number">04</div>
+          </div>
+          <div class="phase-body">
+            <p class="phase-description">
+              將訓練好的模型應用到實際場景：從向量資料庫、RAG 檢索增強生成， 到
+              Agent 自主決策和對話系統。這是現代 LLM 應用的核心技能。
+            </p>
+            <div class="phase-labs">
+              <div class="lab-card locked">
+                <div class="lab-card-header">
+                  <span class="lab-number">4.1</span>
+                </div>
+                <h3>向量資料庫</h3>
+                <p>Embedding + 相似度搜尋</p>
+                <div class="lab-meta">
+                  <span>1 小時</span>
+                  <span>Chroma</span>
+                  <span>FAISS</span>
+                </div>
+              </div>
+              <div class="lab-card locked">
+                <div class="lab-card-header">
+                  <span class="lab-number">4.2</span>
+                </div>
+                <h3>RAG 基礎</h3>
+                <p>檢索增強生成</p>
+                <div class="lab-meta">
+                  <span>2 小時</span>
+                  <span>LlamaIndex</span>
+                  <span>PDF QA</span>
+                </div>
+              </div>
+              <div class="lab-card locked">
+                <div class="lab-card-header">
+                  <span class="lab-number">4.3</span>
+                </div>
+                <h3>進階 RAG</h3>
+                <p>Hybrid Search, Reranking</p>
+                <div class="lab-meta">
+                  <span>2 小時</span>
+                  <span>LangChain</span>
+                  <span>Chunking</span>
+                </div>
+              </div>
+              <div class="lab-card locked">
+                <div class="lab-card-header">
+                  <span class="lab-number">4.4</span>
+                </div>
+                <h3>Agent & Tools</h3>
+                <p>Function Calling, 工具使用</p>
+                <div class="lab-meta">
+                  <span>2 小時</span>
+                  <span>OpenAI</span>
+                  <span>自主決策</span>
+                </div>
+              </div>
+              <div class="lab-card locked">
+                <div class="lab-card-header">
+                  <span class="lab-number">4.5</span>
+                </div>
+                <h3>對話系統</h3>
+                <p>記憶管理, 多輪對話</p>
+                <div class="lab-meta">
+                  <span>1.5 小時</span>
+                  <span>LangChain</span>
+                  <span>Context</span>
+                </div>
+              </div>
+            </div>
+            <span class="phase-link">施工中...</span>
+          </div>
+        </div>
+
+        <!-- Phase 5 (Coming Soon) - 原 Phase 4: 視覺模型 -->
+        <div class="phase-card coming-soon">
+          <div class="phase-header">
+            <div class="phase-icon-box">👁️</div>
+            <div class="phase-info">
+              <h2>Phase 5: 視覺模型</h2>
+              <div class="phase-badges">
+                <span class="phase-badge phase-badge-intermediate">中階</span>
+                <span class="phase-badge phase-badge-intermediate"
+                  >6-7 小時</span
+                >
+              </div>
+            </div>
+            <div class="phase-number">05</div>
+          </div>
+          <div class="phase-body">
+            <p class="phase-description">
+              理解圖像如何變成 tokens，學習多模態對齊，最後實現圖像分割和去背。
+            </p>
+            <div class="phase-labs">
+              <div class="lab-card locked">
+                <div class="lab-card-header">
+                  <span class="lab-number">5.1</span>
+                </div>
+                <h3>ViT</h3>
+                <p>圖像分類</p>
+                <div class="lab-meta">
+                  <span>2 小時</span>
+                  <span>CIFAR-10</span>
+                </div>
+              </div>
+              <div class="lab-card locked">
+                <div class="lab-card-header">
+                  <span class="lab-number">5.2</span>
+                </div>
+                <h3>CLIP</h3>
+                <p>連接視覺與語言</p>
+                <div class="lab-meta">
+                  <span>2 小時</span>
+                  <span>零樣本分類</span>
+                </div>
+              </div>
+              <div class="lab-card locked">
+                <div class="lab-card-header">
+                  <span class="lab-number">5.3</span>
+                </div>
+                <h3>SAM</h3>
+                <p>圖像分割與去背</p>
+                <div class="lab-meta">
+                  <span>2-3 小時</span>
+                  <span>Prompt-based</span>
+                </div>
+              </div>
+            </div>
+            <span class="phase-link">施工中...</span>
+          </div>
+        </div>
+
+        <!-- Phase 6 (Coming Soon) - 原 Phase 5: 生成式應用 -->
+        <div class="phase-card coming-soon">
+          <div class="phase-header">
+            <div class="phase-icon-box">🎨</div>
+            <div class="phase-info">
+              <h2>Phase 6: 生成式應用</h2>
+              <div class="phase-badges">
+                <span class="phase-badge phase-badge-advanced">中階-進階</span>
+                <span class="phase-badge phase-badge-intermediate"
+                  >6-8 小時</span
+                >
+              </div>
+            </div>
+            <div class="phase-number">06</div>
+          </div>
+          <div class="phase-body">
+            <p class="phase-description">
+              掌握生成式
+              AI：文字生成圖片、可控圖像編輯，最後實現高品質語音合成。
+            </p>
+            <div class="phase-labs">
+              <div class="lab-card locked">
+                <div class="lab-card-header">
+                  <span class="lab-number">6.1</span>
+                </div>
+                <h3>Stable Diffusion</h3>
+                <p>文字生成圖片</p>
+                <div class="lab-meta">
+                  <span>2-3 小時</span>
+                  <span>MLX</span>
+                </div>
+              </div>
+              <div class="lab-card locked">
+                <div class="lab-card-header">
+                  <span class="lab-number">6.2</span>
+                </div>
+                <h3>ControlNet</h3>
+                <p>可控圖像編輯</p>
+                <div class="lab-meta">
+                  <span>2-3 小時</span>
+                  <span>Canny</span>
+                </div>
+              </div>
+              <div class="lab-card locked">
+                <div class="lab-card-header">
+                  <span class="lab-number">6.3</span>
+                </div>
+                <h3>TTS</h3>
+                <p>文字轉語音</p>
+                <div class="lab-meta">
+                  <span>2 小時</span>
+                  <span>Bark</span>
+                </div>
+              </div>
+            </div>
+            <span class="phase-link">施工中...</span>
+          </div>
+        </div>
+
+        <!-- Learning Path -->
+        <div class="lab-setup" style="margin-top: 60px">
+          <h4>學習建議</h4>
+          <ul>
+            <li>
+              建議按照 Phase 1 → 6 的順序學習，每個實驗都建立在前一個的基礎上
+            </li>
+            <li>
+              每個實驗都有「給 AI 的 prompt」，可以直接複製給 Cursor / Claude
+              Code 協助開發
+            </li>
+            <li>所有實驗都可在 Mac 128GB 本機運行，無需雲端 GPU</li>
+            <li>每個實驗都包含真實資料集下載連結和完整程式碼</li>
+          </ul>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="../index.html" class="nav-link">← 返回首頁</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

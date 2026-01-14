@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>環境設置 - 手寫 BPE Tokenizer</title>
+    <link rel="stylesheet" href="../../styles/global.css" />
+    <link rel="stylesheet" href="../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../styles/labs.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Hero Section -->
+      <div class="hero-section" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); height: 30vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <h1>環境設置</h1>
+          <p class="hero-subtitle">建立開發環境並準備專案結構</p>
+        </div>
+      </div>
+
+      <!-- Lab Steps Navigation -->
+      <div class="lab-steps">
+        <a href="index.html" class="lab-step">概覽</a>
+        <a href="01-setup.html" class="lab-step active">環境設置</a>
+        <a href="02-implement.html" class="lab-step">實作步驟</a>
+        <a href="03-test.html" class="lab-step">測試運行</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h2>步驟 1：建立專案目錄</h2>
+        <p>
+          首先，建立一個新的專案目錄來存放我們的程式碼。
+        </p>
+
+        <div class="ai-prompt-block">
+          <p>
+            <strong>給 Cursor / Claude Code 的 prompt：</strong>
+          </p>
+          <pre>建立一個名為 `bpe-tokenizer` 的 Python 專案目錄，包含以下結構：
+- bpe-tokenizer/
+  - tokenizer.py (主要實作檔案)
+  - test_tokenizer.py (測試檔案)
+  - requirements.txt (依賴套件)
+  - README.md (說明文件)
+
+請建立這些檔案和目錄結構。</pre>
+          <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">複製 Prompt</button>
+        </div>
+
+        <p>
+          或者，你也可以手動建立：
+        </p>
+
+        <div class="lab-code-block">
+          <div class="lab-code-block-header">
+            <span class="filename">終端機指令</span>
+            <button class="copy-btn" onclick="copyCode(this)">複製</button>
+          </div>
+          <pre><code>mkdir bpe-tokenizer
+cd bpe-tokenizer
+touch tokenizer.py test_tokenizer.py requirements.txt README.md</code></pre>
+        </div>
+
+        <h2>步驟 2：建立虛擬環境（推薦）</h2>
+        <p>
+          使用 Python 虛擬環境可以避免套件衝突。這是 Python 開發的最佳實踐。
+        </p>
+
+        <div class="ai-prompt-block">
+          <p>
+            <strong>給 Cursor / Claude Code 的 prompt：</strong>
+          </p>
+          <pre>幫我建立一個 Python 虛擬環境，並啟用它。使用以下指令：
+1. python3 -m venv venv
+2. source venv/bin/activate (macOS/Linux) 或 venv\Scripts\activate (Windows)
+
+請執行這些指令並確認虛擬環境已啟用。</pre>
+          <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">複製 Prompt</button>
+        </div>
+
+        <div class="lab-code-block">
+          <div class="lab-code-block-header">
+            <span class="filename">終端機指令</span>
+            <button class="copy-btn" onclick="copyCode(this)">複製</button>
+          </div>
+          <pre><code># macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
+
+# Windows
+python -m venv venv
+venv\Scripts\activate</code></pre>
+        </div>
+
+        <div class="explanation">
+          <h4>為什麼需要虛擬環境？</h4>
+          <p>
+            虛擬環境可以隔離專案的依賴套件，避免不同專案之間的套件版本衝突。
+            這是 Python 開發的標準做法。
+          </p>
+        </div>
+
+        <h2>步驟 3：建立 requirements.txt</h2>
+        <p>
+          這個實驗只需要 Python 標準函式庫，不需要額外的套件。但我們還是建立 requirements.txt 以保持專案結構完整。
+        </p>
+
+        <div class="lab-code-block">
+          <div class="lab-code-block-header">
+            <span class="filename">requirements.txt</span>
+            <button class="copy-btn" onclick="copyCode(this)">複製</button>
+          </div>
+          <pre><code># BPE Tokenizer 實驗
+# 此實驗僅使用 Python 標準函式庫，無需額外套件</code></pre>
+        </div>
+
+        <h2>步驟 4：驗證環境</h2>
+        <p>
+          確認 Python 環境已正確設置：
+        </p>
+
+        <div class="lab-code-block">
+          <div class="lab-code-block-header">
+            <span class="filename">終端機指令</span>
+            <button class="copy-btn" onclick="copyCode(this)">複製</button>
+          </div>
+          <pre><code>python --version
+# 應該顯示 Python 3.8 或更高版本</code></pre>
+        </div>
+
+        <div class="lab-expected-output">
+          <pre><code>Python 3.9.7
+# 或類似的版本號</code></pre>
+        </div>
+
+        <h2>下一步</h2>
+        <p>
+          環境設置完成後，我們就可以開始實作 BPE tokenizer 了！
+          在下一頁，我們將一步步實作核心演算法。
+        </p>
+
+        <div class="chapter-nav">
+          <a href="index.html" class="nav-link">← 返回概覽</a>
+          <a href="02-implement.html" class="nav-link">開始實作 →</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function copyPrompt(btn) {
+        const block = btn.closest('.ai-prompt-block');
+        const pre = block.querySelector('pre');
+        const text = pre.textContent;
+        
+        navigator.clipboard.writeText(text).then(() => {
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      }
+
+      function copyCode(btn) {
+        const block = btn.closest('.lab-code-block');
+        const code = block.querySelector('code');
+        const text = code.textContent;
+        
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = '已複製';
+          setTimeout(() => {
+            btn.textContent = '複製';
+          }, 2000);
+        });
+      }
+    </script>
+  </body>
+</html>

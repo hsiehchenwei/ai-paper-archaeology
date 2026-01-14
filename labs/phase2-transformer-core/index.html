@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 2: Transformer 核心機制 - AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../styles/global.css" />
+    <link rel="stylesheet" href="../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Hero Section -->
+      <div class="hero-section-labs">
+        <div class="hero-content">
+          <h1>⚡ Phase 2: Transformer 核心機制</h1>
+          <p class="hero-subtitle">
+            深入 Transformer 的心臟：從 Attention 到完整架構，打造你的第一個 AI 創作者！🎨
+          </p>
+          <p class="hero-meta">
+            3 個實驗 × 3 小時 = 掌握 Transformer 的魔法！
+          </p>
+        </div>
+      </div>
+
+      <!-- Phase Overview -->
+      <div class="story-container">
+        <h2>🎯 學習目標</h2>
+        <p>
+          在這個 Phase，你將深入理解 Transformer 的核心機制：
+          <strong>Self-Attention</strong>（注意力機制）、
+          <strong>Multi-Head Attention</strong>（多頭注意力）、
+          <strong>完整 Transformer 架構</strong>（從零搭建）。
+        </p>
+        <p>
+          最重要的是，每個實驗都有一個<strong>有趣的小專題</strong>！
+          你不只是學理論，而是能<strong>實際打造出東西</strong>：
+          情緒偵探、多角度分析器、名字生成器... 動手做的樂趣才是重點！🚀
+        </p>
+
+        <!-- Lab Cards -->
+        <div class="phase-labs lab-spacing-top">
+          <a href="01-self-attention/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">2.1</span>
+            </div>
+            <h3>情緒偵探</h3>
+            <p>讓 AI 告訴你它在看哪裡：Self-Attention 視覺化</p>
+            <div class="lab-meta">
+              <span>45 分鐘</span>
+              <span>QKV</span>
+              <span>Heatmap</span>
+            </div>
+          </a>
+
+          <a href="02-multihead-attention/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">2.2</span>
+            </div>
+            <h3>多角度分析器</h3>
+            <p>8 個專家同時看一句話：Multi-Head Attention</p>
+            <div class="lab-meta">
+              <span>45 分鐘</span>
+              <span>並行處理</span>
+              <span>視覺化</span>
+            </div>
+          </a>
+
+          <a href="03-transformer-architecture/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">2.3</span>
+            </div>
+            <h3>名字生成器</h3>
+            <p>訓練你的第一個 AI 創作者：完整 Transformer</p>
+            <div class="lab-meta">
+              <span>90 分鐘</span>
+              <span>PyTorch</span>
+              <span>訓練</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- Learning Tips -->
+        <div class="lab-setup lab-spacing-top-lg">
+          <h4>💡 學習秘訣</h4>
+          <ul>
+            <li>
+              <strong>⚠️ 重要：請使用 Python 虛擬環境！</strong>
+              每個實驗都應該在獨立的虛擬環境中進行，避免套件衝突。
+              所有 AI Prompt 都會提醒你建立虛擬環境。
+            </li>
+            <li>
+              <strong>🎨 動手做的樂趣：</strong>
+              每個實驗都有一個「有趣的小專題」，讓你能實際打造出東西！
+              不只是學理論，而是能分享你的成果。
+            </li>
+            <li>
+              建議按照 2.1 → 2.2 → 2.3 的順序學習，每個實驗都建立在前一個的基礎上。
+            </li>
+            <li>
+              實驗 2.3 需要 PyTorch，但完全可以在 Mac 128GB 本機運行，無需 GPU。
+            </li>
+            <li>
+              <strong>視覺化是關鍵！</strong>
+              我們會用熱力圖、對比圖幫助你理解抽象的 Attention 機制。
+            </li>
+          </ul>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="../index.html" class="nav-link">← 返回路線圖</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

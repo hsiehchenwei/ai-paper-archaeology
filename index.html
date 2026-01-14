@@ -103,8 +103,16 @@
       }
     </script>
 
+    <!-- Playful Typography for Labs -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles/global.css" />
     <link rel="stylesheet" href="styles/home.css" />
+    <link rel="stylesheet" href="styles/labs.css" />
   </head>
   <body>
     <!-- Hero Section -->
@@ -129,7 +137,8 @@
           <a href="nested-learning-tutorial/index.html" class="update-item">
             <span class="update-date">2026-01-12</span>
             <span class="update-text"
-              >Nested Learning 論文深度解析 - 打破「深度」學習的迷思，重新定義 AI 學習本質</span
+              >Nested Learning 論文深度解析 - 打破「深度」學習的迷思，重新定義
+              AI 學習本質</span
             >
             <span class="update-badge">NEW</span>
           </a>
@@ -175,6 +184,7 @@
           <button class="tab-btn" onclick="switchTab('articles')">
             知識筆記
           </button>
+          <button class="tab-btn" onclick="switchTab('labs')">🎮 動手做</button>
           <button class="tab-btn" onclick="switchTab('about')">關於本站</button>
         </div>
 
@@ -327,6 +337,47 @@
                 <span>2024-2025</span>
                 <span>•</span>
                 <span>3 篇評測論文</span>
+              </div>
+            </div>
+
+            <!-- Featured Card: RAG Evolution -->
+            <div
+              class="bento-card"
+              onclick="location.href='rag-tutorial/index.html'"
+              style="cursor: pointer"
+            >
+              <div
+                class="card-icon"
+                style="
+                  background: linear-gradient(
+                    135deg,
+                    #1e3a8a 0%,
+                    #3b82f6 50%,
+                    #10b981 100%
+                  );
+                  width: 100px;
+                  height: 100px;
+                  margin-bottom: 20px;
+                  padding: 0;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 3rem;
+                  border-radius: 10px;
+                "
+              >
+                🔍
+              </div>
+              <h3>RAG 的崛起：改變企業 AI 的實用方案</h3>
+              <p>
+                從 2020 年到 2026 年，探索 RAG 如何從學術概念成為 51%
+                企業採用的主流方案。 REALM、RAG、RETRO 的突破，以及 EMNLP 2024
+                揭示的效能挑戰—— 完整呈現正反論述。
+              </p>
+              <div class="card-meta">
+                <span>2020-2026</span>
+                <span>•</span>
+                <span>6 篇核心論文</span>
               </div>
             </div>
           </div>
@@ -1062,9 +1113,14 @@
                       margin-top: 8px;
                     "
                   >
-                    重新定義學習本質：將模型視為巢狀優化問題。提出聯想記憶視角，統一理解優化器與架構，引入 Continuum Memory System 和 Hope 模型，實現持續學習與長上下文理解。從神經科學啟發，揭示「層級」比「深度」更重要，為下一代 AI 架構提供路線圖。
+                    重新定義學習本質：將模型視為巢狀優化問題。提出聯想記憶視角，統一理解優化器與架構，引入
+                    Continuum Memory System 和 Hope
+                    模型，實現持續學習與長上下文理解。從神經科學啟發，揭示「層級」比「深度」更重要，為下一代
+                    AI 架構提供路線圖。
                   </p>
-                  <a href="nested-learning-tutorial/index.html" class="quick-link"
+                  <a
+                    href="nested-learning-tutorial/index.html"
+                    class="quick-link"
                     >深度解析 →</a
                   >
                 </div>
@@ -1339,6 +1395,243 @@
                 <span class="read-more">閱讀全文</span>
               </div>
             </a>
+          </div>
+        </div>
+
+        <!-- Tab 5: Labs (Hands-on) -->
+        <div id="labs" class="tab-content">
+          <div
+            class="story-container"
+            style="max-width: 1200px; margin: 0 auto"
+          >
+            <h2
+              style="
+                font-family: 'Fredoka', sans-serif;
+                font-size: 2.5rem;
+                text-align: center;
+                margin-bottom: 16px;
+              "
+            >
+              🎮 AI 實驗 Playground
+            </h2>
+            <p
+              style="
+                text-align: center;
+                font-size: 1.1rem;
+                color: #64748b;
+                margin-bottom: 40px;
+              "
+            >
+              從零開始，用雙手創造 AI 魔法！每個實驗都有 AI 助手提示，讓 Cursor
+              / Claude 成為你的程式導師
+            </p>
+
+            <div class="magazine-grid" style="gap: 24px">
+              <!-- Overview Card -->
+              <div
+                class="magazine-card"
+                onclick="location.href='labs/index.html'"
+                style="
+                  cursor: pointer;
+                  grid-column: 1 / -1;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  color: white;
+                  border: none;
+                "
+              >
+                <div class="card-content" style="padding: 40px">
+                  <h3
+                    style="font-size: 2rem; margin-bottom: 16px; color: white"
+                  >
+                    🗺️ 完整學習路線圖
+                  </h3>
+                  <p
+                    style="
+                      font-size: 1.1rem;
+                      line-height: 1.8;
+                      color: rgba(255, 255, 255, 0.95);
+                      margin-bottom: 20px;
+                    "
+                  >
+                    6 個關卡、20 挑戰任務，從 Tokenization
+                    到多模態生成，循序漸進掌握 AI 開發。
+                    每個實驗都包含真實資料集、完整程式碼和 AI 輔助提示。
+                  </p>
+                  <span
+                    class="read-more"
+                    style="
+                      background: white;
+                      color: #667eea;
+                      padding: 12px 24px;
+                      border-radius: 999px;
+                      font-weight: 800;
+                      display: inline-block;
+                    "
+                    >查看完整路線圖 →</span
+                  >
+                </div>
+              </div>
+
+              <!-- Phase 1 -->
+              <a
+                href="labs/phase1-text-basics/index.html"
+                class="magazine-card"
+              >
+                <div
+                  class="card-image-wrapper card-image-gradient card-image-gradient-green flex-center"
+                >
+                  <span class="phase-icon">📝</span>
+                </div>
+                <div class="card-content">
+                  <span class="card-tag">Phase 1 ✓ 已開放</span>
+                  <h3>文字處理基礎</h3>
+                  <p>
+                    Tokenization、Embedding、位置編碼。理解 AI
+                    如何處理文字的基礎。
+                  </p>
+                  <div class="card-meta">
+                    <span>3 個實驗</span>
+                    <span>•</span>
+                    <span>入門</span>
+                    <span>•</span>
+                    <span>1.5 小時</span>
+                  </div>
+                  <span class="read-more">開始學習 →</span>
+                </div>
+              </a>
+
+              <!-- Phase 2 (Coming Soon) -->
+              <a
+                href="labs/phase2-transformer/index.html"
+                class="magazine-card coming-soon"
+              >
+                <div
+                  class="card-image-wrapper card-image-gradient card-image-gradient-blue flex-center"
+                >
+                  <span class="phase-icon">⚡</span>
+                </div>
+                <div class="card-content">
+                  <span class="card-tag">Phase 2</span>
+                  <h3>Transformer 核心</h3>
+                  <p>
+                    Self-Attention、Multi-Head Attention、完整 Transformer
+                    架構。
+                  </p>
+                  <div class="card-meta">
+                    <span>3 個實驗</span>
+                    <span>•</span>
+                    <span>入門-中階</span>
+                    <span>•</span>
+                    <span>4-5 小時</span>
+                  </div>
+                  <span class="read-more">開始學習 →</span>
+                </div>
+              </a>
+
+              <!-- Phase 3 (Coming Soon) -->
+              <a
+                href="labs/phase3-language-model/index.html"
+                class="magazine-card coming-soon"
+              >
+                <div
+                  class="card-image-wrapper card-image-gradient card-image-gradient-purple flex-center"
+                >
+                  <span class="phase-icon">🧠</span>
+                </div>
+                <div class="card-content">
+                  <span class="card-tag">Phase 3</span>
+                  <h3>語言模型訓練</h3>
+                  <p>nanoGPT、文本生成、LoRA 微調。掌握現代 LLM 的核心技能。</p>
+                  <div class="card-meta">
+                    <span>3 個實驗</span>
+                    <span>•</span>
+                    <span>中階</span>
+                    <span>•</span>
+                    <span>6-8 小時</span>
+                  </div>
+                  <span class="read-more">開始學習 →</span>
+                </div>
+              </a>
+
+              <!-- Phase 4 (Coming Soon) - NEW: LLM 應用開發 -->
+              <a
+                href="labs/phase4-llm-apps/index.html"
+                class="magazine-card coming-soon"
+              >
+                <div
+                  class="card-image-wrapper card-image-gradient card-image-gradient-orange flex-center"
+                >
+                  <span class="phase-icon">🔗</span>
+                </div>
+                <div class="card-content">
+                  <span class="card-tag">Phase 4</span>
+                  <h3>LLM 應用開發</h3>
+                  <p>
+                    RAG、向量資料庫、Agent、對話系統。現代 LLM 應用的核心技能。
+                  </p>
+                  <div class="card-meta">
+                    <span>5 個實驗</span>
+                    <span>•</span>
+                    <span>中階</span>
+                    <span>•</span>
+                    <span>8-9 小時</span>
+                  </div>
+                  <span class="read-more">開始學習 →</span>
+                </div>
+              </a>
+
+              <!-- Phase 5 (Coming Soon) - 原 Phase 4: 視覺模型 -->
+              <a
+                href="labs/phase5-vision/index.html"
+                class="magazine-card coming-soon"
+              >
+                <div
+                  class="card-image-wrapper card-image-gradient card-image-gradient-orange flex-center"
+                >
+                  <span class="phase-icon">👁️</span>
+                </div>
+                <div class="card-content">
+                  <span class="card-tag">Phase 5</span>
+                  <h3>視覺模型</h3>
+                  <p>ViT、CLIP、SAM。理解圖像處理和多模態對齊。</p>
+                  <div class="card-meta">
+                    <span>3 個實驗</span>
+                    <span>•</span>
+                    <span>中階</span>
+                    <span>•</span>
+                    <span>6-7 小時</span>
+                  </div>
+                  <span class="read-more">開始學習 →</span>
+                </div>
+              </a>
+
+              <!-- Phase 6 (Coming Soon) - 原 Phase 5: 生成式應用 -->
+              <a
+                href="labs/phase6-generative/index.html"
+                class="magazine-card coming-soon"
+              >
+                <div
+                  class="card-image-wrapper card-image-gradient card-image-gradient-red flex-center"
+                >
+                  <span class="phase-icon">🎨</span>
+                </div>
+                <div class="card-content">
+                  <span class="card-tag">Phase 6</span>
+                  <h3>生成式應用</h3>
+                  <p>
+                    Stable Diffusion、ControlNet、TTS。掌握生成式 AI 的實作。
+                  </p>
+                  <div class="card-meta">
+                    <span>3 個實驗</span>
+                    <span>•</span>
+                    <span>中階-進階</span>
+                    <span>•</span>
+                    <span>6-8 小時</span>
+                  </div>
+                  <span class="read-more">開始學習 →</span>
+                </div>
+              </a>
+            </div>
           </div>
         </div>
 

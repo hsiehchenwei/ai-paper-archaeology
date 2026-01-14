@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1.3 位置編碼 - 讓模型理解順序 | AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles/global.css" />
+    <link rel="stylesheet" href="../../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Step Navigation -->
+      <div class="lab-steps">
+        <a href="../index.html" class="lab-step">← Phase 1</a>
+        <a href="#step1" class="lab-step active">Step 1: 理解概念</a>
+        <a href="#step2" class="lab-step">Step 2: 環境設定</a>
+        <a href="#step3" class="lab-step">Step 3: 實作正弦編碼</a>
+        <a href="#step4" class="lab-step">Step 4: 視覺化比較</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h1>📍 1.3 位置編碼 - 讓模型理解順序</h1>
+        <p class="lab-intro-text">
+          Transformer 有一個「缺陷」：它沒有內建的順序概念！
+          但「我愛你」和「你愛我」意思完全不同，所以我們需要「位置編碼」來告訴模型：
+          「這個詞在第幾個位置？」
+        </p>
+
+        <!-- Step 1: 理解概念 -->
+        <section id="step1" class="lab-section">
+          <h2>🎓 Step 1: 理解位置編碼</h2>
+          
+          <div class="visual-diagram">
+            <h4>📊 視覺化：為什麼需要位置編碼？</h4>
+            <p>
+              Transformer 的 Self-Attention 是「無序」的：
+            </p>
+            <pre>
+句子 1: "我 愛 你"
+句子 2: "你 愛 我"
+
+沒有位置編碼：
+  → Transformer 會認為這兩個句子「一樣」！
+  → 因為 Self-Attention 只看詞彙之間的關係，不看順序
+
+有位置編碼：
+  → "我" 在位置 0，編碼為 [0.1, 0.2, ...]
+  → "愛" 在位置 1，編碼為 [0.3, 0.4, ...]
+  → "你" 在位置 2，編碼為 [0.5, 0.6, ...]
+  
+  → 模型可以區分「我愛你」和「你愛我」了！
+            </pre>
+          </div>
+
+          <h3>🤔 兩種位置編碼方法</h3>
+          <p>
+            我們會學兩種方法：
+          </p>
+          <ul class="lab-list-spacing">
+            <li>
+              <strong>正弦位置編碼（Sinusoidal）</strong>：
+              Transformer 原始論文的方法，用數學函數生成固定編碼
+            </li>
+            <li>
+              <strong>RoPE（Rotary Position Embedding）</strong>：
+              LLaMA、GPT-3.5 等現代模型使用的方法，更高效
+            </li>
+          </ul>
+
+          <div class="ai-prompt-block">
+            <p>
+              想更深入了解？把這段 prompt 給 Cursor / Claude Code：
+            </p>
+            <pre>
+請用簡單易懂的方式解釋：
+1. 為什麼 Transformer 需要位置編碼？
+2. 正弦位置編碼（Sinusoidal）的基本原理是什麼？
+3. RoPE（Rotary Position Embedding）和正弦編碼有什麼不同？
+4. 為什麼 RoPE 在長文本上表現更好？
+5. 位置編碼如何與 Embedding 結合？
+
+請用生活化的類比，並提供具體例子。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+        </section>
+
+        <!-- Step 2: 環境設定 -->
+        <section id="step2" class="lab-section">
+          <h2>⚙️ Step 2: 環境設定</h2>
+          
+          <p>
+            我們需要 numpy 和 matplotlib 來實作和視覺化位置編碼。
+          </p>
+
+          <div class="terminal-command">
+            <code># 建立專案目錄（必須手動執行）
+mkdir -p positional-encoding-lab && cd positional-encoding-lab</code>
+            <button class="copy-terminal-btn" onclick="copyTerminal(this)">
+              📋 複製指令
+            </button>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              讓 AI 幫你建立虛擬環境、專案結構和檔案：
+            </p>
+            <pre>
+請幫我建立一個 Python 專案，用於實作位置編碼：
+
+⚠️ 重要：請使用 Python 虛擬環境（venv）來管理專案依賴！
+
+請執行以下步驟：
+1. 建立 Python 虛擬環境：python3 -m venv venv
+2. 啟動虛擬環境：source venv/bin/activate (macOS/Linux) 或 venv\Scripts\activate (Windows)
+3. 確認虛擬環境已啟動（終端機提示符會顯示 (venv)）
+4. 在虛擬環境中安裝依賴：pip install numpy matplotlib
+
+然後建立以下檔案：
+- positional_encoding.py (主要實作檔案，先留空或加上基本註解)
+- visualize_positional_encoding.py (視覺化腳本，先留空)
+- requirements.txt (列出所有依賴：numpy, matplotlib)
+- README.md (專案簡介，包含：專案目的、如何建立虛擬環境、如何安裝依賴、如何執行)
+- .gitignore (忽略 venv/ 和 __pycache__/ 目錄)
+
+請建立這些檔案，並在 requirements.txt 中正確列出所有依賴套件。
+在 README.md 中加入完整的專案說明和虛擬環境使用指南。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup">
+            <h4>💡 提示</h4>
+            <ul>
+              <li>
+                <strong>重要：請使用虛擬環境！</strong>
+                視覺化需要 numpy 和 matplotlib，請在虛擬環境中安裝。
+              </li>
+              <li>記得在 .gitignore 中加入 <code>venv/</code> 和 <code>__pycache__/</code></li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 3: 實作正弦編碼 -->
+        <section id="step3" class="lab-section">
+          <h2>🛠️ Step 3: 實作正弦位置編碼</h2>
+          
+          <p>
+            正弦位置編碼是 Transformer 原始論文的方法。
+            它用 sin 和 cos 函數生成固定的位置編碼，不需要訓練！
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 正弦編碼公式</h4>
+            <pre>
+對於位置 pos，維度 i：
+
+PE(pos, 2i)   = sin(pos / 10000^(2i/d_model))
+PE(pos, 2i+1) = cos(pos / 10000^(2i/d_model))
+
+其中：
+- pos: 位置（0, 1, 2, ...）
+- i: 維度索引（0, 1, 2, ...）
+- d_model: 模型維度（例如 512）
+
+✨ 特點：
+- 每個位置都有唯一的編碼
+- 相對位置關係可以通過數學運算推導
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>實作正弦位置編碼</strong>
+            </p>
+            <pre>
+請幫我實作一個 Python 函數 `sinusoidal_positional_encoding(seq_len, d_model)`：
+
+功能：生成正弦位置編碼
+
+參數：
+- seq_len: int，序列長度（例如 10）
+- d_model: int，模型維度（例如 512）
+
+返回：
+- numpy array，形狀為 (seq_len, d_model)
+
+公式：
+- PE(pos, 2i)   = sin(pos / 10000^(2i/d_model))
+- PE(pos, 2i+1) = cos(pos / 10000^(2i/d_model))
+
+要求：
+1. 使用 numpy 實作（確保在虛擬環境中已安裝）
+2. 對於每個位置 pos，計算所有維度的編碼
+3. 返回完整的編碼矩陣
+4. 加上詳細註解
+
+請提供一個測試範例，打印前幾個位置的編碼。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">positional_encoding.py</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">import numpy as np
+import matplotlib.pyplot as plt
+
+def sinusoidal_positional_encoding(seq_len, d_model):
+    """
+    生成正弦位置編碼
+    
+    Args:
+        seq_len: int，序列長度
+        d_model: int，模型維度
+    
+    Returns:
+        numpy array，形狀為 (seq_len, d_model)
+    """
+    # 初始化編碼矩陣
+    pe = np.zeros((seq_len, d_model))
+    
+    # 計算每個位置的編碼
+    for pos in range(seq_len):
+        for i in range(0, d_model, 2):
+            # 計算分母：10000^(2i/d_model)
+            denominator = np.power(10000, 2 * i / d_model)
+            
+            # 計算編碼
+            pe[pos, i] = np.sin(pos / denominator)
+            if i + 1 < d_model:
+                pe[pos, i + 1] = np.cos(pos / denominator)
+    
+    return pe
+
+# 測試
+seq_len = 10
+d_model = 128
+pe = sinusoidal_positional_encoding(seq_len, d_model)
+
+print(f"位置編碼形狀: {pe.shape}")
+print(f"\n位置 0 的前 10 個維度:")
+print(pe[0, :10])
+print(f"\n位置 1 的前 10 個維度:")
+print(pe[1, :10])</code></pre>
+            </div>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              <strong>執行測試</strong>
+            </p>
+            <pre>
+請幫我執行測試腳本並檢查結果：
+
+1. 在虛擬環境中執行：python positional_encoding.py
+2. 檢查輸出是否符合預期
+3. 如果有錯誤，請幫我修正
+
+請執行測試並告訴我結果。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-expected-output">
+            <pre>
+位置編碼形狀: (10, 128)
+
+位置 0 的前 10 個維度:
+[ 0.          1.          0.84147098  0.54030231  0.90929743  0.41614684
+  0.14112001  0.9899925   0.7568025   0.65364362]
+
+位置 1 的前 10 個維度:
+[ 0.84147098  0.54030231  0.90929743  0.41614684  0.14112001  0.9899925
+  0.7568025   0.65364362  0.95892427  0.28366219]
+            </pre>
+          </div>
+        </section>
+
+        <!-- Step 4: 實作 RoPE -->
+        <section id="step4" class="lab-section">
+          <h2>🔄 Step 3: 實作 RoPE（選讀）</h2>
+          
+          <p>
+            RoPE 是更現代的方法，被 LLaMA、GPT-3.5 等模型使用。
+            它通過「旋轉」向量來編碼位置，在長文本上表現更好。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 RoPE 核心思想</h4>
+            <pre>
+傳統方法：位置編碼 + Embedding
+  → [Embedding] + [Position] = [Final]
+
+RoPE：旋轉 Embedding 向量
+  → 旋轉角度 = f(位置)
+  → 不同位置 = 不同旋轉角度
+
+優點：
+- 相對位置關係更自然
+- 可以外推到更長的序列
+- 計算更高效
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>實作 RoPE（進階）</strong>
+            </p>
+            <pre>
+請幫我實作一個簡化版的 RoPE（Rotary Position Embedding）：
+
+功能：對 Query 和 Key 向量應用旋轉編碼
+
+參數：
+- q: numpy array，Query 向量，形狀為 (seq_len, d_model)
+- k: numpy array，Key 向量，形狀為 (seq_len, d_model)
+- positions: numpy array，位置索引，例如 [0, 1, 2, ...]
+
+返回：
+- q_rotated: 旋轉後的 Query
+- k_rotated: 旋轉後的 Key
+
+簡化版公式：
+- 將向量分成兩半
+- 對每對元素應用旋轉矩陣
+- 旋轉角度 = position * base_angle
+
+提示：這是一個進階主題，可以先理解概念，實作可以參考論文。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup">
+            <h4>💡 提示</h4>
+            <ul>
+              <li>RoPE 是進階主題，如果覺得困難可以先跳過</li>
+              <li>重點是理解「為什麼需要位置編碼」</li>
+              <li>正弦編碼已經足夠理解 Transformer 的工作原理</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 4: 視覺化 -->
+        <section id="step4" class="lab-section">
+          <h2>🎨 Step 4: 視覺化位置編碼</h2>
+          
+          <p>
+            讓我們用圖表「看到」位置編碼的規律！
+            你會發現不同位置的編碼確實不同，而且有規律可循。
+          </p>
+
+          <div class="ai-prompt-block">
+            <p>
+              讓 AI 幫你寫視覺化腳本：
+            </p>
+            <pre>
+請幫我寫一個 Python 腳本，視覺化位置編碼：
+
+⚠️ 前提：確保在虛擬環境中已安裝 numpy 和 matplotlib（參考 Step 2 的環境設定）！
+
+要求：
+1. 使用剛才實作的 sinusoidal_positional_encoding()
+2. 生成一個較長的序列（例如 50 個位置）
+3. 用 matplotlib 畫出：
+   a. 熱力圖（heatmap）：顯示所有位置的編碼值
+   b. 折線圖：顯示前幾個維度在不同位置的值
+4. 觀察編碼的規律（例如：低頻維度變化慢，高頻維度變化快）
+
+請加上詳細註解，並讓圖表美觀易讀。
+確保在虛擬環境中執行腳本。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">visualize_positional_encoding.py</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">import numpy as np
+import matplotlib.pyplot as plt
+from positional_encoding import sinusoidal_positional_encoding
+
+# 生成位置編碼
+seq_len = 50
+d_model = 128
+pe = sinusoidal_positional_encoding(seq_len, d_model)
+
+# 1. 熱力圖
+plt.figure(figsize=(14, 8))
+plt.imshow(pe.T, aspect='auto', cmap='RdYlBu', interpolation='nearest')
+plt.colorbar(label='編碼值')
+plt.xlabel('位置 (Position)')
+plt.ylabel('維度 (Dimension)')
+plt.title('正弦位置編碼熱力圖', fontsize=16, fontweight='bold')
+plt.tight_layout()
+plt.savefig('positional_encoding_heatmap.png', dpi=150, bbox_inches='tight')
+print("熱力圖已保存為 'positional_encoding_heatmap.png'")
+
+# 2. 折線圖：前幾個維度
+plt.figure(figsize=(12, 6))
+positions = np.arange(seq_len)
+for dim in range(0, min(8, d_model), 2):
+    plt.plot(positions, pe[:, dim], label=f'維度 {dim} (sin)', linewidth=2)
+    if dim + 1 < d_model:
+        plt.plot(positions, pe[:, dim + 1], 
+                label=f'維度 {dim+1} (cos)', linewidth=2, linestyle='--')
+
+plt.xlabel('位置 (Position)', fontsize=12)
+plt.ylabel('編碼值', fontsize=12)
+plt.title('位置編碼：不同維度的變化', fontsize=16, fontweight='bold')
+plt.legend(loc='upper right', ncol=2)
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.savefig('positional_encoding_lines.png', dpi=150, bbox_inches='tight')
+print("折線圖已保存為 'positional_encoding_lines.png'")
+plt.show()</code></pre>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              <strong>執行視覺化</strong>
+            </p>
+            <pre>
+請幫我執行視覺化腳本並檢查結果：
+
+1. 在虛擬環境中執行：python visualize_positional_encoding.py
+2. 檢查是否成功生成圖表檔案
+3. 如果有錯誤，請幫我修正
+
+請執行視覺化並告訴我結果。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="visual-diagram">
+            <h4>🎨 預期視覺化結果</h4>
+            <p>
+              熱力圖應該顯示：
+            </p>
+            <pre>
+維度 ↑
+     |
+     |  [低頻維度：變化慢，像長波]
+     |  ████████████████████████
+     |  ████████████████████████
+     |  [中頻維度：變化中等]
+     |  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+     |  [高頻維度：變化快，像短波]
+     |  ░░░░░░░░░░░░░░░░░░░░░░
+     |
+     ─────────────────────────→ 位置
+
+✨ 觀察：
+- 低維度（底部）：變化緩慢，捕捉長距離關係
+- 高維度（頂部）：變化快速，捕捉短距離關係
+- 每個位置都有獨特的「指紋」！
+            </pre>
+          </div>
+        </section>
+
+        <!-- Challenge -->
+        <div class="lab-challenge lab-spacing-top-lg">
+          <h4>💪 挑戰任務</h4>
+          <p>
+            <strong>進階挑戰 1：</strong>
+            比較「有位置編碼」和「沒有位置編碼」的差異。
+            實作一個簡單的 Self-Attention，測試兩種情況下的輸出。
+          </p>
+          <p>
+            <strong>進階挑戰 2：</strong>
+            實作「可學習的位置編碼」（Learned Positional Encoding），
+            比較它和正弦編碼的差異。
+          </p>
+          <p>
+            <strong>進階挑戰 3：</strong>
+            研究 RoPE 的完整實作，並視覺化旋轉過程。
+            這需要理解複數和旋轉矩陣。
+          </p>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="lab-setup lab-spacing-top-lg">
+          <h4>🎯 Phase 1 完成！</h4>
+          <ul>
+            <li>
+              ✅ 恭喜！你已經完成了 Phase 1 的所有實驗！
+            </li>
+            <li>
+              🎓 你現在理解了：
+              <ul class="lab-list-spacing" style="margin-top: 10px; padding-left: 20px;">
+                <li>Tokenization：如何把文字「切」成 tokens</li>
+                <li>Embedding：如何把 tokens 變成向量</li>
+                <li>位置編碼：如何讓模型理解順序</li>
+              </ul>
+            </li>
+            <li>
+              ➡️ 接下來進入 <strong>Phase 2: Transformer 核心機制</strong>！
+              你會學到 Self-Attention、Multi-Head Attention，最後組裝完整的 Transformer。
+            </li>
+            <li>
+              📚 建議：先完成所有挑戰任務，確保完全理解這些基礎概念。
+            </li>
+          </ul>
+        </div>
+
+        <div class="chapter-nav lab-spacing-top-lg">
+          <a href="../index.html" class="nav-link">← 返回 Phase 1</a>
+          <a href="../02-embedding/index.html" class="nav-link">← 上一個實驗</a>
+          <a href="../../index.html" class="nav-link">返回路線圖 →</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function copyPrompt(btn) {
+        const promptBlock = btn.closest(".ai-prompt-block");
+        const preElement = promptBlock.querySelector("pre");
+        const text = preElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.classList.add("copied");
+          btn.textContent = "✓ 已複製！";
+          setTimeout(() => {
+            btn.classList.remove("copied");
+            btn.textContent = "📋 複製 Prompt";
+          }, 2000);
+        });
+      }
+
+      function toggleCodeBlock(header) {
+        const codeBlock = header.closest(".lab-code-block");
+        const toggleBtn = header.querySelector(".toggle-btn");
+        
+        codeBlock.classList.toggle("collapsed");
+        
+        if (codeBlock.classList.contains("collapsed")) {
+          toggleBtn.textContent = "展開";
+        } else {
+          toggleBtn.textContent = "收起";
+        }
+      }
+
+      function copyCode(btn) {
+        const codeBlock = btn.closest(".lab-code-block");
+        const codeElement = codeBlock.querySelector("pre code");
+        const text = codeElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = "✓ 已複製";
+          setTimeout(() => {
+            btn.textContent = "複製";
+          }, 2000);
+        });
+      }
+
+      function copyTerminal(btn) {
+        const terminalBlock = btn.closest(".terminal-command");
+        const codeElement = terminalBlock.querySelector("code");
+        const text = codeElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = "✓ 已複製";
+          setTimeout(() => {
+            btn.textContent = "📋 複製指令";
+          }, 2000);
+        });
+      }
+    </script>
+  </body>
+</html>

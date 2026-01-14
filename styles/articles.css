@@ -1,0 +1,238 @@
+/* ==========================================
+   Articles & Topics - 知識筆記模組
+   Articles & Topics Module
+   ========================================== */
+
+/* --- CSS Variables --- */
+:root {
+  --article-hero-bg-1: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1419 100%);
+  --article-hero-bg-2: linear-gradient(135deg, #1a1f3a 0%, #2d1b3d 50%, #0f1419 100%);
+  --article-gold: #ffd700;
+  --article-silver: #c0c0c0;
+  --article-deep-blue: #0f1419;
+  --article-warning-red: #ef4444;
+  --article-success-green: #10b981;
+  --article-purple: #8b5cf6;
+}
+
+/* --- Hero Section (深色主題) --- */
+.article-hero-section {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--article-hero-bg-1);
+  overflow: hidden;
+}
+
+.article-hero-section.variant-2 {
+  background: var(--article-hero-bg-2);
+}
+
+.article-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 14, 39, 0.3) 0%,
+    rgba(10, 14, 39, 0.85) 60%,
+    rgba(10, 14, 39, 0.95) 100%
+  );
+  z-index: 1;
+}
+
+.article-hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 20px;
+  max-width: 1000px;
+}
+
+.article-hero-title {
+  font-family: "Noto Serif TC", serif;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 900;
+  color: #ffffff;
+  margin-bottom: 30px;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.3);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.article-hero-subtitle {
+  font-family: "Inter", sans-serif;
+  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+  color: var(--article-gold);
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+  margin-bottom: 20px;
+}
+
+/* --- Timeline (Topics 使用) --- */
+.timeline-container {
+  position: relative;
+  padding: 40px 0;
+  margin: 40px 0;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(
+    to bottom,
+    var(--primary-color),
+    var(--secondary-color),
+    var(--purple-color)
+  );
+  transform: translateX(-50%);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 60px;
+  width: 45%;
+}
+
+.timeline-item.left {
+  margin-left: 0;
+  text-align: right;
+  padding-right: 50px;
+}
+
+.timeline-item.right {
+  margin-left: 55%;
+  text-align: left;
+  padding-left: 50px;
+}
+
+.timeline-dot {
+  position: absolute;
+  top: 20px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  border: 4px solid var(--primary-color);
+  z-index: 1;
+}
+
+.timeline-item.left .timeline-dot {
+  right: -10px;
+}
+
+.timeline-item.right .timeline-dot {
+  left: -10px;
+}
+
+.timeline-card {
+  background: white;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border-left: 4px solid var(--primary-color);
+}
+
+.timeline-card h3 {
+  margin-top: 0;
+  color: var(--primary-color);
+}
+
+/* --- Paper Comparison Grid --- */
+.paper-comparison {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin: 40px 0;
+}
+
+.paper-card {
+  background: white;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s, box-shadow 0.3s;
+  border-top: 5px solid var(--primary-color);
+}
+
+.paper-card:nth-child(2) {
+  border-top-color: var(--secondary-color);
+}
+
+.paper-card:nth-child(3) {
+  border-top-color: var(--purple-color);
+}
+
+.paper-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+}
+
+.paper-card h3 {
+  margin-top: 0;
+}
+
+/* --- Impact Grid --- */
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin: 40px 0;
+}
+
+/* --- Story Container (類似 llm-viz) --- */
+.article-story-container {
+  background: #ffffff;
+  margin-top: -50px;
+  position: relative;
+  z-index: 10;
+  border-radius: 30px 30px 0 0;
+  padding: 80px 40px;
+}
+
+.article-content-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .paper-comparison {
+    grid-template-columns: 1fr;
+  }
+  
+  .impact-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .timeline-item.left,
+  .timeline-item.right {
+    width: 100%;
+    margin-left: 0;
+    padding-left: 40px;
+    padding-right: 20px;
+    text-align: left;
+  }
+  
+  .timeline-line {
+    left: 0;
+  }
+  
+  .timeline-item .timeline-dot {
+    left: -10px;
+    right: auto;
+  }
+  
+  .article-story-container {
+    padding: 40px 20px;
+  }
+  
+  .article-hero-title {
+    font-size: 2rem;
+  }
+}

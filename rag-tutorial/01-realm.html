@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>REALM：首個檢索增強預訓練模型 | RAG 演進史</title>
+    <meta name="description" content="REALM: Retrieval-Augmented Language Model Pre-Training 深度解析。Google Research 首創在預訓練階段整合可微分檢索器。" />
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../styles/articles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- 麵包屑導航 -->
+      <div class="breadcrumb">
+        <a href="../index.html">🏠 首頁</a> / 
+        <a href="index.html">📚 RAG 演進史</a> / 
+        REALM
+      </div>
+
+      <!-- 論文資訊卡 -->
+      <div class="index-header">
+        <h1>🏛️ REALM</h1>
+        <p>Retrieval-Augmented Language Model Pre-Training</p>
+        <p style="font-size: 0.9rem; margin-top: 15px; opacity: 0.9;">
+          Kelvin Guu, Kenton Lee, Zora Tung, Panupong Pasupat, Ming-Wei Chang<br />
+          <strong>Google Research</strong> · 2020 年 2 月
+        </p>
+      </div>
+
+      <!-- 一句話總結 -->
+      <div class="key-concept">
+        <h4>💡 一句話總結</h4>
+        <p style="font-size: 1.1rem;">
+          REALM 是第一個在<strong>預訓練階段</strong>就整合知識檢索器的語言模型，
+          讓模型不只從參數中提取知識，還能從外部文檔中「查閱」資料。
+        </p>
+      </div>
+
+      <!-- 論文 PDF 連結 -->
+      <div style="background: var(--primary-light); padding: 15px; border-radius: var(--radius-md); margin: 30px 0; text-align: center;">
+        <a href="papers/realm.pdf" target="_blank" style="color: var(--primary-color); font-weight: 600; text-decoration: none; font-size: 1.05rem;">
+          📄 下載論文原文 PDF →
+        </a>
+      </div>
+
+      <!-- Abstract 摘要 -->
+      <h2>📄 Abstract (摘要)</h2>
+
+      <div class="original-quote">
+        <strong>📄 論文原文</strong><br><br>
+        "Language model pre-training has been shown to capture a surprising amount of world knowledge, crucial for NLP tasks such as question answering. However, this knowledge is stored implicitly in the parameters of a neural network, requiring ever-larger networks to cover more facts. To capture knowledge in a more modular and interpretable way, we augment language model pre-training with a latent knowledge retriever, which allows the model to retrieve and attend over documents from a large corpus such as Wikipedia, used during pre-training, fine-tuning and inference."
+        <br><br>
+        <strong>翻譯</strong>：語言模型預訓練已被證明能捕捉驚人數量的世界知識，這對問答等 NLP 任務至關重要。然而，這些知識隱式地儲存在神經網路的參數中，需要越來越大的網路來涵蓋更多事實。為了以更模組化和可解釋的方式捕捉知識，我們用潛在知識檢索器增強語言模型預訓練，這允許模型從大型語料庫（如 Wikipedia）中檢索和關注文檔，在預訓練、微調和推理期間使用。
+      </div>
+
+      <div class="original-quote">
+        <strong>📄 論文原文（核心創新）</strong><br><br>
+        "For the first time, we show how to pre-train such a knowledge retriever in an unsupervised manner, using masked language modeling as the learning signal and backpropagating through a retrieval step that considers millions of documents. We demonstrate the effectiveness of Retrieval-Augmented Language Model pre-training (REALM) by fine-tuning on the challenging task of Open-domain Question Answering (Open-QA)."
+        <br><br>
+        <strong>翻譯</strong>：我們首次展示了如何以無監督方式預訓練這樣的知識檢索器，使用遮罩語言建模作為學習信號，並透過考慮數百萬文檔的檢索步驟進行反向傳播。我們透過在開放域問答（Open-QA）這個具有挑戰性的任務上進行微調，展示了檢索增強語言模型預訓練（REALM）的有效性。
+      </div>
+
+      <!-- 核心創新 -->
+      <h2>🚀 核心創新</h2>
+
+      <div class="explanation">
+        <h4>📐 為什麼 REALM 很重要？</h4>
+        <p>在 REALM 之前，語言模型把所有知識都「背」在參數裡：</p>
+        <ul>
+          <li>模型越大 → 知識越多 → 但成本也越高</li>
+          <li>知識更新 → 必須重新訓練整個模型</li>
+          <li>知識來源 → 無法追溯，像個「黑箱」</li>
+        </ul>
+        <p style="margin-top: 15px;">
+          <strong>REALM 的突破：</strong>讓檢索器和語言模型一起訓練！<br />
+          檢索器學會「找對的文檔」，語言模型學會「用好這些文檔」。
+        </p>
+      </div>
+
+      <!-- 視覺化圖解 -->
+      <div style="text-align: center; margin: 40px 0;">
+        <img src="images/realm-memory-comparison.png" alt="REALM 參數記憶 vs 非參數記憶對比圖" style="max-width: 100%; border-radius: 12px; box-shadow: var(--shadow-lg);" />
+        <p style="margin-top: 15px; color: var(--text-secondary); font-size: 0.9rem;">
+          📊 參數記憶 vs 非參數記憶：REALM 的核心創新
+        </p>
+      </div>
+
+      <div class="key-concept">
+        <h4>💡 論文原始圖表</h4>
+        <p>
+          REALM 論文中的 <strong>Figure 1</strong> 展示了檢索增強語言模型的架構圖，包含：
+        </p>
+        <ul>
+          <li><strong>Neural Knowledge Retriever</strong>：使用 BERT 編碼器計算查詢與文檔的相似度</li>
+          <li><strong>Knowledge-Augmented Encoder</strong>：將檢索到的文檔與原始輸入拼接處理</li>
+          <li><strong>Masked Language Model</strong>：預訓練目標，通過檢索到的文檔提升預測準確度</li>
+        </ul>
+        <p style="margin-top: 10px; font-size: 0.9rem; color: var(--text-secondary);">
+          📄 請參考 <a href="papers/realm.pdf" target="_blank" style="color: var(--primary-color);">論文 PDF</a> 第 2 頁 Figure 1
+        </p>
+      </div>
+
+      <!-- 技術架構 -->
+      <h2>🔧 技術架構</h2>
+
+      <div class="section-block">
+        <h3>兩大核心組件</h3>
+        
+        <h4 style="color: var(--primary-color);">1. Knowledge Retriever (知識檢索器)</h4>
+        <ul>
+          <li>輸入：查詢文本 x</li>
+          <li>輸出：從知識庫中檢索出相關文檔 z</li>
+          <li>使用 BERT 編碼器計算相似度</li>
+          <li>檢索是「可微分」的 → 可以用梯度下降訓練</li>
+        </ul>
+
+        <h4 style="color: var(--secondary-color); margin-top: 20px;">2. Knowledge-Augmented Encoder (知識增強編碼器)</h4>
+        <ul>
+          <li>輸入：原始文本 x + 檢索到的文檔 z</li>
+          <li>將兩者拼接後用 Transformer 編碼</li>
+          <li>輸出：結合外部知識的表示</li>
+        </ul>
+      </div>
+
+      <div class="analogy">
+        <h4>🎯 生活類比：開放式考試</h4>
+        <p><strong>傳統語言模型</strong> = 閉卷考試</p>
+        <ul>
+          <li>所有答案必須事先背好</li>
+          <li>考試時只能靠記憶</li>
+        </ul>
+        <p><strong>REALM</strong> = 開卷考試</p>
+        <ul>
+          <li>可以帶參考書進考場</li>
+          <li>考試時可以翻書找答案</li>
+          <li>但要學會「怎麼快速找到對的頁面」</li>
+        </ul>
+        <p style="margin-top: 15px;">
+          <strong>關鍵創新：</strong>REALM 不只學會「找書」，還在預訓練時就學會這個技能！
+        </p>
+      </div>
+
+      <!-- 訓練方法 -->
+      <h2>📚 訓練方法</h2>
+
+      <div class="key-concept">
+        <h4>🔄 可微分檢索的魔法</h4>
+        <p>REALM 最大的技術挑戰是：<strong>如何讓檢索過程可以訓練？</strong></p>
+        
+        <p style="margin-top: 15px;"><strong>解決方案：邊緣化 (Marginalization)</strong></p>
+        <ul>
+          <li>不是只選一個最相關的文檔</li>
+          <li>而是考慮「所有可能的文檔」，加權平均</li>
+          <li>權重 = 文檔的相關性機率</li>
+        </ul>
+
+        <p style="margin-top: 15px;"><strong>訓練目標：Masked Language Model</strong></p>
+        <ul>
+          <li>和 BERT 一樣：遮住一些詞，預測被遮住的詞</li>
+          <li>但在預測時，可以參考檢索到的文檔</li>
+          <li>如果檢索到的文檔有幫助 → 預測更準確 → 檢索器得到獎勵</li>
+        </ul>
+      </div>
+
+      <!-- 實驗結果 -->
+      <h2>📊 實驗結果</h2>
+
+      <div class="solution">
+        <h4>✅ Open-Domain QA 大幅領先</h4>
+        <p>REALM 在三個開放域問答資料集上取得 SOTA：</p>
+        <table style="margin-top: 15px;">
+          <thead>
+            <tr>
+              <th>資料集</th>
+              <th>之前最佳</th>
+              <th>REALM</th>
+              <th>提升</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>NaturalQuestions</td>
+              <td>31.8%</td>
+              <td>40.4%</td>
+              <td style="color: var(--secondary-color); font-weight: bold;">+8.6%</td>
+            </tr>
+            <tr>
+              <td>WebQuestions</td>
+              <td>37.4%</td>
+              <td>40.7%</td>
+              <td style="color: var(--secondary-color); font-weight: bold;">+3.3%</td>
+            </tr>
+            <tr>
+              <td>CuratedTrec</td>
+              <td>28.2%</td>
+              <td>46.8%</td>
+              <td style="color: var(--secondary-color); font-weight: bold;">+18.6%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="explanation" style="margin-top: 30px;">
+        <h4>🔍 為什麼效果這麼好？</h4>
+        <ul>
+          <li><strong>知識外置：</strong>不需要把所有知識塞進參數裡</li>
+          <li><strong>可解釋性：</strong>可以看到模型查了哪些文檔</li>
+          <li><strong>模組化：</strong>更新知識只需更新文檔庫，不需重訓模型</li>
+        </ul>
+      </div>
+
+      <!-- 歷史意義 -->
+      <h2>📜 歷史意義</h2>
+
+      <div class="key-concept">
+        <h4>🌟 REALM 開創了什麼？</h4>
+        <ul>
+          <li><strong>第一個</strong>在預訓練階段整合檢索的語言模型</li>
+          <li><strong>證明</strong>了檢索器可以端到端訓練</li>
+          <li><strong>啟發</strong>了後來的 RAG、RETRO 等工作</li>
+          <li><strong>奠定</strong>了「外部知識 + 語言模型」的研究方向</li>
+        </ul>
+        <p style="margin-top: 15px;">
+          REALM 發表於 2020 年 2 月，比 RAG 原始論文早了 3 個月。
+          它證明了一個關鍵洞見：<strong>模型不需要記住所有東西，只需要知道去哪裡找</strong>。
+        </p>
+      </div>
+
+      <!-- 與 RAG 的比較 -->
+      <h2>🔄 REALM vs RAG</h2>
+
+      <div class="section-block">
+        <table>
+          <thead>
+            <tr>
+              <th>面向</th>
+              <th>REALM</th>
+              <th>RAG (下一篇)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>發布時間</strong></td>
+              <td>2020 年 2 月</td>
+              <td>2020 年 5 月</td>
+            </tr>
+            <tr>
+              <td><strong>機構</strong></td>
+              <td>Google Research</td>
+              <td>Facebook AI (Meta)</td>
+            </tr>
+            <tr>
+              <td><strong>訓練目標</strong></td>
+              <td>Masked LM</td>
+              <td>Seq2Seq 生成</td>
+            </tr>
+            <tr>
+              <td><strong>主要任務</strong></td>
+              <td>Open-Domain QA</td>
+              <td>知識密集型 NLP 任務</td>
+            </tr>
+            <tr>
+              <td><strong>檢索器</strong></td>
+              <td>BERT-based</td>
+              <td>DPR (Dense Passage Retrieval)</td>
+            </tr>
+            <tr>
+              <td><strong>生成器</strong></td>
+              <td>BERT Encoder</td>
+              <td>BART (Seq2Seq)</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="margin-top: 15px; font-size: 0.95rem; color: var(--text-secondary);">
+          REALM 專注於理解任務 (Encoder)，RAG 擴展到生成任務 (Seq2Seq)。
+          兩者都是 RAG 技術的重要奠基者。
+        </p>
+      </div>
+
+      <!-- 延伸閱讀 -->
+      <div class="quick-links" style="margin-top: 40px;">
+        <a href="index.html" class="quick-link">← 回到 RAG 總覽</a>
+        <a href="02-rag-original.html" class="quick-link">下一篇：RAG 原始論文 →</a>
+      </div>
+
+      <div class="quick-links" style="margin-top: 15px;">
+        <a href="https://arxiv.org/abs/2002.08909" class="quick-link" target="_blank">📄 REALM 論文 (arXiv)</a>
+        <a href="https://research.google/pubs/realm-retrieval-augmented-language-model-pre-training/" class="quick-link" target="_blank">🔗 Google Research</a>
+      </div>
+    </div>
+  </body>
+</html>

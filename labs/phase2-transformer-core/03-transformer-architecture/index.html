@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2.3 名字生成器 - 訓練你的第一個 AI 創作者 | AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles/global.css" />
+    <link rel="stylesheet" href="../../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Step Navigation -->
+      <div class="lab-steps">
+        <a href="../index.html" class="lab-step">← Phase 2</a>
+        <a href="#step1" class="lab-step active">Step 1: 理解架構</a>
+        <a href="#step2" class="lab-step">Step 2: 環境設定</a>
+        <a href="#step3" class="lab-step">Step 3: 準備資料</a>
+        <a href="#step4" class="lab-step">Step 4: 實作組件</a>
+        <a href="#step5" class="lab-step">Step 5: 組裝 Transformer</a>
+        <a href="#step6" class="lab-step">Step 6: 訓練與生成</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h1>🎨 2.3 名字生成器 - 訓練你的第一個 AI 創作者</h1>
+        <p class="lab-intro-text">
+          從零開始，組裝完整的 Transformer，訓練一個能創造從未存在的名字的 AI！
+          這是你第一次「訓練」一個真正的語言模型，看著它從亂碼到能生成有意義的名字，那種成就感無與倫比！🚀
+        </p>
+
+        <!-- Step 1: 理解架構 -->
+        <section id="step1" class="lab-section">
+          <h2>🎓 Step 1: 理解 Transformer 架構</h2>
+          
+          <div class="visual-diagram">
+            <h4>📊 視覺化：Transformer 全景圖</h4>
+            <p>
+              Transformer 就像一個「文字處理工廠」：
+            </p>
+            <pre>
+輸入："Emma" → Tokenization → [E, m, m, a]
+
+Transformer Block (重複 N 次):
+  ┌─────────────────────┐
+  │ Multi-Head Attention│  ← 讓每個字「看」其他字
+  │   + Residual        │
+  │   + LayerNorm       │
+  └─────────────────────┘
+          ↓
+  ┌─────────────────────┐
+  │ Feed-Forward Network │  ← 處理資訊
+  │   + Residual        │
+  │   + LayerNorm       │
+  └─────────────────────┘
+
+輸出：下一個字的機率分布 → 生成 "Liam" 的第一個字
+            </pre>
+          </div>
+
+          <h3>🤔 為什麼能「生成」文字？</h3>
+          <p>
+            Transformer 是一個<strong>自回歸模型</strong>：
+          </p>
+          <ol class="lab-list-spacing">
+            <li><strong>輸入</strong>：已有的文字（例如："Em"）</li>
+            <li><strong>處理</strong>：Transformer 分析這個序列</li>
+            <li><strong>輸出</strong>：下一個字的機率分布（例如：m 的機率 0.3，a 的機率 0.5...）</li>
+            <li><strong>生成</strong>：根據機率選擇下一個字（例如：選 "m"）</li>
+            <li><strong>重複</strong>：把新字加入序列，繼續生成</li>
+          </ol>
+
+          <div class="visual-diagram lab-spacing-top">
+            <h4>🎯 名字生成器的運作方式</h4>
+            <pre>
+訓練階段：
+  輸入："Emma" → 模型學習：E 後面通常是 m，m 後面通常是 m，m 後面通常是 a
+
+生成階段：
+  輸入：""（空字串）
+  Step 1: 模型預測第一個字 → "E"
+  Step 2: 模型看到 "E"，預測第二個字 → "m"
+  Step 3: 模型看到 "Em"，預測第三個字 → "m"
+  Step 4: 模型看到 "Emm"，預測第四個字 → "a"
+  Step 5: 遇到結束符號 → 停止
+
+結果："Emma"（或可能是 "Emlia"、"Emmar" 等新名字！）
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              想更深入了解？把這段 prompt 給 Cursor / Claude Code：
+            </p>
+            <pre>
+請用簡單易懂的方式解釋：
+1. Transformer 的完整架構包含哪些組件？
+2. 為什麼需要 Residual Connection 和 LayerNorm？
+3. 什麼是自回歸生成？如何一步步生成文字？
+4. Character-Level Language Model 和 Word-Level 有什麼不同？
+
+請用具體例子，並解釋每一步的直觀意義。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+        </section>
+
+        <!-- Step 2: 環境設定 -->
+        <section id="step2" class="lab-section">
+          <h2>⚙️ Step 2: 環境設定</h2>
+          
+          <p>
+            我們需要 PyTorch 來建立和訓練 Transformer。別擔心，完全可以在 Mac 本機運行！
+          </p>
+
+          <div class="terminal-command">
+            <code># 建立專案目錄（必須手動執行）
+mkdir -p name-generator && cd name-generator</code>
+            <button class="copy-terminal-btn" onclick="copyTerminal(this)">
+              📋 複製指令
+            </button>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              讓 AI 幫你建立虛擬環境、專案結構和檔案：
+            </p>
+            <pre>
+請幫我建立一個 Python 專案，用於訓練名字生成器：
+
+⚠️ 重要：請使用 Python 虛擬環境（venv）來管理專案依賴！
+
+請執行以下步驟：
+1. 建立 Python 虛擬環境：python3 -m venv venv
+2. 啟動虛擬環境：source venv/bin/activate (macOS/Linux) 或 venv\Scripts\activate (Windows)
+3. 確認虛擬環境已啟動（終端機提示符會顯示 (venv)）
+4. 安裝依賴套件：pip install torch numpy matplotlib
+
+然後建立以下檔案和目錄結構：
+- transformer.py (主要模型檔案，先留空或加上基本註解)
+- train.py (訓練腳本，先留空)
+- generate.py (生成腳本，先留空)
+- data.py (資料處理，先留空)
+- requirements.txt (包含：torch, numpy, matplotlib)
+- README.md (專案簡介，包含：專案目的、如何建立虛擬環境、如何執行)
+
+請建立這些檔案，並在 README.md 中寫上完整的專案說明和虛擬環境使用指南。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup">
+            <h4>💡 提示</h4>
+            <ul>
+              <li>
+                <strong>重要：請使用虛擬環境！</strong>
+                PyTorch 是一個大套件，使用虛擬環境可以避免套件衝突。
+              </li>
+              <li>建議使用 Python 3.8+</li>
+              <li>PyTorch 會自動偵測你的系統（Mac 會使用 MPS，如果有 GPU 會用 CUDA）</li>
+              <li>完全可以在 Mac 128GB 本機運行，無需 GPU</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 3: 準備資料 -->
+        <section id="step3" class="lab-section">
+          <h2>📚 Step 3: 準備名字資料集</h2>
+          
+          <p>
+            我們需要一個名字資料集。我們會用 Character-Level 的方式處理，讓模型學習「字母的組合規律」。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 資料格式</h4>
+            <pre>
+名字列表：
+  ["Emma", "Liam", "Olivia", "Noah", "Ava", "Ethan", ...]
+
+Character-Level Tokenization：
+  "Emma" → ['E', 'm', 'm', 'a', '<END>']
+  "Liam" → ['L', 'i', 'a', 'm', '<END>']
+
+詞彙表（Vocab）：
+  {'<START>': 0, '<END>': 1, 'E': 2, 'm': 3, 'a': 4, 'L': 5, 'i': 6, ...}
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>準備資料 Prompt</strong>
+            </p>
+            <pre>
+請幫我建立資料處理模組 `data.py`：
+
+功能：
+1. 定義一個名字列表（至少 100 個英文名字，例如：Emma, Liam, Olivia, Noah, Ava, Ethan, Sophia, Mason, Isabella, William, Mia, James...）
+2. 建立 Character-Level Tokenizer：
+   - 將每個名字轉換成字元列表
+   - 建立詞彙表（vocab）：包含所有出現的字元 + '<START>' + '<END>'
+   - 提供 encode() 和 decode() 函數
+3. 建立資料集類別（Dataset）：
+   - 將名字轉換成訓練用的序列對 (input, target)
+   - 例如："Emma" → input: [<START>, E, m, m, a], target: [E, m, m, a, <END>]
+4. 提供一個函數來獲取資料載入器（DataLoader）
+
+要求：
+- 使用 PyTorch 的 Dataset 和 DataLoader
+- 處理不同長度的名字（可以用 padding 或動態長度）
+- 加上詳細註解
+
+請建立 data.py 檔案，包含完整的實作。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">data.py</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">import torch
+from torch.utils.data import Dataset, DataLoader
+from collections import Counter
+
+# 名字資料集（可以擴充更多）
+NAMES = [
+    "Emma", "Liam", "Olivia", "Noah", "Ava", "Ethan", "Sophia", "Mason",
+    "Isabella", "William", "Mia", "James", "Charlotte", "Benjamin", "Amelia",
+    "Lucas", "Harper", "Henry", "Evelyn", "Alexander", "Abigail", "Michael",
+    "Emily", "Daniel", "Elizabeth", "Matthew", "Sofia", "Jackson", "Avery",
+    "David", "Ella", "Joseph", "Madison", "Samuel", "Scarlett", "Sebastian",
+    "Victoria", "Carter", "Aria", "Owen", "Grace", "Wyatt", "Chloe",
+    "John", "Penelope", "Jack", "Riley", "Luke", "Layla", "Jayden", "Nora",
+    "Dylan", "Zoey", "Grayson", "Mila", "Levi", "Aubrey", "Isaac", "Hannah",
+    "Gabriel", "Addison", "Julian", "Eleanor", "Mateo", "Natalie", "Anthony",
+    "Lily", "Jaxon", "Lillian", "Lincoln", "Aurora", "Joshua", "Savannah",
+    "Christopher", "Leah", "Andrew", "Audrey", "Theodore", "Brooklyn",
+    "Caleb", "Bella", "Ryan", "Claire", "Asher", "Skylar", "Nathan", "Lucy",
+    "Thomas", "Paisley", "Leo", "Everly", "Isaiah", "Anna", "Charles", "Caroline",
+    "Josiah", "Nova", "Hudson", "Genesis", "Christian", "Aaliyah", "Hunter",
+    "Kennedy", "Connor", "Kinsley", "Eli", "Allison", "Ezra", "Maya", "Aaron",
+    "Willow", "Landon", "Naomi", "Adrian", "Elena", "Jonathan", "Sarah",
+    "Nolan", "Ariana", "Jeremiah", "Allison", "Easton", "Gabriella", "Elias",
+    "Alice", "Colton", "Madelyn", "Cameron", "Cora", "Carson", "Ruby",
+    "Robert", "Eva", "Angel", "Serenity", "Maverick", "Autumn", "Nicholas",
+    "Adeline", "Dominic", "Hailey", "Jaxson", "Gianna", "Greyson", "Valentina",
+    "Adam", "Isla", "Ian", "Eliana", "Austin", "Quinn", "Santiago", "Nevaeh",
+    "Jordan", "Ivy", "Cooper", "Sadie", "Brayden", "Piper", "Leo", "Lydia",
+    "Jason", "Alexa", "Xavier", "Josephine", "Jose", "Emilia", "Chase", "Delilah",
+    "Kevin", "Arianna", "Zachary", "Violet", "Parker", "Ariella", "Blake", "Willow",
+    "Ayden", "Maya", "Carlos", "Liliana", "Justin", "Natalia", "Bentley", "Katherine"
+]
+
+class CharTokenizer:
+    """Character-Level Tokenizer"""
+    
+    def __init__(self, names):
+        # 建立詞彙表
+        all_chars = set()
+        for name in names:
+            all_chars.update(name)
+        
+        # 特殊 token
+        self.vocab = {'<START>': 0, '<END>': 1}
+        # 字元 token
+        for i, char in enumerate(sorted(all_chars), start=2):
+            self.vocab[char] = i
+        
+        # 反向映射
+        self.idx_to_char = {idx: char for char, idx in self.vocab.items()}
+        self.vocab_size = len(self.vocab)
+    
+    def encode(self, text):
+        """將文字轉換成 token IDs"""
+        return [self.vocab[char] for char in text]
+    
+    def decode(self, ids):
+        """將 token IDs 轉換成文字"""
+        return ''.join([self.idx_to_char[idx] for idx in ids if idx != self.vocab['<END>']])
+
+class NameDataset(Dataset):
+    """名字資料集"""
+    
+    def __init__(self, names, tokenizer):
+        self.names = names
+        self.tokenizer = tokenizer
+        self.max_len = max(len(name) for name in names) + 2  # +2 for START and END
+    
+    def __len__(self):
+        return len(self.names)
+    
+    def __getitem__(self, idx):
+        name = self.names[idx]
+        # input: [<START>, E, m, m, a]
+        # target: [E, m, m, a, <END>]
+        input_seq = [self.tokenizer.vocab['<START>']] + self.tokenizer.encode(name)
+        target_seq = self.tokenizer.encode(name) + [self.tokenizer.vocab['<END>']]
+        
+        # Padding 到相同長度
+        input_seq = input_seq + [self.tokenizer.vocab['<END>']] * (self.max_len - len(input_seq))
+        target_seq = target_seq + [self.tokenizer.vocab['<END>']] * (self.max_len - len(target_seq))
+        
+        return torch.tensor(input_seq[:self.max_len]), torch.tensor(target_seq[:self.max_len])
+
+def get_data_loader(names, tokenizer, batch_size=32, shuffle=True):
+    """建立資料載入器"""
+    dataset = NameDataset(names, tokenizer)
+    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+
+if __name__ == "__main__":
+    # 測試
+    tokenizer = CharTokenizer(NAMES)
+    print(f"詞彙表大小: {tokenizer.vocab_size}")
+    print(f"詞彙表: {tokenizer.vocab}")
+    
+    # 測試 encode/decode
+    test_name = "Emma"
+    encoded = tokenizer.encode(test_name)
+    decoded = tokenizer.decode(encoded)
+    print(f"\n測試: '{test_name}'")
+    print(f"Encoded: {encoded}")
+    print(f"Decoded: '{decoded}'")
+    
+    # 測試 Dataset
+    dataset = NameDataset(NAMES[:5], tokenizer)
+    print(f"\n資料集大小: {len(dataset)}")
+    input_seq, target_seq = dataset[0]
+    print(f"第一個樣本:")
+    print(f"  Input: {input_seq}")
+    print(f"  Target: {target_seq}")</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 4: 實作組件 -->
+        <section id="step4" class="lab-section">
+          <h2>🛠️ Step 4: 實作 Transformer 組件</h2>
+          
+          <p>
+            我們需要實作幾個核心組件：LayerNorm、Feed-Forward Network、Transformer Block。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📐 Transformer Block 結構</h4>
+            <pre>
+Transformer Block:
+  輸入 x
+    ↓
+  Multi-Head Attention
+    ↓
+  Add & Norm (Residual + LayerNorm)
+    ↓
+  Feed-Forward Network
+    ↓
+  Add & Norm (Residual + LayerNorm)
+    ↓
+  輸出
+            </pre>
+          </div>
+
+          <h3>🎯 實作步驟</h3>
+          <p>我們要實作：</p>
+          <ol class="lab-list-spacing">
+            <li>LayerNorm（層標準化）</li>
+            <li>Feed-Forward Network（前饋網路）</li>
+            <li>Transformer Block（組合所有組件）</li>
+          </ol>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>第一個 Prompt：實作 LayerNorm 和 FFN</strong>
+            </p>
+            <pre>
+請幫我實作 Transformer 的核心組件：
+
+1. LayerNorm（層標準化）：
+   - 使用 PyTorch 的 nn.LayerNorm
+   - 或手動實作：對最後一個維度進行標準化
+
+2. Feed-Forward Network（前饋網路）：
+   - 兩個線性層：d_model → d_ff → d_model
+   - 中間加上 ReLU 激活函數
+   - 可以加上 Dropout（可選）
+
+3. 建立一個簡單的測試，驗證組件是否正常工作
+
+請建立 transformer.py 檔案，包含這些組件的實作。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">transformer.py (部分)</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import math
+
+class FeedForward(nn.Module):
+    """Feed-Forward Network"""
+    
+    def __init__(self, d_model, d_ff, dropout=0.1):
+        super().__init__()
+        self.linear1 = nn.Linear(d_model, d_ff)
+        self.linear2 = nn.Linear(d_ff, d_model)
+        self.dropout = nn.Dropout(dropout)
+    
+    def forward(self, x):
+        # d_model → d_ff → d_model
+        return self.linear2(self.dropout(F.relu(self.linear1(x))))
+
+class TransformerBlock(nn.Module):
+    """Transformer Block: Attention + FFN + Residual + LayerNorm"""
+    
+    def __init__(self, d_model, num_heads, d_ff, dropout=0.1):
+        super().__init__()
+        # 注意：這裡簡化，實際需要實作 Multi-Head Attention
+        # 可以先使用 PyTorch 的 nn.MultiheadAttention
+        self.attention = nn.MultiheadAttention(d_model, num_heads, dropout=dropout, batch_first=True)
+        self.ffn = FeedForward(d_model, d_ff, dropout)
+        self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+        self.dropout = nn.Dropout(dropout)
+    
+    def forward(self, x):
+        # Self-Attention + Residual + LayerNorm
+        attn_output, _ = self.attention(x, x, x)
+        x = self.norm1(x + self.dropout(attn_output))
+        
+        # FFN + Residual + LayerNorm
+        ffn_output = self.ffn(x)
+        x = self.norm2(x + self.dropout(ffn_output))
+        
+        return x</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 5: 組裝 Transformer -->
+        <section id="step5" class="lab-section">
+          <h2>🔧 Step 5: 組裝完整 Transformer</h2>
+          
+          <p>
+            現在我們要把所有組件組裝成完整的模型！
+          </p>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>組裝 Transformer Prompt</strong>
+            </p>
+            <pre>
+請幫我組裝完整的 Transformer 模型（MiniGPT）：
+
+架構：
+1. Embedding Layer：將 token IDs 轉換成向量
+2. Positional Encoding：加上位置資訊（可以用學習式或固定式）
+3. N 個 Transformer Blocks（例如 2-4 個）
+4. Output Layer：將向量投影到詞彙表大小，用於預測下一個字
+
+參數建議：
+- d_model: 64 或 128（模型維度）
+- num_heads: 4 或 8（注意力頭數）
+- num_layers: 2 或 4（Transformer Block 數量）
+- d_ff: d_model * 4（前饋網路維度）
+
+請在 transformer.py 中建立完整的 MiniGPT 類別。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">transformer.py (完整模型)</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import math
+
+class PositionalEncoding(nn.Module):
+    """位置編碼（學習式）"""
+    
+    def __init__(self, d_model, max_len=100):
+        super().__init__()
+        self.pos_encoding = nn.Parameter(torch.randn(max_len, d_model))
+    
+    def forward(self, x):
+        seq_len = x.size(1)
+        return x + self.pos_encoding[:seq_len, :]
+
+class FeedForward(nn.Module):
+    """Feed-Forward Network"""
+    
+    def __init__(self, d_model, d_ff, dropout=0.1):
+        super().__init__()
+        self.linear1 = nn.Linear(d_model, d_ff)
+        self.linear2 = nn.Linear(d_ff, d_model)
+        self.dropout = nn.Dropout(dropout)
+    
+    def forward(self, x):
+        return self.linear2(self.dropout(F.relu(self.linear1(x))))
+
+class TransformerBlock(nn.Module):
+    """Transformer Block"""
+    
+    def __init__(self, d_model, num_heads, d_ff, dropout=0.1):
+        super().__init__()
+        self.attention = nn.MultiheadAttention(d_model, num_heads, dropout=dropout, batch_first=True)
+        self.ffn = FeedForward(d_model, d_ff, dropout)
+        self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+        self.dropout = nn.Dropout(dropout)
+    
+    def forward(self, x):
+        # Self-Attention + Residual + LayerNorm
+        attn_output, _ = self.attention(x, x, x)
+        x = self.norm1(x + self.dropout(attn_output))
+        
+        # FFN + Residual + LayerNorm
+        ffn_output = self.ffn(x)
+        x = self.norm2(x + self.dropout(ffn_output))
+        
+        return x
+
+class MiniGPT(nn.Module):
+    """迷你 GPT：Character-Level Language Model"""
+    
+    def __init__(self, vocab_size, d_model=64, num_heads=4, num_layers=2, d_ff=256, dropout=0.1, max_len=20):
+        super().__init__()
+        self.d_model = d_model
+        self.vocab_size = vocab_size
+        
+        # Embedding
+        self.embedding = nn.Embedding(vocab_size, d_model)
+        
+        # Positional Encoding
+        self.pos_encoding = PositionalEncoding(d_model, max_len)
+        
+        # Transformer Blocks
+        self.blocks = nn.ModuleList([
+            TransformerBlock(d_model, num_heads, d_ff, dropout)
+            for _ in range(num_layers)
+        ])
+        
+        # Output Layer
+        self.output = nn.Linear(d_model, vocab_size)
+        self.dropout = nn.Dropout(dropout)
+    
+    def forward(self, x):
+        # x: (batch_size, seq_len)
+        # Embedding
+        x = self.embedding(x) * math.sqrt(self.d_model)  # 縮放
+        x = self.pos_encoding(x)
+        x = self.dropout(x)
+        
+        # Transformer Blocks
+        for block in self.blocks:
+            x = block(x)
+        
+        # Output
+        logits = self.output(x)  # (batch_size, seq_len, vocab_size)
+        return logits
+    
+    def generate(self, tokenizer, start_char='<START>', max_len=10, temperature=1.0):
+        """生成名字"""
+        self.eval()
+        generated = [tokenizer.vocab[start_char]]
+        
+        with torch.no_grad():
+            for _ in range(max_len):
+                # 準備輸入
+                x = torch.tensor([generated]).long()
+                
+                # 前向傳播
+                logits = self.forward(x)
+                
+                # 取最後一個位置的 logits
+                next_logits = logits[0, -1, :] / temperature
+                
+                # 取樣
+                probs = F.softmax(next_logits, dim=-1)
+                next_token = torch.multinomial(probs, 1).item()
+                
+                # 如果遇到 <END>，停止生成
+                if next_token == tokenizer.vocab['<END>']:
+                    break
+                
+                generated.append(next_token)
+        
+        # 移除 <START>
+        generated = generated[1:] if generated[0] == tokenizer.vocab['<START>'] else generated
+        return tokenizer.decode(generated)</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 6: 訓練與生成 -->
+        <section id="step6" class="lab-section">
+          <h2>🚀 Step 6: 訓練與生成名字</h2>
+          
+          <p>
+            最激動人心的時刻！訓練你的第一個 AI 創作者，看著它從亂碼到能生成有意義的名字！
+          </p>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>訓練 Prompt</strong>
+            </p>
+            <pre>
+請幫我建立訓練腳本 `train.py`：
+
+功能：
+1. 載入資料和建立資料載入器
+2. 初始化模型（MiniGPT）
+3. 設定優化器（Adam）和損失函數（CrossEntropyLoss）
+4. 訓練迴圈：
+   - 對每個 epoch
+   - 對每個 batch
+   - 前向傳播、計算損失、反向傳播、更新參數
+   - 定期打印損失和進度
+5. 保存模型
+
+要求：
+- 訓練約 50-100 個 epochs
+- 每 10 個 epochs 打印一次損失
+- 保存最佳模型（loss 最低的）
+- 加上詳細註解
+
+請建立 train.py 檔案，包含完整的訓練流程。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">train.py</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">import torch
+import torch.nn as nn
+import torch.optim as optim
+from data import NAMES, CharTokenizer, get_data_loader
+from transformer import MiniGPT
+
+# 設定
+BATCH_SIZE = 32
+LEARNING_RATE = 0.001
+NUM_EPOCHS = 100
+D_MODEL = 64
+NUM_HEADS = 4
+NUM_LAYERS = 2
+D_FF = 256
+
+# 建立 tokenizer 和資料載入器
+tokenizer = CharTokenizer(NAMES)
+train_loader = get_data_loader(NAMES, tokenizer, batch_size=BATCH_SIZE)
+
+# 建立模型
+model = MiniGPT(
+    vocab_size=tokenizer.vocab_size,
+    d_model=D_MODEL,
+    num_heads=NUM_HEADS,
+    num_layers=NUM_LAYERS,
+    d_ff=D_FF
+)
+
+# 優化器和損失函數
+optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+criterion = nn.CrossEntropyLoss(ignore_index=tokenizer.vocab['<END>'])
+
+# 訓練
+print("開始訓練名字生成器...")
+print(f"模型參數數量: {sum(p.numel() for p in model.parameters()):,}")
+print(f"訓練資料: {len(NAMES)} 個名字")
+print("-" * 60)
+
+best_loss = float('inf')
+
+for epoch in range(NUM_EPOCHS):
+    model.train()
+    total_loss = 0
+    
+    for batch_idx, (input_seq, target_seq) in enumerate(train_loader):
+        # 前向傳播
+        logits = model(input_seq)  # (batch_size, seq_len, vocab_size)
+        
+        # 計算損失（需要 reshape）
+        logits = logits.view(-1, logits.size(-1))  # (batch_size * seq_len, vocab_size)
+        targets = target_seq.view(-1)  # (batch_size * seq_len)
+        
+        loss = criterion(logits, targets)
+        
+        # 反向傳播
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+        total_loss += loss.item()
+    
+    avg_loss = total_loss / len(train_loader)
+    
+    # 每 10 個 epochs 打印一次
+    if (epoch + 1) % 10 == 0:
+        print(f"Epoch {epoch+1}/{NUM_EPOCHS}, Loss: {avg_loss:.4f}")
+        
+        # 生成幾個名字看看效果
+        model.eval()
+        print("  生成的名字:")
+        for _ in range(5):
+            name = model.generate(tokenizer, max_len=10)
+            print(f"    - {name}")
+        print()
+    
+    # 保存最佳模型
+    if avg_loss < best_loss:
+        best_loss = avg_loss
+        torch.save(model.state_dict(), 'best_model.pth')
+
+print("訓練完成！")
+print(f"最佳損失: {best_loss:.4f}")
+print("模型已保存為 'best_model.pth'")</code></pre>
+            </div>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              <strong>生成名字 Prompt</strong>
+            </p>
+            <pre>
+請幫我建立生成腳本 `generate.py`：
+
+功能：
+1. 載入訓練好的模型
+2. 使用模型的 generate() 方法生成名字
+3. 生成多個名字（例如 20 個）
+4. 可以調整 temperature 參數（控制創造性）
+
+要求：
+- 載入 best_model.pth
+- 生成 20 個名字
+- 可以嘗試不同的 temperature（0.5, 1.0, 1.5）
+- 顯示生成結果
+
+請建立 generate.py 檔案。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">generate.py</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">import torch
+from data import NAMES, CharTokenizer
+from transformer import MiniGPT
+
+# 載入 tokenizer
+tokenizer = CharTokenizer(NAMES)
+
+# 建立模型（參數要和訓練時一樣）
+model = MiniGPT(
+    vocab_size=tokenizer.vocab_size,
+    d_model=64,
+    num_heads=4,
+    num_layers=2,
+    d_ff=256
+)
+
+# 載入訓練好的權重
+model.load_state_dict(torch.load('best_model.pth'))
+model.eval()
+
+print("🎨 名字生成器")
+print("=" * 60)
+
+# 生成名字
+num_names = 20
+temperatures = [0.5, 1.0, 1.5]
+
+for temp in temperatures:
+    print(f"\n🌡️ Temperature = {temp} (創造性: {'低' if temp < 1 else '中' if temp == 1 else '高'})")
+    print("-" * 60)
+    
+    generated_names = []
+    for _ in range(num_names):
+        name = model.generate(tokenizer, max_len=10, temperature=temp)
+        if name and name not in generated_names:  # 避免重複
+            generated_names.append(name)
+            print(f"  ✨ {name}")
+    
+    print(f"\n  共生成 {len(generated_names)} 個不重複的名字")
+
+print("\n" + "=" * 60)
+print("✅ 生成完成！")</code></pre>
+            </div>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              <strong>執行訓練</strong>
+            </p>
+            <pre>
+請幫我執行訓練並檢查結果：
+
+1. 在虛擬環境中執行：python train.py
+2. 觀察訓練過程，檢查損失是否下降
+3. 查看生成的名字是否越來越合理
+4. 如果有錯誤，請幫我修正
+
+訓練可能需要幾分鐘到十幾分鐘，請耐心等待。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-expected-output">
+            <pre>
+開始訓練名字生成器...
+模型參數數量: 45,234
+訓練資料: 100 個名字
+------------------------------------------------------------
+Epoch 10/100, Loss: 2.3456
+  生成的名字:
+    - Emlia
+    - Noaven
+    - Sophiam
+    - Livianna
+    - Jamesly
+
+Epoch 20/100, Loss: 1.8923
+  生成的名字:
+    - Emma
+    - Liam
+    - Olivia
+    - Noah
+    - Ava
+
+Epoch 30/100, Loss: 1.4567
+  生成的名字:
+    - Emmar
+    - Liama
+    - Olivian
+    - Noahan
+    - Avara
+
+...
+
+訓練完成！
+最佳損失: 0.8234
+模型已保存為 'best_model.pth'
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              <strong>執行生成</strong>
+            </p>
+            <pre>
+請幫我執行生成腳本並檢查結果：
+
+1. 在虛擬環境中執行：python generate.py
+2. 查看生成的名字
+3. 比較不同 temperature 的效果
+4. 如果有錯誤，請幫我修正
+
+請執行生成並告訴我結果。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+        </section>
+
+        <!-- Challenge -->
+        <div class="lab-challenge lab-spacing-top-lg">
+          <h4>💪 挑戰任務</h4>
+          <p>
+            <strong>進階挑戰 1：</strong>
+            用中文名字資料集訓練！收集 100+ 個中文名字，看看 AI 能生成什麼。
+          </p>
+          <p>
+            <strong>進階挑戰 2：</strong>
+            訓練一個「詩詞生成器」：用古詩詞資料集，讓 AI 學會寫詩。
+          </p>
+          <p>
+            <strong>進階挑戰 3：</strong>
+            調整模型大小：試試更大的模型（d_model=128, num_layers=4），看看效果如何。
+          </p>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="lab-setup lab-spacing-top-lg">
+          <h4>🎯 下一步</h4>
+          <ul>
+            <li>
+              ✅ 恭喜！你已經從零開始組裝了完整的 Transformer，並訓練了你的第一個 AI 創作者！
+            </li>
+            <li>
+              ➡️ 接下來我們要進入 <strong>Phase 3: 語言模型訓練</strong>：
+              用真實的大資料集訓練 GPT-2 風格的模型！
+            </li>
+            <li>
+              📚 建議：先完成挑戰任務，再進入下一個 Phase。
+            </li>
+          </ul>
+        </div>
+
+        <div class="chapter-nav lab-spacing-top-lg">
+          <a href="../index.html" class="nav-link">← 返回 Phase 2</a>
+          <a href="../02-multihead-attention/index.html" class="nav-link">← 上一個實驗：多角度分析器</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function copyPrompt(btn) {
+        const promptBlock = btn.closest(".ai-prompt-block");
+        const preElement = promptBlock.querySelector("pre");
+        const text = preElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.classList.add("copied");
+          btn.textContent = "✓ 已複製！";
+          setTimeout(() => {
+            btn.classList.remove("copied");
+            btn.textContent = "📋 複製 Prompt";
+          }, 2000);
+        });
+      }
+
+      function toggleCodeBlock(header) {
+        const codeBlock = header.closest(".lab-code-block");
+        const toggleBtn = header.querySelector(".toggle-btn");
+        
+        codeBlock.classList.toggle("collapsed");
+        
+        if (codeBlock.classList.contains("collapsed")) {
+          toggleBtn.textContent = "展開";
+        } else {
+          toggleBtn.textContent = "收起";
+        }
+      }
+
+      function copyCode(btn) {
+        const codeBlock = btn.closest(".lab-code-block");
+        const codeElement = codeBlock.querySelector("pre code");
+        const text = codeElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = "✓ 已複製";
+          setTimeout(() => {
+            btn.textContent = "複製";
+          }, 2000);
+        });
+      }
+
+      function copyTerminal(btn) {
+        const terminalBlock = btn.closest(".terminal-command");
+        const codeElement = terminalBlock.querySelector("code");
+        const text = codeElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = "✓ 已複製";
+          setTimeout(() => {
+            btn.textContent = "📋 複製指令";
+          }, 2000);
+        });
+      }
+    </script>
+  </body>
+</html>

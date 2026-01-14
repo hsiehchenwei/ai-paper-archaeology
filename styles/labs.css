@@ -1,0 +1,1079 @@
+/* ==========================================
+   AI Paper Archaeology - Labs 實驗室樣式
+   Playground Style: 童趣 × 活潑 × 動感
+   Based on Claymorphism + Neubrutalism + Vibrant Block
+   ========================================== */
+
+/* --- 0. Playground 專用變數 --- */
+:root {
+  /* Playful Palette - 柔和童趣色系 */
+  --play-peach: #FDBCB4;
+  --play-blue: #ADD8E6;
+  --play-mint: #98FF98;
+  --play-lilac: #E6E6FA;
+  --play-yellow: #FFEB3B;
+  --play-pink: #FFB6C1;
+  --play-coral: #FF7F50;
+  
+  /* Neubrutalism 撞色 */
+  --neo-yellow: #FFDE59;
+  --neo-red: #FF5757;
+  --neo-blue: #2196F3;
+  --neo-black: #000000;
+  
+  /* Clay Shadows - 柔軟立體 */
+  --clay-shadow-sm: -4px -4px 8px rgba(255, 255, 255, 0.8), 4px 4px 8px rgba(0, 0, 0, 0.1);
+  --clay-shadow-md: -6px -6px 12px rgba(255, 255, 255, 0.9), 6px 6px 12px rgba(0, 0, 0, 0.15);
+  --clay-shadow-lg: -8px -8px 16px rgba(255, 255, 255, 0.95), 8px 8px 16px rgba(0, 0, 0, 0.2);
+  
+  /* Bold Shadows - 大膽陰影 */
+  --bold-shadow: 6px 6px 0 var(--neo-black);
+  --bold-shadow-hover: 8px 8px 0 var(--neo-black);
+  
+  /* Rounded */
+  --round-lg: 24px;
+  --round-xl: 32px;
+  --round-full: 999px;
+}
+
+/* --- 1. Hero Section - 3D Playground 入口 --- */
+.hero-section-labs {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  position: relative;
+  overflow: hidden;
+  height: 50vh;
+  margin: -40px -40px 60px -40px;
+  border-radius: 0 0 40px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 15px 30px rgba(118, 75, 162, 0.3);
+}
+
+/* 3D Geometric Shapes Animation */
+.hero-section-labs::before {
+  content: "";
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  top: -100px;
+  right: 10%;
+  animation: floatShape 6s ease-in-out infinite;
+}
+
+.hero-section-labs::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  bottom: -75px;
+  left: 15%;
+  animation: floatShape 8s ease-in-out infinite reverse;
+}
+
+@keyframes floatShape {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(10deg); }
+}
+
+.hero-content h1 {
+  font-size: 4rem;
+  font-weight: 900;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: titlePulse 3s ease-in-out infinite;
+}
+
+@keyframes titlePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+/* --- 2. Phase Card - Clay + Bold Shadows --- */
+.phase-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: var(--round-xl);
+  padding: 0;
+  margin: 60px 0;
+  border: 4px solid var(--neo-black);
+  box-shadow: var(--bold-shadow);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  overflow: hidden;
+  position: relative;
+}
+
+.phase-card:hover {
+  box-shadow: var(--bold-shadow-hover);
+  transform: translate(-2px, -2px);
+}
+
+.phase-header {
+  background: var(--play-blue);
+  padding: 30px 40px;
+  border-bottom: 4px solid var(--neo-black);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+}
+
+.phase-number {
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: rgba(0, 0, 0, 0.08);
+  position: absolute;
+  top: 10px;
+  right: 30px;
+  pointer-events: none;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.phase-icon-box {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  background: white;
+  border: 4px solid var(--neo-black);
+  box-shadow: 4px 4px 0 var(--neo-black);
+  transform: rotate(-5deg);
+  transition: transform 0.3s;
+}
+
+.phase-card:hover .phase-icon-box {
+  transform: rotate(5deg) scale(1.1);
+  animation: wiggle 0.5s ease-in-out;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(5deg) scale(1.1); }
+  25% { transform: rotate(-5deg) scale(1.1); }
+  75% { transform: rotate(10deg) scale(1.1); }
+}
+
+.phase-info {
+  flex: 1;
+}
+
+.phase-info h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: #1a202c;
+  font-weight: 800;
+  line-height: 1.2;
+  text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.5);
+}
+
+.phase-badges {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.phase-badge {
+  padding: 6px 14px;
+  border-radius: var(--round-full);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 2px solid var(--neo-black);
+  box-shadow: 2px 2px 0 var(--neo-black);
+}
+
+.phase-badge-beginner { 
+  background: var(--play-mint); 
+  color: #065f46; 
+}
+
+.phase-badge-intermediate { 
+  background: var(--play-yellow); 
+  color: #78350f; 
+}
+
+.phase-badge-advanced { 
+  background: var(--play-coral); 
+  color: #7f1d1d; 
+}
+
+.phase-body {
+  padding: 40px;
+  background: white;
+}
+
+.phase-description {
+  font-size: 1.15rem;
+  color: #374151;
+  line-height: 1.8;
+  margin-bottom: 30px;
+  font-weight: 500;
+}
+
+.phase-labs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+/* --- 3. Lab Card - Soft Clay 風格 --- */
+.lab-card {
+  display: block;
+  background: linear-gradient(135deg, var(--play-lilac) 0%, #f3f4f6 100%);
+  border: 3px solid var(--neo-black);
+  border-radius: 20px;
+  padding: 24px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: visible;
+  box-shadow: var(--clay-shadow-sm);
+}
+
+.lab-card:hover {
+  box-shadow: var(--clay-shadow-md);
+  transform: translateY(-5px) scale(1.02);
+}
+
+.lab-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.lab-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  color: white;
+  background: var(--neo-black);
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-weight: 800;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.lab-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.4rem;
+  color: #1e293b;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.lab-card p {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  color: #475569;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.lab-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #1e293b;
+  border-top: 2px dashed #cbd5e1;
+  padding-top: 12px;
+  font-weight: 600;
+}
+
+.lab-meta span {
+  background: white;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 2px solid var(--neo-black);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.phase-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 18px;
+  background: var(--neo-yellow);
+  color: var(--neo-black);
+  border-radius: 16px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.2s;
+  border: 4px solid var(--neo-black);
+  box-shadow: 6px 6px 0 var(--neo-black);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.phase-link:hover {
+  background: var(--neo-blue);
+  color: white;
+  box-shadow: 8px 8px 0 var(--neo-black);
+  transform: translate(-2px, -2px);
+}
+
+/* --- 4. Coming Soon 狀態 - 施工圖樣 --- */
+.phase-card.coming-soon {
+  opacity: 0.85;
+  background: repeating-linear-gradient(
+    45deg,
+    #ffffff,
+    #ffffff 20px,
+    #fafafa 20px,
+    #fafafa 40px
+  );
+  border: 4px dashed #cbd5e1;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.phase-card.coming-soon .phase-header {
+  background: #f1f5f9;
+  border-bottom: 3px dashed #cbd5e1;
+}
+
+.phase-card.coming-soon .phase-icon-box {
+  background: #e2e8f0;
+  color: #94a3b8;
+  box-shadow: 3px 3px 0 #cbd5e1;
+  border-color: #cbd5e1;
+  filter: grayscale(1);
+}
+
+.phase-card.coming-soon .phase-info h2 {
+  color: #64748b;
+}
+
+.lab-card.locked {
+  background: #f8fafc;
+  border: 3px dashed #cbd5e1;
+  cursor: not-allowed;
+  box-shadow: none;
+  filter: grayscale(0.8);
+}
+
+.lab-card.locked:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.lab-card.locked h3,
+.lab-card.locked p {
+  color: #94a3b8;
+}
+
+.lab-card.locked .lab-number {
+  background: #cbd5e1;
+  color: #64748b;
+  box-shadow: none;
+}
+
+.lab-card.locked::after {
+  content: "🚧 施工中";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px 20px;
+  border-radius: var(--round-full);
+  font-weight: 800;
+  color: #64748b;
+  border: 3px dashed #cbd5e1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.phase-card.coming-soon .phase-link {
+  background: #e2e8f0;
+  color: #94a3b8;
+  border: 3px dashed #cbd5e1;
+  box-shadow: none;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* --- 5. 首頁卡片樣式 - 更活潑 --- */
+.card-image-gradient {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 加入浮動形狀動畫 */
+.card-image-gradient::before {
+  content: "";
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  top: 20%;
+  left: 15%;
+  animation: floatBubble 4s ease-in-out infinite;
+}
+
+@keyframes floatBubble {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-15px) scale(1.1); }
+}
+
+.card-image-gradient-green { 
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); 
+}
+
+.card-image-gradient-blue { 
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+}
+
+.card-image-gradient-purple { 
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+}
+
+.card-image-gradient-orange { 
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); 
+}
+
+.card-image-gradient-red { 
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); 
+}
+
+.phase-icon {
+  font-size: 4rem;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  animation: iconBounce 2s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes iconBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Coming Soon 卡片覆蓋 */
+.magazine-card.coming-soon {
+  opacity: 0.75;
+  filter: grayscale(0.7);
+  pointer-events: none;
+  position: relative;
+  border: 3px dashed #cbd5e1;
+  background: repeating-linear-gradient(
+    45deg,
+    #ffffff,
+    #ffffff 15px,
+    #f8fafc 15px,
+    #f8fafc 30px
+  );
+}
+
+.magazine-card.coming-soon::after {
+  content: "🚧 Coming Soon";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 12px 24px;
+  border-radius: var(--round-full);
+  font-weight: 800;
+  color: #475569;
+  border: 3px solid #cbd5e1;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  font-size: 1rem;
+}
+
+.magazine-card.coming-soon .card-image-wrapper {
+  background: #e2e8f0 !important;
+  filter: grayscale(1);
+}
+
+.magazine-card.coming-soon .phase-icon {
+  animation: none;
+  opacity: 0.4;
+}
+
+/* --- 6. Lab Step Navigation - Bubble Style --- */
+.lab-steps {
+  display: flex;
+  gap: 12px;
+  margin: 40px 0;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 20px;
+  overflow-x: auto;
+  border: 3px solid var(--neo-black);
+  box-shadow: 4px 4px 0 var(--neo-black);
+}
+
+.lab-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  color: #475569;
+  text-decoration: none;
+  font-weight: 700;
+  border-radius: var(--round-full);
+  transition: all 0.2s;
+  white-space: nowrap;
+  background: white;
+  border: 3px solid transparent;
+  box-shadow: var(--clay-shadow-sm);
+}
+
+.lab-step:hover {
+  background: var(--play-yellow);
+  color: var(--neo-black);
+  transform: translateY(-2px);
+  box-shadow: var(--clay-shadow-md);
+}
+
+.lab-step.active {
+  background: var(--neo-blue);
+  color: white;
+  border-color: var(--neo-black);
+  box-shadow: 3px 3px 0 var(--neo-black);
+}
+
+.lab-step.completed {
+  background: var(--play-mint);
+  color: #065f46;
+  border-color: #10b981;
+  box-shadow: 2px 2px 0 #10b981;
+}
+
+.lab-step.completed::before {
+  content: "✓";
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+/* --- 7. AI Prompt Block - 玩味強化 --- */
+.ai-prompt-block {
+  background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+  border: 4px solid var(--neo-black);
+  border-radius: 20px;
+  padding: 28px;
+  margin: 40px 0 30px 0; /* 增加頂部間距，為 ::before 標籤留空間 */
+  position: relative;
+  box-shadow: 6px 6px 0 var(--neo-black);
+  transition: all 0.2s;
+  z-index: 2; /* 確保在 code-block 之上 */
+}
+
+.ai-prompt-block:hover {
+  box-shadow: 8px 8px 0 var(--neo-black);
+  transform: translate(-2px, -2px);
+}
+
+.ai-prompt-block::before {
+  content: "🤖 AI Prompt";
+  position: absolute;
+  top: -14px;
+  left: 24px;
+  background: var(--neo-black);
+  color: var(--neo-yellow);
+  padding: 8px 18px;
+  border-radius: var(--round-full);
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
+  z-index: 3; /* 確保標籤在最上層 */
+}
+
+.ai-prompt-block pre {
+  background: #1e293b;
+  color: #f1f5f9;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  border: 3px solid var(--neo-black);
+}
+
+.ai-prompt-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px 24px;
+  background: var(--neo-yellow);
+  color: var(--neo-black);
+  border: 3px solid var(--neo-black);
+  border-radius: var(--round-full);
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 4px 4px 0 var(--neo-black);
+  text-transform: uppercase;
+}
+
+.ai-prompt-copy-btn:hover {
+  background: var(--play-mint);
+  box-shadow: 6px 6px 0 var(--neo-black);
+  transform: translate(-2px, -2px);
+}
+
+.ai-prompt-copy-btn.copied {
+  background: var(--play-mint);
+}
+
+.ai-prompt-copy-btn.copied::after {
+  content: " ✓";
+}
+
+/* --- 8. Lab Setup Box - 工具箱風格 --- */
+.lab-setup {
+  background: var(--play-peach);
+  border-radius: 20px;
+  padding: 32px;
+  border: 4px solid var(--neo-black);
+  box-shadow: 6px 6px 0 var(--neo-black);
+  position: relative;
+}
+
+.lab-setup::before {
+  content: "⚙️";
+  position: absolute;
+  font-size: 4rem;
+  top: -20px;
+  right: 20px;
+  opacity: 0.1;
+  transform: rotate(-15deg);
+}
+
+.lab-setup h4 {
+  margin-top: 0;
+  color: var(--neo-black);
+  font-weight: 800;
+  font-size: 1.3rem;
+}
+
+.lab-setup ul {
+  padding-left: 24px;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.lab-setup li {
+  margin-bottom: 8px;
+}
+
+/* --- 9. Code Block - Terminal 風格 --- */
+.lab-code-block {
+  position: relative;
+  margin: 30px 0;
+  margin-bottom: 40px; /* 增加底部間距，避免與下方元素重疊 */
+  border-radius: 16px;
+  overflow: hidden; /* 保持 hidden，避免內容溢出 */
+  border: 4px solid var(--neo-black);
+  box-shadow: 6px 6px 0 var(--neo-black);
+  z-index: 1; /* 確保層級 */
+}
+
+.lab-code-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: #1e293b;
+  color: #f1f5f9;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  border-bottom: 2px solid var(--neo-black);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.lab-code-block-header:hover {
+  background: #334155;
+}
+
+.lab-code-block-header .filename {
+  font-weight: 700;
+  flex: 1;
+}
+
+.lab-code-block-header .header-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.lab-code-block-header .toggle-btn {
+  background: transparent;
+  color: #f1f5f9;
+  border: 2px solid #f1f5f9;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lab-code-block-header .toggle-btn:hover {
+  background: var(--play-mint);
+  color: var(--neo-black);
+  border-color: var(--neo-black);
+  transform: scale(1.05);
+}
+
+.lab-code-block.collapsed .toggle-btn::before {
+  content: "▶";
+  display: inline-block;
+  transition: transform 0.3s;
+}
+
+.lab-code-block:not(.collapsed) .toggle-btn::before {
+  content: "▼";
+  display: inline-block;
+  transition: transform 0.3s;
+}
+
+.lab-code-block-header .copy-btn {
+  background: var(--neo-yellow);
+  color: var(--neo-black);
+  border: 2px solid var(--neo-black);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.lab-code-block-header .copy-btn:hover {
+  background: var(--play-mint);
+  transform: scale(1.05);
+}
+
+.lab-code-block-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-out;
+  background: #0f172a;
+  position: relative;
+  z-index: 1;
+  border-radius: 0 0 12px 12px; /* 底部圓角，與 header 配合 */
+}
+
+.lab-code-block:not(.collapsed) .lab-code-block-content {
+  max-height: 5000px;
+  transition: max-height 0.6s ease-in;
+}
+
+.lab-code-block pre {
+  margin: 0;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 20px;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+/* --- 10. Expected Output - 綠色勾勾 --- */
+.lab-expected-output {
+  background: linear-gradient(135deg, var(--play-mint) 0%, #d1fae5 100%);
+  border: 4px solid #10b981;
+  border-radius: 20px;
+  padding: 24px;
+  margin: 40px 0 30px 0; /* 增加頂部間距 */
+  box-shadow: 6px 6px 0 #10b981;
+  position: relative;
+  z-index: 1; /* 確保層級 */
+}
+
+.lab-expected-output::before {
+  content: "✓ 預期輸出";
+  display: block;
+  font-weight: 800;
+  color: #065f46;
+  margin-bottom: 16px;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative; /* 確保不與上方元素重疊 */
+  z-index: 1;
+}
+
+.lab-expected-output pre {
+  background: white;
+  color: #1e293b;
+  padding: 16px;
+  border-radius: 12px;
+  margin: 0;
+  border: 3px solid #10b981;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* --- 11. Lab Challenge - 寶箱風格 --- */
+.lab-challenge {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 4px solid #f59e0b;
+  border-radius: 20px;
+  padding: 28px;
+  margin: 30px 0;
+  box-shadow: 6px 6px 0 #f59e0b;
+  position: relative;
+}
+
+.lab-challenge::before {
+  content: "💡";
+  position: absolute;
+  font-size: 3rem;
+  top: -15px;
+  right: 20px;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+  animation: challengePulse 2s ease-in-out infinite;
+}
+
+@keyframes challengePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.lab-challenge h4 {
+  color: #92400e;
+  margin-top: 0;
+  font-weight: 800;
+  font-size: 1.2rem;
+}
+
+.lab-challenge p {
+  color: #78350f;
+  margin-bottom: 0;
+  font-weight: 500;
+}
+
+/* --- 13. Visual Diagram - 視覺化圖表區塊 --- */
+.visual-diagram {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 4px solid #f59e0b;
+  border-radius: 20px;
+  padding: 24px;
+  margin: 40px 0 30px 0; /* 增加頂部間距，避免與上方元素重疊 */
+  box-shadow: 6px 6px 0 #f59e0b;
+  position: relative;
+  z-index: 1; /* 確保層級 */
+}
+
+.visual-diagram h4 {
+  color: #92400e;
+  margin-top: 0;
+  font-weight: 800;
+  font-size: 1.2rem;
+}
+
+.visual-diagram p {
+  color: #78350f !important; /* 確保深色文字在淺色背景上可見 */
+  margin-bottom: 16px;
+  font-weight: 500;
+  line-height: 1.7;
+}
+
+.visual-diagram pre {
+  background: white;
+  color: #1e293b !important; /* 深色文字 */
+  padding: 16px;
+  border-radius: 12px;
+  border: 3px solid #f59e0b;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  margin: 0;
+}
+
+/* --- 14. Terminal Command Block - 終端指令區塊 --- */
+.terminal-command {
+  background: #0f172a;
+  border: 4px solid var(--neo-black);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 40px 0 20px 0; /* 增加頂部間距，為 ::before 標籤留空間 */
+  box-shadow: 6px 6px 0 var(--neo-black);
+  position: relative;
+  z-index: 1; /* 確保層級 */
+}
+
+.terminal-command::before {
+  content: "💻 Terminal";
+  position: absolute;
+  top: -14px;
+  left: 24px;
+  background: var(--neo-black);
+  color: var(--neo-yellow);
+  padding: 6px 14px;
+  border-radius: var(--round-full);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: 'Fredoka', sans-serif;
+  z-index: 3; /* 確保標籤在最上層 */
+}
+
+.terminal-command code {
+  display: block;
+  color: #10b981;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  margin: 0;
+}
+
+.terminal-command .copy-terminal-btn {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: var(--neo-yellow);
+  color: var(--neo-black);
+  border: 2px solid var(--neo-black);
+  border-radius: var(--round-full);
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 3px 3px 0 var(--neo-black);
+  text-transform: uppercase;
+  font-family: 'Fredoka', sans-serif;
+}
+
+.terminal-command .copy-terminal-btn:hover {
+  background: var(--play-mint);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--neo-black);
+}
+
+/* --- 15. Utility Classes - 工具類別（替代 inline style）--- */
+.lab-intro-text {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin-bottom: 30px;
+}
+
+.lab-section {
+  margin-top: 60px;
+}
+
+.lab-list-spacing {
+  line-height: 2;
+  color: #374151;
+}
+
+.lab-list-spacing li {
+  margin-bottom: 8px;
+}
+
+.lab-spacing-top {
+  margin-top: 30px;
+}
+
+.lab-spacing-top-lg {
+  margin-top: 60px;
+}
+
+/* 確保所有文字在淺色背景上都是深色 */
+.visual-diagram * {
+  color: inherit;
+}
+
+.visual-diagram p,
+.visual-diagram li,
+.visual-diagram span {
+  color: #78350f !important;
+}
+
+.visual-diagram code,
+.visual-diagram pre {
+  color: #1e293b !important;
+  background: white;
+}
+
+/* --- 12. Responsive 響應式 --- */
+@media (max-width: 768px) {
+  .hero-section-labs {
+    margin: -20px -20px 40px -20px;
+    height: 40vh;
+    border-radius: 0 0 30px 30px;
+  }
+  
+  .hero-content h1 {
+    font-size: 2.5rem;
+  }
+  
+  .phase-card {
+    margin: 40px 0;
+  }
+  
+  .phase-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+  }
+  
+  .phase-icon-box {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+  
+  .phase-number {
+    font-size: 3rem;
+    right: 15px;
+  }
+  
+  .phase-body {
+    padding: 24px;
+  }
+  
+  .phase-labs {
+    grid-template-columns: 1fr;
+  }
+  
+  .lab-card {
+    padding: 20px;
+  }
+  
+  .phase-link {
+    font-size: 1rem;
+    padding: 16px;
+  }
+  
+  .lab-steps {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .lab-step {
+    width: 100%;
+    justify-content: center;
+  }
+}

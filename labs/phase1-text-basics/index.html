@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 1: 文字處理基礎 - AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../styles/global.css" />
+    <link rel="stylesheet" href="../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Hero Section -->
+      <div class="hero-section-labs">
+        <div class="hero-content">
+          <h1>📝 Phase 1: 文字處理基礎</h1>
+          <p class="hero-subtitle">
+            理解 AI 如何「看懂」文字：從切割到向量化，每一步都是魔法 ✨
+          </p>
+          <p class="hero-meta">
+            3 個實驗 × 1.5 小時 = 掌握 NLP 的基礎技能！
+          </p>
+        </div>
+      </div>
+
+      <!-- Phase Overview -->
+      <div class="story-container">
+        <h2>🎯 學習目標</h2>
+        <p>
+          在這個 Phase，你將學會 AI 處理文字的三個核心技能：
+          <strong>Tokenization</strong>（文字切割）、
+          <strong>Embedding</strong>（文字變向量）、
+          <strong>位置編碼</strong>（讓模型理解順序）。
+        </p>
+        <p>
+          這些是所有 NLP 模型的基礎！就像學中文要先學注音符號一樣，
+          理解這些概念後，你就能看懂 GPT、BERT 等模型是如何「思考」的。
+        </p>
+
+        <!-- Lab Cards -->
+        <div class="phase-labs lab-spacing-top">
+          <a href="01-tokenization/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">1.1</span>
+            </div>
+            <h3>Tokenization</h3>
+            <p>文字切割的藝術：BPE 演算法實作</p>
+            <div class="lab-meta">
+              <span>30 分鐘</span>
+              <span>BPE</span>
+              <span>tiktoken</span>
+            </div>
+          </a>
+
+          <a href="02-embedding/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">1.2</span>
+            </div>
+            <h3>Embedding</h3>
+            <p>文字變向量：Word2Vec 視覺化</p>
+            <div class="lab-meta">
+              <span>45 分鐘</span>
+              <span>Word2Vec</span>
+              <span>視覺化</span>
+            </div>
+          </a>
+
+          <a href="03-positional-encoding/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">1.3</span>
+            </div>
+            <h3>位置編碼</h3>
+            <p>讓模型理解順序：正弦編碼與 RoPE</p>
+            <div class="lab-meta">
+              <span>30 分鐘</span>
+              <span>正弦編碼</span>
+              <span>RoPE</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- Learning Tips -->
+        <div class="lab-setup lab-spacing-top-lg">
+          <h4>💡 學習秘訣</h4>
+          <ul>
+            <li>
+              <strong>⚠️ 重要：請使用 Python 虛擬環境！</strong>
+              每個實驗都應該在獨立的虛擬環境中進行，避免套件衝突。
+              所有 AI Prompt 都會提醒你建立虛擬環境。
+            </li>
+            <li>
+              每個實驗都有「🤖 AI Prompt」區塊，可以直接複製給 Cursor 或 Claude Code，
+              讓 AI 成為你的程式導師！
+            </li>
+            <li>
+              建議按照 1.1 → 1.2 → 1.3 的順序學習，每個實驗都建立在前一個的基礎上。
+            </li>
+            <li>
+              所有程式碼都可以在 Mac 128GB 本機運行，無需 GPU。
+            </li>
+            <li>
+              重點是「視覺化」！我們會用圖表、動畫幫助你理解抽象概念。
+            </li>
+          </ul>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="../index.html" class="nav-link">← 返回路線圖</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

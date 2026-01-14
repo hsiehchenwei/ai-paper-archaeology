@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RAG 原始論文：檢索增強生成的誕生 | RAG 演進史</title>
+    <meta name="description" content="Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks 深度解析。Patrick Lewis 等人正式定義 RAG 架構，DPR + BART 經典組合。" />
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../styles/articles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- 麵包屑導航 -->
+      <div class="breadcrumb">
+        <a href="../index.html">🏠 首頁</a> / 
+        <a href="index.html">📚 RAG 演進史</a> / 
+        RAG 原始論文
+      </div>
+
+      <!-- 論文資訊卡 -->
+      <div class="index-header" style="background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));">
+        <h1>⭐ RAG 原始論文</h1>
+        <p>Retrieval-Augmented Generation for<br />Knowledge-Intensive NLP Tasks</p>
+        <p style="font-size: 0.9rem; margin-top: 15px; opacity: 0.95;">
+          Patrick Lewis, Ethan Perez, Aleksandra Piktus, et al.<br />
+          <strong>Facebook AI Research (Meta)</strong> · 2020 年 5 月
+        </p>
+        <p style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; margin-top: 15px; font-size: 0.9rem;">
+          🏆 定義「RAG」名稱與架構的經典論文
+        </p>
+      </div>
+
+      <!-- 一句話總結 -->
+      <div class="key-concept">
+        <h4>💡 一句話總結</h4>
+        <p style="font-size: 1.1rem;">
+          RAG 將 <strong>Dense Passage Retrieval (DPR)</strong> 檢索器與 <strong>BART</strong> 生成器結合，
+          創造出既能「查資料」又能「寫答案」的強大模型，成為所有後續 RAG 系統的基礎架構。
+        </p>
+      </div>
+
+      <!-- 論文 PDF 連結 -->
+      <div style="background: var(--primary-light); padding: 15px; border-radius: var(--radius-md); margin: 30px 0; text-align: center;">
+        <a href="papers/rag.pdf" target="_blank" style="color: var(--primary-color); font-weight: 600; text-decoration: none; font-size: 1.05rem;">
+          📄 下載論文原文 PDF →
+        </a>
+      </div>
+
+      <!-- Abstract 摘要 -->
+      <h2>📄 Abstract (摘要)</h2>
+
+      <div class="original-quote">
+        <strong>📄 論文原文</strong><br><br>
+        "Large pre-trained language models have been shown to store factual knowledge in their parameters, and achieve state-of-the-art results when fine-tuned on downstream NLP tasks. However, their ability to access and precisely manipulate knowledge is still limited, and hence on knowledge-intensive tasks, their performance lags behind task-specific architectures. Additionally, providing provenance for their decisions and updating their world knowledge remain open research problems."
+        <br><br>
+        <strong>翻譯</strong>：大型預訓練語言模型已被證明能在參數中儲存事實知識，並在針對下游 NLP 任務進行微調時達到最先進的結果。然而，它們存取和精確操作知識的能力仍然有限，因此在知識密集型任務上，其表現落後於特定任務的架構。此外，為其決策提供來源證明和更新其世界知識仍然是開放的研究問題。
+      </div>
+
+      <div class="explanation">
+        <h4>🔍 核心問題</h4>
+        <p>論文開頭就點出了傳統 LLM 的三個根本問題：</p>
+        <ul>
+          <li><strong>知識存取受限</strong>：知識「鎖」在參數裡，難以精確提取</li>
+          <li><strong>知識密集型任務表現不佳</strong>：需要大量事實的任務（如問答）表現不如專門架構</li>
+          <li><strong>無法追溯來源</strong>：不知道答案從哪裡來</li>
+          <li><strong>知識過時</strong>：無法更新世界知識</li>
+        </ul>
+      </div>
+
+      <div class="original-quote">
+        <strong>📄 論文原文（解決方案）</strong><br><br>
+        "Pre-trained models with a differentiable access mechanism to explicit non-parametric memory can overcome this issue, but have so far been only investigated for extractive downstream tasks. We explore a general-purpose fine-tuning recipe for retrieval-augmented generation (RAG) -- models which combine pre-trained parametric and non-parametric memory for language generation."
+        <br><br>
+        <strong>翻譯</strong>：具有可微分存取機制以存取明確非參數記憶的預訓練模型可以克服這個問題，但迄今為止僅在抽取式下游任務中進行了研究。我們探索了檢索增強生成（RAG）的通用微調方法——結合預訓練參數記憶和非參數記憶用於語言生成的模型。
+      </div>
+
+      <div class="key-concept">
+        <h4>💡 關鍵概念：參數記憶 vs 非參數記憶</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+          <div style="background: white; padding: 20px; border-radius: var(--radius-md); border-left: 4px solid var(--primary-color);">
+            <h5 style="color: var(--primary-color); margin-top: 0;">Parametric Memory<br />(參數記憶)</h5>
+            <p style="font-size: 0.95rem; line-height: 1.7;">
+              知識儲存在模型的<strong>參數</strong>中<br />
+              例如：GPT-3 的 175B 參數
+            </p>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 10px;">
+              ❌ 難以更新<br />
+              ❌ 無法追溯來源
+            </p>
+          </div>
+          <div style="background: white; padding: 20px; border-radius: var(--radius-md); border-left: 4px solid var(--secondary-color);">
+            <h5 style="color: var(--secondary-color); margin-top: 0;">Non-Parametric Memory<br />(非參數記憶)</h5>
+            <p style="font-size: 0.95rem; line-height: 1.7;">
+              知識儲存在<strong>外部資料庫</strong>中<br />
+              例如：Wikipedia 向量索引
+            </p>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 10px;">
+              ✅ 易於更新<br />
+              ✅ 可追溯來源
+            </p>
+          </div>
+        </div>
+        <p style="margin-top: 20px; font-weight: 600; color: var(--secondary-color);">
+          RAG 的創新：<strong>同時使用兩種記憶</strong>！參數記憶提供語言能力，非參數記憶提供事實知識。
+        </p>
+      </div>
+
+      <div class="original-quote">
+        <strong>📄 論文原文（核心貢獻）</strong><br><br>
+        "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever. We compare two RAG formulations, one which conditions on the same retrieved passages across the whole generated sequence, the other can use different passages per token."
+        <br><br>
+        <strong>翻譯</strong>：我們引入了 RAG 模型，其中參數記憶是預訓練的 seq2seq 模型，非參數記憶是 Wikipedia 的密集向量索引，透過預訓練的神經檢索器存取。我們比較了兩種 RAG 公式，一種在整個生成序列中對相同的檢索段落進行條件化，另一種可以在每個 token 使用不同的段落。
+      </div>
+
+      <!-- Introduction -->
+      <h2>📖 Introduction (引言)</h2>
+
+      <div class="original-quote">
+        <strong>📄 論文原文</strong><br><br>
+        "Large pre-trained language models have been shown to store factual knowledge in their parameters, and achieve state-of-the-art results when fine-tuned on downstream NLP tasks. However, their ability to access and precisely manipulate knowledge is still limited, and hence on knowledge-intensive tasks, their performance lags behind task-specific architectures."
+        <br><br>
+        <strong>翻譯</strong>：大型預訓練語言模型已被證明能在參數中儲存事實知識，並在針對下游 NLP 任務進行微調時達到最先進的結果。然而，它們存取和精確操作知識的能力仍然有限，因此在知識密集型任務上，其表現落後於特定任務的架構。
+      </div>
+
+      <div class="explanation">
+        <h4>📜 為什麼這篇最重要？</h4>
+        <ul>
+          <li>正式提出 <strong>"Retrieval-Augmented Generation"</strong> 這個名稱</li>
+          <li>建立了 <strong>Retriever + Generator</strong> 的經典架構</li>
+          <li>證明了端到端訓練檢索增強模型的可行性</li>
+          <li>在多個知識密集型任務上取得 SOTA</li>
+          <li>被後續幾乎所有 RAG 相關研究引用</li>
+        </ul>
+        <p style="margin-top: 15px; font-weight: 600; color: var(--secondary-color);">
+          這篇論文定義了一個新的範式，今天你用的任何 RAG 系統，都可以追溯到這裡！
+        </p>
+      </div>
+
+      <div class="original-quote">
+        <strong>📄 論文原文（RAG 的優勢）</strong><br><br>
+        "RAG models combine the benefits of parametric and non-parametric memory. The parametric memory (a pre-trained seq2seq model) provides the ability to generate fluent text, while the non-parametric memory (a dense vector index of Wikipedia) provides access to a large corpus of knowledge. This combination allows RAG models to generate text that is both fluent and factually accurate."
+        <br><br>
+        <strong>翻譯</strong>：RAG 模型結合了參數記憶和非參數記憶的優勢。參數記憶（預訓練的 seq2seq 模型）提供了生成流暢文本的能力，而非參數記憶（Wikipedia 的密集向量索引）提供了存取大型知識庫的能力。這種結合使 RAG 模型能夠生成既流暢又事實準確的文本。
+      </div>
+
+      <!-- 核心架構 -->
+      <h2>🔧 Method (方法)</h2>
+
+      <!-- 視覺化圖解 -->
+      <div style="text-align: center; margin: 40px 0;">
+        <img src="images/rag-architecture.png" alt="RAG 架構圖：DPR + BART" style="max-width: 100%; border-radius: 12px; box-shadow: var(--shadow-lg);" />
+        <p style="margin-top: 15px; color: var(--text-secondary); font-size: 0.9rem;">
+          📊 RAG 經典架構：Dense Passage Retrieval + BART Generator
+        </p>
+      </div>
+
+      <div class="key-concept">
+        <h4>💡 論文原始圖表</h4>
+        <p>
+          RAG 論文中的 <strong>Figure 1</strong> 展示了完整的 RAG 架構，包含：
+        </p>
+        <ul>
+          <li><strong>Query Encoder q(x)</strong>：將輸入問題編碼為向量</li>
+          <li><strong>Document Index p(z|x)</strong>：使用 DPR 從 Wikipedia 檢索相關文檔</li>
+          <li><strong>Generator p(y|x,z)</strong>：BART 模型根據問題和文檔生成答案</li>
+          <li><strong>Marginalization</strong>：對多個檢索文檔進行加權整合</li>
+        </ul>
+        <p style="margin-top: 10px; font-size: 0.9rem; color: var(--text-secondary);">
+          📄 請參考 <a href="papers/rag.pdf" target="_blank" style="color: var(--primary-color);">論文 PDF</a> 第 3 頁 Figure 1
+        </p>
+      </div>
+
+      <div class="original-quote">
+        <strong>📄 論文原文（架構概述）</strong><br><br>
+        "A RAG model consists of a question encoder (a query encoder), a document encoder (a passage encoder), and a generator. The question encoder and document encoder are both based on BERT, and are used to encode questions and documents into dense vectors. The generator is a pre-trained seq2seq model (BART) that generates answers conditioned on the retrieved documents."
+        <br><br>
+        <strong>翻譯</strong>：RAG 模型由問題編碼器（查詢編碼器）、文檔編碼器（段落編碼器）和生成器組成。問題編碼器和文檔編碼器都基於 BERT，用於將問題和文檔編碼成密集向量。生成器是預訓練的 seq2seq 模型（BART），根據檢索到的文檔生成答案。
+      </div>
+
+      <div class="section-block">
+        <h3 style="color: var(--primary-color);">RAG 的兩大核心組件</h3>
+        
+        <div style="background: var(--primary-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
+          <h4 style="margin-top: 0;">🔍 Retriever：DPR (Dense Passage Retrieval)</h4>
+          <ul>
+            <li>使用 BERT 將查詢和文檔編碼成向量</li>
+            <li>透過向量相似度找到最相關的 k 個文檔</li>
+            <li>預訓練於 Natural Questions 資料集</li>
+            <li>檢索資料庫：Wikipedia (21M 文檔)</li>
+          </ul>
+        </div>
+
+        <div class="original-quote" style="margin: 20px 0;">
+          <strong>📄 論文原文（DPR 詳解）</strong><br><br>
+          "We use Dense Passage Retrieval (DPR), which encodes queries and passages using two separate BERT encoders. The query encoder encodes the input question into a dense vector, and the passage encoder encodes each passage in the knowledge base into a dense vector. The top-k most similar passages are retrieved using maximum inner product search (MIPS)."
+          <br><br>
+          <strong>翻譯</strong>：我們使用密集段落檢索（DPR），它使用兩個獨立的 BERT 編碼器來編碼查詢和段落。查詢編碼器將輸入問題編碼成密集向量，段落編碼器將知識庫中的每個段落編碼成密集向量。使用最大內積搜尋（MIPS）檢索最相似的 top-k 段落。
+        </div>
+
+        <div style="background: var(--secondary-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
+          <h4 style="margin-top: 0;">📝 Generator：BART</h4>
+          <ul>
+            <li>Sequence-to-Sequence 架構</li>
+            <li>可以生成任意長度的回答</li>
+            <li>輸入 = 查詢 + 檢索到的文檔</li>
+            <li>輸出 = 基於證據的答案</li>
+          </ul>
+        </div>
+
+        <div class="original-quote" style="margin: 20px 0;">
+          <strong>📄 論文原文（Generator 詳解）</strong><br><br>
+          "The generator is a pre-trained BART model, which is a denoising autoencoder for pretraining sequence-to-sequence models. BART is particularly well-suited for conditional generation tasks, as it was trained to reconstruct text from corrupted versions, making it effective at generating coherent text from retrieved context."
+          <br><br>
+          <strong>翻譯</strong>：生成器是預訓練的 BART 模型，這是一個用於預訓練序列到序列模型的去噪自編碼器。BART 特別適合條件生成任務，因為它被訓練從損壞版本重建文本，使其能夠有效地從檢索到的上下文中生成連貫的文本。
+        </div>
+      </div>
+
+      <div class="analogy">
+        <h4>🎯 生活類比：研究助理</h4>
+        <p>想像你有一個超強的研究助理：</p>
+        <ul>
+          <li><strong>DPR 檢索器</strong> = 助理去圖書館找相關書籍</li>
+          <li><strong>BART 生成器</strong> = 助理閱讀這些書，寫出報告</li>
+        </ul>
+        <p style="margin-top: 15px;">
+          <strong>傳統 LLM</strong>：助理只能靠記憶回答，可能記錯<br />
+          <strong>RAG</strong>：助理先查資料再回答，答案有依據
+        </p>
+      </div>
+
+      <!-- 兩種 RAG 變體 -->
+      <h2>🔄 兩種 RAG 變體</h2>
+
+      <div class="key-concept">
+        <h4>RAG-Sequence vs RAG-Token</h4>
+        <p>論文提出了兩種不同的整合方式：</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
+          <div style="background: var(--primary-light); padding: 20px; border-radius: var(--radius-md); border-left: 4px solid var(--primary-color);">
+            <h5 style="color: var(--primary-color); margin-top: 0;">RAG-Sequence</h5>
+            <p>每個文檔生成一個完整答案，最後選最好的</p>
+            <ul style="font-size: 0.9rem;">
+              <li>檢索 k 個文檔</li>
+              <li>每個文檔生成一個答案</li>
+              <li>對所有答案加權平均</li>
+            </ul>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 10px;">
+              適合：答案較短、需要精確的任務
+            </p>
+          </div>
+
+          <div style="background: var(--secondary-light); padding: 20px; border-radius: var(--radius-md); border-left: 4px solid var(--secondary-color);">
+            <h5 style="color: var(--secondary-color); margin-top: 0;">RAG-Token</h5>
+            <p>每生成一個 token，都考慮所有文檔</p>
+            <ul style="font-size: 0.9rem;">
+              <li>檢索 k 個文檔</li>
+              <li>生成每個 token 時參考所有文檔</li>
+              <li>動態選擇最相關的資訊</li>
+            </ul>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 10px;">
+              適合：需要整合多來源資訊的任務
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 數學原理 -->
+      <h2>📐 核心數學原理</h2>
+
+      <div class="original-quote">
+        <strong>📄 論文原文（數學公式）</strong><br><br>
+        "For RAG-Sequence, we marginalize over all retrieved documents to compute the probability of generating the sequence y: P(y|x) = Σ<sub>z∈top-k(D)</sub> P(z|x) × P(y|x, z), where P(z|x) is the probability of retrieving document z given query x, and P(y|x, z) is the probability of generating y given x and z."
+        <br><br>
+        <strong>翻譯</strong>：對於 RAG-Sequence，我們對所有檢索到的文檔進行邊緣化，以計算生成序列 y 的機率：P(y|x) = Σ<sub>z∈top-k(D)</sub> P(z|x) × P(y|x, z)，其中 P(z|x) 是給定查詢 x 檢索文檔 z 的機率，P(y|x, z) 是給定 x 和 z 生成 y 的機率。
+      </div>
+
+      <div class="explanation">
+        <h4>🔢 公式解析</h4>
+        <p>RAG 的核心想法用數學表示：</p>
+        
+        <div style="background: white; padding: 20px; border-radius: var(--radius-md); margin: 15px 0; font-family: monospace; text-align: center; font-size: 1.1rem;">
+          P(y|x) = Σ<sub>z∈top-k(D)</sub> P(z|x) × P(y|x,z)
+        </div>
+        
+        <p>其中：</p>
+        <ul>
+          <li><strong>x</strong> = 輸入查詢</li>
+          <li><strong>y</strong> = 生成的答案</li>
+          <li><strong>z</strong> = 檢索到的文檔（從 top-k 文檔集合中）</li>
+          <li><strong>P(z|x)</strong> = 文檔的相關性機率（Retriever 計算）</li>
+          <li><strong>P(y|x,z)</strong> = 給定文檔後生成答案的機率（Generator 計算）</li>
+        </ul>
+
+        <p style="margin-top: 20px; color: var(--text-secondary);">
+          <strong>白話翻譯：</strong>生成答案的機率 = 加總所有可能文檔的貢獻。
+          文檔越相關（P(z|x) 越高），對答案的影響越大。
+        </p>
+      </div>
+
+      <!-- 訓練流程 -->
+      <h2>🎓 訓練流程</h2>
+
+      <div class="section-block">
+        <h3>端到端訓練</h3>
+        <p>RAG 的一大創新是可以端到端訓練，讓檢索器和生成器一起優化：</p>
+        
+        <ol style="line-height: 2;">
+          <li><strong>輸入查詢 x</strong></li>
+          <li><strong>DPR 檢索</strong>：找到 top-k 相關文檔 z₁, z₂, ..., zₖ</li>
+          <li><strong>計算相關性</strong>：P(zᵢ|x) = softmax(查詢向量 · 文檔向量)</li>
+          <li><strong>BART 生成</strong>：對每個文檔生成答案機率 P(y|x, zᵢ)</li>
+          <li><strong>邊緣化</strong>：P(y|x) = Σ P(zᵢ|x) × P(y|x, zᵢ)</li>
+          <li><strong>計算損失</strong>：最大化正確答案的機率</li>
+          <li><strong>反向傳播</strong>：更新 Retriever 和 Generator 的參數</li>
+        </ol>
+      </div>
+
+      <!-- 實驗結果 -->
+      <h2>📊 Results (實驗結果)</h2>
+
+      <div class="original-quote">
+        <strong>📄 論文原文（主要結果）</strong><br><br>
+        "We fine-tune and evaluate our models on a wide range of knowledge-intensive NLP tasks and set the state-of-the-art on three open domain QA tasks, outperforming parametric seq2seq models and task-specific retrieve-and-extract architectures. For language generation tasks, we find that RAG models generate more specific, diverse and factual language than a state-of-the-art parametric-only seq2seq baseline."
+        <br><br>
+        <strong>翻譯</strong>：我們在多種知識密集型 NLP 任務上對模型進行微調和評估，並在三個開放域問答任務上達到最先進的結果，超越了參數化 seq2seq 模型和特定任務的檢索-抽取架構。對於語言生成任務，我們發現 RAG 模型生成的文本比最先進的純參數化 seq2seq 基線更具體、更多樣且更符合事實。
+      </div>
+
+      <div class="solution">
+        <h4>✅ 在知識密集型任務上的表現</h4>
+        
+        <h5 style="margin-top: 20px;">Open-Domain QA</h5>
+        <table>
+          <thead>
+            <tr>
+              <th>資料集</th>
+              <th>模型</th>
+              <th>Exact Match</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Natural Questions</td>
+              <td>RAG</td>
+              <td style="font-weight: bold; color: var(--secondary-color);">44.5%</td>
+            </tr>
+            <tr>
+              <td>TriviaQA</td>
+              <td>RAG</td>
+              <td style="font-weight: bold; color: var(--secondary-color);">56.1%</td>
+            </tr>
+            <tr>
+              <td>WebQuestions</td>
+              <td>RAG</td>
+              <td style="font-weight: bold; color: var(--secondary-color);">45.2%</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h5 style="margin-top: 25px;">其他任務</h5>
+        <ul>
+          <li><strong>Jeopardy 問答</strong>：生成風格的答案</li>
+          <li><strong>FEVER 事實驗證</strong>：判斷陳述真假</li>
+          <li><strong>MS-MARCO</strong>：開放式問答</li>
+        </ul>
+        
+        <p style="margin-top: 15px; color: var(--text-secondary);">
+          RAG 在所有任務上都超越了純參數化的模型（如 BART、T5），
+          證明「檢索增強」對知識密集型任務非常有效。
+        </p>
+      </div>
+
+      <!-- 消融實驗 -->
+      <h2>🔬 關鍵發現</h2>
+
+      <div class="key-concept">
+        <h4>📈 消融實驗結論</h4>
+        <ul>
+          <li>
+            <strong>檢索數量 k：</strong>k=5 到 k=10 效果最好，太多反而會引入噪音
+          </li>
+          <li>
+            <strong>RAG-Sequence vs RAG-Token：</strong>不同任務各有優勢
+          </li>
+          <li>
+            <strong>端到端訓練：</strong>比分開訓練效果更好
+          </li>
+          <li>
+            <strong>文檔品質：</strong>檢索器的品質直接影響最終效果
+          </li>
+        </ul>
+      </div>
+
+      <!-- 實作提示 -->
+      <h2>💻 實作提示</h2>
+
+      <div class="section-block">
+        <h3>使用 Hugging Face 實作</h3>
+        <p>RAG 已整合到 Hugging Face Transformers：</p>
+        
+        <pre style="background: #1e1e1e; color: #d4d4d4; padding: 20px; border-radius: var(--radius-md); overflow-x: auto; font-size: 0.9rem;">
+<span style="color: #6a9955;"># 載入 RAG 模型</span>
+<span style="color: #c586c0;">from</span> transformers <span style="color: #c586c0;">import</span> RagTokenizer, RagRetriever, RagSequenceForGeneration
+
+<span style="color: #6a9955;"># 初始化</span>
+tokenizer = RagTokenizer.from_pretrained(<span style="color: #ce9178;">"facebook/rag-sequence-nq"</span>)
+retriever = RagRetriever.from_pretrained(<span style="color: #ce9178;">"facebook/rag-sequence-nq"</span>)
+model = RagSequenceForGeneration.from_pretrained(<span style="color: #ce9178;">"facebook/rag-sequence-nq"</span>)
+
+<span style="color: #6a9955;"># 使用</span>
+input_ids = tokenizer(<span style="color: #ce9178;">"What is the capital of France?"</span>, return_tensors=<span style="color: #ce9178;">"pt"</span>).input_ids
+generated = model.generate(input_ids)
+<span style="color: #dcdcaa;">print</span>(tokenizer.decode(generated[<span style="color: #b5cea8;">0</span>], skip_special_tokens=<span style="color: #569cd6;">True</span>))</pre>
+      </div>
+
+      <!-- 與其他工作的關係 -->
+      <h2>🔗 與其他論文的關係</h2>
+
+      <div class="explanation">
+        <h4>RAG 的上下游</h4>
+        
+        <p><strong>上游（影響 RAG 的工作）：</strong></p>
+        <ul>
+          <li><strong>REALM (2020.02)</strong>：證明檢索可以整合進預訓練</li>
+          <li><strong>DPR (2020.04)</strong>：提供高品質的密集檢索器</li>
+          <li><strong>BART (2019)</strong>：提供強大的 Seq2Seq 生成器</li>
+        </ul>
+
+        <p style="margin-top: 20px;"><strong>下游（被 RAG 影響的工作）：</strong></p>
+        <ul>
+          <li><strong>RETRO (2021)</strong>：擴展到更大規模的檢索</li>
+          <li><strong>Self-RAG (2023)</strong>：加入自我反思機制</li>
+          <li><strong>GraphRAG (2024)</strong>：整合知識圖譜</li>
+          <li><strong>所有現代 RAG 系統</strong>：LangChain、LlamaIndex 等</li>
+        </ul>
+      </div>
+
+      <!-- 限制與挑戰 -->
+      <h2>⚠️ 限制與挑戰</h2>
+
+      <div class="key-concept" style="background: linear-gradient(135deg, #fff5f5, #ffe5e5);">
+        <h4 style="color: var(--danger-color);">論文的局限性</h4>
+        <ul>
+          <li><strong>檢索品質依賴</strong>：如果檢索到錯誤文檔，答案也會錯</li>
+          <li><strong>延遲增加</strong>：需要額外的檢索步驟</li>
+          <li><strong>知識庫限制</strong>：只能回答知識庫中有的內容</li>
+          <li><strong>單次檢索</strong>：不會迭代檢索（後來的 Self-RAG 解決）</li>
+        </ul>
+        <p style="margin-top: 15px; color: var(--text-secondary);">
+          這些限制成為後續研究的改進方向，催生了 Advanced RAG 和 Agentic RAG。
+        </p>
+      </div>
+
+      <!-- 總結 -->
+      <h2>📝 總結</h2>
+
+      <div class="solution">
+        <h4>✅ RAG 論文的核心貢獻</h4>
+        <ol>
+          <li><strong>定義架構</strong>：Retriever + Generator 的經典組合</li>
+          <li><strong>端到端訓練</strong>：兩個組件可以一起優化</li>
+          <li><strong>兩種變體</strong>：RAG-Sequence 和 RAG-Token</li>
+          <li><strong>廣泛適用</strong>：多種知識密集型任務都有效</li>
+          <li><strong>開源實作</strong>：Hugging Face 即可使用</li>
+        </ol>
+        <p style="margin-top: 20px; font-weight: 600; color: var(--secondary-color);">
+          這篇論文開創了一個新時代，讓「讓 AI 先查資料再回答」成為可能！
+        </p>
+      </div>
+
+      <!-- 延伸閱讀 -->
+      <div class="quick-links" style="margin-top: 40px;">
+        <a href="01-realm.html" class="quick-link">← 上一篇：REALM</a>
+        <a href="index.html" class="quick-link">回到 RAG 總覽</a>
+        <a href="03-retro.html" class="quick-link">下一篇：RETRO →</a>
+      </div>
+
+      <div class="quick-links" style="margin-top: 15px;">
+        <a href="https://arxiv.org/abs/2005.11401" class="quick-link" target="_blank">📄 RAG 論文 (arXiv)</a>
+        <a href="https://huggingface.co/facebook/rag-sequence-nq" class="quick-link" target="_blank">🤗 Hugging Face 模型</a>
+        <a href="https://github.com/huggingface/transformers/tree/main/examples/research_projects/rag" class="quick-link" target="_blank">💻 官方程式碼</a>
+      </div>
+
+      <!-- 作者資訊 -->
+      <div style="margin-top: 40px; padding: 25px; background: var(--bg-body); border-radius: var(--radius-md); border-left: 4px solid var(--secondary-color);">
+        <h4 style="color: var(--secondary-color); margin-top: 0;">👨‍🔬 關於第一作者</h4>
+        <p>
+          <strong>Patrick Lewis</strong> 是 RAG 論文的第一作者，當時任職於 Facebook AI Research (現 Meta AI)。
+          這篇論文成為他博士論文的重要組成部分，後來他獲得了 Time 雜誌的 AI 100 人物報導。
+          RAG 這個名稱和架構，已經成為整個產業的標準用語。
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

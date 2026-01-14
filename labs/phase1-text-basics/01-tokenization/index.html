@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1.1 Tokenization - 文字切割的藝術 | AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles/global.css" />
+    <link rel="stylesheet" href="../../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Step Navigation -->
+      <div class="lab-steps">
+        <a href="../index.html" class="lab-step">← Phase 1</a>
+        <a href="#step1" class="lab-step active">Step 1: 理解概念</a>
+        <a href="#step2" class="lab-step">Step 2: 環境設定</a>
+        <a href="#step3" class="lab-step">Step 3: 實作 BPE</a>
+        <a href="#step4" class="lab-step">Step 4: 測試與視覺化</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h1>🔪 1.1 Tokenization - 文字切割的藝術</h1>
+        <p class="lab-intro-text">
+          想像一下，AI 就像一個剛學中文的外國人，它需要把句子「切」成小塊才能理解。
+          Tokenization 就是這個「切」的過程！我們要實作 BPE（Byte Pair Encoding），
+          這是 GPT、BERT 等模型都在用的方法。
+        </p>
+
+        <!-- Step 1: 理解概念 -->
+        <section id="step1" class="lab-section">
+          <h2>🎓 Step 1: 理解 Tokenization 概念</h2>
+          
+          <div class="visual-diagram">
+            <h4>📊 視覺化：Tokenization 是什麼？</h4>
+            <p>
+              把一句話「切」成 tokens，就像把句子切成詞彙：
+            </p>
+            <pre>
+原文: "Hello world! 你好世界"
+
+方法 1: 按空格切
+  → ["Hello", "world!", "你好世界"]
+
+方法 2: 按字元切
+  → ["H", "e", "l", "l", "o", " ", "w", ...]
+
+方法 3: BPE (我們要學的！)
+  → ["Hello", " world", "!", " 你", "好", "世界"]
+  
+  ✨ BPE 的優點：既不會太細（像字元），也不會太粗（像詞彙）
+            </pre>
+          </div>
+
+          <h3>🤔 為什麼需要 Tokenization？</h3>
+          <p>
+            AI 模型其實是「數學函數」，它們只能處理數字，不能直接處理文字。
+            所以我們需要：
+          </p>
+          <ol class="lab-list-spacing">
+            <li><strong>文字 → Tokens</strong>：把句子切成小塊</li>
+            <li><strong>Tokens → IDs</strong>：每個 token 對應一個數字 ID</li>
+            <li><strong>IDs → Embeddings</strong>：把數字變成向量（下一個實驗會學）</li>
+          </ol>
+
+          <div class="ai-prompt-block">
+            <p>
+              想更深入了解？把這段 prompt 給 Cursor / Claude Code：
+            </p>
+            <pre>
+請用簡單易懂的方式解釋：
+1. 什麼是 Tokenization？為什麼 AI 需要它？
+2. BPE (Byte Pair Encoding) 的基本原理是什麼？
+3. BPE 和傳統的「按空格切詞」有什麼不同？
+4. 為什麼 GPT、BERT 都使用 BPE？
+
+請用生活化的類比，並提供具體例子。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+        </section>
+
+        <!-- Step 2: 環境設定 -->
+        <section id="step2" class="lab-section">
+          <h2>⚙️ Step 2: 環境設定</h2>
+          
+          <p>
+            讓我們建立一個乾淨的專案環境。我們會用 Python 實作 BPE Tokenizer。
+          </p>
+
+          <div class="terminal-command">
+            <code># 建立專案目錄（必須手動執行）
+mkdir -p bpe-tokenizer && cd bpe-tokenizer</code>
+            <button class="copy-terminal-btn" onclick="copyTerminal(this)">
+              📋 複製指令
+            </button>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              讓 AI 幫你建立虛擬環境、專案結構和檔案：
+            </p>
+            <pre>
+請幫我建立一個 Python 專案，用於實作 BPE Tokenizer：
+
+⚠️ 重要：請使用 Python 虛擬環境（venv）來管理專案依賴！
+
+請執行以下步驟：
+1. 建立 Python 虛擬環境：python3 -m venv venv
+2. 啟動虛擬環境：source venv/bin/activate (macOS/Linux) 或 venv\Scripts\activate (Windows)
+3. 確認虛擬環境已啟動（終端機提示符會顯示 (venv)）
+
+然後建立以下檔案和目錄結構：
+- bpe_tokenizer.py (主要實作檔案，先留空或加上基本註解)
+- test_tokenizer.py (測試檔案，先留空)
+- requirements.txt (依賴套件，目前只需要標準庫，可以寫 "無額外依賴" 或留空)
+- README.md (專案簡介，包含：專案目的、如何建立虛擬環境、如何執行測試)
+- .gitignore (忽略 venv/ 和 __pycache__/ 目錄)
+
+請建立這些檔案，並在 README.md 中寫上完整的專案說明和虛擬環境使用指南。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup">
+            <h4>💡 提示</h4>
+            <ul>
+              <li>
+                <strong>重要：請使用虛擬環境！</strong>
+                即使這個實驗只需要 Python 標準庫，養成使用虛擬環境的習慣很重要。
+              </li>
+              <li>建議使用 Python 3.8+</li>
+              <li>可以用 VS Code 或 Cursor 開啟專案資料夾</li>
+              <li>記得在 .gitignore 中加入 <code>venv/</code> 和 <code>__pycache__/</code></li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 3: 實作 BPE -->
+        <section id="step3" class="lab-section">
+          <h2>🛠️ Step 3: 實作 BPE Tokenizer</h2>
+          
+          <p>
+            BPE 的核心思想很簡單：<strong>從最常見的「字元對」開始，不斷合併</strong>。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 BPE 演算法流程</h4>
+            <pre>
+初始: "hello" → ['h', 'e', 'l', 'l', 'o']
+
+Step 1: 統計所有字元對的頻率
+  - 'he': 1 次
+  - 'el': 1 次
+  - 'll': 1 次  ← 最高頻！
+  - 'lo': 1 次
+
+Step 2: 合併最高頻的對 'll'
+  → ['h', 'e', 'll', 'o']
+
+Step 3: 重複 Step 1-2，直到達到目標詞彙量
+  → 繼續合併 'he', 'el', 'lo' 等...
+
+最終: ['he', 'llo'] 或 ['hello'] (取決於迭代次數)
+            </pre>
+          </div>
+
+          <h3>🎯 實作步驟</h3>
+          <p>我們要實作三個核心函數：</p>
+          <ol class="lab-list-spacing">
+            <li><code>get_stats()</code> - 統計字元對頻率</li>
+            <li><code>merge_vocab()</code> - 合併最高頻的字元對</li>
+            <li><code>train_bpe()</code> - 主訓練函數</li>
+          </ol>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>第一個 Prompt：實作統計函數</strong>
+            </p>
+            <pre>
+請幫我實作一個 Python 函數 `get_stats(vocab)`：
+
+功能：統計詞彙中所有相鄰字元對的頻率
+
+參數：
+- vocab: dict，格式為 {word: frequency}，例如 {"hello": 5, "world": 3}
+
+返回：
+- dict，格式為 {pair: frequency}，例如 {('h', 'e'): 5, ('e', 'l'): 5, ...}
+
+要求：
+1. 遍歷每個詞彙的所有相鄰字元對
+2. 統計每個對出現的總頻率（考慮詞彙本身的頻率）
+3. 返回頻率字典
+
+請加上詳細註解，並提供一個測試範例。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">bpe_tokenizer.py</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">def get_stats(vocab):
+    """
+    統計詞彙中所有相鄰字元對的頻率
+    
+    Args:
+        vocab: dict，格式為 {word: frequency}
+              例如: {"hello": 5, "world": 3}
+    
+    Returns:
+        dict，格式為 {pair: frequency}
+              例如: {('h', 'e'): 5, ('e', 'l'): 5, ...}
+    """
+    pairs = {}
+    for word, freq in vocab.items():
+        # 將詞彙轉換為字元列表
+        symbols = list(word)
+        
+        # 統計所有相鄰字元對
+        for i in range(len(symbols) - 1):
+            pair = (symbols[i], symbols[i + 1])
+            pairs[pair] = pairs.get(pair, 0) + freq
+    
+    return pairs</code></pre>
+            </div>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              <strong>第二個 Prompt：實作合併函數</strong>
+            </p>
+            <pre>
+請幫我實作一個 Python 函數 `merge_vocab(pair, vocab)`：
+
+功能：將詞彙中所有出現的指定字元對合併成一個 token
+
+參數：
+- pair: tuple，要合併的字元對，例如 ('l', 'l')
+- vocab: dict，格式為 {word: frequency}
+
+返回：
+- dict，合併後的新詞彙
+
+範例：
+  輸入: pair = ('l', 'l'), vocab = {"hello": 5, "world": 3}
+  輸出: {"hel" + "lo": 5, "world": 3}  # 注意：這裡 'll' 被合併了
+  
+  但實際上應該是：
+  輸入: ["h", "e", "l", "l", "o"]
+  輸出: ["h", "e", "ll", "o"]
+
+請實作這個函數，並處理邊界情況。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">bpe_tokenizer.py</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">def merge_vocab(pair, vocab):
+    """
+    將詞彙中所有出現的指定字元對合併成一個 token
+    
+    Args:
+        pair: tuple，要合併的字元對，例如 ('l', 'l')
+        vocab: dict，格式為 {word: frequency}
+    
+    Returns:
+        dict，合併後的新詞彙
+    """
+    new_vocab = {}
+    bigram = ''.join(pair)  # 將 ('l', 'l') 轉為 'll'
+    
+    for word in vocab:
+        new_word = word.replace(''.join(pair), bigram)
+        new_vocab[new_word] = vocab[word]
+    
+    return new_vocab</code></pre>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              <strong>第三個 Prompt：實作主訓練函數</strong>
+            </p>
+            <pre>
+請幫我實作一個 Python 函數 `train_bpe(vocab, num_merges)`：
+
+功能：訓練 BPE tokenizer，迭代合併最高頻的字元對
+
+參數：
+- vocab: dict，初始詞彙，格式為 {word: frequency}
+- num_merges: int，要執行的合併次數（例如 100）
+
+返回：
+- dict，最終的詞彙表
+- list，合併規則的歷史記錄
+
+演算法流程：
+1. 初始化：vocab 是原始詞彙
+2. 重複 num_merges 次：
+   a. 調用 get_stats() 統計當前詞彙的字元對頻率
+   b. 找到頻率最高的字元對
+   c. 調用 merge_vocab() 合併這個對
+   d. 更新詞彙
+   e. 記錄合併規則
+3. 返回最終詞彙和規則歷史
+
+請加上詳細註解，並在每次迭代時打印進度。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">bpe_tokenizer.py</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">def train_bpe(vocab, num_merges=100):
+    """
+    訓練 BPE tokenizer
+    
+    Args:
+        vocab: dict，初始詞彙，格式為 {word: frequency}
+        num_merges: int，要執行的合併次數
+    
+    Returns:
+        vocab: dict，最終的詞彙表
+        merges: list，合併規則的歷史記錄
+    """
+    vocab = vocab.copy()  # 避免修改原始詞彙
+    merges = []
+    
+    for i in range(num_merges):
+        # 統計字元對頻率
+        pairs = get_stats(vocab)
+        
+        if not pairs:
+            break
+        
+        # 找到頻率最高的字元對
+        best_pair = max(pairs, key=pairs.get)
+        
+        # 合併這個對
+        vocab = merge_vocab(best_pair, vocab)
+        merges.append(best_pair)
+        
+        # 打印進度
+        if (i + 1) % 10 == 0:
+            print(f"完成 {i + 1}/{num_merges} 次合併，最新規則: {best_pair}")
+    
+    return vocab, merges</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 4: 測試與視覺化 -->
+        <section id="step4" class="lab-section">
+          <h2>🎨 Step 4: 測試與視覺化</h2>
+          
+          <p>
+            現在讓我們寫一個測試腳本，看看我們的 BPE Tokenizer 是否正常工作！
+          </p>
+
+          <div class="ai-prompt-block">
+            <p>
+              讓 AI 幫你寫測試腳本：
+            </p>
+            <pre>
+請幫我寫一個測試腳本 `test_tokenizer.py`：
+
+功能：
+1. 建立一個簡單的訓練資料（例如：["hello", "world", "hello world"]）
+2. 統計詞頻，建立初始詞彙
+3. 調用 train_bpe() 訓練 tokenizer（合併 20 次）
+4. 打印每次合併的規則
+5. 打印最終的詞彙表
+6. 測試對新句子的 tokenization
+
+要求：
+- 使用清晰的輸出格式
+- 加上註解說明每一步在做什麼
+- 提供一個視覺化的輸出，顯示合併過程
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-code-block collapsed">
+            <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+              <span class="filename">test_tokenizer.py</span>
+              <div class="header-buttons">
+                <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+              </div>
+            </div>
+            <div class="lab-code-block-content">
+              <pre><code class="language-python">from collections import Counter
+from bpe_tokenizer import train_bpe, get_stats
+
+# 1. 建立訓練資料
+text = "hello world hello world hello"
+words = text.split()
+
+# 2. 統計詞頻
+vocab = dict(Counter(words))
+print("初始詞彙:", vocab)
+print()
+
+# 3. 訓練 BPE
+print("開始訓練 BPE...")
+final_vocab, merges = train_bpe(vocab, num_merges=20)
+print()
+
+# 4. 打印結果
+print("=" * 50)
+print("合併規則歷史:")
+for i, pair in enumerate(merges, 1):
+    print(f"  {i}. 合併: {pair[0]} + {pair[1]} → {''.join(pair)}")
+print()
+
+print("最終詞彙表:")
+for word, freq in final_vocab.items():
+    print(f"  {word}: {freq}")</code></pre>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              <strong>執行測試</strong>
+            </p>
+            <pre>
+請幫我執行測試腳本並檢查結果：
+
+1. 在虛擬環境中執行：python test_tokenizer.py
+2. 檢查輸出是否符合預期
+3. 如果有錯誤，請幫我修正
+
+請執行測試並告訴我結果。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-expected-output">
+            <pre>
+初始詞彙: {'hello': 3, 'world': 2}
+
+開始訓練 BPE...
+完成 10/20 次合併，最新規則: ('l', 'l')
+完成 20/20 次合併，最新規則: ('he', 'l')
+
+==================================================
+合併規則歷史:
+  1. 合併: h + e → he
+  2. 合併: e + l → el
+  3. 合併: l + l → ll
+  4. 合併: o +   → o 
+  ...
+
+最終詞彙表:
+  hel lo: 3
+  world: 2
+            </pre>
+          </div>
+
+          <div class="visual-diagram">
+            <h4>🎨 視覺化：BPE 合併過程</h4>
+            <p>
+              看看 BPE 是如何一步步「學習」的：
+            </p>
+            <pre>
+迭代 0: ["h", "e", "l", "l", "o"]
+        ↓ 合併 ('h', 'e')
+迭代 1: ["he", "l", "l", "o"]
+        ↓ 合併 ('l', 'l')
+迭代 2: ["he", "ll", "o"]
+        ↓ 合併 ('he', 'l')
+迭代 3: ["hel", "l", "o"]
+        ...
+
+最終: ["hel", "lo"] 或 ["hello"] (取決於迭代次數)
+            </pre>
+          </div>
+        </section>
+
+        <!-- Advanced Learning: 中文 Tokenization -->
+        <section id="advanced" class="lab-section lab-spacing-top-lg">
+          <h2>🌏 進階學習：中文 Tokenization 的挑戰與解決方案</h2>
+          
+          <div class="lab-intro-text">
+            <p>
+              我們剛才學的 BPE 是基於<strong>英文</strong>設計的。但中文是完全不同的語言系統！
+              讓我們看看實際的語言模型是如何處理中文的。
+            </p>
+          </div>
+
+          <!-- 中文 Tokenization 的挑戰 -->
+          <div class="lab-section lab-spacing-top">
+            <h3>📝 1. 中文 Tokenization 的特殊挑戰</h3>
+            
+            <div class="visual-diagram">
+              <h4>🔍 問題 1：沒有空格分隔</h4>
+              <pre>
+英文："I love AI"
+     → 天然有空格分隔
+     → ["I", "love", "AI"] 很直觀
+
+中文："我愛人工智慧"
+     → 沒有空格！
+     → 怎麼切？["我", "愛", "人工", "智慧"]？
+     → 還是 ["我", "愛", "人工智", "慧"]？
+     → 還是 ["我愛", "人工", "智慧"]？
+              </pre>
+            </div>
+
+            <div class="visual-diagram lab-spacing-top">
+              <h4>🔍 問題 2：字 vs 詞的歧義</h4>
+              <pre>
+例子："銀行行長"
+     → 可以是 "銀行" + "行長" (bank president)
+     → 也可以是 "銀" + "行行" + "長" (錯誤切分)
+
+例子："南京市長江大橋"
+     → "南京市" + "長江大橋"？
+     → "南京" + "市長" + "江大橋"？
+     → "南京市長" + "江大橋"？
+              </pre>
+            </div>
+
+            <div class="visual-diagram lab-spacing-top">
+              <h4>🔍 問題 3：字符數量龐大</h4>
+              <pre>
+英文：26 個字母 + 數字 + 標點 ≈ 100 個基本字符
+中文：常用漢字 3000+，總字符數 10,000+！
+
+挑戰：
+- 如果每個字一個 token → 詞彙表太大（10,000+）
+- 如果每個詞一個 token → 未登錄詞（OOV）問題嚴重
+- 需要找到「子詞」的平衡點
+              </pre>
+            </div>
+          </div>
+
+          <!-- GPT 系列的處理方式 -->
+          <div class="lab-section lab-spacing-top">
+            <h3>🤖 2. GPT 系列（OpenAI）的處理方式</h3>
+            
+            <div class="visual-diagram">
+              <h4>📊 GPT-3 / GPT-4 的實際表現</h4>
+              <pre>
+<strong>方法：</strong>基於英文語料訓練的 BPE
+
+<strong>中文處理結果：</strong>
+原文："我愛人工智慧"
+GPT-3 Tokenizer: ["我", "愛", "人工", "智慧"] 或更細的切分
+Token 數量：通常 6-10 個 tokens
+
+<strong>問題：</strong>
+1. 中文字在訓練語料中出現頻率低
+2. 很多中文字被拆成 UTF-8 bytes
+3. 效率低：同樣意思，中文需要 2-3 倍 tokens
+
+<strong>實際例子：</strong>
+英文："Hello world" → 2 tokens
+中文："你好世界"   → 6-8 tokens（GPT-3）
+              </pre>
+            </div>
+
+            <div class="ai-prompt-block lab-spacing-top">
+              <p>
+                <strong>動手試試：用 tiktoken 看 GPT 的 tokenization</strong>
+              </p>
+              <pre>
+請幫我安裝 tiktoken 並測試中文 tokenization：
+
+1. 安裝：pip install tiktoken
+2. 使用 GPT-3.5/GPT-4 的 tokenizer (cl100k_base)
+3. 測試以下句子：
+   - "Hello world"
+   - "你好世界"
+   - "我愛人工智慧"
+4. 比較中英文的 token 數量差異
+5. 打印每個 token 的內容，看看中文是怎麼被切的
+
+請幫我寫一個測試腳本並執行。
+              </pre>
+              <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+                📋 複製 Prompt
+              </button>
+            </div>
+
+            <div class="lab-code-block collapsed">
+              <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+                <span class="filename">test_gpt_tokenizer.py</span>
+                <div class="header-buttons">
+                  <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                  <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+                </div>
+              </div>
+              <div class="lab-code-block-content">
+                <pre><code class="language-python">import tiktoken
+
+# 使用 GPT-3.5/GPT-4 的 tokenizer
+enc = tiktoken.get_encoding("cl100k_base")
+
+# 測試句子
+sentences = [
+    "Hello world",
+    "你好世界",
+    "我愛人工智慧"
+]
+
+for text in sentences:
+    tokens = enc.encode(text)
+    token_count = len(tokens)
+    
+    print(f"\n原文: {text}")
+    print(f"Token 數量: {token_count}")
+    print(f"Token IDs: {tokens}")
+    
+    # 解碼每個 token 看看內容
+    print("Token 內容:")
+    for i, token_id in enumerate(tokens):
+        token_text = enc.decode([token_id])
+        print(f"  [{i}] ID {token_id}: '{token_text}'")
+    
+    print("-" * 50)
+
+# 比較分析
+print("\n📊 比較分析:")
+print("英文 'Hello world' 通常: 2 tokens")
+print("中文 '你好世界' 通常: 6-8 tokens")
+print("→ 中文效率是英文的 1/3 到 1/4！")</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- 中國語言模型的處理方式 -->
+          <div class="lab-section lab-spacing-top">
+            <h3>🇨🇳 3. 中國語言模型的處理方式</h3>
+            
+            <div class="visual-diagram">
+              <h4>🎯 核心策略：針對中文優化的 Tokenization</h4>
+              <pre>
+<strong>主要模型：</strong>
+- GLM / ChatGLM (智譜 AI)
+- Qwen (阿里雲)
+- Baichuan (百川智能)
+- InternLM (上海 AI Lab)
+- Yi (零一萬物)
+
+<strong>共同特點：</strong>
+1. 使用<strong>中文語料</strong>訓練 BPE/WordPiece
+2. 詞彙表中包含大量<strong>中文詞彙</strong>
+3. 針對中文的<strong>分詞工具</strong>（如 jieba、pkuseg）
+4. 混合策略：字級 + 詞級 + 子詞級
+              </pre>
+            </div>
+
+            <div class="visual-diagram lab-spacing-top">
+              <h4>📚 方法 1：中文分詞 + BPE</h4>
+              <pre>
+<strong>流程：</strong>
+1. 先用中文分詞工具（jieba）切詞
+   "我愛人工智慧" → ["我", "愛", "人工智慧"]
+
+2. 對分詞結果應用 BPE
+   ["我", "愛", "人工智慧"]
+   → ["我", "愛", "人工", "智慧"] (進一步細分)
+
+<strong>優點：</strong>
+- 保留詞的語義完整性
+- 減少 token 數量
+- 提高中文理解能力
+
+<strong>缺點：</strong>
+- 依賴分詞工具品質
+- 分詞錯誤會影響後續處理
+              </pre>
+            </div>
+
+            <div class="visual-diagram lab-spacing-top">
+              <h4>📚 方法 2：純 BPE，但用中文語料訓練</h4>
+              <pre>
+<strong>代表：</strong>Qwen、Baichuan
+
+<strong>流程：</strong>
+1. 收集大量中文語料（數百 GB）
+2. 用中文語料訓練 BPE tokenizer
+3. 詞彙表中自然包含常見中文詞彙
+
+<strong>結果：</strong>
+"我愛人工智慧"
+→ ["我", "愛", "人工", "智慧"] (4-5 tokens)
+→ 比 GPT-3 的 6-8 tokens 更高效！
+
+<strong>優點：</strong>
+- 不需要額外分詞工具
+- 端到端訓練
+- 對中文更友好
+              </pre>
+            </div>
+
+            <div class="visual-diagram lab-spacing-top">
+              <h4>📚 方法 3：混合策略（字 + 詞 + 子詞）</h4>
+              <pre>
+<strong>代表：</strong>ChatGLM、GLM
+
+<strong>策略：</strong>
+- 常見詞：保留為完整 token（如 "人工智慧"）
+- 罕見詞：拆成子詞（如 "人工" + "智慧"）
+- 單字：保留為單字 token（如 "我"、"愛"）
+
+<strong>例子：</strong>
+"我愛人工智慧"
+→ ["我", "愛", "人工智慧"] (3 tokens，最優！)
+
+<strong>優點：</strong>
+- 平衡效率和覆蓋率
+- 常見詞保持語義完整
+- 罕見詞也能處理
+              </pre>
+            </div>
+
+            <div class="ai-prompt-block lab-spacing-top">
+              <p>
+                <strong>動手試試：比較不同模型的 tokenization</strong>
+              </p>
+              <pre>
+請幫我比較不同模型的 tokenization 效果：
+
+1. 安裝 transformers 庫：pip install transformers
+2. 載入以下模型的 tokenizer：
+   - GPT-2 (英文為主)
+   - Qwen/Qwen2-0.5B (中文優化)
+   - 或 ChatGLM (如果有)
+3. 測試相同的中文句子："我愛人工智慧"
+4. 比較：
+   - Token 數量
+   - Token 內容
+   - 哪個更符合中文語義
+
+請幫我寫一個比較腳本並執行。
+              </pre>
+              <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+                📋 複製 Prompt
+              </button>
+            </div>
+
+            <div class="lab-code-block collapsed">
+              <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+                <span class="filename">compare_tokenizers.py</span>
+                <div class="header-buttons">
+                  <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                  <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+                </div>
+              </div>
+              <div class="lab-code-block-content">
+                <pre><code class="language-python">from transformers import AutoTokenizer
+
+# 測試句子
+text = "我愛人工智慧"
+
+# 1. GPT-2 (英文為主)
+print("=" * 60)
+print("1. GPT-2 Tokenizer (英文為主)")
+print("=" * 60)
+try:
+    gpt2_tokenizer = AutoTokenizer.from_pretrained("gpt2")
+    gpt2_tokens = gpt2_tokenizer.encode(text)
+    gpt2_token_texts = gpt2_tokenizer.convert_ids_to_tokens(gpt2_tokens)
+    
+    print(f"原文: {text}")
+    print(f"Token 數量: {len(gpt2_tokens)}")
+    print(f"Tokens: {gpt2_token_texts}")
+    print()
+except Exception as e:
+    print(f"無法載入 GPT-2: {e}\n")
+
+# 2. Qwen (中文優化)
+print("=" * 60)
+print("2. Qwen Tokenizer (中文優化)")
+print("=" * 60)
+try:
+    # 注意：可能需要較大的模型，這裡用較小的版本
+    qwen_tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2-0.5B")
+    qwen_tokens = qwen_tokenizer.encode(text)
+    qwen_token_texts = qwen_tokenizer.convert_ids_to_tokens(qwen_tokens)
+    
+    print(f"原文: {text}")
+    print(f"Token 數量: {len(qwen_tokens)}")
+    print(f"Tokens: {qwen_token_texts}")
+    print()
+except Exception as e:
+    print(f"無法載入 Qwen: {e}")
+    print("提示：可能需要較大的模型或網路連線\n")
+
+# 3. 使用 jieba 分詞 + 簡單 tokenization
+print("=" * 60)
+print("3. jieba 分詞 (中文分詞工具)")
+print("=" * 60)
+try:
+    import jieba
+    jieba_words = list(jieba.cut(text))
+    print(f"原文: {text}")
+    print(f"分詞結果: {jieba_words}")
+    print(f"詞數: {len(jieba_words)}")
+    print()
+except ImportError:
+    print("請先安裝 jieba: pip install jieba\n")
+
+# 總結
+print("=" * 60)
+print("📊 總結")
+print("=" * 60)
+print("中文優化的模型通常能產生更少的 tokens")
+print("並且 tokens 更符合中文語義單位（詞而非字）")</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- 實際影響 -->
+          <div class="lab-section lab-spacing-top">
+            <h3>💡 4. 實際影響：為什麼這很重要？</h3>
+            
+            <div class="visual-diagram">
+              <h4>💰 成本影響</h4>
+              <pre>
+<strong>Token 數量直接影響成本：</strong>
+
+GPT-3.5 計費：$0.0015 / 1K tokens (輸入)
+同樣意思的對話：
+
+英文："What's the weather?" → 4 tokens  → $0.000006
+中文："今天天氣如何？"     → 12 tokens → $0.000018
+
+→ 中文成本是英文的 3 倍！
+
+<strong>使用中文優化模型：</strong>
+中文："今天天氣如何？" → 6 tokens (Qwen)
+→ 成本降低 50%！
+              </pre>
+            </div>
+
+            <div class="visual-diagram lab-spacing-top">
+              <h4>🎯 理解能力影響</h4>
+              <pre>
+<strong>Token 切分影響語義理解：</strong>
+
+錯誤切分："銀行行長" → ["銀", "行", "行", "長"]
+→ 模型無法理解「銀行」和「行長」的語義
+
+正確切分："銀行行長" → ["銀行", "行長"]
+→ 模型能理解這是「銀行的行長」
+
+<strong>結論：</strong>
+好的 tokenization = 更好的中文理解能力
+              </pre>
+            </div>
+
+            <div class="lab-setup lab-spacing-top">
+              <h4>📚 延伸閱讀</h4>
+              <ul>
+                <li>
+                  <strong>論文：</strong>
+                  <a href="https://arxiv.org/abs/1508.07909" target="_blank">Neural Machine Translation of Rare Words with Subword Units (BPE 原始論文)</a>
+                </li>
+                <li>
+                  <strong>中文分詞：</strong>
+                  <a href="https://github.com/fxsjy/jieba" target="_blank">jieba 中文分詞工具</a>
+                </li>
+                <li>
+                  <strong>實際應用：</strong>
+                  比較不同模型的 tokenization 效果，選擇最適合你任務的模型
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Challenge -->
+        <div class="lab-challenge lab-spacing-top-lg">
+          <h4>💪 挑戰任務</h4>
+          <p>
+            <strong>進階挑戰 1：</strong>
+            實作一個 <code>tokenize()</code> 函數，能夠將新句子轉換為 tokens。
+            提示：使用訓練好的 merges 規則，從最長的規則開始應用。
+          </p>
+          <p>
+            <strong>進階挑戰 2：</strong>
+            比較你的 BPE 實作和 <code>tiktoken</code> 庫的結果。
+            安裝 tiktoken：<code>pip install tiktoken</code>
+          </p>
+          <p>
+            <strong>進階挑戰 3：</strong>
+            視覺化 BPE 的合併過程！用 matplotlib 畫出每次合併後詞彙表的變化。
+          </p>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="lab-setup lab-spacing-top-lg">
+          <h4>🎯 下一步</h4>
+          <ul>
+            <li>
+              ✅ 恭喜！你已經學會了 Tokenization。現在文字可以被「切」成 tokens 了。
+            </li>
+            <li>
+              ➡️ 接下來我們要學 <strong>Embedding</strong>：如何把這些 tokens 變成「向量」？
+              這是 AI 真正「理解」文字的關鍵！
+            </li>
+            <li>
+              📚 建議：先完成挑戰任務，再進入下一個實驗。
+            </li>
+          </ul>
+        </div>
+
+        <div class="chapter-nav lab-spacing-top-lg">
+          <a href="../index.html" class="nav-link">← 返回 Phase 1</a>
+          <a href="../02-embedding/index.html" class="nav-link">下一個實驗：Embedding →</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function copyPrompt(btn) {
+        const promptBlock = btn.closest(".ai-prompt-block");
+        const preElement = promptBlock.querySelector("pre");
+        const text = preElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.classList.add("copied");
+          btn.textContent = "✓ 已複製！";
+          setTimeout(() => {
+            btn.classList.remove("copied");
+            btn.textContent = "📋 複製 Prompt";
+          }, 2000);
+        });
+      }
+
+      function toggleCodeBlock(header) {
+        const codeBlock = header.closest(".lab-code-block");
+        const toggleBtn = header.querySelector(".toggle-btn");
+        
+        codeBlock.classList.toggle("collapsed");
+        
+        if (codeBlock.classList.contains("collapsed")) {
+          toggleBtn.textContent = "展開";
+        } else {
+          toggleBtn.textContent = "收起";
+        }
+      }
+
+      function copyCode(btn) {
+        const codeBlock = btn.closest(".lab-code-block");
+        const codeElement = codeBlock.querySelector("pre code");
+        const text = codeElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = "✓ 已複製";
+          setTimeout(() => {
+            btn.textContent = "複製";
+          }, 2000);
+        });
+      }
+
+      function copyTerminal(btn) {
+        const terminalBlock = btn.closest(".terminal-command");
+        const codeElement = terminalBlock.querySelector("code");
+        const text = codeElement.textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = "✓ 已複製";
+          setTimeout(() => {
+            btn.textContent = "📋 複製指令";
+          }, 2000);
+        });
+      }
+    </script>
+  </body>
+</html>

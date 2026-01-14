@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>實作步驟 - 手寫 BPE Tokenizer</title>
+    <link rel="stylesheet" href="../../styles/global.css" />
+    <link rel="stylesheet" href="../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../styles/labs.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Hero Section -->
+      <div class="hero-section" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); height: 30vh;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <h1>實作步驟</h1>
+          <p class="hero-subtitle">一步步實作 BPE 演算法</p>
+        </div>
+      </div>
+
+      <!-- Lab Steps Navigation -->
+      <div class="lab-steps">
+        <a href="index.html" class="lab-step">概覽</a>
+        <a href="01-setup.html" class="lab-step">環境設置</a>
+        <a href="02-implement.html" class="lab-step active">實作步驟</a>
+        <a href="03-test.html" class="lab-step">測試運行</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h2>BPE Tokenizer 架構</h2>
+        <p>
+          我們的 BPE tokenizer 將包含以下核心功能：
+        </p>
+        <ul>
+          <li><code>train()</code>：從文字資料訓練 BPE 詞彙表</li>
+          <li><code>encode()</code>：將文字轉換成 tokens</li>
+          <li><code>decode()</code>：將 tokens 轉換回文字</li>
+        </ul>
+
+        <h2>步驟 1：建立基本類別結構</h2>
+        <p>
+          首先，建立 BPETokenizer 類別的基本結構。
+        </p>
+
+        <div class="ai-prompt-block">
+          <p>
+            <strong>給 Cursor / Claude Code 的 prompt：</strong>
+          </p>
+          <pre>在 tokenizer.py 中建立一個 BPETokenizer 類別，包含以下初始化方法：
+
+class BPETokenizer:
+    def __init__(self):
+        self.vocab = {}  # 詞彙表：token -> id
+        self.merges = []  # 合併規則列表
+        
+    def train(self, text, vocab_size=256):
+        """從文字訓練 BPE 詞彙表"""
+        pass
+        
+    def encode(self, text):
+        """將文字編碼成 tokens"""
+        pass
+        
+    def decode(self, tokens):
+        """將 tokens 解碼回文字"""
+        pass
+
+請實作這個類別的基本結構。</pre>
+          <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">複製 Prompt</button>
+        </div>
+
+        <h2>步驟 2：實作 train() 方法</h2>
+        <p>
+          <code>train()</code> 方法是 BPE 的核心。它會：
+        </p>
+        <ol>
+          <li>將文字拆分成字元</li>
+          <li>統計字元對的頻率</li>
+          <li>合併最頻繁的字元對</li>
+          <li>重複直到達到目標詞彙表大小</li>
+        </ol>
+
+        <div class="ai-prompt-block">
+          <p>
+            <strong>給 Cursor / Claude Code 的 prompt：</strong>
+          </p>
+          <pre>實作 BPETokenizer 的 train() 方法，執行以下步驟：
+
+1. 將輸入文字轉換成字元列表（每個字元是一個 token）
+2. 建立初始詞彙表（包含所有唯一字元）
+3. 重複以下步驟直到詞彙表大小達到 vocab_size：
+   a. 統計所有相鄰 token 對的出現頻率
+   b. 找到出現最頻繁的 token 對
+   c. 將這個 token 對合併成一個新 token
+   d. 將新 token 加入詞彙表
+   e. 更新所有文字中的 token 對
+
+請實作完整的 train() 方法。</pre>
+          <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">複製 Prompt</button>
+        </div>
+
+        <div class="key-concept">
+          <h4>核心演算法</h4>
+          <p>
+            BPE 的關鍵是「貪婪合併」：每次都選擇出現最頻繁的 token 對進行合併。
+            這樣可以確保最常見的組合被優先處理，提高 tokenization 的效率。
+          </p>
+        </div>
+
+        <h2>步驟 3：實作 encode() 方法</h2>
+        <p>
+          <code>encode()</code> 方法使用訓練好的詞彙表，將文字轉換成 token IDs。
+        </p>
+
+        <div class="ai-prompt-block">
+          <p>
+            <strong>給 Cursor / Claude Code 的 prompt：</strong>
+          </p>
+          <pre>實作 encode() 方法：
+
+1. 將輸入文字拆分成字元
+2. 按照訓練時的合併規則（merges），逐步合併 tokens
+3. 將最終的 tokens 轉換成對應的 IDs（使用 self.vocab）
+4. 返回 token IDs 列表
+
+請實作完整的 encode() 方法。</pre>
+          <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">複製 Prompt</button>
+        </div>
+
+        <h2>步驟 4：實作 decode() 方法</h2>
+        <p>
+          <code>decode()</code> 方法將 token IDs 轉換回原始文字。
+        </p>
+
+        <div class="ai-prompt-block">
+          <p>
+            <strong>給 Cursor / Claude Code 的 prompt：</strong>
+          </p>
+          <pre>實作 decode() 方法：
+
+1. 將 token IDs 轉換回 tokens（使用 self.vocab 的反向查找）
+2. 將 tokens 連接成字串
+3. 返回原始文字
+
+請實作完整的 decode() 方法。</pre>
+          <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">複製 Prompt</button>
+        </div>
+
+        <h2>完整程式碼範例</h2>
+        <p>
+          以下是完整的實作範例，你可以參考或直接使用：
+        </p>
+
+        <div class="lab-code-block">
+          <div class="lab-code-block-header">
+            <span class="filename">tokenizer.py</span>
+            <button class="copy-btn" onclick="copyCode(this)">複製</button>
+          </div>
+          <pre><code>from collections import Counter, defaultdict
+
+class BPETokenizer:
+    def __init__(self):
+        self.vocab = {}
+        self.merges = []
+        self.vocab_size = 0
+        
+    def train(self, text, vocab_size=256):
+        """訓練 BPE 詞彙表"""
+        # 初始化：將文字拆分成字元
+        tokens = [list(word) + ['</w>'] for word in text.split()]
+        vocab = Counter()
+        for token_list in tokens:
+            vocab[''.join(token_list)] = vocab.get(''.join(token_list), 0) + 1
+        
+        # 建立初始詞彙表
+        self.vocab = {chr(i): i for i in range(256)}
+        self.vocab_size = 256
+        
+        # BPE 合併循環
+        while self.vocab_size < vocab_size:
+            # 統計相鄰 token 對的頻率
+            pairs = defaultdict(int)
+            for token_list in tokens:
+                for i in range(len(token_list) - 1):
+                    pairs[(token_list[i], token_list[i+1])] += 1
+            
+            if not pairs:
+                break
+                
+            # 找到最頻繁的 pair
+            best_pair = max(pairs, key=pairs.get)
+            
+            # 合併 tokens
+            new_tokens = []
+            for token_list in tokens:
+                i = 0
+                new_token_list = []
+                while i < len(token_list):
+                    if i < len(token_list) - 1 and (token_list[i], token_list[i+1]) == best_pair:
+                        new_token_list.append(token_list[i] + token_list[i+1])
+                        i += 2
+                    else:
+                        new_token_list.append(token_list[i])
+                        i += 1
+                new_tokens.append(new_token_list)
+            tokens = new_tokens
+            
+            # 更新詞彙表
+            merged_token = best_pair[0] + best_pair[1]
+            if merged_token not in self.vocab:
+                self.vocab[merged_token] = self.vocab_size
+                self.vocab_size += 1
+                self.merges.append(best_pair)
+        
+        return self.vocab
+    
+    def encode(self, text):
+        """將文字編碼成 token IDs"""
+        # 將文字拆分成字元
+        tokens = [list(word) + ['</w>'] for word in text.split()]
+        
+        # 應用合併規則
+        for pair in self.merges:
+            new_tokens = []
+            for token_list in tokens:
+                i = 0
+                new_token_list = []
+                while i < len(token_list):
+                    if i < len(token_list) - 1 and (token_list[i], token_list[i+1]) == pair:
+                        new_token_list.append(pair[0] + pair[1])
+                        i += 2
+                    else:
+                        new_token_list.append(token_list[i])
+                        i += 1
+                new_tokens.append(new_token_list)
+            tokens = new_tokens
+        
+        # 轉換成 IDs
+        token_ids = []
+        for token_list in tokens:
+            for token in token_list:
+                if token in self.vocab:
+                    token_ids.append(self.vocab[token])
+                else:
+                    # 處理未知 token（拆分成字元）
+                    for char in token:
+                        token_ids.append(self.vocab.get(char, 0))
+        
+        return token_ids
+    
+    def decode(self, token_ids):
+        """將 token IDs 解碼回文字"""
+        # 建立反向詞彙表
+        id_to_token = {v: k for k, v in self.vocab.items()}
+        
+        # 轉換成 tokens
+        tokens = [id_to_token.get(id, '') for id in token_ids]
+        
+        # 連接並移除 </w> 標記
+        text = ''.join(tokens).replace('</w>', ' ')
+        return text.strip()</code></pre>
+        </div>
+
+        <div class="explanation">
+          <h4>程式碼說明</h4>
+          <ul>
+            <li><code>train()</code>：從文字資料學習合併規則，建立詞彙表</li>
+            <li><code>encode()</code>：使用訓練好的規則將文字轉換成 token IDs</li>
+            <li><code>decode()</code>：將 token IDs 轉換回原始文字</li>
+          </ul>
+        </div>
+
+        <h2>下一步</h2>
+        <p>
+          實作完成後，我們就可以測試 tokenizer 了！在下一頁，我們將建立測試腳本並驗證功能。
+        </p>
+
+        <div class="chapter-nav">
+          <a href="01-setup.html" class="nav-link">← 返回環境設置</a>
+          <a href="03-test.html" class="nav-link">開始測試 →</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function copyPrompt(btn) {
+        const block = btn.closest('.ai-prompt-block');
+        const pre = block.querySelector('pre');
+        const text = pre.textContent;
+        
+        navigator.clipboard.writeText(text).then(() => {
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      }
+
+      function copyCode(btn) {
+        const block = btn.closest('.lab-code-block');
+        const code = block.querySelector('code');
+        const text = code.textContent;
+        
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = '已複製';
+          setTimeout(() => {
+            btn.textContent = '複製';
+          }, 2000);
+        });
+      }
+    </script>
+  </body>
+</html>
