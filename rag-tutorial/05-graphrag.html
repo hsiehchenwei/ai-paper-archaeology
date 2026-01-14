@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GraphRAG：從局部到全局的知識圖譜 RAG | RAG 演進史</title>
-    <meta name="description" content="From Local to Global: A Graph RAG Approach to Query-Focused Summarization 深度解析。Microsoft 整合知識圖譜，實現跨文檔推理與全局摘要。" />
+    <meta
+      name="description"
+      content="From Local to Global: A Graph RAG Approach to Query-Focused Summarization 深度解析。Microsoft 整合知識圖譜，實現跨文檔推理與全局摘要。"
+    />
     <link rel="stylesheet" href="../styles/global.css" />
     <link rel="stylesheet" href="../styles/paper-reading.css" />
     <link rel="stylesheet" href="../styles/articles.css" />
@@ -13,20 +16,33 @@
     <div class="container">
       <!-- 麵包屑導航 -->
       <div class="breadcrumb">
-        <a href="../index.html">🏠 首頁</a> / 
-        <a href="index.html">📚 RAG 演進史</a> / 
-        GraphRAG
+        <a href="../index.html">🏠 首頁</a> /
+        <a href="index.html">📚 RAG 演進史</a> / GraphRAG
       </div>
 
       <!-- 論文資訊卡 -->
-      <div class="index-header" style="background: linear-gradient(135deg, #10b981, #059669);">
+      <div
+        class="index-header"
+        style="background: linear-gradient(135deg, #10b981, #059669)"
+      >
         <h1>🕸️ GraphRAG</h1>
-        <p>From Local to Global:<br />A Graph RAG Approach to Query-Focused Summarization</p>
-        <p style="font-size: 0.9rem; margin-top: 15px; opacity: 0.95;">
+        <p>
+          From Local to Global:<br />A Graph RAG Approach to Query-Focused
+          Summarization
+        </p>
+        <p style="font-size: 0.9rem; margin-top: 15px; opacity: 0.95">
           Darren Edge, Ha Trinh, Newman Cheng, et al.<br />
           <strong>Microsoft Research</strong> · 2024 年 4 月
         </p>
-        <p style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; margin-top: 15px; font-size: 0.9rem;">
+        <p
+          style="
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+          "
+        >
           🌐 解決傳統 RAG 的「局部問題」限制
         </p>
       </div>
@@ -34,15 +50,32 @@
       <!-- 一句話總結 -->
       <div class="key-concept">
         <h4>💡 一句話總結</h4>
-        <p style="font-size: 1.1rem;">
-          GraphRAG 整合知識圖譜，突破傳統 RAG 只能回答「局部問題」的限制。
-          透過 Community Detection 和全局摘要，實現跨文檔推理與全局視角回答。
+        <p style="font-size: 1.1rem">
+          GraphRAG 整合知識圖譜，突破傳統 RAG 只能回答「局部問題」的限制。 透過
+          Community Detection 和全局摘要，實現跨文檔推理與全局視角回答。
         </p>
       </div>
 
       <!-- 論文 PDF 連結 -->
-      <div style="background: var(--secondary-light); padding: 15px; border-radius: var(--radius-md); margin: 30px 0; text-align: center;">
-        <a href="papers/graphrag.pdf" target="_blank" style="color: var(--secondary-color); font-weight: 600; text-decoration: none; font-size: 1.05rem;">
+      <div
+        style="
+          background: var(--secondary-light);
+          padding: 15px;
+          border-radius: var(--radius-md);
+          margin: 30px 0;
+          text-align: center;
+        "
+      >
+        <a
+          href="papers/graphrag.pdf"
+          target="_blank"
+          style="
+            color: var(--secondary-color);
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1.05rem;
+          "
+        >
           📄 下載論文原文 PDF →
         </a>
       </div>
@@ -52,25 +85,56 @@
 
       <div class="explanation">
         <h4>📐 局部 vs 全局問題</h4>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
-          <div style="background: var(--primary-light); padding: 20px; border-radius: var(--radius-md); border-left: 4px solid var(--primary-color);">
-            <h5 style="color: var(--primary-color); margin-top: 0;">✅ Local Questions<br />(局部問題)</h5>
-            <p style="font-size: 0.95rem; line-height: 1.7;">
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+          "
+        >
+          <div
+            style="
+              background: var(--primary-light);
+              padding: 20px;
+              border-radius: var(--radius-md);
+              border-left: 4px solid var(--primary-color);
+            "
+          >
+            <h5 style="color: var(--primary-color); margin-top: 0">
+              ✅ Local Questions<br />(局部問題)
+            </h5>
+            <p style="font-size: 0.95rem; line-height: 1.7">
               「誰發明了電話？」<br />
               「巴黎是哪裡的首都？」<br />
               <strong>傳統 RAG 擅長</strong>
             </p>
           </div>
-          <div style="background: var(--danger-light); padding: 20px; border-radius: var(--radius-md); border-left: 4px solid var(--danger-color);">
-            <h5 style="color: var(--danger-color); margin-top: 0;">❌ Global Questions<br />(全局問題)</h5>
-            <p style="font-size: 0.95rem; line-height: 1.7;">
+          <div
+            style="
+              background: var(--danger-light);
+              padding: 20px;
+              border-radius: var(--radius-md);
+              border-left: 4px solid var(--danger-color);
+            "
+          >
+            <h5 style="color: var(--danger-color); margin-top: 0">
+              ❌ Global Questions<br />(全局問題)
+            </h5>
+            <p style="font-size: 0.95rem; line-height: 1.7">
               「這個資料集的主要主題是什麼？」<br />
               「這些事件之間有什麼關聯？」<br />
               <strong>傳統 RAG 無法回答</strong>
             </p>
           </div>
         </div>
-        <p style="margin-top: 20px; font-weight: 600; color: var(--secondary-color);">
+        <p
+          style="
+            margin-top: 20px;
+            font-weight: 600;
+            color: var(--secondary-color);
+          "
+        >
           GraphRAG 的目標：讓 RAG 也能回答全局問題！
         </p>
       </div>
@@ -79,9 +143,23 @@
       <h2>🔧 GraphRAG 架構</h2>
 
       <!-- 視覺化圖解 -->
-      <div style="text-align: center; margin: 40px 0;">
-        <img src="images/graphrag-architecture.png" alt="GraphRAG 三階段架構圖" style="max-width: 100%; border-radius: 12px; box-shadow: var(--shadow-lg);" />
-        <p style="margin-top: 15px; color: var(--text-secondary); font-size: 0.9rem;">
+      <div style="text-align: center; margin: 40px 0">
+        <img
+          src="images/graphrag-architecture.png"
+          alt="GraphRAG 三階段架構圖"
+          style="
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+          "
+        />
+        <p
+          style="
+            margin-top: 15px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+          "
+        >
           📊 GraphRAG 三階段流程：知識圖譜建構 → 社群偵測 → 查詢處理
         </p>
       </div>
@@ -93,22 +171,49 @@
         </p>
         <ul>
           <li><strong>Source Documents</strong>：原始文檔作為輸入</li>
-          <li><strong>Element Instances</strong>：提取實體、關係和主張（claims）</li>
+          <li>
+            <strong>Element Instances</strong>：提取實體、關係和主張（claims）
+          </li>
           <li><strong>Element Summaries</strong>：為每個元素生成摘要</li>
-          <li><strong>Graph Communities</strong>：基於圖譜的社群偵測（Leiden 演算法）</li>
-          <li><strong>Community Summaries</strong>：為每個社群生成層次化摘要</li>
+          <li>
+            <strong>Graph Communities</strong>：基於圖譜的社群偵測（Leiden
+            演算法）
+          </li>
+          <li>
+            <strong>Community Summaries</strong>：為每個社群生成層次化摘要
+          </li>
           <li><strong>Community Answers</strong>：使用社群摘要回答全局問題</li>
         </ul>
-        <p style="margin-top: 10px; font-size: 0.9rem; color: var(--text-secondary);">
-          📄 請參考 <a href="papers/graphrag.pdf" target="_blank" style="color: var(--primary-color);">論文 PDF</a> 第 2 頁 Figure 1
+        <p
+          style="
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+          "
+        >
+          📄 請參考
+          <a
+            href="papers/graphrag.pdf"
+            target="_blank"
+            style="color: var(--primary-color)"
+            >論文 PDF</a
+          >
+          第 2 頁 Figure 1
         </p>
       </div>
 
       <div class="section-block">
-        <h3 style="color: var(--secondary-color);">三階段 Pipeline</h3>
-        
-        <div style="background: var(--primary-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
-          <h4 style="margin-top: 0;">1️⃣ Knowledge Graph 建構</h4>
+        <h3 style="color: var(--secondary-color)">三階段 Pipeline</h3>
+
+        <div
+          style="
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h4 style="margin-top: 0">1️⃣ Knowledge Graph 建構</h4>
           <ul>
             <li>從文檔中提取實體（人物、地點、組織等）</li>
             <li>識別實體之間的關係</li>
@@ -116,8 +221,15 @@
           </ul>
         </div>
 
-        <div style="background: var(--secondary-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
-          <h4 style="margin-top: 0;">2️⃣ Community Detection</h4>
+        <div
+          style="
+            background: var(--secondary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h4 style="margin-top: 0">2️⃣ Community Detection</h4>
           <ul>
             <li>在知識圖譜中找出相關實體的「社群」</li>
             <li>每個社群代表一個主題或概念</li>
@@ -125,8 +237,15 @@
           </ul>
         </div>
 
-        <div style="background: var(--accent-light); padding: 20px; border-radius: var(--radius-md); margin: 20px 0;">
-          <h4 style="margin-top: 0;">3️⃣ Query Processing</h4>
+        <div
+          style="
+            background: var(--accent-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h4 style="margin-top: 0">3️⃣ Query Processing</h4>
           <ul>
             <li><strong>Local 查詢</strong>：直接檢索相關文檔</li>
             <li><strong>Global 查詢</strong>：使用社群摘要回答</li>
@@ -156,25 +275,611 @@
       <div class="key-concept">
         <h4>🕸️ Knowledge Graph 建構</h4>
         <p>GraphRAG 使用 LLM 從文檔中提取實體和關係：</p>
-        <ol style="line-height: 2;">
+        <ol style="line-height: 2">
           <li><strong>實體提取</strong>：識別文檔中的人物、組織、地點等</li>
-          <li><strong>關係識別</strong>：找出實體之間的關係（例如：A 是 B 的創辦人）</li>
+          <li>
+            <strong>關係識別</strong>：找出實體之間的關係（例如：A 是 B
+            的創辦人）
+          </li>
           <li><strong>圖譜建構</strong>：建立 Entity-Relation-Entity 三元組</li>
           <li><strong>圖譜優化</strong>：合併重複實體，清理噪音</li>
         </ol>
       </div>
 
-      <div class="key-concept" style="margin-top: 30px;">
+      <div class="key-concept" style="margin-top: 30px">
         <h4>👥 Community Detection</h4>
         <p>在知識圖譜中找出相關實體的社群：</p>
-        <ul style="line-height: 1.9;">
+        <ul style="line-height: 1.9">
           <li>使用圖譜演算法（如 Louvain）找出緊密相連的實體群組</li>
           <li>每個社群代表一個主題或概念</li>
           <li>為每個社群生成摘要，描述該社群的核心內容</li>
         </ul>
-        <p style="margin-top: 15px; color: var(--text-secondary);">
+        <p style="margin-top: 15px; color: var(--text-secondary)">
           這些社群摘要就是回答全局問題的關鍵！
         </p>
+      </div>
+
+      <!-- 實作細節 -->
+      <h2>🔧 論文實作細節</h2>
+
+      <div class="key-concept">
+        <h4>📝 階段一：Source Documents → Text Chunks</h4>
+        <p><strong>文檔分塊策略</strong></p>
+        <ul style="line-height: 1.9">
+          <li><strong>預設塊大小</strong>：600 tokens（論文實驗設定）</li>
+          <li><strong>塊重疊</strong>：100 tokens 重疊，確保資訊不遺漏</li>
+          <li>
+            <strong>設計權衡</strong>：
+            <ul style="margin-top: 10px; padding-left: 20px">
+              <li>較長的塊 → 減少 LLM 調用次數（降低成本）</li>
+              <li>較短的塊 → 提高資訊召回率（避免早期資訊遺漏）</li>
+            </ul>
+          </li>
+          <li>
+            <strong>實際案例</strong>：
+            <ul style="margin-top: 10px; padding-left: 20px">
+              <li>Podcast 資料集：1669 個 600-token 塊（約 100 萬 tokens）</li>
+              <li>News 資料集：3197 個 600-token 塊（約 170 萬 tokens）</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="key-concept" style="margin-top: 30px">
+        <h4>🔍 階段二：Text Chunks → Entities & Relationships</h4>
+        <p><strong>LLM 提取實體與關係</strong></p>
+        <div
+          style="
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 15px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--primary-color)">
+            📌 論文範例
+          </h5>
+          <p style="font-style: italic; margin-bottom: 15px">
+            "NeoChip's (NC) shares surged in their first week of trading on the
+            NewTech Exchange. However, market analysts caution that the
+            chipmaker's public debut may not reflect trends for other technology
+            IPOs. NeoChip, previously a private entity, was acquired by Quantum
+            Systems in 2016."
+          </p>
+          <p><strong>LLM 提取結果：</strong></p>
+          <ul style="line-height: 1.9">
+            <li>
+              <strong>實體：NeoChip</strong> → "NeoChip is a publicly traded
+              company specializing in low-power processors for wearables and IoT
+              devices."
+            </li>
+            <li>
+              <strong>實體：Quantum Systems</strong> → "Quantum Systems is a
+              firm that previously owned NeoChip."
+            </li>
+            <li>
+              <strong>關係</strong> → "Quantum Systems owned NeoChip from 2016
+              until NeoChip became publicly traded."
+            </li>
+          </ul>
+        </div>
+        <ul style="line-height: 1.9; margin-top: 15px">
+          <li>
+            <strong>提取內容</strong>：
+            <ul style="margin-top: 10px; padding-left: 20px">
+              <li>
+                實體（Entities）：人物、組織、地點等，包含名稱、類型、描述
+              </li>
+              <li>
+                關係（Relationships）：實體間的關係，包含來源、目標、關係描述
+              </li>
+              <li>
+                主張（Claims）：關於實體的重要事實陳述（日期、事件、互動等）
+              </li>
+            </ul>
+          </li>
+          <li>
+            <strong>領域適應</strong>：使用 few-shot exemplars 進行領域特定調整
+            <ul style="margin-top: 10px; padding-left: 20px">
+              <li>預設提示詞適用於一般命名實體（人物、地點、組織）</li>
+              <li>專業領域（科學、醫學、法律）可使用領域特定的範例</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Self-Reflection 技術</strong>：
+            <ul style="margin-top: 10px; padding-left: 20px">
+              <li>LLM 先生成提取結果，再評估正確性、清晰度、完整性</li>
+              <li>基於評估結果生成改進的響應</li>
+              <li>
+                在 HotPotQA 資料集上，600-token 塊比 2400-token
+                塊提取的實體數量多近兩倍
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="key-concept" style="margin-top: 30px">
+        <h4>🕸️ 階段三：Entities & Relationships → Knowledge Graph</h4>
+        <p><strong>建構知識圖譜</strong></p>
+        <ul style="line-height: 1.9">
+          <li>
+            <strong>節點（Nodes）</strong>：每個實體實例成為圖中的一個節點
+          </li>
+          <li><strong>邊（Edges）</strong>：關係實例成為圖中的邊</li>
+          <li>
+            <strong>聚合與摘要</strong>：
+            <ul style="margin-top: 10px; padding-left: 20px">
+              <li>實體描述被聚合並為每個節點生成摘要</li>
+              <li>關係的數量成為邊的權重（重複關係越多，權重越大）</li>
+              <li>主張（claims）也以類似方式聚合</li>
+            </ul>
+          </li>
+          <li>
+            <strong>實體匹配</strong>：
+            <ul style="margin-top: 10px; padding-left: 20px">
+              <li>
+                論文使用<strong>精確字串匹配</strong>（exact string matching）
+              </li>
+              <li>可調整為更軟的匹配方法（fuzzy matching）</li>
+              <li>
+                GraphRAG
+                對重複實體具有韌性，因為重複實體通常會在後續步驟中被聚類
+              </li>
+            </ul>
+          </li>
+          <li>
+            <strong>抽象化摘要</strong>：提取過程本身就是一種抽象化摘要
+            <ul style="margin-top: 10px; padding-left: 20px">
+              <li>關係和主張可能不會在原文中明確陳述</li>
+              <li>LLM 從文本中推斷出隱含的關係</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="key-concept" style="margin-top: 30px">
+        <h4>👥 階段四：Knowledge Graph → Graph Communities</h4>
+        <p><strong>階層式社群偵測</strong></p>
+        <ul style="line-height: 1.9">
+          <li>
+            <strong>演算法選擇</strong>：使用
+            <strong>Leiden 社群偵測演算法</strong>（Traag et al., 2019）
+          </li>
+          <li>
+            <strong>階層式分割</strong>：
+            <ul style="margin-top: 10px; padding-left: 20px">
+              <li>遞迴地在每個偵測到的社群內偵測子社群</li>
+              <li>持續分割直到達到無法再分割的葉子社群（leaf communities）</li>
+              <li>每個層級提供一個互斥且完整的社群分割</li>
+            </ul>
+          </li>
+          <li>
+            <strong>階層結構的優勢</strong>：
+            <ul style="margin-top: 10px; padding-left: 20px">
+              <li>支援分治法（divide-and-conquer）全局摘要</li>
+              <li>不同層級可回答不同粒度的問題</li>
+              <li>高層級社群提供廣泛視角，低層級社群提供詳細資訊</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="key-concept" style="margin-top: 30px">
+        <h4>📄 階段五：Graph Communities → Community Summaries</h4>
+        <p><strong>生成社群摘要</strong></p>
+        <div
+          style="
+            background: var(--secondary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 15px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--secondary-color)">
+            🌳 葉子級社群（Leaf-level Communities）
+          </h5>
+          <ol style="line-height: 2">
+            <li>
+              按<strong>節點度數</strong>（node degree）優先順序排序社群邊
+            </li>
+            <li>
+              依序添加以下元素到 LLM context window：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>來源節點描述</li>
+                <li>目標節點描述</li>
+                <li>邊本身描述</li>
+                <li>相關主張（claims）</li>
+              </ul>
+            </li>
+            <li>持續添加直到達到 token 限制</li>
+          </ol>
+        </div>
+        <div
+          style="
+            background: var(--accent-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 15px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--accent-color)">
+            🏛️ 高級社群（Higher-level Communities）
+          </h5>
+          <ol style="line-height: 2">
+            <li>如果所有元素摘要都能放入 context window → 直接摘要所有元素</li>
+            <li>
+              如果超過 token 限制：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>按元素摘要的 token 數量降序排序子社群</li>
+                <li>迭代地用子社群摘要（較短）替換對應的元素摘要（較長）</li>
+                <li>直到符合 context window 限制</li>
+              </ul>
+            </li>
+          </ol>
+        </div>
+        <p style="margin-top: 15px; color: var(--text-secondary)">
+          <strong>💡 設計理念</strong
+          >：這些摘要本身就有用，可以幫助理解資料集的全局結構和語義，即使沒有特定查詢也能用來理解語料庫。
+        </p>
+      </div>
+
+      <div class="key-concept" style="margin-top: 30px">
+        <h4>
+          🔎 階段六：Community Summaries → Community Answers → Global Answer
+        </h4>
+        <p><strong>Map-Reduce 查詢處理</strong></p>
+        <div
+          style="
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 15px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--primary-color)">
+            📦 Step 1: 準備社群摘要
+          </h5>
+          <ul style="line-height: 1.9">
+            <li>社群摘要被<strong>隨機打亂</strong>（random shuffle）</li>
+            <li>分割成預定 token 大小的塊（chunks）</li>
+            <li>
+              <strong>目的</strong
+              >：確保相關資訊分散在多個塊中，而不是集中在單一 context
+              window（避免資訊遺漏）
+            </li>
+          </ul>
+        </div>
+        <div
+          style="
+            background: var(--secondary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 15px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--secondary-color)">
+            🗺️ Step 2: Map 階段（並行生成中間答案）
+          </h5>
+          <ul style="line-height: 1.9">
+            <li>為每個社群摘要塊<strong>並行生成</strong>中間答案</li>
+            <li>
+              LLM 同時生成：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>部分答案（partial answer）</li>
+                <li>有用性分數（helpfulness score）：0-100 分</li>
+              </ul>
+            </li>
+            <li><strong>過濾</strong>：分數為 0 的答案被過濾掉</li>
+          </ul>
+        </div>
+        <div
+          style="
+            background: var(--accent-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 15px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--accent-color)">
+            📊 Step 3: Reduce 階段（生成全局答案）
+          </h5>
+          <ol style="line-height: 2">
+            <li>中間答案按有用性分數<strong>降序排序</strong></li>
+            <li>迭代地將答案添加到新的 context window</li>
+            <li>持續添加直到達到 token 限制</li>
+            <li>使用最終 context 生成返回給用戶的全局答案</li>
+          </ol>
+        </div>
+        <p
+          style="
+            margin-top: 15px;
+            font-weight: 600;
+            color: var(--secondary-color);
+          "
+        >
+          🎯
+          階層結構的靈活性：不同層級的社群摘要可用於回答不同粒度的問題，論文評估了哪個層級在摘要詳細程度和範圍之間提供最佳平衡。
+        </p>
+      </div>
+
+      <div class="key-concept" style="margin-top: 30px">
+        <h4>⚙️ 技術配置與效能</h4>
+        <div
+          style="
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 15px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--primary-color)">
+            🔧 實驗配置
+          </h5>
+          <ul style="line-height: 1.9">
+            <li>
+              <strong>Context Window</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>社群摘要生成：8k tokens</li>
+                <li>社群答案生成：8k tokens</li>
+                <li>全局答案生成：8k tokens</li>
+                <li>圖索引建構：600 tokens（用於實體提取）</li>
+              </ul>
+            </li>
+            <li>
+              <strong>硬體環境</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>虛擬機器：16GB RAM</li>
+                <li>CPU：Intel(R) Xeon(R) Platinum 8171M @ 2.60GHz</li>
+                <li>LLM API：OpenAI gpt-4-turbo（2M TPM, 10k RPM）</li>
+              </ul>
+            </li>
+            <li>
+              <strong>處理時間</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>Podcast 資料集（100 萬 tokens）：圖索引建構約 281 分鐘</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <div
+          style="
+            background: var(--secondary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 15px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--secondary-color)">
+            📈 效能優化技巧
+          </h5>
+          <ul style="line-height: 1.9">
+            <li>
+              <strong>Self-Reflection</strong>：提升實體提取品質，但增加 token
+              消耗
+            </li>
+            <li>
+              <strong>塊大小選擇</strong>：600 tokens 在成本和召回率之間取得平衡
+            </li>
+            <li><strong>並行處理</strong>：Map 階段可並行生成多個社群答案</li>
+            <li><strong>階層式摘要</strong>：利用社群階層結構，避免重複處理</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 模型使用方式 -->
+      <h2>🤖 模型使用方式：Prompt Engineering vs 微調</h2>
+
+      <div class="key-concept">
+        <h4>✅ 使用現有模型，透過 Prompt 進行多次任務</h4>
+        <p style="font-size: 1.05rem; line-height: 1.8; margin-bottom: 20px">
+          <strong>GraphRAG 並未微調模型參數</strong>，而是使用現有的
+          LLM（GPT-4）透過精心設計的 prompt 來完成所有任務。 這是一個純粹的
+          <strong>Prompt Engineering</strong> 方法，不需要訓練或調整模型權重。
+        </p>
+
+        <div
+          style="
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--primary-color)">
+            🔧 使用的模型與 API
+          </h5>
+          <ul style="line-height: 1.9">
+            <li><strong>模型</strong>：GPT-4（OpenAI）</li>
+            <li>
+              <strong>API</strong>：OpenAI public endpoint for gpt-4-turbo
+            </li>
+            <li>
+              <strong>API 限制</strong>：2M TPM (Tokens Per Minute), 10k RPM
+              (Requests Per Minute)
+            </li>
+            <li>
+              <strong>模型狀態</strong>：預訓練模型，<strong>未進行微調</strong>
+            </li>
+          </ul>
+        </div>
+
+        <div
+          style="
+            background: var(--secondary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--secondary-color)">
+            📝 Prompt Engineering 技術
+          </h5>
+          <p style="margin-bottom: 15px">
+            <strong>GraphRAG 使用多種 Prompt Engineering 技術：</strong>
+          </p>
+          <ul style="line-height: 1.9">
+            <li>
+              <strong>Few-shot Learning（少樣本學習）</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>在 prompt 中提供領域特定的範例（exemplars）</li>
+                <li>讓模型透過 in-context learning 理解任務</li>
+                <li>例如：提供科學、醫學、法律等領域的實體提取範例</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Self-Reflection（自我反思）</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>LLM 先生成答案</li>
+                <li>然後評估答案的正確性、清晰度、完整性</li>
+                <li>基於評估結果生成改進的響應</li>
+                <li>這是一個多輪 prompt 技術，提升提取品質</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Prompt Templates（提示詞模板）</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>為不同任務設計專門的 prompt 模板</li>
+                <li>實體提取、關係提取、主張提取各有專用 prompt</li>
+                <li>社群摘要、全局答案生成也有對應的 prompt 設計</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Domain-specific Exemplars（領域特定範例）</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>預設 prompt 適用於一般命名實體（人物、地點、組織）</li>
+                <li>專業領域可提供領域特定的 few-shot 範例</li>
+                <li>例如：科學領域的實體類型、醫學領域的關係類型等</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <div
+          style="
+            background: var(--accent-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--accent-color)">
+            🔄 多次 LLM 調用流程
+          </h5>
+          <p style="margin-bottom: 15px">
+            <strong>GraphRAG 在整個流程中進行多次 LLM API 調用：</strong>
+          </p>
+          <ol style="line-height: 2">
+            <li>
+              <strong>索引建構階段（Indexing Time）</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>為每個文字塊調用 LLM 提取實體和關係</li>
+                <li>Podcast 資料集：1669 個塊 → 1669 次 LLM 調用</li>
+                <li>News 資料集：3197 個塊 → 3197 次 LLM 調用</li>
+                <li>如果使用 Self-Reflection，每個塊需要 2-3 次調用</li>
+              </ul>
+            </li>
+            <li>
+              <strong>社群摘要生成階段</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>為每個社群（葉子級和高級）調用 LLM 生成摘要</li>
+                <li>社群數量取決於資料集大小和社群偵測結果</li>
+                <li>可並行處理多個社群摘要</li>
+              </ul>
+            </li>
+            <li>
+              <strong>查詢處理階段（Query Time）</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>
+                  <strong>Map 階段</strong>：為每個社群摘要塊並行調用 LLM
+                  生成部分答案
+                </li>
+                <li>
+                  <strong>Reduce 階段</strong>：調用 LLM
+                  將部分答案合併成全局答案
+                </li>
+              </ul>
+            </li>
+          </ol>
+          <p
+            style="
+              margin-top: 15px;
+              font-weight: 600;
+              color: var(--accent-color);
+            "
+          >
+            💡 關鍵點：所有這些調用都使用相同的預訓練 GPT-4 模型，只是透過不同的
+            prompt 來引導模型完成不同任務。
+          </p>
+        </div>
+
+        <div
+          style="
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--primary-color)">
+            📊 為什麼不微調？
+          </h5>
+          <ul style="line-height: 1.9">
+            <li>
+              <strong>通用性</strong
+              >：使用現有模型可以快速應用到不同領域，只需調整 prompt 中的
+              few-shot 範例
+            </li>
+            <li>
+              <strong>成本效益</strong>：微調需要大量標註資料和計算資源，而
+              prompt engineering 成本較低
+            </li>
+            <li>
+              <strong>靈活性</strong>：可以針對不同任務快速調整
+              prompt，無需重新訓練模型
+            </li>
+            <li>
+              <strong>可解釋性</strong>：Prompt 的設計邏輯清晰，容易理解和調整
+            </li>
+            <li>
+              <strong>實用性</strong>：GPT-4
+              等大型模型已經具備強大的推理能力，透過 prompt 即可引導完成複雜任務
+            </li>
+          </ul>
+        </div>
+
+        <div
+          style="
+            background: var(--secondary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--secondary-color)">
+            🎯 論文中的證據
+          </h5>
+          <ul style="line-height: 1.9">
+            <li>
+              論文明確提到："<em>The LLM is prompted to extract...</em>"（LLM
+              被提示提取...）
+            </li>
+            <li>
+              "<em>These prompts can be tailored to the domain...</em>"（這些
+              prompt 可以針對領域調整...）
+            </li>
+            <li>
+              "<em>few-shot exemplars for in-context learning</em
+              >"（用於上下文學習的少樣本範例）
+            </li>
+            <li>
+              "<em>using a public OpenAI endpoint for gpt-4-turbo</em>"（使用
+              OpenAI 公開端點）
+            </li>
+            <li>Appendix A 和 Appendix E 詳細描述了各種 prompt 的設計</li>
+            <li>沒有任何關於 fine-tuning、training、或參數調整的內容</li>
+          </ul>
+        </div>
       </div>
 
       <!-- 應用場景 -->
@@ -182,7 +887,7 @@
 
       <div class="solution">
         <h4>✅ GraphRAG 擅長的任務</h4>
-        <ul style="line-height: 2;">
+        <ul style="line-height: 2">
           <li><strong>全局摘要</strong>：「這個資料集的主要主題是什麼？」</li>
           <li><strong>關聯分析</strong>：「這些事件之間有什麼關聯？」</li>
           <li><strong>趨勢分析</strong>：「這個領域的發展趨勢是什麼？」</li>
@@ -233,6 +938,553 @@
         </table>
       </div>
 
+      <!-- 評測驗證 -->
+      <h2>🔬 評測驗證：實驗設計與測試結果</h2>
+
+      <div class="key-concept">
+        <h4>📋 實驗概述</h4>
+        <p style="font-size: 1.05rem; line-height: 1.8; margin-bottom: 20px">
+          論文進行了兩個主要實驗，使用
+          <strong>Adaptive Benchmarking</strong> 方法生成測試問題， 並使用
+          <strong>LLM-as-a-Judge</strong> 技術進行評估。所有實驗都使用 GPT-4
+          作為 LLM。
+        </p>
+      </div>
+
+      <div class="key-concept" style="margin-top: 30px">
+        <h4>❓ 問題生成方法：Adaptive Benchmarking</h4>
+        <p style="margin-bottom: 15px">
+          <strong>為什麼需要新的評估方法？</strong>
+        </p>
+        <ul style="line-height: 1.9; margin-bottom: 20px">
+          <li>
+            傳統基準（如
+            HotPotQA、MultiHop-RAG）專注於<strong>事實檢索</strong>，不適合全局理解任務
+          </li>
+          <li>全局 sensemaking 問題沒有標準答案（ground truth）</li>
+          <li>需要生成能代表真實使用場景的問題</li>
+        </ul>
+
+        <div
+          style="
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--primary-color)">
+            🔧 三階段問題生成流程
+          </h5>
+          <ol style="line-height: 2">
+            <li>
+              <strong>生成用戶角色（Personas）</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>基於資料集描述，LLM 生成 K 個潛在用戶角色</li>
+                <li>例如：科技記者、教育工作者、研究人員等</li>
+              </ul>
+            </li>
+            <li>
+              <strong>識別任務（Tasks）</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>為每個用戶角色識別 N 個相關任務</li>
+                <li>例如：理解科技政策、整合健康議題到課程等</li>
+              </ul>
+            </li>
+            <li>
+              <strong>生成問題（Questions）</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>為每個（用戶，任務）組合生成 M 個全局理解問題</li>
+                <li>問題要求理解整個語料庫，而非檢索特定事實</li>
+              </ul>
+            </li>
+          </ol>
+          <p
+            style="
+              margin-top: 15px;
+              font-weight: 600;
+              color: var(--primary-color);
+            "
+          >
+            📊 實驗設定：K = M = N = 5，每個資料集生成 125 個測試問題（5 × 5 ×
+            5）
+          </p>
+        </div>
+
+        <div
+          style="
+            background: var(--secondary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--secondary-color)">
+            📝 問題範例
+          </h5>
+          <p><strong>Podcast 資料集：</strong></p>
+          <ul style="line-height: 1.9">
+            <li>用戶：科技記者，任務：理解科技領袖對政策與監管的看法</li>
+            <li>
+              問題範例：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>"哪些集數主要討論科技政策和政府監管？"</li>
+                <li>"來賓如何看待隱私法對科技發展的影響？"</li>
+                <li>"來賓是否討論創新與倫理考量之間的平衡？"</li>
+              </ul>
+            </li>
+          </ul>
+          <p style="margin-top: 15px"><strong>News 資料集：</strong></p>
+          <ul style="line-height: 1.9">
+            <li>用戶：教育工作者，任務：將時事融入課程</li>
+            <li>
+              問題範例：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>"哪些當前健康議題可以整合到健康教育課程中？"</li>
+                <li>"新聞文章如何處理預防醫學和健康概念？"</li>
+                <li>"基於新聞報導，可以從中了解哪些公共衛生優先事項？"</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="key-concept" style="margin-top: 30px">
+        <h4>📊 評估標準：四個維度</h4>
+        <p style="margin-bottom: 15px">
+          由於全局 sensemaking 問題沒有標準答案，論文使用
+          <strong>Head-to-Head Comparison</strong> 方法， 讓 LLM
+          評估兩個系統的相對表現。
+        </p>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+          "
+        >
+          <div
+            style="
+              background: var(--primary-light);
+              padding: 15px;
+              border-radius: var(--radius-md);
+              border-left: 4px solid var(--primary-color);
+            "
+          >
+            <h5 style="margin-top: 0; color: var(--primary-color)">
+              📈 Comprehensiveness<br />（全面性）
+            </h5>
+            <p style="font-size: 0.95rem; line-height: 1.7">
+              答案提供了多少細節來涵蓋問題的所有面向和細節？
+            </p>
+          </div>
+          <div
+            style="
+              background: var(--secondary-light);
+              padding: 15px;
+              border-radius: var(--radius-md);
+              border-left: 4px solid var(--secondary-color);
+            "
+          >
+            <h5 style="margin-top: 0; color: var(--secondary-color)">
+              🌈 Diversity<br />（多樣性）
+            </h5>
+            <p style="font-size: 0.95rem; line-height: 1.7">
+              答案在提供不同觀點和見解方面有多豐富和多樣？
+            </p>
+          </div>
+          <div
+            style="
+              background: var(--accent-light);
+              padding: 15px;
+              border-radius: var(--radius-md);
+              border-left: 4px solid var(--accent-color);
+            "
+          >
+            <h5 style="margin-top: 0; color: var(--accent-color)">
+              💡 Empowerment<br />（賦能性）
+            </h5>
+            <p style="font-size: 0.95rem; line-height: 1.7">
+              答案如何幫助讀者理解並做出明智判斷？
+            </p>
+          </div>
+          <div
+            style="
+              background: #f0f0f0;
+              padding: 15px;
+              border-radius: var(--radius-md);
+              border-left: 4px solid #666;
+            "
+          >
+            <h5 style="margin-top: 0; color: #666">
+              🎯 Directness<br />（直接性）
+            </h5>
+            <p style="font-size: 0.95rem; line-height: 1.7">
+              答案如何具體且清晰地回答問題？（對照標準）
+            </p>
+          </div>
+        </div>
+
+        <div
+          style="
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--primary-color)">
+            ⚖️ 評估流程
+          </h5>
+          <ol style="line-height: 2">
+            <li>LLM 接收問題和兩個競爭系統的答案</li>
+            <li>根據特定標準比較兩個答案</li>
+            <li>判斷哪個答案更好，或標記為平手（tie）</li>
+            <li>為考慮 LLM 的隨機性，每個比較進行多次重複（replicates）</li>
+            <li>計算平均結果：獲勝 = 100 分，失敗 = 0 分，平手 = 50 分</li>
+          </ol>
+          <p style="margin-top: 15px; color: var(--text-secondary)">
+            💡 Directness 作為對照標準：由於它與 Comprehensiveness 和 Diversity
+            對立， 預期沒有方法能在所有四個標準上都獲勝。
+          </p>
+        </div>
+      </div>
+
+      <div class="key-concept" style="margin-top: 30px">
+        <h4>🧪 對照實驗設計：六個條件</h4>
+        <p style="margin-bottom: 15px">
+          論文比較了六個條件，所有條件使用相同的 context window 大小（8k
+          tokens）和相同的 prompt， 差異僅在於如何創建 context window 的內容。
+        </p>
+
+        <div
+          style="
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--primary-color)">
+            🕸️ GraphRAG 條件（C0-C3）
+          </h5>
+          <ul style="line-height: 1.9">
+            <li><strong>C0</strong>：使用根層級社群摘要（數量最少）</li>
+            <li>
+              <strong>C1</strong>：使用高層級社群摘要（C0 的子社群，如果存在）
+            </li>
+            <li>
+              <strong>C2</strong>：使用中層級社群摘要（C1 的子社群，如果存在）
+            </li>
+            <li>
+              <strong>C3</strong>：使用低層級社群摘要（數量最多，C2 的子社群）
+            </li>
+          </ul>
+          <p style="margin-top: 15px; color: var(--text-secondary)">
+            💡 這些條件測試不同層級的社群摘要對答案品質的影響
+          </p>
+        </div>
+
+        <div
+          style="
+            background: var(--secondary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--secondary-color)">
+            📄 對照條件
+          </h5>
+          <ul style="line-height: 1.9">
+            <li>
+              <strong>TS（Text Summarization）</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>使用相同的 map-reduce 方法，但直接對源文本進行摘要</li>
+                <li>源文本被打亂並分塊，而非使用社群摘要</li>
+                <li>測試社群摘要是否比直接文本摘要更好</li>
+              </ul>
+            </li>
+            <li>
+              <strong>SS（Semantic Search / Vector RAG）</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>傳統向量 RAG 實作</li>
+                <li>
+                  檢索語義相似的文本塊，添加到 context window 直到達到 token
+                  限制
+                </li>
+                <li>這是 GraphRAG 的主要對照基準</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="key-concept" style="margin-top: 30px">
+        <h4>📈 測試資料集</h4>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+          "
+        >
+          <div
+            style="
+              background: var(--primary-light);
+              padding: 20px;
+              border-radius: var(--radius-md);
+            "
+          >
+            <h5 style="margin-top: 0; color: var(--primary-color)">
+              🎙️ Podcast 資料集
+            </h5>
+            <ul style="line-height: 1.9; font-size: 0.95rem">
+              <li>
+                <strong>來源</strong>：Behind the Tech with Kevin Scott 播客轉錄
+              </li>
+              <li><strong>內容</strong>：Microsoft CTO 與科技領袖的對話</li>
+              <li>
+                <strong>規模</strong>：1669 個 600-token 塊（約 100 萬 tokens）
+              </li>
+              <li><strong>重疊</strong>：100 tokens</li>
+              <li><strong>圖譜</strong>：8,564 個節點，20,691 條邊</li>
+            </ul>
+          </div>
+          <div
+            style="
+              background: var(--secondary-light);
+              padding: 20px;
+              border-radius: var(--radius-md);
+            "
+          >
+            <h5 style="margin-top: 0; color: var(--secondary-color)">
+              📰 News 資料集
+            </h5>
+            <ul style="line-height: 1.9; font-size: 0.95rem">
+              <li>
+                <strong>來源</strong>：2013 年 9 月至 2023 年 12 月的新聞文章
+              </li>
+              <li><strong>類別</strong>：娛樂、商業、體育、科技、健康、科學</li>
+              <li>
+                <strong>規模</strong>：3197 個 600-token 塊（約 170 萬 tokens）
+              </li>
+              <li><strong>重疊</strong>：100 tokens</li>
+              <li><strong>圖譜</strong>：15,754 個節點，19,520 條邊</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="key-concept" style="margin-top: 30px">
+        <h4>🏆 測試結果：Experiment 1</h4>
+
+        <div
+          style="
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--primary-color)">
+            ✅ GraphRAG vs Vector RAG（SS）
+          </h5>
+          <p style="font-weight: 600; margin-bottom: 15px">
+            Comprehensiveness（全面性）：
+          </p>
+          <ul style="line-height: 1.9">
+            <li>
+              <strong>Podcast 資料集</strong>：GraphRAG 獲勝率 72-83%（p <
+              0.001）
+            </li>
+            <li>
+              <strong>News 資料集</strong>：GraphRAG 獲勝率 72-80%（p < 0.001）
+            </li>
+            <li>所有 GraphRAG 條件（C0-C3）都顯著優於向量 RAG</li>
+          </ul>
+          <p style="font-weight: 600; margin-top: 15px; margin-bottom: 15px">
+            Diversity（多樣性）：
+          </p>
+          <ul style="line-height: 1.9">
+            <li>
+              <strong>Podcast 資料集</strong>：GraphRAG 獲勝率 75-82%（p <
+              0.001）
+            </li>
+            <li>
+              <strong>News 資料集</strong>：GraphRAG 獲勝率 62-71%（p < 0.01）
+            </li>
+          </ul>
+          <p style="font-weight: 600; margin-top: 15px; margin-bottom: 15px">
+            Directness（直接性）：
+          </p>
+          <ul style="line-height: 1.9">
+            <li>向量 RAG（SS）在所有比較中產生最直接的答案</li>
+            <li>
+              這符合預期，因為 Directness 與 Comprehensiveness 和 Diversity 對立
+            </li>
+          </ul>
+        </div>
+
+        <div
+          style="
+            background: var(--secondary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--secondary-color)">
+            📊 GraphRAG 不同層級比較
+          </h5>
+          <p style="margin-bottom: 15px">
+            <strong>Comprehensiveness：</strong>
+          </p>
+          <ul style="line-height: 1.9">
+            <li>
+              <strong>C2 和 C3</strong> 在兩個資料集上都顯著優於 TS（p < 0.001）
+            </li>
+            <li><strong>C1</strong> 在 News 資料集上優於 TS（p = 0.002）</li>
+            <li>較低層級的社群摘要（C2, C3）提供更詳細的資訊</li>
+          </ul>
+          <p style="margin-top: 15px; margin-bottom: 15px">
+            <strong>Empowerment（賦能性）：</strong>
+          </p>
+          <ul style="line-height: 1.9">
+            <li>結果混合：GraphRAG 與向量 RAG 之間沒有明確勝者</li>
+            <li>GraphRAG 與 TS 之間也沒有明確勝者</li>
+            <li>LLM 評估顯示這可能與提供具體範例的能力有關</li>
+          </ul>
+        </div>
+
+        <div
+          style="
+            background: var(--accent-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--accent-color)">📈 統計分析</h5>
+          <ul style="line-height: 1.9">
+            <li>
+              <strong>統計檢驗</strong>：使用 Wilcoxon signed-rank
+              test（非參數檢驗）
+            </li>
+            <li><strong>多重比較校正</strong>：Holm-Bonferroni correction</li>
+            <li><strong>重複次數</strong>：每個比較進行 5 次評估運行</li>
+            <li>
+              <strong>顯著性水平</strong>：p < 0.001（非常顯著），p <
+              0.01（顯著）
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="key-concept" style="margin-top: 30px">
+        <h4>🔬 Experiment 2：基於主張的驗證</h4>
+        <p style="margin-bottom: 15px">
+          為驗證 Experiment 1 的結果，論文進行了第二個實驗，使用<strong
+            >事實主張（factual claims）</strong
+          >作為客觀指標。
+        </p>
+
+        <div
+          style="
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--primary-color)">
+            📝 主張提取方法
+          </h5>
+          <ul style="line-height: 1.9">
+            <li><strong>工具</strong>：使用 Claimify（LLM-based 方法）</li>
+            <li>
+              <strong>定義</strong>：主張是「明確呈現某些可驗證事實的陳述」
+            </li>
+            <li>
+              <strong>流程</strong>：
+              <ol style="margin-top: 5px; padding-left: 20px; line-height: 1.9">
+                <li>識別答案中包含至少一個事實主張的句子</li>
+                <li>將這些句子分解為簡單、自包含的事實主張</li>
+                <li>移除重複主張</li>
+              </ol>
+            </li>
+            <li>
+              <strong>結果</strong>：從所有答案中提取了 47,075
+              個唯一主張，平均每個答案 31 個主張
+            </li>
+          </ul>
+        </div>
+
+        <div
+          style="
+            background: var(--secondary-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin: 20px 0;
+          "
+        >
+          <h5 style="margin-top: 0; color: var(--secondary-color)">
+            📊 兩個指標
+          </h5>
+          <ul style="line-height: 1.9">
+            <li>
+              <strong>Comprehensiveness（全面性）</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>測量每個條件下答案中提取的主張平均數量</li>
+                <li>更多主張 = 更全面</li>
+              </ul>
+            </li>
+            <li>
+              <strong>Diversity（多樣性）</strong>：
+              <ul style="margin-top: 5px; padding-left: 20px">
+                <li>對每個答案的主張進行聚類</li>
+                <li>計算平均聚類數量</li>
+                <li>使用 Scikit-learn 的 Agglomerative Clustering</li>
+                <li>距離度量：1 - ROUGE-L</li>
+                <li>更多聚類 = 更多樣</li>
+              </ul>
+            </li>
+          </ul>
+          <p style="margin-top: 15px; color: var(--text-secondary)">
+            💡 這個實驗提供了客觀的、可量化的驗證，支持 Experiment 1 中使用
+            LLM-as-a-Judge 的主觀評估結果。
+          </p>
+        </div>
+      </div>
+
+      <div class="key-concept" style="margin-top: 30px">
+        <h4>💡 實驗設計的創新點</h4>
+        <ul style="line-height: 1.9">
+          <li>
+            <strong>Adaptive Benchmarking</strong
+            >：針對特定領域動態生成評估基準，而非使用通用基準
+          </li>
+          <li>
+            <strong>LLM-as-a-Judge</strong>：使用 LLM
+            評估沒有標準答案的全局理解問題
+          </li>
+          <li>
+            <strong>多維度評估</strong
+            >：不僅評估準確性，還評估全面性、多樣性、賦能性
+          </li>
+          <li>
+            <strong>客觀驗證</strong>：使用事實主張作為客觀指標驗證主觀評估結果
+          </li>
+          <li>
+            <strong>公平對照</strong>：所有條件使用相同的 context window 和
+            prompt，只改變內容來源
+          </li>
+        </ul>
+      </div>
+
       <!-- 歷史意義 -->
       <h2>📜 歷史意義</h2>
 
@@ -244,23 +1496,37 @@
           <li><strong>社群摘要</strong>：創新的知識壓縮方法</li>
           <li><strong>實用性</strong>：Microsoft 已開源實作</li>
         </ul>
-        <p style="margin-top: 15px;">
-          GraphRAG 發表於 2024 年 4 月，是 Modular RAG 時代的代表作。
-          它證明了 RAG 不僅可以「檢索」，還可以「理解結構」。
+        <p style="margin-top: 15px">
+          GraphRAG 發表於 2024 年 4 月，是 Modular RAG 時代的代表作。 它證明了
+          RAG 不僅可以「檢索」，還可以「理解結構」。
         </p>
       </div>
 
       <!-- 延伸閱讀 -->
-      <div class="quick-links" style="margin-top: 40px;">
+      <div class="quick-links" style="margin-top: 40px">
         <a href="04-self-rag.html" class="quick-link">← 上一篇：Self-RAG</a>
         <a href="index.html" class="quick-link">回到 RAG 總覽</a>
-        <a href="07-rag-vs-long-context.html" class="quick-link">下一篇：RAG vs Long Context →</a>
+        <a href="07-rag-vs-long-context.html" class="quick-link"
+          >下一篇：RAG vs Long Context →</a
+        >
       </div>
 
-      <div class="quick-links" style="margin-top: 15px;">
-        <a href="https://arxiv.org/abs/2404.16130" class="quick-link" target="_blank">📄 GraphRAG 論文 (arXiv)</a>
-        <a href="https://aka.ms/graphrag" class="quick-link" target="_blank">💻 Microsoft 開源實作</a>
-        <a href="https://www.microsoft.com/en-us/research/publication/from-local-to-global-a-graph-rag-approach-to-query-focused-summarization/" class="quick-link" target="_blank">🔗 Microsoft Research</a>
+      <div class="quick-links" style="margin-top: 15px">
+        <a
+          href="https://arxiv.org/abs/2404.16130"
+          class="quick-link"
+          target="_blank"
+          >📄 GraphRAG 論文 (arXiv)</a
+        >
+        <a href="https://aka.ms/graphrag" class="quick-link" target="_blank"
+          >💻 Microsoft 開源實作</a
+        >
+        <a
+          href="https://www.microsoft.com/en-us/research/publication/from-local-to-global-a-graph-rag-approach-to-query-focused-summarization/"
+          class="quick-link"
+          target="_blank"
+          >🔗 Microsoft Research</a
+        >
       </div>
     </div>
   </body>
