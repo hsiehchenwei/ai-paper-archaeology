@@ -73,6 +73,927 @@ Token: "狗" (ID: 5678)
             </pre>
           </div>
 
+          <div class="explanation">
+            <h4>🔍 重要概念：多 Token 詞彙的 Embedding 處理</h4>
+            <p>
+              當一個中文詞被拆成多個 tokens 時，embedding 是如何處理的呢？
+            </p>
+            
+            <div class="visual-diagram">
+              <h4>📊 範例：多 Token 詞彙的 Embedding</h4>
+              <pre>
+<strong>情況 1：單一 Token（理想情況）</strong>
+文字: "貓"
+  ↓ Tokenization
+Token: ["貓"] → 1 個 token
+  ↓ Embedding（每個 token 對應一個 vector）
+Embedding: [0.2, -0.5, 0.8, ...]  (1 個 vector，例如 768 維)
+
+<strong>情況 2：多個 Tokens（常見情況）</strong>
+文字: "貓咪"
+  ↓ Tokenization (GPT-3)
+Tokens: ["貓", "咪"] → 2 個 tokens
+  ↓ Embedding（每個 token 對應一個 vector）
+Embedding: [
+  [0.2, -0.5, 0.8, ...],  ← "貓" 的 vector
+  [0.1, -0.3, 0.6, ...]   ← "咪" 的 vector
+]  (2 個 vectors，每個都是 768 維)
+
+<strong>情況 3：複雜詞彙（多個 Tokens）</strong>
+文字: "人工智慧"
+  ↓ Tokenization (GPT-3)
+Tokens: ["人工", "智", "慧"] → 3 個 tokens
+  ↓ Embedding
+Embedding: [
+  [0.3, -0.4, 0.7, ...],  ← "人工" 的 vector
+  [0.2, -0.2, 0.5, ...],  ← "智" 的 vector
+  [0.1, -0.1, 0.4, ...]   ← "慧" 的 vector
+]  (3 個 vectors，每個都是 768 維)
+
+✨ 關鍵理解：
+- 每個 token 都有自己獨立的 embedding vector
+- 多個 tokens = 多個 vectors（不是合併成一個）
+- 模型會處理這多個 vectors，學習它們的組合意義
+              </pre>
+            </div>
+
+            <div class="visual-diagram lab-spacing-top">
+              <h4>🔄 模型如何處理多 Token Embeddings？</h4>
+              <pre>
+<strong>步驟 1：Tokenization</strong>
+"貓咪" → ["貓", "咪"] (2 tokens)
+
+<strong>步驟 2：Embedding Lookup（查表）</strong>
+每個 token 從 embedding 表中查找對應的 vector：
+- "貓" (ID: 1234) → vector_1: [0.2, -0.5, 0.8, ...]
+- "咪" (ID: 5678) → vector_2: [0.1, -0.3, 0.6, ...]
+
+<strong>步驟 3：Transformer 處理</strong>
+Transformer 接收多個 vectors 作為輸入：
+Input: [vector_1, vector_2]  (2 個 vectors)
+
+Transformer 會：
+1. 使用 Self-Attention 讓 tokens 互相「交流」
+2. "貓" 和 "咪" 的 vectors 會互相影響
+3. 最終每個 token 的表示會包含上下文資訊
+
+<strong>步驟 4：輸出表示</strong>
+每個 token 位置都有最終的表示：
+- Position 0: "貓" 的表示（已考慮 "咪" 的上下文）
+- Position 1: "咪" 的表示（已考慮 "貓" 的上下文）
+
+<strong>步驟 5：如何得到整個詞的表示？</strong>
+如果需要整個詞 "貓咪" 的單一表示，可以：
+- 方法 1：平均池化（Average Pooling）
+  詞表示 = (vector_1 + vector_2) / 2
+  
+- 方法 2：使用第一個 token 的表示
+  詞表示 = vector_1（"貓" 的表示）
+  
+- 方法 3：使用最後一個 token 的表示
+  詞表示 = vector_2（"咪" 的表示）
+  
+- 方法 4：使用 [CLS] token（如果有）
+  詞表示 = [CLS] token 的表示
+              </pre>
+            </div>
+
+            <div class="visual-diagram lab-spacing-top">
+              <h4>📊 實際例子：比較不同模型的處理方式</h4>
+              <pre>
+<strong>範例：處理 "我愛人工智慧"</strong>
+
+<strong>GPT-3 的處理：</strong>
+Tokenization: ["我", "愛", "人工", "智", "慧"] → 5 tokens
+Embedding: 5 個 vectors，每個 768 維
+  - "我": [0.1, -0.2, 0.3, ...]
+  - "愛": [0.2, -0.1, 0.4, ...]
+  - "人工": [0.3, -0.3, 0.5, ...]
+  - "智": [0.1, -0.1, 0.2, ...]
+  - "慧": [0.1, -0.1, 0.2, ...]
+
+Transformer 處理：5 個 vectors → 5 個上下文表示
+最終輸出：5 個表示（每個 token 一個）
+
+<strong>Qwen 的處理：</strong>
+Tokenization: ["我", "愛", "人工智慧"] → 3 tokens
+Embedding: 3 個 vectors，每個 768 維
+  - "我": [0.1, -0.2, 0.3, ...]
+  - "愛": [0.2, -0.1, 0.4, ...]
+  - "人工智慧": [0.4, -0.4, 0.7, ...]  ← 完整的詞表示！
+
+Transformer 處理：3 個 vectors → 3 個上下文表示
+最終輸出：3 個表示（更高效！）
+
+✨ 關鍵差異：
+- GPT-3: 5 tokens → 5 vectors → 需要更多計算
+- Qwen: 3 tokens → 3 vectors → 更高效，語義更完整
+              </pre>
+            </div>
+
+            <div class="explanation lab-spacing-top">
+              <h4>💡 常見問題解答</h4>
+              <p>
+                <strong>Q1: 一個 token 對應一個 vector 嗎？</strong>
+              </p>
+              <p>
+                <strong>A:</strong> 是的！每個 token 都有自己獨立的 embedding vector。
+                如果一個詞被拆成 3 個 tokens，就會有 3 個 vectors。
+              </p>
+              
+              <p>
+                <strong>Q2: 多個 tokens 會合併成一個 vector 嗎？</strong>
+              </p>
+              <p>
+                <strong>A:</strong> 不會自動合併。每個 token 保持獨立的 vector。
+                但 Transformer 會通過 Self-Attention 讓這些 vectors 互相影響，
+                最終每個 token 的表示會包含上下文資訊。
+              </p>
+              
+              <p>
+                <strong>Q3: 如何得到整個詞的單一表示？</strong>
+              </p>
+              <p>
+                <strong>A:</strong> 可以使用多種方法：
+              </p>
+              <ul>
+                <li><strong>平均池化</strong>：將多個 token vectors 平均</li>
+                <li><strong>第一個 token</strong>：使用第一個 token 的表示</li>
+                <li><strong>最後一個 token</strong>：使用最後一個 token 的表示</li>
+                <li><strong>特殊 token</strong>：使用 [CLS] 或 [SEP] token 的表示</li>
+              </ul>
+              
+              <p>
+                <strong>Q4: 為什麼中文優化模型更好？</strong>
+              </p>
+              <p>
+                <strong>A:</strong> 因為它們能將完整的中文詞作為單一 token，
+                這樣：
+              </p>
+              <ul>
+                <li>更少的 tokens → 更少的 vectors → 更高效</li>
+                <li>完整的詞表示 → 更好的語義理解</li>
+                <li>更低的成本（更少的 tokens）</li>
+              </ul>
+            </div>
+
+            <div class="explanation lab-spacing-top">
+              <h4>🔍 什麼是 [CLS] Token？</h4>
+              <p>
+                <strong>[CLS]</strong> 是 "Classification" 的縮寫，是一個特殊的 token，
+                主要用於 BERT 等雙向 Transformer 模型中。
+              </p>
+              
+              <div class="visual-diagram">
+                <h4>📊 [CLS] Token 的作用</h4>
+                <pre>
+<strong>1. 位置：</strong>
+[CLS] token 總是放在句子的最前面
+
+<strong>範例：</strong>
+原始句子: "我愛人工智慧"
+  ↓ 加上 [CLS] token
+Tokenization: ["[CLS]", "我", "愛", "人工", "智慧"]
+                ↑
+            特殊 token
+
+<strong>2. 作用：</strong>
+[CLS] token 的 embedding 經過 Transformer 處理後，
+會包含整個句子的語義資訊！
+
+<strong>處理過程：</strong>
+輸入: ["[CLS]", "我", "愛", "人工", "智慧"]
+  ↓ Embedding
+Embeddings: [
+  [CLS_embedding],    ← 特殊 embedding
+  [我_embedding],
+  [愛_embedding],
+  [人工_embedding],
+  [智慧_embedding]
+]
+  ↓ Transformer 處理（Self-Attention）
+  ↓ [CLS] token 可以「看到」所有其他 tokens
+輸出: [
+  [CLS_output],       ← 包含整個句子的語義！
+  [我_output],
+  [愛_output],
+  [人工_output],
+  [智慧_output]
+]
+
+✨ 關鍵：使用 [CLS_output] 就可以代表整個句子！
+                </pre>
+              </div>
+
+              <div class="visual-diagram lab-spacing-top">
+                <h4>📊 為什麼需要 [CLS] Token？</h4>
+                <pre>
+<strong>問題：</strong>
+如何用一個向量表示整個句子或詞彙？
+
+<strong>解決方案：</strong>
+1. 平均池化：計算所有 token embeddings 的平均
+   → 簡單但可能稀釋重要資訊
+
+2. 第一個 token：使用第一個 token 的表示
+   → 可能不包含完整語義
+
+3. 最後一個 token：使用最後一個 token 的表示
+   → 可能不包含完整語義
+
+4. [CLS] token：專門設計來代表整個句子！
+   → 經過訓練，專門學習「總結」整個句子的語義
+   → 最準確！
+
+<strong>實際應用：</strong>
+- 文本分類：使用 [CLS] token 的表示來分類
+- 句子相似度：比較兩個句子的 [CLS] token 表示
+- 問答系統：使用 [CLS] token 來理解問題
+- 情感分析：使用 [CLS] token 來判斷情感
+                </pre>
+              </div>
+
+              <div class="visual-diagram lab-spacing-top">
+                <h4>📊 哪些模型使用 [CLS] Token？</h4>
+                <pre>
+<strong>使用 [CLS] Token 的模型：</strong>
+✅ BERT (Bidirectional Encoder Representations from Transformers)
+✅ RoBERTa (Robustly Optimized BERT)
+✅ ALBERT (A Lite BERT)
+✅ DistilBERT (Distilled BERT)
+✅ 大多數基於 BERT 的模型
+
+<strong>不使用 [CLS] Token 的模型：</strong>
+❌ GPT 系列（GPT-2, GPT-3, GPT-4）
+   → 使用最後一個 token 的表示
+   
+❌ T5 (Text-to-Text Transfer Transformer)
+   → 使用特殊的 decoder token
+
+❌ Qwen、ChatGLM 等中文模型
+   → 通常不使用 [CLS]，使用其他方法
+
+<strong>為什麼 GPT 不使用 [CLS]？</strong>
+- GPT 是單向（從左到右）的模型
+- [CLS] 需要雙向注意力才能有效工作
+- GPT 使用最後一個 token 的表示來代表整個序列
+                </pre>
+              </div>
+
+              <div class="visual-diagram lab-spacing-top">
+                <h4>📊 實際例子：使用 [CLS] Token</h4>
+                <pre>
+<strong>範例 1：文本分類</strong>
+句子: "這部電影很好看"
+  ↓ Tokenization
+Tokens: ["[CLS]", "這", "部", "電", "影", "很", "好", "看"]
+  ↓ BERT 處理
+  ↓ 取得 [CLS] token 的輸出
+[CLS] 表示: [0.2, -0.5, 0.8, ...]  (包含整個句子的語義)
+  ↓ 分類層
+情感: 正面 (0.95)
+
+<strong>範例 2：句子相似度</strong>
+句子 1: "我愛人工智慧"
+句子 2: "我喜歡 AI"
+  ↓ 分別處理
+[CLS]_1: [0.3, -0.4, 0.7, ...]  (句子 1 的表示)
+[CLS]_2: [0.28, -0.38, 0.68, ...]  (句子 2 的表示)
+  ↓ 計算相似度
+相似度 = cosine_similarity([CLS]_1, [CLS]_2) = 0.92
+→ 兩個句子意思很相似！
+
+<strong>範例 3：多 Token 詞彙的表示</strong>
+詞彙: "人工智慧"
+  ↓ Tokenization (BERT)
+Tokens: ["[CLS]", "人工", "智慧"]
+  ↓ BERT 處理
+  ↓ 使用 [CLS] token 的表示
+詞彙表示 = [CLS] 的輸出
+→ 這比平均池化更準確！
+                </pre>
+              </div>
+
+              <div class="lab-code-block collapsed">
+                <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+                  <span class="filename">use_cls_token.py</span>
+                  <div class="header-buttons">
+                    <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                    <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+                  </div>
+                </div>
+                <div class="lab-code-block-content">
+                  <pre><code class="language-python">from transformers import AutoTokenizer, AutoModel
+import torch
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+# 載入 BERT 模型（使用 [CLS] token）
+print("載入 BERT 模型...")
+tokenizer = AutoTokenizer.from_pretrained("bert-base-chinese")
+model = AutoModel.from_pretrained("bert-base-chinese")
+
+# 測試句子
+sentences = [
+    "我愛人工智慧",
+    "我喜歡 AI",
+    "貓咪很可愛",
+    "小狗很可愛"
+]
+
+print("\n" + "="*70)
+print("使用 [CLS] Token 取得句子表示")
+print("="*70)
+
+# 取得每個句子的 [CLS] token 表示
+cls_embeddings = {}
+
+for sentence in sentences:
+    # Tokenization（BERT 會自動加上 [CLS] token）
+    inputs = tokenizer(sentence, return_tensors="pt", padding=True, truncation=True)
+    
+    # 查看 tokenization 結果
+    tokens = tokenizer.convert_ids_to_tokens(inputs["input_ids"][0])
+    print(f"\n句子: '{sentence}'")
+    print(f"Tokens: {tokens[:5]}...")  # 顯示前 5 個 tokens
+    
+    # 取得模型輸出
+    with torch.no_grad():
+        outputs = model(**inputs)
+        # [CLS] token 總是在位置 0
+        cls_embedding = outputs.last_hidden_state[0][0].numpy()  # [CLS] token 的表示
+        cls_embeddings[sentence] = cls_embedding
+        print(f"[CLS] embedding 形狀: {cls_embedding.shape}")
+
+# 計算句子相似度
+print("\n" + "="*70)
+print("句子相似度矩陣（使用 [CLS] Token）")
+print("="*70)
+
+print(f"{'句子':<20}", end="")
+for s in sentences:
+    print(f"{s[:10]:>12}", end="")
+print()
+
+for s1 in sentences:
+    print(f"{s1:<20}", end="")
+    for s2 in sentences:
+        sim = cosine_similarity(
+            [cls_embeddings[s1]], 
+            [cls_embeddings[s2]]
+        )[0][0]
+        print(f"{sim:>12.4f}", end="")
+    print()
+
+# 比較 [CLS] 和平均池化的差異
+print("\n" + "="*70)
+print("比較 [CLS] Token 和平均池化")
+print("="*70)
+
+test_sentence = "我愛人工智慧"
+inputs = tokenizer(test_sentence, return_tensors="pt", padding=True, truncation=True)
+
+with torch.no_grad():
+    outputs = model(**inputs)
+    # 方法 1: 使用 [CLS] token
+    cls_embedding = outputs.last_hidden_state[0][0].numpy()
+    
+    # 方法 2: 平均池化（排除 [CLS] token）
+    all_embeddings = outputs.last_hidden_state[0][1:]  # 排除 [CLS]
+    avg_embedding = all_embeddings.mean(dim=0).numpy()
+
+print(f"\n句子: '{test_sentence}'")
+print(f"[CLS] embedding 形狀: {cls_embedding.shape}")
+print(f"平均池化 embedding 形狀: {avg_embedding.shape}")
+
+# 計算兩種方法的差異
+diff = np.linalg.norm(cls_embedding - avg_embedding)
+print(f"\n兩種方法的差異（L2 距離）: {diff:.4f}")
+print("→ [CLS] token 和平均池化會產生不同的表示！")
+print("→ [CLS] token 通常更準確，因為它經過專門訓練")
+
+print("\n" + "="*70)
+print("📊 總結")
+print("="*70)
+print("1. [CLS] token 是 BERT 等模型中的特殊 token")
+print("2. 它放在句子最前面，用來代表整個句子的語義")
+print("3. 使用 [CLS] token 的表示比平均池化更準確")
+print("4. 適用於文本分類、句子相似度等任務")</code></pre>
+                </div>
+              </div>
+
+              <div class="explanation lab-spacing-top">
+                <h4>💡 [CLS] Token vs 其他方法</h4>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                  <thead>
+                    <tr style="background-color: #f0f0f0;">
+                      <th style="border: 1px solid #ddd; padding: 8px;">方法</th>
+                      <th style="border: 1px solid #ddd; padding: 8px;">優點</th>
+                      <th style="border: 1px solid #ddd; padding: 8px;">缺點</th>
+                      <th style="border: 1px solid #ddd; padding: 8px;">適用模型</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="border: 1px solid #ddd; padding: 8px;"><strong>[CLS] Token</strong></td>
+                      <td style="border: 1px solid #ddd; padding: 8px;">專門訓練來代表整個句子，最準確</td>
+                      <td style="border: 1px solid #ddd; padding: 8px;">只在 BERT 等雙向模型中使用</td>
+                      <td style="border: 1px solid #ddd; padding: 8px;">BERT, RoBERTa, ALBERT</td>
+                    </tr>
+                    <tr>
+                      <td style="border: 1px solid #ddd; padding: 8px;"><strong>平均池化</strong></td>
+                      <td style="border: 1px solid #ddd; padding: 8px;">簡單，適用於所有模型</td>
+                      <td style="border: 1px solid #ddd; padding: 8px;">可能稀釋重要資訊</td>
+                      <td style="border: 1px solid #ddd; padding: 8px;">所有模型</td>
+                    </tr>
+                    <tr>
+                      <td style="border: 1px solid #ddd; padding: 8px;"><strong>最後一個 Token</strong></td>
+                      <td style="border: 1px solid #ddd; padding: 8px;">簡單快速</td>
+                      <td style="border: 1px solid #ddd; padding: 8px;">可能不包含完整語義</td>
+                      <td style="border: 1px solid #ddd; padding: 8px;">GPT 系列</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="explanation lab-spacing-top">
+              <h4>🔍 如何比較多 Token 詞彙的相似度？</h4>
+              <p>
+                當我們要比較多 token 詞彙（如 "貓咪"、"小狗"、"大狗"、"狼犬"）的相似度時，
+                需要先將多個 token embeddings 轉換成單一表示，然後再比較。
+              </p>
+              
+              <div class="visual-diagram">
+                <h4>📊 方法 1：平均池化（Average Pooling）</h4>
+                <pre>
+<strong>原理：</strong>將所有 token embeddings 平均，得到詞的表示
+
+<strong>範例：</strong>
+"貓咪" → ["貓", "咪"] → 2 個 vectors
+  - vector_貓: [0.2, -0.5, 0.8, ...]
+  - vector_咪: [0.1, -0.3, 0.6, ...]
+  ↓ 平均池化
+詞表示: [(0.2+0.1)/2, (-0.5-0.3)/2, (0.8+0.6)/2, ...]
+      = [0.15, -0.4, 0.7, ...]
+
+"小狗" → ["小", "狗"] → 2 個 vectors
+  - vector_小: [0.3, -0.4, 0.7, ...]
+  - vector_狗: [0.4, -0.3, 0.8, ...]
+  ↓ 平均池化
+詞表示: [(0.3+0.4)/2, (-0.4-0.3)/2, (0.7+0.8)/2, ...]
+      = [0.35, -0.35, 0.75, ...]
+
+<strong>比較相似度：</strong>
+相似度 = cosine_similarity(詞表示_貓咪, 詞表示_小狗)
+       = cosine_similarity([0.15, -0.4, 0.7, ...], [0.35, -0.35, 0.75, ...])
+       = 0.85 (高相似度！因為都是動物)
+
+<strong>優點：</strong>
+- 簡單直觀
+- 考慮所有 token 的資訊
+- 適合大多數情況
+
+<strong>缺點：</strong>
+- 可能稀釋重要 token 的資訊
+- 對 token 順序不敏感
+                </pre>
+              </div>
+
+              <div class="visual-diagram lab-spacing-top">
+                <h4>📊 方法 2：使用 Transformer 輸出後的表示</h4>
+                <pre>
+<strong>原理：</strong>使用 Transformer 處理後的 token 表示（已包含上下文）
+
+<strong>範例：</strong>
+"貓咪" → ["貓", "咪"] → 2 個 token embeddings
+  ↓ Transformer 處理（Self-Attention）
+  ↓ 輸出表示（已考慮上下文）
+  - output_貓: [0.25, -0.45, 0.75, ...]  (已考慮 "咪" 的上下文)
+  - output_咪: [0.12, -0.28, 0.65, ...]  (已考慮 "貓" 的上下文)
+  ↓ 選擇表示方法
+  方法 A: 使用最後一個 token → output_咪
+  方法 B: 平均所有 tokens → (output_貓 + output_咪) / 2
+
+<strong>比較相似度：</strong>
+使用最後一個 token 的表示：
+相似度 = cosine_similarity(output_咪, output_狗)
+       = 0.88 (比平均池化更高！因為考慮了上下文)
+
+<strong>優點：</strong>
+- 考慮了上下文資訊
+- 更準確的語義表示
+- 這是 Transformer 模型的標準做法
+
+<strong>缺點：</strong>
+- 需要完整的模型前向傳播
+- 計算成本較高
+                </pre>
+              </div>
+
+              <div class="visual-diagram lab-spacing-top">
+                <h4>📊 方法 3：使用第一個或最後一個 Token</h4>
+                <pre>
+<strong>原理：</strong>只使用第一個或最後一個 token 的 embedding
+
+<strong>範例：</strong>
+"貓咪" → ["貓", "咪"]
+  使用第一個 token: "貓" 的 embedding
+  或使用最後一個 token: "咪" 的 embedding
+
+<strong>比較相似度：</strong>
+使用最後一個 token：
+相似度 = cosine_similarity(embedding_咪, embedding_狗)
+       = 0.72 (中等相似度)
+
+<strong>優點：</strong>
+- 簡單快速
+- 不需要額外計算
+
+<strong>缺點：</strong>
+- 可能丟失重要資訊
+- 對 token 順序敏感
+- 不適合所有情況
+                </pre>
+              </div>
+
+              <div class="visual-diagram lab-spacing-top">
+                <h4>📊 實際例子：比較 "貓咪"、"小狗"、"大狗"、"狼犬"</h4>
+                <pre>
+<strong>假設 Tokenization 結果：</strong>
+"貓咪" → ["貓", "咪"] (2 tokens)
+"小狗" → ["小", "狗"] (2 tokens)
+"大狗" → ["大", "狗"] (2 tokens)
+"狼犬" → ["狼", "犬"] (2 tokens)
+
+<strong>方法 1：平均池化</strong>
+1. 取得每個詞的所有 token embeddings
+2. 計算每個詞的平均 embedding
+3. 比較平均 embeddings 的相似度
+
+結果（假設）：
+- "貓咪" ↔ "小狗": 0.65 (都是小動物)
+- "小狗" ↔ "大狗": 0.85 (都是狗，只是大小不同)
+- "大狗" ↔ "狼犬": 0.80 (都是大型犬類)
+- "貓咪" ↔ "狼犬": 0.35 (差異較大)
+
+<strong>方法 2：Transformer 輸出後平均</strong>
+1. 將每個詞輸入 Transformer
+2. 取得所有 token 的輸出表示
+3. 計算平均
+4. 比較相似度
+
+結果（假設，通常更準確）：
+- "貓咪" ↔ "小狗": 0.70 (考慮上下文後更準確)
+- "小狗" ↔ "大狗": 0.88 (都是狗，相似度更高)
+- "大狗" ↔ "狼犬": 0.82 (都是大型犬類)
+- "貓咪" ↔ "狼犬": 0.30 (差異更大，更準確)
+
+✨ 觀察：
+- 方法 2 通常更準確，因為考慮了上下文
+- "小狗" 和 "大狗" 相似度高（都是狗）
+- "貓咪" 和其他詞相似度較低（不同動物）
+                </pre>
+              </div>
+
+              <div class="lab-code-block collapsed">
+                <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+                  <span class="filename">compare_multi_token_words.py</span>
+                  <div class="header-buttons">
+                    <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                    <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+                  </div>
+                </div>
+                <div class="lab-code-block-content">
+                  <pre><code class="language-python">from transformers import AutoTokenizer, AutoModel
+import torch
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+def get_word_embedding_average(text, tokenizer, model):
+    """方法 1：平均池化 - 取得詞的平均 embedding"""
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    
+    with torch.no_grad():
+        outputs = model(**inputs)
+        # 取得所有 token 的 embeddings
+        embeddings = outputs.last_hidden_state[0]  # [seq_len, hidden_size]
+        # 平均池化
+        avg_embedding = embeddings.mean(dim=0).numpy()
+    
+    return avg_embedding
+
+def get_word_embedding_transformer(text, tokenizer, model):
+    """方法 2：Transformer 輸出後平均 - 使用處理後的表示"""
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    
+    with torch.no_grad():
+        outputs = model(**inputs)
+        # 取得 Transformer 輸出後的表示（已包含上下文）
+        output_embeddings = outputs.last_hidden_state[0]  # [seq_len, hidden_size]
+        # 平均所有 token 的輸出表示
+        avg_embedding = output_embeddings.mean(dim=0).numpy()
+    
+    return avg_embedding
+
+def get_word_embedding_last_token(text, tokenizer, model):
+    """方法 3：使用最後一個 token"""
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    
+    with torch.no_grad():
+        outputs = model(**inputs)
+        # 取得最後一個 token 的輸出表示
+        last_token_embedding = outputs.last_hidden_state[0][-1].numpy()
+    
+    return last_token_embedding
+
+def compare_words(words, tokenizer, model, method_name, method_func):
+    """比較多個詞彙的相似度"""
+    print(f"\n{'='*70}")
+    print(f"方法: {method_name}")
+    print(f"{'='*70}")
+    
+    # 取得每個詞的表示
+    word_embeddings = {}
+    for word in words:
+        embedding = method_func(word, tokenizer, model)
+        word_embeddings[word] = embedding
+        print(f"  '{word}': embedding 形狀 {embedding.shape}")
+    
+    # 計算相似度矩陣
+    print(f"\n相似度矩陣:")
+    print(f"{'詞彙':<10}", end="")
+    for word in words:
+        print(f"{word:>12}", end="")
+    print()
+    
+    similarity_matrix = []
+    for word1 in words:
+        print(f"{word1:<10}", end="")
+        row = []
+        for word2 in words:
+            sim = cosine_similarity(
+                [word_embeddings[word1]], 
+                [word_embeddings[word2]]
+            )[0][0]
+            row.append(sim)
+            print(f"{sim:>12.4f}", end="")
+        similarity_matrix.append(row)
+        print()
+    
+    return similarity_matrix
+
+# 測試詞彙
+test_words = ["貓咪", "小狗", "大狗", "狼犬"]
+
+print("=" * 70)
+print("比較多 Token 詞彙的相似度")
+print("=" * 70)
+print(f"\n測試詞彙: {test_words}")
+
+# 載入模型
+try:
+    print("\n載入 Qwen 模型...")
+    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2-0.5B")
+    model = AutoModel.from_pretrained("Qwen/Qwen2-0.5B")
+    
+    # 顯示每個詞的 tokenization
+    print("\n📊 Tokenization 結果:")
+    for word in test_words:
+        tokens = tokenizer.encode(word, add_special_tokens=False)
+        token_texts = [tokenizer.decode([tid]) for tid in tokens]
+        print(f"  '{word}': {len(tokens)} tokens → {token_texts}")
+    
+    # 方法 1：平均池化
+    compare_words(
+        test_words, 
+        tokenizer, 
+        model, 
+        "方法 1: 平均池化 (Token Embeddings)",
+        get_word_embedding_average
+    )
+    
+    # 方法 2：Transformer 輸出後平均
+    compare_words(
+        test_words, 
+        tokenizer, 
+        model, 
+        "方法 2: Transformer 輸出後平均 (考慮上下文)",
+        get_word_embedding_transformer
+    )
+    
+    # 方法 3：最後一個 token
+    compare_words(
+        test_words, 
+        tokenizer, 
+        model, 
+        "方法 3: 最後一個 Token",
+        get_word_embedding_last_token
+    )
+    
+    print("\n" + "="*70)
+    print("📊 總結")
+    print("="*70)
+    print("1. 方法 2 (Transformer 輸出後平均) 通常最準確")
+    print("2. 方法 1 (平均池化) 簡單但可能不夠準確")
+    print("3. 方法 3 (最後一個 token) 快速但可能丟失資訊")
+    print("4. 建議：根據任務需求選擇合適的方法")
+    
+except Exception as e:
+    print(f"錯誤: {e}")
+    print("請確保已安裝 transformers 和 torch")</code></pre>
+                </div>
+              </div>
+
+              <div class="explanation lab-spacing-top">
+                <h4>💡 實務建議</h4>
+                <p>
+                  <strong>何時使用哪種方法？</strong>
+                </p>
+                <ul>
+                  <li>
+                    <strong>方法 1（平均池化）</strong>：
+                    <ul>
+                      <li>適合：快速比較、不需要完整模型時</li>
+                      <li>不適合：需要精確語義理解時</li>
+                    </ul>
+                  </li>
+                  <li>
+                    <strong>方法 2（Transformer 輸出後平均）</strong>：
+                    <ul>
+                      <li>適合：需要準確語義比較時（推薦）</li>
+                      <li>不適合：計算資源有限時</li>
+                    </ul>
+                  </li>
+                  <li>
+                    <strong>方法 3（最後一個 token）</strong>：
+                    <ul>
+                      <li>適合：快速比較、token 順序有意義時</li>
+                      <li>不適合：需要完整語義資訊時</li>
+                    </ul>
+                  </li>
+                </ul>
+                <p>
+                  <strong>實際應用中的最佳實踐：</strong>
+                </p>
+                <ul>
+                  <li>大多數情況下，使用<strong>方法 2（Transformer 輸出後平均）</strong>最準確</li>
+                  <li>如果模型有 [CLS] token，可以使用 [CLS] token 的表示</li>
+                  <li>對於中文優化模型（如 Qwen），通常能將完整詞彙作為單一 token，比較更簡單</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="ai-prompt-block lab-spacing-top">
+              <p>
+                <strong>動手試試：觀察多 Token 詞彙的 Embedding</strong>
+              </p>
+              <pre>
+請幫我寫一個腳本，觀察多 token 詞彙的 embedding：
+
+1. 使用 tiktoken 和 transformers 庫
+2. 測試以下詞彙：
+   - "貓" (可能是 1 個 token)
+   - "貓咪" (可能是 2 個 tokens)
+   - "人工智慧" (可能是 3-4 個 tokens)
+3. 對於每個詞彙：
+   a. 顯示 tokenization 結果（有多少 tokens）
+   b. 顯示每個 token 的 ID
+   c. 取得每個 token 的 embedding vector
+   d. 顯示每個 vector 的維度
+   e. 計算所有 token vectors 的平均（模擬「詞的表示」）
+4. 比較不同模型的結果（GPT-3 vs Qwen）
+
+請幫我寫一個完整的腳本並執行。
+              </pre>
+              <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+                📋 複製 Prompt
+              </button>
+            </div>
+
+            <div class="lab-code-block collapsed">
+              <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+                <span class="filename">observe_multi_token_embedding.py</span>
+                <div class="header-buttons">
+                  <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                  <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+                </div>
+              </div>
+              <div class="lab-code-block-content">
+                <pre><code class="language-python">import tiktoken
+from transformers import AutoTokenizer, AutoModel
+import torch
+import numpy as np
+
+def analyze_token_embedding(text, tokenizer, model, model_name):
+    """分析一個詞彙的 tokenization 和 embedding"""
+    print(f"\n{'='*70}")
+    print(f"分析詞彙: '{text}' (使用 {model_name})")
+    print(f"{'='*70}")
+    
+    # 1. Tokenization
+    tokens = tokenizer.encode(text, add_special_tokens=False)
+    token_count = len(tokens)
+    print(f"\n📊 Tokenization 結果:")
+    print(f"  Token 數量: {token_count}")
+    print(f"  Token IDs: {tokens}")
+    
+    # 取得每個 token 的文字（如果可以解碼）
+    try:
+        token_texts = [tokenizer.decode([tid]) for tid in tokens]
+        print(f"  Token 文字: {token_texts}")
+    except:
+        print(f"  (無法解碼 token 文字)")
+    
+    # 2. Embedding
+    print(f"\n🔢 Embedding 結果:")
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    
+    with torch.no_grad():
+        outputs = model(**inputs)
+        # 取得每個 token 的 embedding
+        embeddings = outputs.last_hidden_state[0]  # [seq_len, hidden_size]
+    
+    print(f"  Embedding 形狀: {embeddings.shape}")  # [token_count, hidden_size]
+    print(f"  每個 token 的 vector 維度: {embeddings.shape[1]}")
+    
+    # 顯示每個 token 的 vector（前 5 個數字）
+    for i, (token_id, embedding) in enumerate(zip(tokens, embeddings)):
+        vec_preview = embedding[:5].numpy()
+        print(f"  Token {i+1} (ID: {token_id}): {vec_preview} ...")
+    
+    # 3. 計算平均（模擬「詞的表示」）
+    avg_embedding = embeddings.mean(dim=0)
+    print(f"\n📈 平均 Embedding（模擬整個詞的表示）:")
+    print(f"  形狀: {avg_embedding.shape}")
+    print(f"  前 5 個數字: {avg_embedding[:5].numpy()}")
+    
+    return tokens, embeddings, avg_embedding
+
+# 測試詞彙
+test_words = ["貓", "貓咪", "人工智慧"]
+
+print("=" * 70)
+print("觀察多 Token 詞彙的 Embedding")
+print("=" * 70)
+
+# 1. GPT-2 (西方模型代表)
+print("\n" + "="*70)
+print("1. GPT-2 (西方模型)")
+print("="*70)
+try:
+    gpt2_tokenizer = AutoTokenizer.from_pretrained("gpt2")
+    gpt2_model = AutoModel.from_pretrained("gpt2")
+    
+    for word in test_words:
+        analyze_token_embedding(word, gpt2_tokenizer, gpt2_model, "GPT-2")
+except Exception as e:
+    print(f"無法載入 GPT-2: {e}")
+
+# 2. Qwen (中文優化模型)
+print("\n" + "="*70)
+print("2. Qwen (中文優化模型)")
+print("="*70)
+try:
+    qwen_tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2-0.5B")
+    qwen_model = AutoModel.from_pretrained("Qwen/Qwen2-0.5B")
+    
+    for word in test_words:
+        analyze_token_embedding(word, qwen_tokenizer, qwen_model, "Qwen")
+except Exception as e:
+    print(f"無法載入 Qwen: {e}")
+
+# 3. 使用 tiktoken 查看 GPT-3.5/4 的 tokenization
+print("\n" + "="*70)
+print("3. GPT-3.5/4 Tokenization (使用 tiktoken)")
+print("="*70)
+try:
+    enc = tiktoken.get_encoding("cl100k_base")
+    for word in test_words:
+        tokens = enc.encode(word)
+        print(f"\n詞彙: '{word}'")
+        print(f"  Token 數量: {len(tokens)}")
+        print(f"  Token IDs: {tokens}")
+        # 解碼每個 token 看看內容
+        print(f"  Token 內容:")
+        for i, tid in enumerate(tokens):
+            token_text = enc.decode([tid])
+            print(f"    [{i}] ID {tid}: '{token_text}'")
+except Exception as e:
+    print(f"無法使用 tiktoken: {e}")
+
+print("\n" + "="*70)
+print("📊 總結")
+print("="*70)
+print("1. 每個 token 都有自己獨立的 embedding vector")
+print("2. 多個 tokens = 多個 vectors（不是合併成一個）")
+print("3. Transformer 會處理這些 vectors，讓它們互相影響")
+print("4. 如果需要整個詞的表示，可以計算平均或其他方法")
+print("5. 中文優化模型通常能將完整詞彙作為單一 token，更高效")</code></pre>
+              </div>
+            </div>
+          </div>
+
           <h3>🤔 為什麼需要 Embedding？</h3>
           <p>
             AI 模型本質上是「數學函數」，它們只能計算數字。
@@ -544,6 +1465,603 @@ plt.show()</code></pre>
             <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
               📋 複製 Prompt
             </button>
+          </div>
+        </section>
+
+        <!-- Advanced Learning: 中文 Embedding 的特殊性 -->
+        <section id="chinese-embedding" class="lab-section lab-spacing-top-lg">
+          <h2>🌏 進階學習：中文 Embedding 的特殊性</h2>
+          
+          <div class="lab-intro-text">
+            <p>
+              我們剛才學的 Word2Vec 是基於<strong>英文</strong>設計的。但中文是完全不同的語言系統！
+              讓我們看看實際的語言模型（如 Qwen、ChatGLM）是如何處理中文 Embedding 的。
+            </p>
+          </div>
+
+          <!-- 中文 Embedding 的基本原理 -->
+          <div class="lab-section lab-spacing-top">
+            <h3>📝 1. 中文 Embedding 的基本原理</h3>
+            
+            <div class="visual-diagram">
+              <h4>🔍 核心問題：中文 Embedding 是否與英文相同？</h4>
+              <p>
+                <strong>答案：基本原理相同，但訓練方式有差異！</strong>
+              </p>
+              <pre>
+<strong>相同點：</strong>
+- 都是將 tokens 轉換成向量
+- 都使用神經網路學習語義表示
+- 都遵循「相似詞彙有相似向量」的原則
+
+<strong>不同點：</strong>
+- 訓練語料：中文模型用中文語料，英文模型用英文語料
+- Tokenization：中文需要特殊的分詞處理
+- 語義理解：中文的語義單位（字 vs 詞）與英文不同
+              </pre>
+            </div>
+
+            <div class="explanation">
+              <h4>📊 視覺化：中英文 Embedding 的差異</h4>
+              <pre>
+<strong>英文 Embedding：</strong>
+文字: "cat" → Token: "cat" → 向量: [0.2, -0.5, 0.8, ...]
+文字: "dog" → Token: "dog" → 向量: [0.3, -0.4, 0.7, ...]
+
+<strong>中文 Embedding（字級）：</strong>
+文字: "貓" → Token: "貓" → 向量: [0.1, -0.6, 0.9, ...]
+文字: "狗" → Token: "狗" → 向量: [0.2, -0.5, 0.8, ...]
+
+<strong>中文 Embedding（詞級）：</strong>
+文字: "貓咪" → Token: "貓咪" → 向量: [0.15, -0.55, 0.85, ...]
+文字: "小狗" → Token: "小狗" → 向量: [0.25, -0.45, 0.75, ...]
+
+✨ 關鍵差異：
+- 中文可以選擇「字級」或「詞級」embedding
+- 詞級 embedding 更能捕捉語義（"貓咪" 比 "貓" 更完整）
+              </pre>
+            </div>
+          </div>
+
+          <!-- Qwen 等中文模型的特殊處理 -->
+          <div class="lab-section lab-spacing-top">
+            <h3>🤖 2. Qwen、ChatGLM 等中文模型的特殊處理</h3>
+            
+            <div class="visual-diagram">
+              <h4>🎯 策略 1：使用中文語料訓練</h4>
+              <pre>
+<strong>代表模型：</strong>Qwen、ChatGLM、Baichuan、InternLM
+
+<strong>核心策略：</strong>
+1. 收集大量中文語料（數百 GB 到數 TB）
+   - 中文維基百科
+   - 中文新聞文章
+   - 中文書籍、論文
+   - 中文對話資料
+
+2. 用中文語料訓練 Embedding
+   - 詞彙表中包含大量中文詞彙
+   - 向量空間反映中文語義關係
+
+<strong>結果：</strong>
+- "貓" 和 "狗" 的向量相似度高（都是動物）
+- "北京" 和 "上海" 的向量相似度高（都是城市）
+- 比用英文語料訓練的模型更理解中文語義
+              </pre>
+            </div>
+
+            <div class="visual-diagram lab-spacing-top">
+              <h4>🎯 策略 2：混合字級和詞級 Embedding</h4>
+              <pre>
+<strong>代表模型：</strong>ChatGLM、GLM
+
+<strong>核心策略：</strong>
+- 常見詞彙：使用詞級 embedding（如 "人工智慧"）
+- 罕見詞彙：拆成字級 embedding（如 "人工" + "智慧"）
+- 單字：使用字級 embedding（如 "我"、"的"）
+
+<strong>範例：</strong>
+"我愛人工智慧"
+→ ["我", "愛", "人工智慧"]  (詞級，3 tokens)
+→ 或 ["我", "愛", "人工", "智慧"]  (混合，4 tokens)
+
+<strong>優點：</strong>
+- 常見詞保持語義完整性
+- 罕見詞也能處理（拆成字）
+- 平衡效率和覆蓋率
+              </pre>
+            </div>
+
+            <div class="visual-diagram lab-spacing-top">
+              <h4>🎯 策略 3：針對中文語義的特殊優化</h4>
+              <pre>
+<strong>代表模型：</strong>Qwen、Baichuan
+
+<strong>核心策略：</strong>
+1. 使用中文分詞工具預處理（如 jieba）
+2. 針對中文語義關係優化（如同義詞、反義詞）
+3. 考慮中文的語法結構（如主謂賓）
+
+<strong>實際效果：</strong>
+- "貓" 和 "貓咪" 的向量非常接近（同義詞）
+- "大" 和 "小" 的向量在向量空間中相對（反義詞）
+- "北京" 和 "中國" 的向量有語義關聯（包含關係）
+
+<strong>技術細節：</strong>
+- 使用更大的詞彙表（包含更多中文詞彙）
+- 使用更長的上下文窗口（捕捉中文長句）
+- 使用多任務學習（同時學習語義和語法）
+              </pre>
+            </div>
+
+            <!-- 西方模型處理中文的方式 -->
+            <div class="lab-section lab-spacing-top">
+              <h3>🌍 3. 西方模型（GPT、Mistral）如何處理中文？</h3>
+              
+              <div class="visual-diagram">
+                <h4>📊 GPT 系列（OpenAI）的處理方式</h4>
+                <pre>
+<strong>代表模型：</strong>GPT-3、GPT-3.5、GPT-4
+
+<strong>核心策略：</strong>
+1. <strong>多語言語料訓練</strong>
+   - 訓練語料包含少量中文（約 1-5%）
+   - 主要還是英文語料（80%+）
+   - 中文語料品質和數量有限
+
+2. <strong>基於英文的 BPE Tokenization</strong>
+   - 使用英文語料訓練的 BPE tokenizer
+   - 中文被拆成 UTF-8 bytes 或罕見子詞
+   - 例如："人工智慧" → 6-8 tokens（GPT-3）
+
+3. <strong>通用 Embedding 空間</strong>
+   - 在同一個向量空間中學習所有語言
+   - 中文詞彙的 embedding 品質取決於訓練資料中的出現頻率
+   - 常見中文字（如 "的"、"是"）有較好的 embedding
+   - 罕見中文詞彙的 embedding 品質較差
+
+<strong>實際效果：</strong>
+✅ 優點：
+- 可以處理中文（基本功能）
+- 多語言能力（可以同時處理中英文）
+- 對常見中文詞彙有一定理解
+
+❌ 缺點：
+- Token 效率低（中文需要更多 tokens）
+- 語義理解不如中文優化模型
+- 對中文語法、文化背景理解有限
+- 成本較高（更多 tokens = 更高成本）
+
+<strong>實際例子：</strong>
+"我愛人工智慧"
+- GPT-3 Tokenization: ["我", "愛", "人工", "智", "慧"] → 5-6 tokens
+- GPT-3 Embedding: 向量品質中等，語義理解一般
+                </pre>
+              </div>
+
+              <div class="visual-diagram lab-spacing-top">
+                <h4>📊 Mistral 系列（Mistral AI）的處理方式</h4>
+                <pre>
+<strong>代表模型：</strong>Mistral-7B、Mixtral-8x7B
+
+<strong>核心策略：</strong>
+1. <strong>多語言語料訓練（類似 GPT）</strong>
+   - 訓練語料包含多種語言（英文、法文、西班牙文、中文等）
+   - 中文語料比例較低（約 2-3%）
+   - 主要針對歐洲語言優化
+
+2. <strong>改進的 Tokenization</strong>
+   - 使用 SentencePiece（比 BPE 更先進）
+   - 對中文的處理略好於 GPT-3
+   - 但仍然不是針對中文優化
+
+3. <strong>多語言 Embedding 空間</strong>
+   - 在統一向量空間中學習所有語言
+   - 中文 embedding 品質取決於訓練資料
+   - 對中文的理解能力介於 GPT-3 和中文優化模型之間
+
+<strong>實際效果：</strong>
+✅ 優點：
+- 比 GPT-3 對中文的處理稍好
+- 多語言能力強
+- 開源模型，可以本地部署
+
+❌ 缺點：
+- 仍然不是針對中文優化
+- Token 效率不如中文模型
+- 對中文語義理解有限
+
+<strong>實際例子：</strong>
+"我愛人工智慧"
+- Mistral Tokenization: ["我", "愛", "人工", "智慧"] → 4-5 tokens
+- Mistral Embedding: 向量品質中等，略好於 GPT-3
+                </pre>
+              </div>
+
+              <div class="visual-diagram lab-spacing-top">
+                <h4>📊 Claude（Anthropic）的處理方式</h4>
+                <pre>
+<strong>代表模型：</strong>Claude-3、Claude-3.5
+
+<strong>核心策略：</strong>
+1. <strong>多語言語料訓練</strong>
+   - 訓練語料包含多種語言
+   - 中文語料比例較 GPT 稍高（約 3-5%）
+   - 注重語料品質而非數量
+
+2. <strong>改進的 Tokenization</strong>
+   - 使用自定義的 tokenization 方法
+   - 對中文的處理比 GPT-3 更好
+   - 但仍然不是針對中文優化
+
+3. <strong>語義理解優化</strong>
+   - 注重語義理解而非 token 效率
+   - 對中文的理解能力較好
+   - 但仍然不如專門的中文模型
+
+<strong>實際效果：</strong>
+✅ 優點：
+- 對中文的理解能力較好（在西方模型中）
+- 語義理解強
+- 可以處理複雜的中文任務
+
+❌ 缺點：
+- 仍然不是針對中文優化
+- Token 效率不如中文模型
+- 成本較高
+
+<strong>實際例子：</strong>
+"我愛人工智慧"
+- Claude Tokenization: ["我", "愛", "人工", "智慧"] → 4-5 tokens
+- Claude Embedding: 向量品質較好，語義理解較強
+                </pre>
+              </div>
+
+              <div class="explanation lab-spacing-top">
+                <h4>🔍 西方模型處理中文的共通問題</h4>
+                <p>
+                  <strong>1. Tokenization 效率低</strong>
+                </p>
+                <ul>
+                  <li>中文被拆成太多 tokens（6-8 個 vs 中文模型的 3-4 個）</li>
+                  <li>導致成本高、速度慢</li>
+                  <li>例如：GPT-3 處理 "人工智慧" 需要 6-8 tokens，而 Qwen 只需要 1-2 tokens</li>
+                </ul>
+                <p>
+                  <strong>2. 語義理解有限</strong>
+                </p>
+                <ul>
+                  <li>訓練語料中中文比例低（1-5%）</li>
+                  <li>對中文語法、文化背景理解不足</li>
+                  <li>例如：可能不理解 "貓咪" 和 "貓" 是同義詞</li>
+                </ul>
+                <p>
+                  <strong>3. 文化背景理解不足</strong>
+                </p>
+                <ul>
+                  <li>對中文文化、習俗、成語理解有限</li>
+                  <li>可能產生不符合中文習慣的回答</li>
+                  <li>例如：可能不理解 "一石二鳥" 的含義</li>
+                </ul>
+              </div>
+
+              <div class="visual-diagram lab-spacing-top">
+                <h4>📊 對比表格：西方模型 vs 中文優化模型</h4>
+                <pre>
+<strong>比較項目          | GPT-3/4    | Mistral    | Claude    | Qwen/ChatGLM</strong>
+─────────────────────────────────────────────────────────────────────
+訓練語料中文比例    | 1-5%       | 2-3%       | 3-5%      | 80%+
+Tokenization 效率  | 低 (6-8)   | 中 (4-5)   | 中 (4-5)  | 高 (1-2)
+語義理解能力        | 中         | 中         | 中高      | 高
+中文語法理解        | 低         | 低         | 中        | 高
+文化背景理解        | 低         | 低         | 中        | 高
+成本（相同任務）    | 高         | 中高       | 高        | 低
+多語言能力          | 高         | 高         | 高        | 中
+
+<strong>適用場景：</strong>
+- GPT/Mistral/Claude: 多語言混合任務、國際化應用
+- Qwen/ChatGLM: 純中文任務、中文內容生成、中文問答
+                </pre>
+              </div>
+
+              <div class="ai-prompt-block lab-spacing-top">
+                <p>
+                  <strong>動手試試：比較西方模型和中文模型的中文處理能力</strong>
+                </p>
+                <pre>
+請幫我比較不同模型對中文的處理能力：
+
+1. 安裝 transformers 和 tiktoken：pip install transformers tiktoken torch
+2. 測試以下模型：
+   - GPT-2 (西方模型代表)
+   - Mistral-7B (如果有)
+   - Qwen/Qwen2-0.5B (中文優化模型)
+3. 測試項目：
+   a. Tokenization 效率：計算 "我愛人工智慧" 的 token 數量
+   b. 語義相似度：計算 "貓" 和 "貓咪" 的 embedding 相似度
+   c. 語義理解：測試 "一石二鳥" 的語義理解
+4. 比較結果並分析差異
+
+請幫我寫一個完整的比較腳本並執行。
+                </pre>
+                <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+                  📋 複製 Prompt
+                </button>
+              </div>
+
+              <div class="lab-code-block collapsed">
+                <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+                  <span class="filename">compare_western_vs_chinese_models.py</span>
+                  <div class="header-buttons">
+                    <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                    <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+                  </div>
+                </div>
+                <div class="lab-code-block-content">
+                  <pre><code class="language-python">import tiktoken
+from transformers import AutoTokenizer, AutoModel
+import torch
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+# 測試文字
+test_text = "我愛人工智慧"
+test_words = ["貓", "貓咪", "狗", "小狗"]
+
+print("=" * 70)
+print("比較西方模型和中文模型的中文處理能力")
+print("=" * 70)
+
+# 1. Tokenization 效率比較
+print("\n📊 1. Tokenization 效率比較")
+print("-" * 70)
+
+# GPT-3.5/GPT-4 (使用 tiktoken)
+try:
+    enc_gpt = tiktoken.get_encoding("cl100k_base")
+    gpt_tokens = enc_gpt.encode(test_text)
+    print(f"GPT-3.5/4: '{test_text}' → {len(gpt_tokens)} tokens")
+    print(f"  Token IDs: {gpt_tokens}")
+except Exception as e:
+    print(f"無法測試 GPT: {e}")
+
+# Qwen (中文優化)
+try:
+    qwen_tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2-0.5B")
+    qwen_tokens = qwen_tokenizer.encode(test_text)
+    print(f"Qwen: '{test_text}' → {len(qwen_tokens)} tokens")
+    print(f"  Token IDs: {qwen_tokens}")
+except Exception as e:
+    print(f"無法測試 Qwen: {e}")
+
+# 2. 語義相似度比較
+print("\n📊 2. 語義相似度比較（'貓' vs '貓咪'）")
+print("-" * 70)
+
+def get_embedding(model, tokenizer, text):
+    """取得文字的 embedding"""
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    with torch.no_grad():
+        outputs = model(**inputs)
+        embedding = outputs.last_hidden_state.mean(dim=1).squeeze()
+    return embedding.numpy()
+
+# GPT-2 (西方模型代表)
+try:
+    print("\nGPT-2 (西方模型):")
+    gpt2_tokenizer = AutoTokenizer.from_pretrained("gpt2")
+    gpt2_model = AutoModel.from_pretrained("gpt2")
+    
+    gpt2_emb_cat = get_embedding(gpt2_model, gpt2_tokenizer, "貓")
+    gpt2_emb_cat2 = get_embedding(gpt2_model, gpt2_tokenizer, "貓咪")
+    gpt2_sim = cosine_similarity([gpt2_emb_cat], [gpt2_emb_cat2])[0][0]
+    print(f"  '貓' ↔ '貓咪' 相似度: {gpt2_sim:.4f}")
+except Exception as e:
+    print(f"無法測試 GPT-2: {e}")
+
+# Qwen (中文優化)
+try:
+    print("\nQwen (中文優化):")
+    qwen_tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2-0.5B")
+    qwen_model = AutoModel.from_pretrained("Qwen/Qwen2-0.5B")
+    
+    qwen_emb_cat = get_embedding(qwen_model, qwen_tokenizer, "貓")
+    qwen_emb_cat2 = get_embedding(qwen_model, qwen_tokenizer, "貓咪")
+    qwen_sim = cosine_similarity([qwen_emb_cat], [qwen_emb_cat2])[0][0]
+    print(f"  '貓' ↔ '貓咪' 相似度: {qwen_sim:.4f}")
+except Exception as e:
+    print(f"無法測試 Qwen: {e}")
+
+# 3. 總結
+print("\n" + "=" * 70)
+print("📊 總結")
+print("=" * 70)
+print("1. Tokenization 效率：中文優化模型通常需要更少的 tokens")
+print("2. 語義相似度：中文優化模型對同義詞的理解更好")
+print("3. 建議：")
+print("   - 純中文任務 → 使用中文優化模型（Qwen、ChatGLM）")
+print("   - 多語言任務 → 使用西方模型（GPT、Mistral、Claude）")</code></pre>
+                </div>
+              </div>
+            </div>
+
+            <div class="ai-prompt-block lab-spacing-top">
+              <p>
+                <strong>動手試試：比較不同模型的中文 Embedding</strong>
+              </p>
+              <pre>
+請幫我比較不同模型的中文 Embedding 效果：
+
+1. 安裝 transformers 庫：pip install transformers torch
+2. 載入以下模型的 tokenizer 和 model：
+   - GPT-2 (英文為主)
+   - Qwen/Qwen2-0.5B (中文優化)
+   - 或 ChatGLM (如果有)
+3. 測試以下中文詞彙的 embedding：
+   - "貓"、"狗"、"貓咪"、"小狗"
+   - "北京"、"上海"、"城市"
+   - "大"、"小"、"好"、"壞"
+4. 計算詞彙之間的相似度
+5. 比較不同模型的結果，看看哪個更符合中文語義
+
+請幫我寫一個比較腳本並執行。
+              </pre>
+              <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+                📋 複製 Prompt
+              </button>
+            </div>
+
+            <div class="lab-code-block collapsed">
+              <div class="lab-code-block-header" onclick="toggleCodeBlock(this)">
+                <span class="filename">compare_chinese_embeddings.py</span>
+                <div class="header-buttons">
+                  <button class="toggle-btn" onclick="event.stopPropagation(); toggleCodeBlock(this.closest('.lab-code-block-header'))">展開</button>
+                  <button class="copy-btn" onclick="event.stopPropagation(); copyCode(this)">複製</button>
+                </div>
+              </div>
+              <div class="lab-code-block-content">
+                <pre><code class="language-python">from transformers import AutoTokenizer, AutoModel
+import torch
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+def get_embedding(model, tokenizer, text):
+    """取得文字的 embedding"""
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    with torch.no_grad():
+        outputs = model(**inputs)
+        # 使用 [CLS] token 或平均池化
+        embedding = outputs.last_hidden_state.mean(dim=1).squeeze()
+    return embedding.numpy()
+
+# 測試詞彙
+test_words = ["貓", "狗", "貓咪", "小狗", "北京", "上海", "大", "小"]
+
+print("=" * 60)
+print("比較不同模型的中文 Embedding")
+print("=" * 60)
+
+# 1. Qwen (中文優化)
+print("\n1. Qwen 模型 (中文優化)")
+print("-" * 60)
+try:
+    qwen_tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2-0.5B")
+    qwen_model = AutoModel.from_pretrained("Qwen/Qwen2-0.5B")
+    
+    qwen_embeddings = {}
+    for word in test_words:
+        emb = get_embedding(qwen_model, qwen_tokenizer, word)
+        qwen_embeddings[word] = emb
+    
+    # 計算相似度
+    print("詞彙相似度（Qwen）:")
+    for i, word1 in enumerate(test_words):
+        for word2 in test_words[i+1:]:
+            sim = cosine_similarity(
+                [qwen_embeddings[word1]], 
+                [qwen_embeddings[word2]]
+            )[0][0]
+            if sim > 0.7:  # 只顯示高相似度
+                print(f"  '{word1}' ↔ '{word2}': {sim:.4f}")
+except Exception as e:
+    print(f"無法載入 Qwen: {e}")
+
+# 2. GPT-2 (英文為主，對比用)
+print("\n2. GPT-2 模型 (英文為主，對比用)")
+print("-" * 60)
+try:
+    gpt2_tokenizer = AutoTokenizer.from_pretrained("gpt2")
+    gpt2_model = AutoModel.from_pretrained("gpt2")
+    
+    gpt2_embeddings = {}
+    for word in test_words:
+        emb = get_embedding(gpt2_model, gpt2_tokenizer, word)
+        gpt2_embeddings[word] = emb
+    
+    # 計算相似度
+    print("詞彙相似度（GPT-2）:")
+    for i, word1 in enumerate(test_words):
+        for word2 in test_words[i+1:]:
+            sim = cosine_similarity(
+                [gpt2_embeddings[word1]], 
+                [gpt2_embeddings[word2]]
+            )[0][0]
+            if sim > 0.7:
+                print(f"  '{word1}' ↔ '{word2}': {sim:.4f}")
+except Exception as e:
+    print(f"無法載入 GPT-2: {e}")
+
+print("\n" + "=" * 60)
+print("📊 總結")
+print("=" * 60)
+print("中文優化的模型（如 Qwen）通常能更好地捕捉中文語義關係")
+print("例如：'貓' 和 '貓咪' 在 Qwen 中相似度更高")</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- 實際影響 -->
+          <div class="lab-section lab-spacing-top">
+            <h3>💡 3. 實際影響：為什麼這很重要？</h3>
+            
+            <div class="visual-diagram">
+              <h4>🎯 語義理解能力</h4>
+              <pre>
+<strong>使用英文語料訓練的模型（如 GPT-3）：</strong>
+- "貓" 和 "狗" 的向量可能不太相似
+- 因為在英文語料中，這些中文字出現頻率低
+- 模型無法理解中文的語義關係
+
+<strong>使用中文語料訓練的模型（如 Qwen）：</strong>
+- "貓" 和 "狗" 的向量非常相似（都是動物）
+- "貓" 和 "貓咪" 的向量幾乎相同（同義詞）
+- 模型能理解中文的語義關係
+
+<strong>實際應用：</strong>
+- 中文問答系統：需要理解中文語義
+- 中文翻譯：需要捕捉語義相似性
+- 中文情感分析：需要理解詞彙的情感色彩
+              </pre>
+            </div>
+
+            <div class="visual-diagram lab-spacing-top">
+              <h4>💰 效率和成本</h4>
+              <pre>
+<strong>Token 效率：</strong>
+- 中文優化模型：更少的 tokens 表達相同意思
+- 例如："人工智慧" → 1-2 tokens (Qwen)
+- 英文模型：可能需要 4-6 tokens (GPT-3)
+
+<strong>成本影響：</strong>
+- 更少的 tokens = 更低的 API 成本
+- 更快的推理速度
+- 更好的語義理解
+
+<strong>實際例子：</strong>
+同樣意思的對話：
+- GPT-3: "我愛人工智慧" → 12 tokens → $0.000018
+- Qwen: "我愛人工智慧" → 5 tokens → $0.0000075
+→ 成本降低 58%！
+              </pre>
+            </div>
+
+            <div class="lab-setup lab-spacing-top">
+              <h4>📚 延伸閱讀</h4>
+              <ul>
+                <li>
+                  <strong>論文：</strong>
+                  <a href="https://arxiv.org/abs/2309.16609" target="_blank">Qwen Technical Report</a> - 了解 Qwen 的技術細節
+                </li>
+                <li>
+                  <strong>論文：</strong>
+                  <a href="https://arxiv.org/abs/2103.10360" target="_blank">GLM: General Language Model Pretraining</a> - ChatGLM 的基礎
+                </li>
+                <li>
+                  <strong>實際應用：</strong>
+                  比較不同模型的中文理解能力，選擇最適合你任務的模型
+                </li>
+              </ul>
+            </div>
           </div>
         </section>
 

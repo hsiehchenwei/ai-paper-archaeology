@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 3: 語言模型訓練 - AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../styles/global.css" />
+    <link rel="stylesheet" href="../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Hero Section -->
+      <div class="hero-section-labs">
+        <div class="hero-content">
+          <h1>🧠 Phase 3: 語言模型訓練</h1>
+          <p class="hero-subtitle">
+            從零訓練 GPT、掌握文本生成策略，最後用 LoRA 高效微調大模型！
+            以 nanoGPT 為核心，打造你的第一個真正的語言模型 🚀
+          </p>
+          <p class="hero-meta">
+            3 個實驗 × 6-8 小時 = 掌握現代 LLM 的完整訓練流程！
+          </p>
+        </div>
+      </div>
+
+      <!-- Phase Overview -->
+      <div class="story-container">
+        <h2>🎯 學習目標</h2>
+        <p>
+          在這個 Phase，你將掌握語言模型訓練的完整流程：
+          <strong>nanoGPT</strong>（從零訓練 GPT）、
+          <strong>文本生成</strong>（Sampling 策略）、
+          <strong>LoRA 微調</strong>（高效微調大模型）。
+        </p>
+        <p>
+          以 <strong>nanoGPT</strong> 為核心，這是一個簡化版的 GPT 實作，
+          讓你從零開始理解語言模型的訓練過程。你會看到模型如何從亂碼逐漸學會生成有意義的文字，
+          那種成就感無與倫比！每個實驗都建立在前一個的基礎上，形成完整的學習路徑。
+        </p>
+
+        <!-- Lab Cards -->
+        <div class="phase-labs lab-spacing-top">
+          <a href="01-nanogpt/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">3.1</span>
+            </div>
+            <h3>nanoGPT</h3>
+            <p>從零訓練你的第一個 GPT：完整訓練流程實作</p>
+            <div class="lab-meta">
+              <span>2-3 小時</span>
+              <span>PyTorch</span>
+              <span>Shakespeare</span>
+            </div>
+          </a>
+
+          <a href="02-text-generation/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">3.2</span>
+            </div>
+            <h3>文本生成</h3>
+            <p>讓模型說話：Sampling 策略與生成技巧</p>
+            <div class="lab-meta">
+              <span>1 小時</span>
+              <span>Top-k</span>
+              <span>Temperature</span>
+            </div>
+          </a>
+
+          <a href="03-lora-finetuning/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">3.3</span>
+            </div>
+            <h3>LoRA 微調</h3>
+            <p>高效微調大模型：Low-Rank Adaptation 實作</p>
+            <div class="lab-meta">
+              <span>3-4 小時</span>
+              <span>MLX</span>
+              <span>GPT-2</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- Learning Path -->
+        <div class="lab-setup lab-spacing-top-lg">
+          <h4>📚 學習路徑</h4>
+          <p>
+            三個實驗形成完整的學習路徑，建議按照順序學習：
+          </p>
+          <ol>
+            <li>
+              <strong>3.1 nanoGPT（基礎）</strong>：
+              從零開始訓練一個 GPT 模型。這是 Phase 3 的核心，必須先完成。
+              你會學到資料準備、模型架構、訓練循環、損失函數等完整流程。
+            </li>
+            <li>
+              <strong>3.2 文本生成（應用）</strong>：
+              基於 3.1 訓練好的模型，實作不同的 Sampling 策略（Greedy、Top-k、Top-p、Temperature），
+              讓模型能夠生成多樣化的文字。這是將訓練好的模型應用到實際場景的關鍵技能。
+            </li>
+            <li>
+              <strong>3.3 LoRA 微調（進階）</strong>：
+              學習如何高效微調大模型。雖然可以獨立進行，但建議先完成 3.1，
+              這樣你才能理解「微調」和「從零訓練」的差異。
+            </li>
+          </ol>
+        </div>
+
+        <!-- Generation Plan & Notes -->
+        <div class="lab-setup lab-spacing-top-lg">
+          <h4>📋 生成計劃與注意事項</h4>
+          
+          <h5>🔧 技術注意事項</h5>
+          <ul>
+            <li>
+              <strong>⚠️ 重要：請使用 Python 虛擬環境！</strong>
+              每個實驗都應該在獨立的虛擬環境中進行，避免套件衝突。
+              所有 AI Prompt 都會提醒你建立虛擬環境。
+            </li>
+            <li>
+              <strong>💻 硬體需求：</strong>
+              <ul>
+                <li>所有實驗必須能在 Mac 128GB 本機運行</li>
+                <li>實驗 3.1 和 3.2 使用 PyTorch（支援 MPS，Apple Silicon 優化）</li>
+                <li>實驗 3.3 使用 MLX（專為 Apple Silicon 優化）</li>
+                <li>建議至少 16GB RAM，訓練過程會佔用較多記憶體</li>
+                <li>預留至少 5GB 儲存空間用於模型和資料集</li>
+              </ul>
+            </li>
+            <li>
+              <strong>📊 資料集：</strong>
+              <ul>
+                <li>實驗 3.1 使用 Shakespeare 資料集（公開且易於取得）</li>
+                <li>資料集會自動下載，大小約 1MB</li>
+                <li>處理時間約 1-2 分鐘（取決於硬體）</li>
+              </ul>
+            </li>
+            <li>
+              <strong>🤖 模型規模：</strong>
+              <ul>
+                <li>實驗 3.1：小型模型（約 10M 參數），適合本機訓練</li>
+                <li>實驗 3.3：使用預訓練模型（GPT-2 small 或 medium）</li>
+                <li>訓練時間：3.1 約 30-60 分鐘（取決於硬體和訓練輪數）</li>
+                <li>明確說明模型參數數量和預期訓練時間</li>
+              </ul>
+            </li>
+          </ul>
+
+          <h5>📝 內容注意事項</h5>
+          <ul>
+            <li>
+              <strong>🎯 學習重點：</strong>
+              <ul>
+                <li>強調「從零開始」的重要性，不只是複製貼上</li>
+                <li>解釋每個組件的作用（資料處理、模型架構、訓練循環、生成策略）</li>
+                <li>提供除錯技巧和常見錯誤解決方案</li>
+                <li>包含模型評估和改進建議</li>
+              </ul>
+            </li>
+            <li>
+              <strong>📊 視覺化：</strong>
+              <ul>
+                <li>訓練損失曲線圖（Loss Curve）</li>
+                <li>生成文字範例對比（不同訓練階段的輸出）</li>
+                <li>不同 Sampling 策略的生成效果對比</li>
+                <li>LoRA 參數可視化（權重分布、訓練過程）</li>
+              </ul>
+            </li>
+            <li>
+              <strong>🤖 AI Prompt 設計：</strong>
+              <ul>
+                <li>每個 Step 都提供完整的 AI Prompt</li>
+                <li>Prompt 必須包含虛擬環境提醒</li>
+                <li>Prompt 必須包含錯誤處理和除錯建議</li>
+                <li>提供「給 AI 的完整專案描述」範本</li>
+                <li>包含常見錯誤的解決方案提示</li>
+              </ul>
+            </li>
+          </ul>
+
+          <h5>🏗️ 實作重點</h5>
+          <ul>
+            <li>
+              <strong>實驗 3.1 nanoGPT：</strong>
+              <ul>
+                <li>理解 GPT 架構（基於 Phase 2 的 Transformer）</li>
+                <li>資料準備與 Tokenization（使用 Phase 1 的知識）</li>
+                <li>訓練循環實作（前向傳播、反向傳播、優化器更新）</li>
+                <li>損失函數與優化器（Cross-Entropy Loss、Adam）</li>
+                <li>模型檢查點保存（Checkpointing）</li>
+                <li>專題：訓練一個能生成莎士比亞風格文字的模型</li>
+              </ul>
+            </li>
+            <li>
+              <strong>實驗 3.2 文本生成：</strong>
+              <ul>
+                <li>理解 Sampling 策略（Greedy、Top-k、Top-p、Temperature）</li>
+                <li>實作不同的生成策略</li>
+                <li>比較不同策略的生成效果</li>
+                <li>處理生成長度和停止條件</li>
+                <li>專題：建立一個互動式文字生成器</li>
+              </ul>
+            </li>
+            <li>
+              <strong>實驗 3.3 LoRA 微調：</strong>
+              <ul>
+                <li>理解 LoRA（Low-Rank Adaptation）原理</li>
+                <li>實作 LoRA 層</li>
+                <li>載入預訓練模型（如 GPT-2）</li>
+                <li>微調特定任務（如情感分析、特定領域文字生成）</li>
+                <li>比較全量微調 vs LoRA 微調的效率</li>
+                <li>專題：用 LoRA 微調 GPT-2 生成特定風格的文字</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Learning Tips -->
+        <div class="lab-setup lab-spacing-top-lg">
+          <h4>💡 學習秘訣</h4>
+          <ul>
+            <li>
+              <strong>🎯 以 nanoGPT 為核心：</strong>
+              Phase 3 的核心是 nanoGPT，這是從零訓練 GPT 的完整流程。
+              建議先專注完成 3.1，理解整個訓練過程，再進行後續實驗。
+            </li>
+            <li>
+              <strong>📈 觀察訓練過程：</strong>
+              訓練過程中的損失曲線、生成範例都是重要的學習材料。
+              不要只是等待訓練完成，要觀察模型如何逐步改進。
+            </li>
+            <li>
+              <strong>🔄 迭代改進：</strong>
+              如果第一次訓練效果不好，不要灰心！調整超參數（學習率、批次大小、模型大小）、
+              增加訓練輪數、嘗試不同的資料處理方式，都是改進模型的方法。
+            </li>
+            <li>
+              <strong>🤖 善用 AI 助手：</strong>
+              每個實驗都有「🤖 AI Prompt」區塊，可以直接複製給 Cursor 或 Claude Code，
+              讓 AI 成為你的程式導師！遇到錯誤時，也可以把錯誤訊息給 AI 協助除錯。
+            </li>
+            <li>
+              <strong>📚 參考資源：</strong>
+              <ul>
+                <li>nanoGPT 原始專案：<a href="https://github.com/karpathy/nanoGPT" target="_blank">https://github.com/karpathy/nanoGPT</a></li>
+                <li>MLX 文件：<a href="https://ml-explore.github.io/mlx/" target="_blank">https://ml-explore.github.io/mlx/</a></li>
+                <li>PyTorch 訓練教程：<a href="https://pytorch.org/tutorials/" target="_blank">https://pytorch.org/tutorials/</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="../index.html" class="nav-link">← 返回路線圖</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

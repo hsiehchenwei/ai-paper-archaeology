@@ -101,6 +101,57 @@ class BPETokenizer:
           <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">複製 Prompt</button>
         </div>
 
+        <div class="explanation">
+          <h4>理解詞彙頻率統計</h4>
+          <p>
+            在 BPE 訓練過程中，我們需要統計詞彙（或 token）在訓練資料中出現的頻率。
+            這個頻率統計通常以字典（dictionary）的形式呈現，例如：
+          </p>
+          <div class="lab-code-block">
+            <div class="lab-code-block-header">
+              <span class="filename">詞彙頻率統計範例</span>
+            </div>
+            <pre><code>{"hello": 5, "world": 3}</code></pre>
+          </div>
+          <p>
+            <strong>這個字典的含義：</strong>
+          </p>
+          <ul>
+            <li><code>"hello": 5</code> 表示 "hello" 這個詞在訓練資料中出現了 <strong>5 次</strong></li>
+            <li><code>"world": 3</code> 表示 "world" 這個詞在訓練資料中出現了 <strong>3 次</strong></li>
+          </ul>
+          <p>
+            <strong>原始資料範例：</strong>
+          </p>
+          <p>
+            假設我們的訓練資料是：
+          </p>
+          <div class="lab-code-block">
+            <div class="lab-code-block-header">
+              <span class="filename">訓練資料</span>
+            </div>
+            <pre><code>training_text = "hello hello hello hello hello world world world"</code></pre>
+          </div>
+          <p>
+            當我們將這段文字按空格分割並統計每個詞的出現次數時，就會得到：
+          </p>
+          <ul>
+            <li>"hello" 出現了 <strong>5 次</strong>（因為訓練資料中有 5 個 "hello"）</li>
+            <li>"world" 出現了 <strong>3 次</strong>（因為訓練資料中有 3 個 "world"）</li>
+          </ul>
+          <p>
+            因此統計結果就是 <code>{"hello": 5, "world": 3}</code>。
+          </p>
+          <p>
+            <strong>為什麼需要統計頻率？</strong>
+          </p>
+          <p>
+            BPE 演算法的核心是「合併最常見的符號對」。為了知道哪些符號對最常見，
+            我們必須先統計每個詞彙（或字元對）的出現頻率。頻率越高，表示這個組合越重要，
+            應該優先被合併成一個新的 token。
+          </p>
+        </div>
+
         <div class="key-concept">
           <h4>核心演算法</h4>
           <p>

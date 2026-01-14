@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 4: LLM 應用開發 - AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../styles/global.css" />
+    <link rel="stylesheet" href="../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Hero Section -->
+      <div class="hero-section-labs">
+        <div class="hero-content">
+          <h1>🔗 Phase 4: LLM 應用開發</h1>
+          <p class="hero-subtitle">
+            從理論到實戰：掌握 RAG、向量資料庫與自主 Agent，打造真正的 AI
+            應用！🚀
+          </p>
+          <p class="hero-meta">6 個實驗 × 10.5 小時 = 成為 LLM 應用工程師！</p>
+        </div>
+      </div>
+
+      <!-- Phase Overview -->
+      <div class="story-container">
+        <h2>🎯 學習目標</h2>
+        <p>
+          在這個 Phase，你將學習如何將強大的語言模型轉化為實際可用的應用系統。
+          我們將從底層的<strong>向量資料庫</strong>開始，實作<strong
+            >檢索增強生成 (RAG)</strong
+          >， 並進階到具備自主決策能力的
+          <strong>Agent</strong> 與擁有記憶的<strong>對話系統</strong>。
+        </p>
+        <p>
+          <strong>特別強化：中文語境處理</strong>。中文 RAG
+          有其特殊的挑戰（如分詞、語義偏移），
+          每個實驗我們都會包含專門針對繁體中文內容的處理技巧與實作範例。
+        </p>
+        <p>
+          <strong>高階技術：</strong>在實驗 4.6 中，我們將深入探索
+          Self-RAG（自省式檢索）、 GraphRAG（知識圖譜檢索）與
+          CRAG（修正檢索）等前沿技術，解決傳統 RAG 的幻覺與局部性問題。
+        </p>
+
+        <!-- Lab Cards -->
+        <div class="phase-labs lab-spacing-top">
+          <a href="01-vector-database/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">4.1</span>
+            </div>
+            <h3>向量資料庫</h3>
+            <p>Embedding 儲存與相似度搜尋：Chroma, FAISS & Qdrant</p>
+            <div class="lab-meta">
+              <span>1 小時</span>
+              <span>Qdrant</span>
+              <span>中文 Embedding</span>
+            </div>
+          </a>
+
+          <a href="02-rag-basics/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">4.2</span>
+            </div>
+            <h3>RAG 基礎</h3>
+            <p>PDF 問答系統實作：中文分塊與 LlamaIndex</p>
+            <div class="lab-meta">
+              <span>2 小時</span>
+              <span>LlamaIndex</span>
+              <span>中文分塊</span>
+            </div>
+          </a>
+
+          <a href="03-advanced-rag/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">4.3</span>
+            </div>
+            <h3>進階 RAG</h3>
+            <p>優化檢索品質：Qdrant Hybrid Search & Reranking</p>
+            <div class="lab-meta">
+              <span>2 小時</span>
+              <span>Qdrant</span>
+              <span>Cross-Encoder</span>
+            </div>
+          </a>
+
+          <a href="04-agent-tools/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">4.4</span>
+            </div>
+            <h3>Agent & Tools</h3>
+            <p>賦予模型行動力：Function Calling 與自主決策</p>
+            <div class="lab-meta">
+              <span>2 小時</span>
+              <span>OpenAI</span>
+              <span>自主 Agent</span>
+            </div>
+          </a>
+
+          <a href="05-conversation-system/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">4.5</span>
+            </div>
+            <h3>對話系統</h3>
+            <p>打造智能客服：記憶管理與多輪對話</p>
+            <div class="lab-meta">
+              <span>1.5 小時</span>
+              <span>Memory</span>
+              <span>繁體中文客服</span>
+            </div>
+          </a>
+
+          <a href="06-advanced-rag-patterns/index.html" class="lab-card">
+            <div class="lab-card-header">
+              <span class="lab-number">4.6</span>
+            </div>
+            <h3>高階 RAG 模式</h3>
+            <p>突破 RAG 極限：自省檢索、知識圖譜與修正機制</p>
+            <div class="lab-meta">
+              <span>2.5 小時</span>
+              <span>LlamaIndex</span>
+              <span>GraphRAG</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- Learning Tips -->
+        <div class="lab-setup lab-spacing-top-lg">
+          <h4>💡 學習秘訣</h4>
+          <ul>
+            <li>
+              <strong>⚠️ API Key 管理：</strong>
+              本階段實驗需要使用外部 API（如 OpenAI）。請務必使用
+              <code>.env</code> 文件管理 Key，切勿直接寫在程式碼中。
+            </li>
+            <li>
+              <strong>💰 API 成本追蹤：</strong>
+              LlamaIndex 提供內建的 <code>TokenCountingHandler</code> 來追蹤
+              token 使用量和成本。使用方法：
+              <pre
+                style="
+                  background: #f3f4f6;
+                  padding: 10px;
+                  border-radius: 6px;
+                  margin-top: 8px;
+                  font-size: 0.85rem;
+                  color: #1f2937;
+                  line-height: 1.6;
+                "
+              >
+from llama_index.core.callbacks import CallbackManager, TokenCountingHandler
+import tiktoken
+
+token_counter = TokenCountingHandler(
+    tokenizer=tiktoken.encoding_for_model("gpt-3.5-turbo").encode,
+    verbose=True  # 顯示詳細 token 使用資訊
+)
+Settings.callback_manager = CallbackManager([token_counter])
+
+# 之後每次查詢都會自動計算 token
+print(f"總 Embedding Tokens: {token_counter.total_embedding_token_count}")
+print(f"總 LLM Tokens: {token_counter.total_llm_token_count}")</pre
+              >
+              <strong>成本估算：</strong>OpenAI GPT-3.5-turbo 約 $0.0015/1K
+              tokens（輸入）+ $0.002/1K tokens（輸出）<br />
+              <strong>提示：</strong>在測試階段可使用 <code>MockLLM</code> 和
+              <code>MockEmbedding</code> 來預估成本而不實際呼叫 API
+            </li>
+            <li>
+              <strong>🌏 中文處理是關鍵：</strong>
+              中文文檔處理（如 PDF
+              解析、段落切割）與英文不同。我們會示範如何使用
+              <code>jieba</code> 與繁體中文 Embedding 模型優化效果。
+            </li>
+            <li>
+              <strong>🤖 AI 助手提示：</strong>
+              每個實驗都附帶專屬 Prompt，複製給 Cursor/Claude
+              即可獲得該實驗的最佳實作建議。
+            </li>
+            <li>
+              <strong>📦 虛擬環境：</strong>
+              LLM 套件（LangChain,
+              LlamaIndex）更新頻繁，建議為每個實驗建立獨立的
+              <code>venv</code> 以免版本衝突。
+            </li>
+          </ul>
+        </div>
+
+        <div class="chapter-nav">
+          <a href="../index.html" class="nav-link">← 返回路線圖</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

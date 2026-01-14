@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Qdrant 進階功能：過濾、混合搜尋與水平擴展 | RAG 演進史</title>
+    <meta
+      name="description"
+      content="深入學習 Qdrant 向量資料庫的進階功能：元數據過濾、混合搜尋（密集+稀疏向量）、水平擴展與分散式部署。適合需要生產級 RAG 系統的開發者。"
+    />
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../styles/articles.css" />
+    <link rel="stylesheet" href="rag-tutorial.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- 麵包屑導航 -->
+      <div class="breadcrumb">
+        <a href="../index.html">🏠 首頁</a> /
+        <a href="index.html">📚 RAG 演進史</a> / Qdrant 進階功能
+      </div>
+
+      <!-- 頁面標題 -->
+      <div class="rag-header-secondary">
+        <h1 style="margin: 0 0 10px 0; font-size: 2.5rem">
+          🚀 Qdrant 進階功能教學
+        </h1>
+        <p style="font-size: 1.2rem; opacity: 0.95; margin: 0">
+          元數據過濾、混合搜尋與水平擴展
+        </p>
+        <p style="font-size: 0.95rem; margin-top: 15px; opacity: 0.9">
+          <strong>從基礎到生產級部署的完整指南</strong>
+        </p>
+        <div class="rag-header-badge">💼 生產級 RAG 系統必備技能</div>
+      </div>
+
+      <!-- 導言 -->
+      <div class="key-concept">
+        <h4>💡 為什麼需要 Qdrant 進階功能？</h4>
+        <p style="font-size: 1.1rem; line-height: 1.9">
+          當你的 RAG 系統從原型進入生產環境，你會發現基礎的向量搜尋已經不夠用。
+          <strong>元數據過濾</strong>讓你能精準篩選資料（例如：只搜尋特定日期範圍的文檔），
+          <strong>混合搜尋</strong>結合語義與關鍵字，大幅提升檢索準確度，
+          <strong>水平擴展</strong>則讓系統能處理百萬級以上的向量資料。
+          本教學將帶你掌握這些生產級功能。
+        </p>
+      </div>
+
+      <!-- 第一部分：進階過濾 -->
+      <h2>🔍 第一部分：元數據過濾（Payload Filtering）</h2>
+
+      <div class="key-concept">
+        <h4>什麼是 Payload？</h4>
+        <p style="font-size: 1.05rem; line-height: 1.9; margin-top: 15px">
+          Payload 是附加在向量上的<strong>結構化元數據</strong>（JSON 格式）。
+          例如：文檔的發布日期、作者、類別、標籤等。透過 Payload 過濾，你可以：
+        </p>
+        <ul style="margin-top: 20px; line-height: 2">
+          <li>只搜尋特定時間範圍的文檔</li>
+          <li>過濾特定作者或部門的內容</li>
+          <li>結合多個條件進行複雜查詢</li>
+        </ul>
+      </div>
+
+      <div
+        style="
+          background: white;
+          padding: 30px;
+          border-radius: 12px;
+          margin: 30px 0;
+          border-left: 5px solid var(--primary-color);
+          box-shadow: var(--shadow-md);
+        "
+      >
+        <h3 style="color: var(--primary-color); margin-top: 0">
+          實作範例：建立帶 Payload 的 Collection
+        </h3>
+        <pre style="background: #f8f9fa; padding: 20px; border-radius: 8px; overflow-x: auto"><code>from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams, PointStruct
+import uuid
+
+# 連接到 Qdrant
+client = QdrantClient(host="localhost", port=6333)
+
+# 建立 Collection（帶 Payload 索引）
+client.create_collection(
+    collection_name="tech_docs",
+    vectors_config=VectorParams(size=768, distance=Distance.COSINE),
+)
+
+# 插入帶 Payload 的向量
+points = [
+    PointStruct(
+        id=str(uuid.uuid4()),
+        vector=[0.1] * 768,  # 實際使用時替換為真實 embedding
+        payload={
+            "title": "Transformer 架構解析",
+            "author": "張三",
+            "date": "2024-01-15",
+            "category": "AI",
+            "tags": ["深度學習", "NLP"],
+            "views": 1500,
+        },
+    ),
+    PointStruct(
+        id=str(uuid.uuid4()),
+        vector=[0.2] * 768,
+        payload={
+            "title": "BERT 預訓練技巧",
+            "author": "李四",
+            "date": "2024-02-20",
+            "category": "AI",
+            "tags": ["BERT", "預訓練"],
+            "views": 2300,
+        },
+    ),
+]
+
+client.upsert(collection_name="tech_docs", points=points)</code></pre>
+      </div>
+
+      <div
+        style="
+          background: white;
+          padding: 30px;
+          border-radius: 12px;
+          margin: 30px 0;
+          border-left: 5px solid var(--secondary-color);
+          box-shadow: var(--shadow-md);
+        "
+      >
+        <h3 style="color: var(--secondary-color); margin-top: 0">
+          進階過濾查詢範例
+        </h3>
+        <pre style="background: #f8f9fa; padding: 20px; border-radius: 8px; overflow-x: auto"><code>from qdrant_client.models import Filter, FieldCondition, Range, Match
+
+# 範例 1：只搜尋特定類別
+results = client.search(
+    collection_name="tech_docs",
+    query_vector=[0.15] * 768,
+    query_filter=Filter(
+        must=[
+            FieldCondition(key="category", match=Match(value="AI")),
+        ]
+    ),
+    limit=5,
+)
+
+# 範例 2：日期範圍過濾
+results = client.search(
+    collection_name="tech_docs",
+    query_vector=[0.15] * 768,
+    query_filter=Filter(
+        must=[
+            FieldCondition(
+                key="date",
+                range=Range(
+                    gte="2024-01-01",
+                    lte="2024-03-31",
+                ),
+            ),
+        ]
+    ),
+    limit=5,
+)
+
+# 範例 3：複雜條件（AND + OR）
+results = client.search(
+    collection_name="tech_docs",
+    query_vector=[0.15] * 768,
+    query_filter=Filter(
+        must=[
+            FieldCondition(key="category", match=Match(value="AI")),
+        ],
+        should=[
+            FieldCondition(key="tags", match=Match(value="深度學習")),
+            FieldCondition(key="tags", match=Match(value="NLP")),
+        ],
+        must_not=[
+            FieldCondition(key="views", range=Range(lt=1000)),
+        ],
+    ),
+    limit=5,
+)</code></pre>
+      </div>
+
+      <!-- 第二部分：混合搜尋 -->
+      <h2>🔀 第二部分：混合搜尋（Hybrid Search）</h2>
+
+      <div class="key-concept">
+        <h4>為什麼需要混合搜尋？</h4>
+        <p style="font-size: 1.05rem; line-height: 1.9; margin-top: 15px">
+          純向量搜尋（Dense Search）有時會「想太多」，漏掉包含關鍵字但語義略有偏差的文檔。
+          <strong>混合搜尋</strong>結合：
+        </p>
+        <ul style="margin-top: 20px; line-height: 2">
+          <li><strong>密集向量搜尋（Dense）：</strong>理解語義相似度</li>
+          <li><strong>稀疏向量搜尋（Sparse）：</strong>BM25 關鍵字匹配</li>
+        </ul>
+        <p style="margin-top: 20px; font-weight: 600; color: var(--secondary-color)">
+          兩者結合，既能理解語義，又能精準匹配關鍵字！
+        </p>
+      </div>
+
+      <div
+        style="
+          background: white;
+          padding: 30px;
+          border-radius: 12px;
+          margin: 30px 0;
+          border-left: 5px solid var(--accent-color);
+          box-shadow: var(--shadow-md);
+        "
+      >
+        <h3 style="color: var(--accent-color); margin-top: 0">
+          實作混合搜尋（Qdrant 1.10+）
+        </h3>
+        <pre style="background: #f8f9fa; padding: 20px; border-radius: 8px; overflow-x: auto"><code>from qdrant_client.models import Query, QueryRequest, SparseVector
+
+# 建立混合查詢
+query_request = QueryRequest(
+    collection_name="tech_docs",
+    query=Query(
+        fusion="rrf",  # Reciprocal Rank Fusion
+        queries=[
+            # 密集向量查詢
+            Query(
+                vector=[0.15] * 768,
+                using="dense_vectors",
+            ),
+            # 稀疏向量查詢（BM25）
+            Query(
+                sparse=SparseVector(
+                    indices=[1, 5, 10, 20],  # Token IDs
+                    values=[0.8, 0.6, 0.9, 0.7],  # 權重
+                ),
+                using="sparse_vectors",
+            ),
+        ],
+    ),
+    limit=10,
+)
+
+results = client.query(query_request)</code></pre>
+        <p style="margin-top: 15px; padding: 15px; background: #fffbeb; border-radius: 8px; border-left: 3px solid #f59e0b">
+          <strong>💡 提示：</strong>Qdrant 1.10 引入了新的 Query API，支援更靈活的混合搜尋配置。
+          你可以調整 <code>fusion</code> 策略（RRF、Weighted、Average）來優化結果。
+        </p>
+      </div>
+
+      <!-- 第三部分：水平擴展 -->
+      <h2>📈 第三部分：水平擴展與分散式部署</h2>
+
+      <div class="key-concept">
+        <h4>什麼時候需要水平擴展？</h4>
+        <p style="font-size: 1.05rem; line-height: 1.9; margin-top: 15px">
+          當你的向量資料達到<strong>百萬級以上</strong>，單一節點已經無法滿足需求時，
+          就需要進行<strong>水平擴展</strong>（Horizontal Scaling）：
+        </p>
+        <ul style="margin-top: 20px; line-height: 2">
+          <li>資料量超過單機記憶體容量</li>
+          <li>查詢延遲超過可接受範圍</li>
+          <li>需要高可用性（High Availability）</li>
+          <li>需要處理更高的並發查詢</li>
+        </ul>
+      </div>
+
+      <div
+        style="
+          background: white;
+          padding: 30px;
+          border-radius: 12px;
+          margin: 30px 0;
+          border-left: 5px solid var(--purple-color);
+          box-shadow: var(--shadow-md);
+        "
+      >
+        <h3 style="color: var(--purple-color); margin-top: 0">
+          Qdrant 分散式架構
+        </h3>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+          "
+        >
+          <div style="background: #f0f9ff; padding: 20px; border-radius: 8px">
+            <h4 style="margin: 0 0 10px 0; color: var(--primary-color)">
+              Sharding（分片）
+            </h4>
+            <p style="margin: 0; line-height: 1.8; font-size: 0.95rem">
+              將 Collection 的資料分散到多個節點，每個節點負責一部分向量。
+              查詢時會並行搜尋所有分片，然後合併結果。
+            </p>
+          </div>
+          <div style="background: #f0fdf4; padding: 20px; border-radius: 8px">
+            <h4 style="margin: 0 0 10px 0; color: var(--secondary-color)">
+              Replication（複製）
+            </h4>
+            <p style="margin: 0; line-height: 1.8; font-size: 0.95rem">
+              為每個分片建立多個副本，確保高可用性。
+              當一個節點故障時，系統自動切換到備份節點。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style="
+          background: white;
+          padding: 30px;
+          border-radius: 12px;
+          margin: 30px 0;
+          border-left: 5px solid var(--danger-color);
+          box-shadow: var(--shadow-md);
+        "
+      >
+        <h3 style="color: var(--danger-color); margin-top: 0">
+          使用 Docker Compose 部署分散式 Qdrant
+        </h3>
+        <pre style="background: #f8f9fa; padding: 20px; border-radius: 8px; overflow-x: auto"><code># docker-compose.yml
+version: '3.8'
+
+services:
+  qdrant-node1:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./qdrant_storage1:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    command: ./qdrant --config-path /qdrant/config/production.yaml
+
+  qdrant-node2:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6335:6333"
+      - "6336:6334"
+    volumes:
+      - ./qdrant_storage2:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    command: ./qdrant --config-path /qdrant/config/production.yaml
+
+  qdrant-node3:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6337:6333"
+      - "6338:6334"
+    volumes:
+      - ./qdrant_storage3:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    command: ./qdrant --config-path /qdrant/config/production.yaml</code></pre>
+        <p style="margin-top: 15px; padding: 15px; background: #fef2f2; border-radius: 8px; border-left: 3px solid #dc2626">
+          <strong>⚠️ 注意：</strong>生產環境建議使用 Kubernetes 部署，並配置 StatefulSet 和 Service
+          來實現自動擴展和負載均衡。詳細部署指南請參考
+          <a href="https://cloud.google.com/kubernetes-engine/docs/tutorials/deploy-qdrant" target="_blank">Qdrant on GKE 教學</a>。
+        </p>
+      </div>
+
+      <!-- 第四部分：中文語境優化 -->
+      <h2>🌏 第四部分：中文語境下的最佳實踐</h2>
+
+      <div class="key-concept">
+        <h4>中文 RAG 的特殊考量</h4>
+        <p style="font-size: 1.05rem; line-height: 1.9; margin-top: 15px">
+          在中文環境下使用 Qdrant，需要注意以下幾點：
+        </p>
+      </div>
+
+      <div
+        style="
+          background: white;
+          padding: 30px;
+          border-radius: 12px;
+          margin: 30px 0;
+          box-shadow: var(--shadow-md);
+        "
+      >
+        <h3 style="margin-top: 0">1. 中文 Payload 過濾</h3>
+        <pre style="background: #f8f9fa; padding: 20px; border-radius: 8px; overflow-x: auto"><code># 使用繁體中文標籤進行過濾
+results = client.search(
+    collection_name="chinese_docs",
+    query_vector=query_embedding,
+    query_filter=Filter(
+        must=[
+            FieldCondition(
+                key="tags",
+                match=Match(value="人工智慧"),  # 繁體中文
+            ),
+            FieldCondition(
+                key="language",
+                match=Match(value="zh-TW"),
+            ),
+        ]
+    ),
+    limit=10,
+)</code></pre>
+
+        <h3 style="margin-top: 30px">2. 中文混合搜尋優化</h3>
+        <p style="line-height: 1.9; margin-top: 15px">
+          在混合搜尋中，稀疏向量需要使用<strong>中文分詞</strong>（如 jieba）來生成 Token IDs。
+          建議的流程：
+        </p>
+        <ol style="line-height: 2; margin-top: 15px">
+          <li>使用 jieba 對查詢進行分詞</li>
+          <li>將詞彙映射到 Token ID（建立詞彙表）</li>
+          <li>生成稀疏向量（indices + values）</li>
+          <li>與密集向量結合進行混合搜尋</li>
+        </ol>
+
+        <h3 style="margin-top: 30px">3. 效能優化建議</h3>
+        <ul style="line-height: 2; margin-top: 15px">
+          <li><strong>Payload 索引：</strong>為常用的過濾欄位建立索引，加速查詢</li>
+          <li><strong>向量量化：</strong>使用 Scalar Quantization 減少記憶體使用</li>
+          <li><strong>批次查詢：</strong>使用 <code>batch_search</code> 處理多個查詢</li>
+          <li><strong>快取策略：</strong>對熱點查詢結果進行快取</li>
+        </ul>
+      </div>
+
+      <!-- 總結 -->
+      <div
+        style="
+          background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+          padding: 40px;
+          border-radius: 16px;
+          margin: 50px 0;
+          border: 2px solid var(--secondary-color);
+        "
+      >
+        <h3
+          style="
+            color: #047857;
+            margin: 0 0 20px 0;
+            font-size: 1.8rem;
+            text-align: center;
+          "
+        >
+          🎯 總結：從原型到生產
+        </h3>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+          "
+        >
+          <div style="background: white; padding: 20px; border-radius: 8px">
+            <h4 style="margin: 0 0 10px 0; color: var(--primary-color)">
+              ✅ 進階過濾
+            </h4>
+            <p style="margin: 0; line-height: 1.8; font-size: 0.95rem">
+              使用 Payload 進行精準篩選，大幅提升檢索相關性
+            </p>
+          </div>
+          <div style="background: white; padding: 20px; border-radius: 8px">
+            <h4 style="margin: 0 0 10px 0; color: var(--secondary-color)">
+              ✅ 混合搜尋
+            </h4>
+            <p style="margin: 0; line-height: 1.8; font-size: 0.95rem">
+              結合語義與關鍵字，解決純向量搜尋的盲點
+            </p>
+          </div>
+          <div style="background: white; padding: 20px; border-radius: 8px">
+            <h4 style="margin: 0 0 10px 0; color: var(--accent-color)">
+              ✅ 水平擴展
+            </h4>
+            <p style="margin: 0; line-height: 1.8; font-size: 0.95rem">
+              透過分片與複製，處理百萬級向量資料
+            </p>
+          </div>
+        </div>
+        <p
+          style="
+            margin-top: 30px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #047857;
+          "
+        >
+          掌握這些進階功能，你就能建立真正適合生產環境的 RAG 系統！
+        </p>
+      </div>
+
+      <!-- 延伸資源 -->
+      <div class="key-concept" style="margin-top: 50px">
+        <h4>📚 延伸資源</h4>
+        <ul style="margin-top: 20px; line-height: 2">
+          <li>
+            <a href="https://qdrant.tech/documentation/" target="_blank"
+              >Qdrant 官方文檔</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://qdrant.tech/articles/hybrid-search/"
+              target="_blank"
+              >Qdrant 混合搜尋教學</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://cloud.google.com/kubernetes-engine/docs/tutorials/deploy-qdrant"
+              target="_blank"
+              >Qdrant on Kubernetes 部署指南</a
+            >
+          </li>
+          <li>
+            <a href="index.html">← 返回 RAG 演進史目錄</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="chapter-nav" style="margin-top: 60px">
+        <a href="index.html" class="nav-link">← 返回 RAG 演進史</a>
+      </div>
+    </div>
+  </body>
+</html>

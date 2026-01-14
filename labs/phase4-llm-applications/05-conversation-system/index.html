@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>4.5 對話系統 - 打造智能客服 | AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles/global.css" />
+    <link rel="stylesheet" href="../../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1, h2, h3, h4, .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Step Navigation -->
+      <div class="lab-steps">
+        <a href="../index.html" class="lab-step">← Phase 4</a>
+        <a href="#step1" class="lab-step active">Step 1: 記憶機制</a>
+        <a href="#step2" class="lab-step">Step 2: Token 管理</a>
+        <a href="#step3" class="lab-step">Step 3: 中文摘要</a>
+        <a href="#step4" class="lab-step">Step 4: 完整專題</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h1>💬 4.5 對話系統 - 讓 AI 記住你是誰</h1>
+        <p class="lab-intro-text">
+          一個好的 AI 助手不應該「轉頭就忘」。
+          為了實現流暢的多輪對話，我們需要建立<strong>記憶機制 (Memory)</strong>。
+          本實驗將帶你掌握對話歷史的管理、Token 的智慧刪減，並針對繁體中文內容實作高效的摘要策略。
+        </p>
+
+        <!-- Step 1: 記憶機制 -->
+        <section id="step1" class="lab-section">
+          <h2>🎓 Step 1: 常見的記憶管理策略</h2>
+          <div class="visual-diagram">
+            <h4>📊 Memory 類型對比</h4>
+            <ul>
+              <li><strong>Buffer Memory:</strong> 記住所有對話（最簡單，但 Token 消耗快）。</li>
+              <li><strong>Window Memory:</strong> 只記住最後 N 輪對話。</li>
+              <li><strong>Summary Memory:</strong> 將過去的對話總結成摘要（適合長對話）。</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 2: Token 管理 -->
+        <section id="step2" class="lab-section">
+          <h2>🛠️ Step 2: Token 計算與管理</h2>
+          <p>
+            中文字符在模型眼中通常佔用更多 Token。我們需要精確計算，避免對話過長導致報錯。
+          </p>
+          <div class="ai-prompt-block">
+            <p>複製 Prompt 測試 Token：</p>
+            <pre>
+請幫我撰寫一個 Python 腳本：
+1. 安裝 tiktoken, openai
+2. 示範如何使用 `tiktoken` 計算中文句子的 Token 數量。
+3. 對比同樣意思的中英文句子，分別佔用了多少個 Token？
+4. 實作一個簡單的「視窗機制」：當總 Token 超過 2000 時，自動刪除最早的對話。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <!-- Step 3: 中文摘要策略 -->
+        <section id="step3" class="lab-section">
+          <h2>🌏 Step 3: 針對中文的摘要優化</h2>
+          <p>
+            長對話後，直接將歷史記錄交給模型摘要。
+            <strong>重點：</strong> 需要特別提示模型保留專有名詞（如：產品型號、人名）。
+          </p>
+          <div class="ai-prompt-block">
+            <pre>
+使用 LangChain 實作 `ConversationSummaryMemory`：
+1. 模擬一段長達 10 輪的繁體中文客戶服務對話。
+2. 設定摘要模型，當對話超過一定長度時，自動生成摘要。
+3. 自定義摘要提示詞 (Summary Prompt)，要求模型以「繁體中文」進行重點條列，並保留關鍵的日期與單號資訊。
+4. 測試摘要後，模型是否仍能記住對話開頭提到的使用者姓名。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <!-- Step 4: 完整專題 -->
+        <section id="step4" class="lab-section">
+          <h2>🚀 Step 4: 實作繁體中文智能客服</h2>
+          <p>整合本 Phase 所學的所有技能！</p>
+          <div class="ai-prompt-block">
+            <pre>
+打造一個完整「電商退貨助手」：
+1. 整合 RAG：可以查詢內部的「退貨政策」PDF。
+2. 整合 Agent：可以使用 `get_order_status` 工具查詢訂單進度。
+3. 整合 Memory：能記住使用者的姓名與剛才提到的問題。
+4. 限制模型：必須使用溫柔有禮的「台灣中文」口吻，且只能回答政策相關問題。
+5. 實作流式輸出 (Streaming)，讓回答看起來像打字一樣逐字出現。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <div class="chapter-nav">
+          <a href="../index.html" class="nav-link">← 返回 Phase 4</a>
+        </div>
+      </div>
+    </div>
+    <script>
+      function copyPrompt(btn) {
+        const pre = btn.previousElementSibling;
+        navigator.clipboard.writeText(pre.innerText);
+        const originalText = btn.innerText;
+        btn.innerText = "✅ 已複製！";
+        setTimeout(() => btn.innerText = originalText, 2000);
+      }
+    </script>
+  </body>
+</html>

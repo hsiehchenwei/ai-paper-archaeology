@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
+    <title>
+      多模態 RAG：視覺與語言的檢索革命 | AI Paper Archaeology
+    </title>
+    <meta
+      name="title"
+      content="多模態 RAG：視覺與語言的檢索革命"
+    />
+    <meta
+      name="description"
+      content="從純文字到圖文並茂的知識檢索。探索 RA-CM3 與 REVEAL 如何突破傳統 RAG 的限制，實現視覺問答、圖像字幕生成與多模態文件理解。"
+    />
+    <meta
+      name="keywords"
+      content="多模態 RAG, Multimodal RAG, RA-CM3, REVEAL, 視覺問答, VQA, 圖像檢索, 視覺語言模型, 檢索增強生成"
+    />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Poppins:wght@400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../styles/articles.css" />
+    <link rel="stylesheet" href="multimodal-rag-tutorial.css" />
+  </head>
+  <body>
+    <!-- Hero Section -->
+    <div class="mmrag-hero">
+      <div class="mmrag-hero-content">
+        <h1 class="mmrag-hero-title">多模態 RAG</h1>
+        <p class="mmrag-hero-subtitle">視覺與語言的檢索革命</p>
+        <p class="mmrag-hero-meta">2022-2023 · 從純文字到圖文並茂的知識檢索</p>
+        <div style="margin-top: 2rem">
+          <a href="#story-start" class="mmrag-hero-button">探索故事 ↓</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- 麵包屑導航 -->
+      <div class="breadcrumb">
+        <a href="../index.html">🏠 首頁</a> / 📚 多模態 RAG 專題報導
+      </div>
+
+      <!-- Story Container -->
+      <div id="story-start" class="story-container">
+        <p class="drop-cap">
+          當傳統的 RAG 系統還在文字的世界裡打轉時，一個根本性的問題浮現了：<strong>如果知識不僅存在於文字中，還存在於圖像、影片、圖表裡，該怎麼辦？</strong>
+          二零二二年，Meta AI 和 Google Research 分別提出了突破性的解決方案，開啟了多模態檢索增強生成的新時代。
+        </p>
+
+        <p
+          style="
+            font-size: 1.1rem;
+            line-height: 1.9;
+            color: var(--text-main);
+            margin: 30px 0;
+          "
+        >
+          想像一下，當你問 AI「這張 X 光片顯示什麼疾病？」或「這張圖表說明了什麼趨勢？」時，傳統的文字 RAG 只能檢索相關的文字描述，卻無法直接「看到」圖像本身。
+          <strong>多模態 RAG 的誕生，就是要讓 AI 同時理解文字與視覺資訊，實現真正的圖文並茂知識檢索。</strong>
+        </p>
+
+        <div class="section-divider"><span>✦</span></div>
+
+        <h2
+          style="
+            font-size: 2.2rem;
+            margin-top: 60px;
+            color: var(--primary-color);
+          "
+        >
+          為什麼需要多模態 RAG？
+        </h2>
+
+        <div class="rag-problem-grid">
+          <div class="rag-problem-card rag-problem-card-danger">
+            <div class="rag-problem-title rag-problem-title-danger">
+              <span>1. 純文字 RAG 的局限性</span>
+            </div>
+            <p class="rag-problem-desc">
+              傳統 RAG 只能檢索文字資料，對於視覺資訊（圖像、圖表、影片）束手無策。
+              當問題涉及圖像內容時，系統無法直接理解視覺元素，只能依賴文字描述。
+            </p>
+            <div class="rag-problem-example">
+              例子：問「這張醫療影像顯示什麼異常？」，傳統 RAG 只能檢索相關的文字報告，無法直接分析影像本身。
+            </div>
+          </div>
+
+          <div class="rag-problem-card rag-problem-card-info">
+            <div class="rag-problem-title rag-problem-title-info">
+              <span>2. 視覺資訊的重要性</span>
+            </div>
+            <p class="rag-problem-desc">
+              現實世界中，大量知識以視覺形式存在：醫療影像、科學圖表、產品照片、教學影片。
+              這些視覺資訊往往包含文字無法完全描述的重要細節。
+            </p>
+          </div>
+        </div>
+
+        <div class="rag-comparison-box">
+          <h4 class="rag-comparison-title">💡 多模態 RAG 的解法：圖文並茂</h4>
+
+          <div class="rag-vs-grid">
+            <div class="rag-vs-item rag-vs-item-bad">
+              <div class="rag-vs-header rag-vs-header-bad">
+                <span>❌ 傳統 RAG = 只能讀文字</span>
+              </div>
+              <ul class="rag-vs-list">
+                <li>只能檢索文字資料庫</li>
+                <li>無法理解圖像內容</li>
+                <li>視覺問答（VQA）表現不佳</li>
+                <li>圖像字幕生成受限</li>
+              </ul>
+            </div>
+
+            <div class="rag-vs-item rag-vs-item-good">
+              <div class="rag-vs-header rag-vs-header-good">
+                <span>✅ 多模態 RAG = 圖文並茂</span>
+              </div>
+              <ul class="rag-vs-list">
+                <li>同時檢索文字與圖像</li>
+                <li>直接理解視覺內容</li>
+                <li>VQA 任務大幅提升</li>
+                <li>圖像生成與理解並重</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider"><span>✦</span></div>
+
+        <!-- 過渡段落 -->
+        <div
+          style="
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 30px;
+            border-radius: 16px;
+            margin: 40px 0;
+            border-left: 5px solid var(--primary-color);
+          "
+        >
+          <p
+            style="
+              font-size: 1.1rem;
+              line-height: 1.9;
+              margin: 0;
+              color: #1e293b;
+            "
+          >
+            <strong>這就是多模態 RAG 誕生的背景。</strong>既然知識不僅存在於文字中，何不讓 AI 同時「閱讀」文字與「觀看」圖像？
+            接下來，讓我們深入了解兩篇開創性論文：<strong>RA-CM3</strong> 與 <strong>REVEAL</strong>，看看它們如何突破傳統 RAG 的限制。
+          </p>
+        </div>
+
+        <!-- 技術演進時間線 -->
+        <section class="story-section" style="margin-top: 60px">
+          <h2
+            style="
+              font-size: 2.2rem;
+              margin-bottom: 30px;
+              color: var(--primary-color);
+            "
+          >
+            📅 多模態 RAG 的演進歷程
+          </h2>
+
+          <div class="mmrag-timeline-container">
+            <div class="mmrag-timeline-line"></div>
+
+            <!-- 2022: RA-CM3 -->
+            <div class="mmrag-timeline-item left">
+              <div class="mmrag-timeline-dot"></div>
+              <div class="mmrag-timeline-card">
+                <h3>🎨 2022 年 11 月：RA-CM3</h3>
+                <p class="mmrag-timeline-meta">Meta AI & Stanford · ICML 2023</p>
+
+                <div class="rag-timeline-box">
+                  <h4>Retrieval-Augmented Multimodal Language Modeling</h4>
+                  <p>
+                    首創將檢索機制整合到多模態語言模型中，實現 Text-to-Image 和 Image-to-Text 的雙向生成。
+                    使用對比學習進行多模態預訓練，讓模型能夠從外部知識庫檢索相關的圖像與文字。
+                    <br />
+                    <a href="01-ra-cm3.html" class="rag-timeline-link"
+                      >深入了解 RA-CM3 →</a
+                    >
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2022: REVEAL -->
+            <div class="mmrag-timeline-item right">
+              <div class="mmrag-timeline-dot"></div>
+              <div class="mmrag-timeline-card">
+                <h3>🔍 2022 年 12 月：REVEAL</h3>
+                <p class="mmrag-timeline-meta">Google Research · CVPR 2023</p>
+
+                <div class="rag-timeline-box">
+                  <h4>Retrieval-Augmented Visual-Language Pre-Training</h4>
+                  <p>
+                    建立大規模多源多模態知識記憶庫，整合 Image-Text Pairs、Question-Answer Pairs 和 Knowledge Graph Triplets。
+                    端到端預訓練，在視覺問答（VQA）和圖像字幕生成任務上達到 SOTA 表現。
+                    <br />
+                    <a href="02-reveal.html" class="rag-timeline-link"
+                      >深入了解 REVEAL →</a
+                    >
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2024-2026: 後續發展 -->
+            <div class="mmrag-timeline-item left">
+              <div class="mmrag-timeline-dot"></div>
+              <div class="mmrag-timeline-card">
+                <h3>🚀 2024-2026：百花齊放</h3>
+                <p class="mmrag-timeline-meta">多模態 RAG 的持續演進</p>
+
+                <div class="rag-timeline-box">
+                  <ul
+                    style="
+                      margin: 0;
+                      padding-left: 20px;
+                      line-height: 1.9;
+                      color: var(--rag-text-secondary);
+                    "
+                  >
+                    <li><strong>QA-Dragon</strong>：查詢感知的動態 RAG，支援多跳推理</li>
+                    <li><strong>CMRAG</strong>：共模態 RAG，同時利用文字與圖像</li>
+                    <li><strong>ReAG</strong>：推理增強多模態 RAG</li>
+                    <li><strong>VisDoMRAG</strong>：多文件視覺 RAG</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider"><span>✦</span></div>
+
+        <!-- 應用場景 -->
+        <section class="story-section" style="margin-top: 60px">
+          <h2
+            style="
+              font-size: 2.2rem;
+              margin-bottom: 30px;
+              color: var(--primary-color);
+            "
+          >
+            🎯 多模態 RAG 的應用場景
+          </h2>
+
+          <div class="mmrag-scenarios-grid">
+            <div class="mmrag-scenario-card">
+              <span class="mmrag-scenario-icon">🖼️</span>
+              <h4>視覺問答（VQA）</h4>
+              <p>
+                回答關於圖像的問題，例如「這張照片中有幾個人？」、「這張圖表顯示什麼趨勢？」
+                多模態 RAG 能夠檢索相關的視覺與文字知識，提供更準確的答案。
+              </p>
+            </div>
+
+            <div class="mmrag-scenario-card">
+              <span class="mmrag-scenario-icon">📝</span>
+              <h4>圖像字幕生成</h4>
+              <p>
+                為圖像生成描述性文字。多模態 RAG 可以檢索類似的圖像-文字配對，生成更準確、更豐富的圖像描述。
+              </p>
+            </div>
+
+            <div class="mmrag-scenario-card">
+              <span class="mmrag-scenario-icon">📄</span>
+              <h4>多模態文件理解</h4>
+              <p>
+                理解包含圖表、圖像、文字的複雜文件。例如科學論文、產品手冊、醫療報告等。
+                系統能夠同時理解文字內容與視覺元素。
+              </p>
+            </div>
+
+            <div class="mmrag-scenario-card">
+              <span class="mmrag-scenario-icon">🏥</span>
+              <h4>醫療影像問答</h4>
+              <p>
+                分析醫療影像（X 光、CT、MRI）並回答相關問題。
+                檢索相關的醫學知識與案例，提供更準確的診斷建議。
+              </p>
+            </div>
+
+            <div class="mmrag-scenario-card">
+              <span class="mmrag-scenario-icon">🛍️</span>
+              <h4>電商產品問答</h4>
+              <p>
+                根據產品圖片回答問題，例如「這個產品的材質是什麼？」、「適合什麼場合使用？」
+                檢索產品資料庫中的圖像與文字資訊。
+              </p>
+            </div>
+
+            <div class="mmrag-scenario-card">
+              <span class="mmrag-scenario-icon">📚</span>
+              <h4>教育內容理解</h4>
+              <p>
+                理解教學材料中的圖表、圖解、示意圖。
+                幫助學生更好地理解複雜概念，提供視覺化的解釋。
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider"><span>✦</span></div>
+
+        <!-- 論文導覽卡片 -->
+        <section class="story-section" style="margin-top: 60px">
+          <h2
+            style="
+              font-size: 2.2rem;
+              margin-bottom: 30px;
+              color: var(--primary-color);
+              text-align: center;
+            "
+          >
+            📚 深入探索兩篇開創性論文
+          </h2>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+              gap: 30px;
+              margin-top: 40px;
+            "
+          >
+            <!-- RA-CM3 卡片 -->
+            <a href="01-ra-cm3.html" class="mmrag-paper-card ra-cm3">
+              <h3>🎨 RA-CM3</h3>
+              <p class="paper-meta">
+                Meta AI & Stanford · ICML 2023<br />
+                arXiv: 2211.12561
+              </p>
+              <p class="paper-desc">
+                <strong>Retrieval-Augmented Multimodal Language Modeling</strong><br /><br />
+                結合檢索機制與多模態語言模型，實現 Text-to-Image 和 Image-to-Text 的雙向生成。
+                使用對比學習進行預訓練，讓模型能夠從外部知識庫檢索相關的圖像與文字。
+                在圖像生成與理解任務上，超越 DALL-E 和 CM3 等模型。
+              </p>
+            </a>
+
+            <!-- REVEAL 卡片 -->
+            <a href="02-reveal.html" class="mmrag-paper-card reveal">
+              <h3>🔍 REVEAL</h3>
+              <p class="paper-meta">
+                Google Research · CVPR 2023<br />
+                arXiv: 2212.05221
+              </p>
+              <p class="paper-desc">
+                <strong>Retrieval-Augmented Visual-Language Pre-Training</strong><br /><br />
+                建立大規模多源多模態知識記憶庫，整合多種知識來源。
+                端到端預訓練，在視覺問答（VQA）和圖像字幕生成任務上達到 SOTA 表現。
+                解決視覺語言模型的知識限制問題，實現知識密集型的視覺理解。
+              </p>
+            </a>
+          </div>
+        </section>
+
+        <div class="section-divider"><span>✦</span></div>
+
+        <!-- 技術對比 -->
+        <section class="story-section" style="margin-top: 60px">
+          <h2
+            style="
+              font-size: 2.2rem;
+              margin-bottom: 30px;
+              color: var(--primary-color);
+              text-align: center;
+            "
+          >
+            ⚖️ RA-CM3 vs REVEAL：設計理念對比
+          </h2>
+
+          <div class="mmrag-comparison-grid">
+            <div class="mmrag-comparison-card">
+              <h3>🎨 RA-CM3：生成導向</h3>
+              <p>
+                <strong>核心目標：</strong>實現高品質的 Text-to-Image 和 Image-to-Text 生成<br /><br />
+                <strong>設計理念：</strong>使用對比學習，讓模型學會從外部知識庫檢索相關內容，然後生成對應的圖像或文字。<br /><br />
+                <strong>優勢：</strong>生成品質高，能夠創造新內容，適合創意應用。
+              </p>
+            </div>
+
+            <div class="mmrag-comparison-card">
+              <h3>🔍 REVEAL：理解導向</h3>
+              <p>
+                <strong>核心目標：</strong>提升視覺問答（VQA）和圖像理解的準確性<br /><br />
+                <strong>設計理念：</strong>建立大規模知識記憶庫，端到端預訓練，讓模型能夠檢索並利用多源知識回答問題。<br /><br />
+                <strong>優勢：</strong>理解準確度高，知識覆蓋廣，適合知識密集型任務。
+              </p>
+            </div>
+          </div>
+
+          <div
+            style="
+              background: white;
+              padding: 30px;
+              border-radius: 16px;
+              margin-top: 30px;
+              border: 2px solid var(--rag-border);
+            "
+          >
+            <h4 style="color: var(--primary-color); margin-top: 0; font-size: 1.3rem">
+              💡 關鍵差異總結
+            </h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px">
+              <div>
+                <h5 style="color: var(--mmrag-text); margin-bottom: 10px">RA-CM3 適合：</h5>
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.9; color: var(--rag-text-secondary)">
+                  <li>圖像生成任務</li>
+                  <li>創意內容創作</li>
+                  <li>圖像描述生成</li>
+                  <li>多模態對話系統</li>
+                </ul>
+              </div>
+              <div>
+                <h5 style="color: var(--mmrag-visual); margin-bottom: 10px">REVEAL 適合：</h5>
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.9; color: var(--rag-text-secondary)">
+                  <li>視覺問答（VQA）</li>
+                  <li>知識密集型理解</li>
+                  <li>圖像字幕生成</li>
+                  <li>多模態文件分析</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 延伸閱讀 -->
+        <div class="rag-footer-section">
+          <h3 class="rag-resources-title">📚 延伸閱讀與資源</h3>
+          <div class="rag-resources-grid">
+            <a href="../index.html" class="rag-resource-card">
+              <span class="rag-resource-icon">🏠</span>
+              <span class="rag-resource-text">回到首頁</span>
+            </a>
+            <a href="../rag-tutorial/index.html" class="rag-resource-card">
+              <span class="rag-resource-icon">📖</span>
+              <span class="rag-resource-text">RAG 演進史</span>
+            </a>
+            <a
+              href="https://arxiv.org/abs/2211.12561"
+              class="rag-resource-card"
+              target="_blank"
+            >
+              <span class="rag-resource-icon">📄</span>
+              <span class="rag-resource-text">RA-CM3 論文</span>
+            </a>
+            <a
+              href="https://arxiv.org/abs/2212.05221"
+              class="rag-resource-card"
+              target="_blank"
+            >
+              <span class="rag-resource-icon">📄</span>
+              <span class="rag-resource-text">REVEAL 論文</span>
+            </a>
+          </div>
+
+          <div class="rag-about-block">
+            <div class="rag-about-bg-circle rag-about-bg-1"></div>
+            <div class="rag-about-bg-circle rag-about-bg-2"></div>
+
+            <div class="rag-about-content">
+              <h3 class="rag-about-title">關於本專題報導</h3>
+              <p class="rag-about-text">
+                本專題報導深入探索多模態 RAG 的技術突破，從 RA-CM3 到 REVEAL，
+                用<strong>雜誌敘事</strong>的方式講述視覺與語言檢索的革命性進展。
+                配合<strong>視覺化時間軸</strong>與<strong>應用場景說明</strong>，
+                讓你不只理解「是什麼」，更能看見「為什麼重要」與「如何改變世界」。
+              </p>
+
+              <div class="rag-about-signature">
+                <div class="rag-about-brand">AI Paper Archaeology</div>
+                <div class="rag-about-slogan">考古改變世界的 AI 論文</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

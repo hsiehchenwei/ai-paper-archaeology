@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>4.6 高階 RAG 模式 - 突破 RAG 極限 | AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles/global.css" />
+    <link rel="stylesheet" href="../../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1, h2, h3, h4, .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Step Navigation -->
+      <div class="lab-steps">
+        <a href="../index.html" class="lab-step">← Phase 4</a>
+        <a href="#step1" class="lab-step active">Step 1: Self-RAG</a>
+        <a href="#step2" class="lab-step">Step 2: CRAG</a>
+        <a href="#step3" class="lab-step">Step 3: GraphRAG</a>
+        <a href="#step4" class="lab-step">Step 4: 中文整合</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h1>🚀 4.6 高階 RAG 模式 - 讓 RAG 學會「自我反思」</h1>
+        <p class="lab-intro-text">
+          傳統 RAG 有三大痛點：<strong>盲目檢索</strong>（不管是否需要都檢索）、
+          <strong>不判斷相關性</strong>（即使不相關也使用）、<strong>局部視角</strong>（無法跨文檔推理）。
+          本實驗將延續 4.2-4.3 使用 <strong>LlamaIndex</strong>，帶你實作三種高階模式：
+          <strong>Self-RAG</strong>（自省式檢索）、<strong>CRAG</strong>（修正檢索）與 
+          <strong>GraphRAG</strong>（知識圖譜檢索），徹底解決這些問題！
+        </p>
+
+        <!-- Step 1: Self-RAG -->
+        <section id="step1" class="lab-section">
+          <h2>🔄 Step 1: Self-RAG - 讓模型學會「自我批評」</h2>
+          <p>
+            Self-RAG 的核心創新是引入 <strong>Reflection Tokens</strong>，讓模型在每個決策點都問自己：
+            「我該檢索嗎？」「檢索結果相關嗎？」「我的回答有依據嗎？」
+          </p>
+          <div class="visual-diagram">
+            <h4>📊 Self-RAG 的四個反思階段</h4>
+            <ol>
+              <li><strong>Retrieve:</strong> 判斷是否需要檢索（Yes/No/Continue）</li>
+              <li><strong>IsRel:</strong> 檢索結果是否相關（Yes/No/Partially）</li>
+              <li><strong>IsSup:</strong> 生成內容是否有依據（Yes/No/Partially）</li>
+              <li><strong>IsUse:</strong> 最終回答是否有用（Yes/No/Partially）</li>
+            </ol>
+          </div>
+          <div class="ai-prompt-block">
+            <p>複製 Prompt 實作 Self-RAG：</p>
+            <pre>
+請幫我撰寫一個 Python 腳本，使用 LlamaIndex 實作 Self-RAG 的核心流程：
+1. 安裝 llama-index, llama-index-llms-openai, python-dotenv
+2. 建立一個「自省函數」`should_retrieve(question: str) -> bool`：
+   使用 GPT-4 判斷問題是否需要檢索（例如：常識問題不需要，專業問題需要）。
+3. 建立「相關性評分函數」`evaluate_relevance(query: str, retrieved_nodes: list) -> list`：
+   對每個檢索的 Node，讓模型評分是否相關（0-1 分），只保留分數 > 0.7 的結果。
+4. 建立「依據檢查函數」`check_support(answer: str, nodes: list) -> bool`：
+   檢查生成的答案是否有足夠的檢索結果支持。
+5. 整合成完整的 Self-RAG Pipeline：
+   - 使用 LlamaIndex 的 query_engine.query() 獲取結果
+   - 在查詢前後加入自省判斷
+   - 使用 node_postprocessors 過濾不相關結果
+6. 用繁體中文問題測試（常識問題 vs 專業問題）
+
+參考：LlamaIndex 的 node_postprocessors 可用於相關性過濾
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <!-- Step 2: CRAG -->
+        <section id="step2" class="lab-section">
+          <h2>🔧 Step 2: Corrective RAG (CRAG) - 當檢索失敗時自動修正</h2>
+          <p>
+            CRAG 的核心思想：當檢索品質不佳時（例如相似度太低），自動觸發「網路搜尋」補充資訊。
+            這讓 RAG 系統具備了「自我修正」的能力。
+          </p>
+          <div class="lab-setup">
+            <h4>💡 CRAG 的決策流程</h4>
+            <ol>
+              <li>執行向量檢索，獲取 Top-K 結果</li>
+              <li>計算檢索結果的平均相似度分數</li>
+              <li>如果分數 < 閾值（如 0.7），判定為「檢索失敗」</li>
+              <li>觸發網路搜尋（Tavily 或 DuckDuckGo）補充資訊</li>
+              <li>合併本地檢索與網路搜尋的結果</li>
+            </ol>
+          </div>
+          <div class="ai-prompt-block">
+            <pre>
+實作 Corrective RAG 機制（使用 LlamaIndex）：
+1. 安裝 llama-index, duckduckgo-search 或 tavily-python
+2. 建立一個 `corrective_retrieve(query: str, threshold: float = 0.7)` 函數：
+   - 使用 LlamaIndex 的 query_engine 執行檢索，獲取 Top-3 results
+   - 檢查 response.source_nodes 的相似度分數（node.score）
+   - 計算平均相似度分數
+   - 如果分數 < threshold，調用網路搜尋 API
+   - 將網路搜尋結果轉換為 LlamaIndex 的 Document 格式
+   - 返回合併後的結果（標註來源：本地/網路）
+3. 測試場景：問一個「本地文檔中沒有」的問題，觀察系統是否自動觸發網路搜尋。
+4. 加入繁體中文的網路搜尋結果處理（清理、去重）。
+5. 使用 LlamaIndex 的 ResponseSynthesizer 整合所有來源的內容
+
+提示：可以使用 LlamaIndex 的 SimpleWebPageReader 載入網路搜尋結果
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <!-- Step 3: GraphRAG -->
+        <section id="step3" class="lab-section">
+          <h2>🕸️ Step 3: GraphRAG - 從「局部」到「全局」</h2>
+          <p>
+            傳統 RAG 只能回答「局部問題」（單一文檔內的資訊），無法進行跨文檔推理。
+            GraphRAG 透過建立<strong>知識圖譜</strong>，讓模型能理解實體之間的關聯，回答「全局問題」。
+          </p>
+          <div class="visual-diagram">
+            <h4>📊 GraphRAG 的兩階段流程</h4>
+            <ol>
+              <li><strong>Entity Extraction:</strong> 從文檔中提取實體（人物、組織、概念）</li>
+              <li><strong>Relation Building:</strong> 建立實體之間的關聯（誰與誰合作、概念之間的層級）</li>
+              <li><strong>Graph Retrieval:</strong> 根據問題，從圖譜中檢索相關的實體與關聯</li>
+            </ol>
+          </div>
+          <div class="ai-prompt-block">
+            <pre>
+實作簡易的 GraphRAG 系統（使用 LlamaIndex）：
+1. 安裝 llama-index, llama-index-graph-stores-simple, networkx
+2. 建立一個 `build_knowledge_graph(documents: list) -> KnowledgeGraphIndex` 函數：
+   - 使用 LlamaIndex 的 KnowledgeGraphIndex 自動提取實體和關係
+   - 或使用 LLM 手動提取每個文檔中的實體（人物、組織、技術名詞）
+   - 使用 LLM 識別實體之間的關係（例如：「Transformer 是 Attention 的應用」）
+   - 建立 KnowledgeGraphIndex 或簡易的圖結構
+3. 建立 `graph_query_engine` 從知識圖譜中檢索：
+   - 使用 KnowledgeGraphIndex.as_query_engine()
+   - 或手動實作：從問題中提取關鍵實體 → 在圖譜中找出相關實體（1-2 度關聯）
+4. 測試：問一個需要「跨文檔推理」的問題（例如：「A 和 B 都提到了什麼技術？」）
+5. 加入中文實體識別：使用 jieba 或直接用 LLM 提取中文實體
+
+參考：LlamaIndex 的 KnowledgeGraphIndex 支援自動構建知識圖譜
+文檔：https://docs.llamaindex.ai/en/stable/examples/index_structs/knowledge_graph/
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <!-- Step 4: 中文整合 -->
+        <section id="step4" class="lab-section">
+          <h2>🌏 Step 4: 中文語境下的高階 RAG 整合</h2>
+          <p>
+            將前三種技術整合，並針對繁體中文進行優化。
+          </p>
+          <div class="lab-setup">
+            <h4>💡 中文特殊處理重點</h4>
+            <ul>
+              <li><strong>實體識別：</strong>使用 <code>jieba</code> 或 <code>ckiptagger</code> 進行中文分詞與實體提取</li>
+              <li><strong>自省 Prompt：</strong>設計繁體中文語境下的反思提示詞（例如：「這段內容是否真的回答了使用者的問題？」）</li>
+              <li><strong>關聯建立：</strong>處理中文的同義詞與縮寫（如「人工智慧」vs「AI」vs「機器智能」）</li>
+            </ul>
+          </div>
+          <div class="ai-prompt-block">
+            <pre>
+整合所有高階技術，打造「終極中文 RAG 系統」（使用 LlamaIndex）：
+1. 結合 Self-RAG 的自省機制、CRAG 的修正能力與 GraphRAG 的全局視角。
+2. 使用繁體中文技術文檔作為測試資料。
+3. 實作一個統一的 Pipeline（基於 LlamaIndex）：
+   - 問題輸入 → Self-RAG 判斷是否需要檢索
+   - 如果需要 → 執行向量檢索（VectorStoreIndex）+ GraphRAG 圖譜檢索（KnowledgeGraphIndex）
+   - 如果檢索品質不佳（檢查 node.score）→ CRAG 觸發網路搜尋
+   - 使用自訂的 node_postprocessor 過濾不相關結果
+   - 使用 ResponseSynthesizer 生成最終答案
+4. 加入詳細的日誌輸出，展示每個決策點的判斷過程。
+5. 測試複雜問題：「請比較 Transformer 與 BERT 的異同，並說明它們在中文 NLP 任務中的表現。」
+6. 中文特殊處理：
+   - 使用 jieba 進行實體識別
+   - 設計繁體中文的自省 Prompt
+   - 處理同義詞（「人工智慧」vs「AI」vs「機器智能」）
+
+提示：可以建立一個 CustomQueryEngine 類別，整合所有步驟
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <!-- 參考資源 -->
+        <section class="lab-section">
+          <h2>📚 延伸閱讀</h2>
+          <p>
+            本實驗參考了以下論文與技術：
+          </p>
+          <ul>
+            <li><strong>Self-RAG:</strong> Learning to Retrieve, Generate, and Critique through Self-Reflection (2023)</li>
+            <li><strong>CRAG:</strong> Corrective Retrieval Augmented Generation (2024)</li>
+            <li><strong>GraphRAG:</strong> From Local to Global: A Graph RAG Approach to Query-Focused Summarization (Microsoft, 2024)</li>
+          </ul>
+          <p>
+            詳細的論文解析請參考 <a href="../../../rag-tutorial/index.html" target="_blank">RAG 演進史教學</a>。
+          </p>
+        </section>
+
+        <div class="chapter-nav">
+          <a href="../index.html" class="nav-link">← 返回 Phase 4</a>
+        </div>
+      </div>
+    </div>
+    <script>
+      function copyPrompt(btn) {
+        const pre = btn.previousElementSibling;
+        navigator.clipboard.writeText(pre.innerText);
+        const originalText = btn.innerText;
+        btn.innerText = "✅ 已複製！";
+        setTimeout(() => btn.innerText = originalText, 2000);
+      }
+    </script>
+  </body>
+</html>

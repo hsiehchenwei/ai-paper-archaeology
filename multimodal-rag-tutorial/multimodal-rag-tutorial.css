@@ -1,0 +1,428 @@
+/* --- Multimodal RAG Tutorial Specific Styles --- */
+
+/* 基於 rag-tutorial.css，針對多模態 RAG 專題的樣式擴展 */
+
+/* --- CSS Variables (多模態主題配色) --- */
+:root {
+  /* Multimodal Theme Colors */
+  --mmrag-primary: #6366f1;         /* Indigo 500 - 多模態主題色 */
+  --mmrag-primary-light: #818cf8;  /* Indigo 400 */
+  --mmrag-primary-dark: #4f46e5;   /* Indigo 600 */
+  
+  --mmrag-visual: #ec4899;          /* Pink 500 - 視覺元素 */
+  --mmrag-text: #3b82f6;            /* Blue 500 - 文字元素 */
+  --mmrag-fusion: #8b5cf6;          /* Purple 500 - 融合概念 */
+  
+  /* 重用 RAG Tutorial 的變數 */
+  --rag-primary: #0f172a;
+  --rag-primary-light: #334155;
+  --rag-bg: #f8fafc;
+  --rag-bg-elevated: #ffffff;
+  --rag-text-primary: #1e293b;
+  --rag-text-secondary: #475569;
+  --rag-text-muted: #94a3b8;
+  --rag-border: #e2e8f0;
+  --rag-success: #059669;
+  --rag-danger: #dc2626;
+  --rag-brand: #2563eb;
+  
+  /* Spacing & Radius (重用) */
+  --rag-spacing-xs: 0.5rem;
+  --rag-spacing-sm: 1rem;
+  --rag-spacing-md: 1.5rem;
+  --rag-spacing-lg: 2rem;
+  --rag-spacing-xl: 3rem;
+  
+  --rag-radius-sm: 0.375rem;
+  --rag-radius-md: 0.5rem;
+  --rag-radius-lg: 0.75rem;
+  --rag-radius-xl: 1rem;
+  
+  /* Shadows (重用) */
+  --rag-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --rag-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --rag-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* --- Multimodal Hero Section --- */
+.mmrag-hero {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  color: white;
+  padding: 6rem 1rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--rag-spacing-xl);
+}
+
+.mmrag-hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.mmrag-hero-content {
+  position: relative;
+  z-index: 10;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.mmrag-hero-title {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 900;
+  margin-bottom: 1rem;
+  background: linear-gradient(to right, #ffffff, #e0e7ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.mmrag-hero-subtitle {
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+}
+
+.mmrag-hero-meta {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 2rem;
+}
+
+.mmrag-hero-button {
+  display: inline-flex;
+  align-items: center;
+  background: white;
+  color: var(--mmrag-primary);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--rag-radius-md);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.mmrag-hero-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  background: #f8fafc;
+}
+
+/* --- Multimodal Comparison Cards --- */
+.mmrag-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  margin: 40px 0;
+}
+
+.mmrag-comparison-card {
+  background: var(--rag-bg-elevated);
+  border: 2px solid var(--rag-border);
+  border-radius: var(--rag-radius-lg);
+  padding: 30px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.mmrag-comparison-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--mmrag-text), var(--mmrag-visual));
+}
+
+.mmrag-comparison-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--rag-shadow-lg);
+  border-color: var(--mmrag-primary);
+}
+
+.mmrag-comparison-card h3 {
+  color: var(--rag-text-primary);
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+}
+
+.mmrag-comparison-card p {
+  color: var(--rag-text-secondary);
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* --- Paper Navigation Cards --- */
+.mmrag-paper-card {
+  display: block;
+  text-decoration: none;
+  background: var(--rag-bg-elevated);
+  border: 2px solid var(--rag-border);
+  border-radius: var(--rag-radius-lg);
+  padding: 35px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--rag-shadow-sm);
+}
+
+.mmrag-paper-card::after {
+  content: '→';
+  position: absolute;
+  bottom: 25px;
+  right: 25px;
+  font-size: 1.8rem;
+  color: var(--rag-text-muted);
+  transition: all 0.3s;
+}
+
+.mmrag-paper-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--rag-shadow-lg);
+  border-color: var(--mmrag-primary);
+}
+
+.mmrag-paper-card:hover::after {
+  color: var(--mmrag-primary);
+  transform: translateX(5px);
+}
+
+.mmrag-paper-card h3 {
+  color: var(--rag-text-primary);
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.mmrag-paper-card .paper-meta {
+  color: var(--rag-text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+}
+
+.mmrag-paper-card .paper-desc {
+  color: var(--rag-text-secondary);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* RA-CM3 卡片特殊樣式 */
+.mmrag-paper-card.ra-cm3 {
+  border-left: 5px solid var(--mmrag-text);
+}
+
+.mmrag-paper-card.ra-cm3:hover {
+  border-left-color: var(--mmrag-primary);
+}
+
+/* REVEAL 卡片特殊樣式 */
+.mmrag-paper-card.reveal {
+  border-left: 5px solid var(--mmrag-visual);
+}
+
+.mmrag-paper-card.reveal:hover {
+  border-left-color: var(--mmrag-fusion);
+}
+
+/* --- Application Scenarios Grid --- */
+.mmrag-scenarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin: 40px 0;
+}
+
+.mmrag-scenario-card {
+  background: linear-gradient(135deg, var(--rag-bg-elevated) 0%, var(--rag-bg) 100%);
+  border: 1px solid var(--rag-border);
+  border-radius: var(--rag-radius-lg);
+  padding: 25px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.mmrag-scenario-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--rag-shadow-md);
+  border-color: var(--mmrag-primary);
+}
+
+.mmrag-scenario-icon {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.mmrag-scenario-card h4 {
+  color: var(--rag-text-primary);
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.mmrag-scenario-card p {
+  color: var(--rag-text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* --- Timeline for Multimodal RAG Evolution --- */
+.mmrag-timeline-container {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--rag-spacing-xl) 0;
+}
+
+.mmrag-timeline-line {
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
+  width: 3px;
+  background: linear-gradient(180deg, var(--mmrag-text), var(--mmrag-visual), var(--mmrag-fusion));
+  transform: translateX(-50%);
+}
+
+.mmrag-timeline-item {
+  display: flex;
+  position: relative;
+  margin-bottom: 60px;
+  width: 100%;
+}
+
+.mmrag-timeline-item.left {
+  justify-content: flex-end;
+  padding-right: 50%;
+  text-align: right;
+}
+
+.mmrag-timeline-item.left .mmrag-timeline-card {
+  margin-right: 40px;
+  text-align: right;
+}
+
+.mmrag-timeline-item.right {
+  justify-content: flex-start;
+  padding-left: 50%;
+  text-align: left;
+}
+
+.mmrag-timeline-item.right .mmrag-timeline-card {
+  margin-left: 40px;
+  text-align: left;
+}
+
+.mmrag-timeline-dot {
+  width: 18px;
+  height: 18px;
+  background: var(--rag-bg-elevated);
+  border: 4px solid var(--mmrag-primary);
+  border-radius: 50%;
+  position: absolute;
+  left: 50%;
+  top: 30px;
+  transform: translateX(-50%);
+  z-index: 2;
+  box-shadow: 0 0 0 4px var(--rag-bg);
+}
+
+.mmrag-timeline-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--rag-bg-elevated);
+  border: 1px solid var(--rag-border);
+  border-radius: var(--rag-radius-lg);
+  padding: 25px;
+  box-shadow: var(--rag-shadow-sm);
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.mmrag-timeline-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--rag-shadow-md);
+}
+
+.mmrag-timeline-card h3 {
+  margin-bottom: 5px;
+  font-size: 1.25rem;
+  color: var(--rag-primary);
+}
+
+.mmrag-timeline-meta {
+  font-size: 0.875rem;
+  color: var(--rag-text-muted);
+  margin-bottom: 15px;
+}
+
+/* --- Key Concept Highlight Boxes --- */
+.mmrag-key-concept {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  padding: 30px;
+  border-radius: var(--rag-radius-lg);
+  margin: 30px 0;
+  border-left: 5px solid var(--accent-color);
+}
+
+.mmrag-key-concept h4 {
+  color: var(--accent-color);
+  margin-top: 0;
+  font-size: 1.4rem;
+}
+
+.mmrag-key-concept p {
+  color: var(--rag-text-primary);
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+  .mmrag-timeline-line {
+    left: 20px;
+  }
+  
+  .mmrag-timeline-item.left,
+  .mmrag-timeline-item.right {
+    padding: 0;
+    padding-left: 50px;
+    justify-content: flex-start;
+    text-align: left;
+  }
+  
+  .mmrag-timeline-item.left .mmrag-timeline-card,
+  .mmrag-timeline-item.right .mmrag-timeline-card {
+    margin: 0;
+    margin-bottom: 20px;
+    max-width: 100%;
+    text-align: left;
+  }
+  
+  .mmrag-timeline-item.left .mmrag-timeline-card * {
+    text-align: left;
+  }
+
+  .mmrag-timeline-dot {
+    left: 20px;
+  }
+  
+  .mmrag-comparison-grid,
+  .mmrag-scenarios-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .mmrag-hero {
+    padding: 4rem 1rem;
+  }
+}

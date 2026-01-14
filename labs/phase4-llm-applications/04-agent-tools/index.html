@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>4.4 Agent & Tools - 賦予模型行動力 | AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles/global.css" />
+    <link rel="stylesheet" href="../../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1, h2, h3, h4, .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Step Navigation -->
+      <div class="lab-steps">
+        <a href="../index.html" class="lab-step">← Phase 4</a>
+        <a href="#step1" class="lab-step active">Step 1: 什麼是 Agent？</a>
+        <a href="#step2" class="lab-step">Step 2: 工具定義</a>
+        <a href="#step3" class="lab-step">Step 3: Function Calling</a>
+        <a href="#step4" class="lab-step">Step 4: 實作自主 Agent</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h1>🤖 4.4 Agent & Tools - 讓 AI 學會使用工具</h1>
+        <p class="lab-intro-text">
+          如果 RAG 是讓 AI 「讀書」，那麼 Agent 就是讓 AI 「動手做事」。
+          透過定義<strong>工具 (Tools)</strong>，AI 可以查詢即時股價、搜索網路、甚至是執行程式碼。
+          本實驗我們將學習如何使用 OpenAI 的 <strong>Function Calling</strong> 技術，打造一個能自主思考並解決複雜任務的 Agent。
+        </p>
+
+        <!-- Step 1: 什麼是 Agent？ -->
+        <section id="step1" class="lab-section">
+          <h2>🎓 Step 1: 理解 Agent 的思維模式</h2>
+          <div class="visual-diagram">
+            <h4>🧠 ReAct 模式 (Reasoning + Acting)</h4>
+            <pre>
+1. Thought: 思考下一步該做什麼。
+2. Action: 決定要使用哪個工具。
+3. Observation: 觀察工具返回的結果。
+4. (重複 1-3 直到完成任務)
+            </pre>
+          </div>
+        </section>
+
+        <!-- Step 2: 定義你的第一個工具 -->
+        <section id="step2" class="lab-section">
+          <h2>🛠️ Step 2: 定義工具與環境設定</h2>
+          <div class="ai-prompt-block">
+            <p>複製 Prompt 定義工具：</p>
+            <pre>
+請幫我撰寫一個 Python 腳本：
+1. 安裝 openai, python-dotenv
+2. 定義一個自定義 Python 函數 `get_weather(city: str)`，模擬回傳該城市的即時天氣。
+3. 定義一個 `calculate_tax(amount: float)`，根據台灣稅率計算金額。
+4. 示範如何將這些函數描述為 OpenAI 的工具 JSON 格式。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <!-- Step 3: Function Calling -->
+        <section id="step3" class="lab-section">
+          <h2>💻 Step 3: 實作 Function Calling 流程</h2>
+          <div class="ai-prompt-block">
+            <pre>
+實作 OpenAI Function Calling 完整流程：
+1. 向模型提問：「台北現在天氣如何？如果我想買一個 1000 元的東西，加上稅後是多少？」
+2. 讓模型判斷需要調用哪些工具。
+3. 在本地執行這些函數。
+4. 將執行結果回傳給模型，讓它總結出最終答案。
+5. 加入繁體中文的對話介面。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <!-- Step 4: 實作自主 Agent -->
+        <section id="step4" class="lab-section">
+          <h2>🚀 Step 4: 使用 LangChain 打造自主 Agent</h2>
+          <p>手動處理 Function Calling 很繁瑣。我們改用 LangChain 框架來自動化這個過程。</p>
+          <div class="ai-prompt-block">
+            <pre>
+使用 LangChain 實作一個「超級助手」：
+1. 安裝 langchain, langchain-openai, duckduckgo-search
+2. 設定 `Tavily` 或 `DuckDuckGo` 作為網路搜尋工具。
+3. 使用 `ChatOpenAI` 與 `create_openai_functions_agent` 建立 Agent。
+4. 測試任務：「查詢 2024 年最新的 AI 趨勢，並幫我寫一份簡短的繁體中文報告。」
+5. 展示 Agent 的執行軌跡 (Thought/Action/Observation)，讓讀者看清其思考過程。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <div class="chapter-nav">
+          <a href="../index.html" class="nav-link">← 返回 Phase 4</a>
+        </div>
+      </div>
+    </div>
+    <script>
+      function copyPrompt(btn) {
+        const pre = btn.previousElementSibling;
+        navigator.clipboard.writeText(pre.innerText);
+        const originalText = btn.innerText;
+        btn.innerText = "✅ 已複製！";
+        setTimeout(() => btn.innerText = originalText, 2000);
+      }
+    </script>
+  </body>
+</html>

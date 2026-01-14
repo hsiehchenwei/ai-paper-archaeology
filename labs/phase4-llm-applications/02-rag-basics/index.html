@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>4.2 RAG 基礎 - PDF 問答系統 | AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles/global.css" />
+    <link rel="stylesheet" href="../../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1, h2, h3, h4, .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Step Navigation -->
+      <div class="lab-steps">
+        <a href="../index.html" class="lab-step">← Phase 4</a>
+        <a href="#step1" class="lab-step active">Step 1: RAG 流程</a>
+        <a href="#step2" class="lab-step">Step 2: 中文分塊</a>
+        <a href="#step3" class="lab-step">Step 3: 實作 LlamaIndex</a>
+        <a href="#step4" class="lab-step">Step 4: 測試與優化</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h1>📄 4.2 RAG 基礎 - 打造你的個人知識庫</h1>
+        <p class="lab-intro-text">
+          檢索增強生成 (Retrieval-Augmented Generation, RAG) 是目前 LLM 最強大的應用。
+          它讓模型能讀取你的私有文件，並根據內容回答問題。
+          本實驗我們將使用 LlamaIndex 框架，實作一個能讀懂繁體中文 PDF 的問答系統！
+        </p>
+
+        <!-- Step 1: RAG 流程 -->
+        <section id="step1" class="lab-section">
+          <h2>🎓 Step 1: 理解 RAG 核心流程</h2>
+          <div class="visual-diagram">
+            <h4>🔄 RAG 的五個階段</h4>
+            <ol>
+              <li><strong>Load:</strong> 載入文檔 (PDF, TXT, Markdown)。</li>
+              <li><strong>Split:</strong> 將長文檔切成小塊 (Chunks)。</li>
+              <li><strong>Embed:</strong> 將小塊轉化為向量。</li>
+              <li><strong>Retrieve:</strong> 根據問題找出最相關的小塊。</li>
+              <li><strong>Generate:</strong> 將小塊內容交給 LLM 生成答案。</li>
+            </ol>
+          </div>
+        </section>
+
+        <!-- Step 2: 中文分塊策略 -->
+        <section id="step2" class="lab-section">
+          <h2>🌏 Step 2: 中文文檔特殊處理</h2>
+          <p>中文沒有空格，如果分塊不當（例如在詞彙中間切斷），會嚴重影響 RAG 的效果。</p>
+          
+          <div class="lab-setup" style="background: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b; margin-bottom: 20px;">
+            <h4>🔬 研究發現：Chunk Size 對 RAG 效能的影響</h4>
+            <p style="margin-bottom: 15px;">
+              根據最新研究論文（<strong>arxiv.org/abs/2505.21700</strong> - "Rethinking Chunk Size For Long-Document Retrieval"），
+              chunk size 的選擇會顯著影響 RAG 系統的效能：
+            </p>
+            <ul style="margin-bottom: 15px;">
+              <li><strong>短答案場景（如 FAQ）：</strong>64-128 tokens 最佳，SQuAD 資料集達到 64.1% recall@1</li>
+              <li><strong>描述性回答：</strong>512-1024 tokens 最佳，NewsQA 資料集達到 55.9% recall@1</li>
+              <li><strong>長篇複雜回答：</strong>1024+ tokens，NarrativeQA 從 4.2% 提升到 10.7%</li>
+            </ul>
+            <p style="padding: 12px; background: #fff; border-radius: 6px; font-size: 0.95rem;">
+              <strong>⚠️ 關鍵發現：</strong>Chunk 越大 token 越多，會帶來以下影響：<br>
+              ✅ <strong>優點：</strong>保留更多上下文、減少語義片段化、適合複雜問題<br>
+              ❌ <strong>缺點：</strong>引入更多雜訊、增加 LLM 處理時間與成本、降低檢索精準度
+            </p>
+            <p style="margin-top: 10px; font-weight: 600; color: #d97706;">
+              最佳策略：根據你的資料類型與問題複雜度選擇 chunk size，而非一刀切！
+            </p>
+          </div>
+          
+          <div class="lab-setup">
+            <h4>💡 中文分塊建議（基於研究發現）</h4>
+            <ul>
+              <li><strong>Chunk Size:</strong> 
+                <ul style="margin-top: 8px;">
+                  <li>短問答（FAQ）：200-400 字（約 300-600 tokens）</li>
+                  <li>技術文檔：500-800 字（約 750-1200 tokens）</li>
+                  <li>長篇論文：800-1200 字（約 1200-1800 tokens）</li>
+                </ul>
+              </li>
+              <li><strong>Chunk Overlap:</strong> 建議保留 10-20% 的重疊，確保語義連貫（研究顯示 overlap 能提升 5-10% 的檢索準確率）。</li>
+              <li><strong>標點符號：</strong> 盡量在「。」或「\n」處切割，避免切斷語義單元。</li>
+            </ul>
+            <p style="margin-top: 15px; padding: 12px; background: #ecfdf5; border-radius: 6px; border-left: 3px solid #10b981; font-size: 0.95rem;">
+              <strong>📚 延伸閱讀：</strong>
+              <ul style="margin-top: 8px;">
+                <li><a href="https://arxiv.org/abs/2505.21700" target="_blank">Rethinking Chunk Size For Long-Document Retrieval (2024)</a></li>
+                <li><a href="https://arxiv.org/abs/2410.12788" target="_blank">Meta-Chunking: Learning Efficient Text Segmentation (2024)</a></li>
+                <li><a href="https://developer.nvidia.com/blog/finding-the-best-chunking-strategy-for-accurate-ai-responses/" target="_blank">NVIDIA: Finding the Best Chunking Strategy</a></li>
+              </ul>
+            </p>
+          </div>
+          <div class="ai-prompt-block">
+            <p>複製 Prompt 建立環境：</p>
+            <pre>
+請幫我建立一個 RAG 實驗環境：
+1. 安裝 llama-index, pypdf, python-dotenv
+2. 建立一個 `data` 資料夾，並下載一份繁體中文 PDF (例如：AI 論文或技術文章)。
+3. 撰寫一個腳本，示範如何載入 PDF 並使用 `SentenceSplitter` 進行分塊。
+4. 加入代碼列印出前三個分塊的內容，檢查是否有中途切斷詞彙的情況。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <!-- Step 3: 實作 LlamaIndex -->
+        <section id="step3" class="lab-section">
+          <h2>💻 Step 3: 實作 LlamaIndex 問答系統</h2>
+          
+          <div class="lab-setup" style="background: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6; margin-bottom: 20px;">
+            <h4>🤔 什麼是 LlamaIndex？</h4>
+            <p style="margin-bottom: 15px;">
+              <strong>LlamaIndex</strong>（前身為 GPT Index）是一個專為 LLM 應用設計的資料框架，特別擅長將外部資料連接到大型語言模型。
+              它提供了一套簡潔的 API，讓你能快速建立 RAG（Retrieval-Augmented Generation）系統，而不需要從頭處理複雜的向量化、檢索和提示工程。
+            </p>
+            
+            <div style="padding: 15px; background: #fff; border-radius: 6px; margin-bottom: 15px;">
+              <strong>核心功能：</strong>
+              <ul style="margin-top: 10px;">
+                <li><strong>資料連接器（Data Connectors）：</strong>支援 100+ 種資料來源（PDF、網頁、資料庫、API 等）</li>
+                <li><strong>資料索引（Data Indexes）：</strong>自動將文檔轉換為向量並建立索引</li>
+                <li><strong>查詢引擎（Query Engines）：</strong>智能檢索相關內容並生成答案</li>
+                <li><strong>對話引擎（Chat Engines）：</strong>支援多輪對話，自動管理對話歷史</li>
+                <li><strong>Agent 工具：</strong>可與外部工具整合，實現複雜的決策流程</li>
+              </ul>
+            </div>
+            
+            <div style="padding: 15px; background: #ecfdf5; border-radius: 6px; margin-bottom: 15px; border-left: 3px solid #10b981;">
+              <strong>✅ 授權與商業使用</strong>
+              <ul style="margin-top: 10px;">
+                <li><strong>授權：</strong><a href="https://github.com/run-llama/llama_index/blob/main/LICENSE" target="_blank">MIT License</a> - 完全開源，可免費使用、修改和商業化</li>
+                <li><strong>產品化：</strong>✅ 可直接用於生產環境，無授權費用或使用限制</li>
+                <li><strong>注意事項：</strong>MIT License 不提供擔保，使用者需自行確保符合業務需求和法規</li>
+                <li><strong>生態系統：</strong>2024 年已成熟，許多企業用於生產環境（知識庫、文檔 Q&A、企業搜尋）</li>
+              </ul>
+            </div>
+            
+            <div style="padding: 15px; background: #fef3c7; border-radius: 6px; margin-bottom: 15px; border-left: 3px solid #f59e0b;">
+              <strong>🤔 如果我只要 Retrieval，不需要 Generation 呢？</strong>
+              <p style="margin-top: 10px; margin-bottom: 10px;">
+                這是個很好的問題！LlamaIndex 主要為<strong>完整的 RAG</strong>（Retrieval + Generation）設計，
+                但<strong>也支援純 retrieval</strong>。以下是不同場景的建議：
+              </p>
+              
+              <table style="width: 100%; border-collapse: collapse; background: #fff; font-size: 0.9rem; margin-top: 10px; margin-bottom: 15px;">
+                <thead>
+                  <tr style="background: #f3f4f6;">
+                    <th style="padding: 10px; text-align: left; border: 1px solid #e5e7eb;">需求</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #e5e7eb;">建議方案</th>
+                    <th style="padding: 10px; text-align: left; border: 1px solid #e5e7eb;">原因</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="padding: 10px; border: 1px solid #e5e7eb;"><strong>純粹相似度搜尋</strong><br>（只要找相似文檔）</td>
+                    <td style="padding: 10px; border: 1px solid #e5e7eb;">✅ 直接用向量資料庫<br>（Qdrant/Chroma Client）</td>
+                    <td style="padding: 10px; border: 1px solid #e5e7eb;">• 更輕量<br>• 更直接<br>• 延遲更低</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px; border: 1px solid #e5e7eb;"><strong>Retrieval + 自己的處理邏輯</strong><br>（檢索後自己處理結果）</td>
+                    <td style="padding: 10px; border: 1px solid #e5e7eb;">⚖️ 兩者皆可<br>LlamaIndex 或 直接用資料庫</td>
+                    <td style="padding: 10px; border: 1px solid #e5e7eb;">• LlamaIndex: 提供 node_postprocessors<br>• 直接用: 更靈活但需自己處理</td>
+                  </tr>
+                  <tr style="background: #ecfdf5;">
+                    <td style="padding: 10px; border: 1px solid #e5e7eb;"><strong>Retrieval + 可能未來要 RAG</strong><br>（現在只要檢索，未來可能加 LLM）</td>
+                    <td style="padding: 10px; border: 1px solid #e5e7eb;">✅ 推薦 LlamaIndex</td>
+                    <td style="padding: 10px; border: 1px solid #e5e7eb;">• 架構擴展性好<br>• 加 Generation 只需 1 行<br>• 避免重構</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px; border: 1px solid #e5e7eb;"><strong>完整 RAG 系統</strong><br>（Retrieval + LLM 回答）</td>
+                    <td style="padding: 10px; border: 1px solid #e5e7eb;">✅ 強烈推薦 LlamaIndex</td>
+                    <td style="padding: 10px; border: 1px solid #e5e7eb;">• 專為此設計<br>• 簡化開發<br>• 最佳實踐內建</td>
+                  </tr>
+                </tbody>
+              </table>
+              
+              <p style="padding: 12px; background: #fff; border-radius: 6px; font-size: 0.95rem;">
+                <strong>💡 實際範例：</strong><br>
+                <strong>純 Retrieval 用 LlamaIndex：</strong><br>
+                <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px;">
+                retriever = index.as_retriever(similarity_top_k=5)<br>
+                nodes = retriever.retrieve("查詢文字")<br>
+                # nodes 包含檢索結果，可自行處理，無需呼叫 LLM
+                </code>
+                <br><br>
+                <strong>純 Retrieval 用 Qdrant Client：</strong><br>
+                <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px;">
+                results = client.search(collection_name="docs", query_vector=vec, limit=5)<br>
+                # 直接獲得結果，程式碼更短但需自己處理文檔載入等
+                </code>
+              </p>
+            </div>
+            
+            <div style="padding: 15px; background: #fff; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e5e7eb;">
+              <strong>🏗️ 與其他工具比較</strong>
+              <ul style="margin-top: 10px;">
+                <li><strong>LlamaIndex vs LangChain：</strong>
+                  <ul style="margin-top: 5px; margin-left: 20px;">
+                    <li>LlamaIndex：專注於<strong>資料索引和檢索</strong>，適合文檔 Q&A、知識庫</li>
+                    <li>LangChain：專注於<strong>複雜工作流程</strong>，適合 Agent、多步驟推理</li>
+                    <li>兩者可結合使用！</li>
+                  </ul>
+                </li>
+                <li style="margin-top: 10px;"><strong>LlamaIndex vs 直接用 Qdrant/Chroma：</strong>
+                  <ul style="margin-top: 5px; margin-left: 20px;">
+                    <li>LlamaIndex 提供更高層的抽象，5-10 行程式碼即可完成 RAG 系統</li>
+                    <li>直接用向量資料庫需要自己處理分塊、embedding、檢索邏輯</li>
+                    <li>LlamaIndex 適合快速原型，直接操作適合需要完全控制時</li>
+                    <li><strong>純 Retrieval：</strong>直接用向量資料庫更輕量</li>
+                    <li><strong>Retrieval + Generation：</strong>LlamaIndex 更簡單</li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+            
+            <p style="padding: 12px; background: #ecfdf5; border-radius: 6px; border-left: 3px solid #10b981; font-size: 0.95rem;">
+              <strong>💡 為什麼本教學選擇 LlamaIndex？</strong><br>
+              相較於從零開始用 LangChain 或直接操作向量資料庫，LlamaIndex 提供了<strong>更高層次的抽象</strong>，
+              讓你能用 5-10 行程式碼就建立一個可運作的 RAG 系統。它特別適合快速原型開發和概念驗證。
+              <strong>且完全開源免費，可用於商業產品！</strong><br><br>
+              <strong>如果你只需要 retrieval：</strong>本教學的基礎知識仍然適用，只是最後不呼叫 <code>query_engine.query()</code>，
+              而是用 <code>retriever.retrieve()</code> 即可。架構保持彈性，未來隨時可升級為完整 RAG。
+            </p>
+            
+            <p style="margin-top: 15px; font-size: 0.9rem; color: #6b7280;">
+              <strong>🔗 官方資源：</strong><br>
+              • 官網：<a href="https://www.llamaindex.ai/" target="_blank">llamaindex.ai</a><br>
+              • GitHub：<a href="https://github.com/run-llama/llama_index" target="_blank">github.com/run-llama/llama_index</a>（MIT License）<br>
+              • 文檔：<a href="https://docs.llamaindex.ai/" target="_blank">docs.llamaindex.ai</a><br>
+              • Retriever 文檔：<a href="https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/" target="_blank">Retriever Guide</a><br>
+              • Qdrant 整合：<a href="https://docs.llamaindex.ai/en/stable/examples/vector_stores/QdrantIndexDemo/" target="_blank">Qdrant Vector Store</a>
+            </p>
+          </div>
+          
+          <div class="ai-prompt-block">
+            <pre>
+使用 LlamaIndex 建立一個繁體中文 QA 系統：
+1. 讀取 `data` 目錄下的所有 PDF。
+2. 使用 OpenAI `text-embedding-3-small` 建立向量索引。
+3. 設定系統提示 (System Prompt)，要求模型使用「繁體中文」回答，並標註來源頁碼。
+4. 實作一個簡易的對話循環，讓我能不斷提問。
+5. 加入異常處理，如果 PDF 無法讀取或 API 超時時能顯示提示。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <!-- Step 4: 測試與優化 -->
+        <section id="step4" class="lab-section">
+          <h2>🎯 Step 4: 測試與優化</h2>
+          <p>試著問一些 PDF 中沒有提到的問題，觀察模型是否會「胡說八道」 (Hallucination)。</p>
+          <div class="ai-prompt-block">
+            <p>優化提示：</p>
+            <pre>
+修改腳本，加入以下優化：
+1. 設定 `similarity_top_k=5`，獲取更多參考資訊。
+2. 加入對回應的驗證：如果檢索到的內容不足以回答問題，要求模型回答「我不知道，文件中沒有提到」。
+3. 視覺化：使用 Rich 庫美化終端輸出，區分「引用內容」與「AI 回答」。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <div class="chapter-nav">
+          <a href="../index.html" class="nav-link">← 返回 Phase 4</a>
+        </div>
+      </div>
+    </div>
+    <script>
+      function copyPrompt(btn) {
+        const pre = btn.previousElementSibling;
+        navigator.clipboard.writeText(pre.innerText);
+        const originalText = btn.innerText;
+        btn.innerText = "✅ 已複製！";
+        setTimeout(() => btn.innerText = originalText, 2000);
+      }
+    </script>
+  </body>
+</html>

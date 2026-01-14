@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3.3 LoRA 微調 - 高效微調大模型 | AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles/global.css" />
+    <link rel="stylesheet" href="../../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+    <script>
+      function copyPrompt(button) {
+        const pre = button.previousElementSibling;
+        const text = pre.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          button.textContent = "✅ 已複製";
+          setTimeout(() => {
+            button.textContent = "📋 複製 Prompt";
+          }, 2000);
+        });
+      }
+      function copyTerminal(button) {
+        const code = button.previousElementSibling;
+        const text = code.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          button.textContent = "✅ 已複製";
+          setTimeout(() => {
+            button.textContent = "📋 複製指令";
+          }, 2000);
+        });
+      }
+      function toggleCodeBlock(header) {
+        const block = header.closest(".lab-code-block");
+        block.classList.toggle("collapsed");
+        const btn = header.querySelector(".toggle-btn");
+        btn.textContent = block.classList.contains("collapsed") ? "展開" : "收起";
+      }
+      function copyCode(button) {
+        const codeBlock = button.closest(".lab-code-block").querySelector("code");
+        const text = codeBlock.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          button.textContent = "✅ 已複製";
+          setTimeout(() => {
+            button.textContent = "複製";
+          }, 2000);
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Step Navigation -->
+      <div class="lab-steps">
+        <a href="../index.html" class="lab-step">← Phase 3</a>
+        <a href="#step1" class="lab-step active">Step 1: 理解 LoRA</a>
+        <a href="#step2" class="lab-step">Step 2: 環境設定</a>
+        <a href="#step3" class="lab-step">Step 3: 載入預訓練模型</a>
+        <a href="#step4" class="lab-step">Step 4: 實作 LoRA</a>
+        <a href="#step5" class="lab-step">Step 5: 微調訓練</a>
+        <a href="#step6" class="lab-step">Step 6: 評估與生成</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h1>🔧 3.3 LoRA 微調 - 高效微調大模型</h1>
+        <p class="lab-intro-text">
+          學習如何用 LoRA（Low-Rank Adaptation）高效微調大模型！
+          不需要訓練所有參數，只需要訓練一小部分參數，就能讓模型適應新任務。
+          這是現代 LLM 應用的核心技能，讓你在 Mac 本機就能微調 GPT-2！🚀
+        </p>
+
+        <!-- Step 1: 理解 LoRA -->
+        <section id="step1" class="lab-section">
+          <h2>🎓 Step 1: 理解 LoRA 原理</h2>
+          
+          <p>
+            LoRA（Low-Rank Adaptation）是一種<strong>參數高效微調</strong>技術。
+            它不需要訓練模型的所有參數，只需要訓練一小部分低秩矩陣，就能達到接近全量微調的效果。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 LoRA 的核心思想</h4>
+            <pre>
+傳統全量微調：
+  原始權重 W (d × d)
+  ↓
+  微調後權重 W' (d × d)
+  ↓
+  需要更新 d² 個參數
+
+LoRA 微調：
+  原始權重 W (d × d) - 凍結，不更新
+  ↓
+  新增低秩矩陣：
+    A (d × r) × B (r × d) = ΔW (d × d)
+  ↓
+  最終權重：W + ΔW
+  ↓
+  只需要更新 2×d×r 個參數（r << d）
+
+例如：d=768, r=8
+  全量微調：768² = 589,824 個參數
+  LoRA：2×768×8 = 12,288 個參數（減少 98%！）
+            </pre>
+          </div>
+
+          <h3>🤔 為什麼 LoRA 有效？</h3>
+          <p>
+            LoRA 基於一個重要假設：模型適應新任務時，權重的變化是<strong>低秩</strong>的。
+            這意味著我們可以用兩個小矩陣（A 和 B）來近似權重的變化（ΔW）。
+          </p>
+          <ul class="lab-list-spacing">
+            <li>
+              <strong>參數效率</strong>：
+              只需要訓練很少的參數（通常 < 1%），大幅減少記憶體和計算需求
+            </li>
+            <li>
+              <strong>模組化</strong>：
+              可以為不同任務訓練不同的 LoRA 適配器，輕鬆切換
+            </li>
+            <li>
+              <strong>效果接近全量微調</strong>：
+              在許多任務上，LoRA 的效果接近全量微調，但成本低得多
+            </li>
+          </ul>
+
+          <div class="visual-diagram lab-spacing-top">
+            <h4>🎯 LoRA 的數學原理</h4>
+            <pre>
+原始前向傳播：
+  h = W × x
+
+LoRA 前向傳播：
+  h = W × x + (B × A) × x
+    = W × x + ΔW × x
+
+其中：
+  - W：原始權重（凍結）
+  - A：低秩矩陣 A (d × r)，可訓練
+  - B：低秩矩陣 B (r × d)，可訓練
+  - ΔW = B × A：權重變化（低秩近似）
+
+訓練時：
+  - 只更新 A 和 B 的參數
+  - W 保持凍結
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              想更深入了解？把這段 prompt 給 Cursor / Claude Code：
+            </p>
+            <pre>
+請用簡單易懂的方式解釋：
+1. 什麼是 LoRA（Low-Rank Adaptation）？為什麼需要它？
+2. LoRA 如何減少需要訓練的參數數量？
+3. 什麼是低秩矩陣？為什麼權重變化可以用低秩矩陣近似？
+4. LoRA 和全量微調有什麼不同？各自的優缺點是什麼？
+5. 什麼時候應該用 LoRA，什麼時候應該用全量微調？
+
+請用具體例子和數字，並解釋每一步的直觀意義。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+        </section>
+
+        <!-- Step 2: 環境設定 -->
+        <section id="step2" class="lab-section">
+          <h2>⚙️ Step 2: 環境設定（MLX）</h2>
+          
+          <p>
+            我們使用 <strong>MLX</strong>（Apple Machine Learning）來實作 LoRA 微調。
+            MLX 專為 Apple Silicon 優化，可以在 Mac 本機高效運行大模型！
+          </p>
+
+          <div class="terminal-command">
+            <code># 建立專案目錄（必須手動執行）
+mkdir -p lora-finetuning && cd lora-finetuning</code>
+            <button class="copy-terminal-btn" onclick="copyTerminal(this)">
+              📋 複製指令
+            </button>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              讓 AI 幫你建立虛擬環境、專案結構和檔案：
+            </p>
+            <pre>
+請幫我建立一個 Python 專案，用於 LoRA 微調 GPT-2：
+
+⚠️ 重要：請使用 Python 虛擬環境（venv）來管理專案依賴！
+
+請執行以下步驟：
+1. 建立 Python 虛擬環境：python3 -m venv venv
+2. 啟動虛擬環境：source venv/bin/activate (macOS/Linux) 或 venv\Scripts\activate (Windows)
+3. 確認虛擬環境已啟動（終端機提示符會顯示 (venv)）
+4. 安裝依賴套件：
+   pip install mlx mlx-lm transformers numpy matplotlib tqdm
+
+然後建立以下檔案和目錄結構：
+- lora.py (LoRA 層實作)
+- model.py (載入和包裝 GPT-2 模型)
+- train.py (微調訓練腳本)
+- generate.py (生成腳本)
+- data.py (資料處理)
+- config.py (配置檔案)
+- requirements.txt (包含：mlx, mlx-lm, transformers, numpy, matplotlib, tqdm)
+- README.md (專案簡介，包含：專案目的、如何建立虛擬環境、如何執行)
+
+請建立這些檔案，並在 README.md 中寫上完整的專案說明和虛擬環境使用指南。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup">
+            <h4>💡 提示</h4>
+            <ul>
+              <li>
+                <strong>重要：請使用虛擬環境！</strong>
+                MLX 和 transformers 都是大套件，使用虛擬環境可以避免套件衝突。
+              </li>
+              <li>
+                <strong>MLX 優勢</strong>：
+                - 專為 Apple Silicon 優化
+                - 可以在 Mac 本機高效運行大模型
+                - 支援 LoRA 微調
+              </li>
+              <li>
+                <strong>系統需求</strong>：
+                - macOS 12.0+（Apple Silicon）
+                - Python 3.8+
+                - 建議 16GB+ RAM
+              </li>
+              <li>
+                <strong>模型選擇</strong>：
+                我們使用 GPT-2 small（124M 參數），適合本機訓練
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 3: 載入預訓練模型 -->
+        <section id="step3" class="lab-section">
+          <h2>📥 Step 3: 載入預訓練 GPT-2 模型</h2>
+          
+          <p>
+            我們使用 Hugging Face 的 transformers 庫來載入預訓練的 GPT-2 模型。
+            然後我們會用 LoRA 來微調它，讓它適應新任務。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 模型載入流程</h4>
+            <pre>
+1. 從 Hugging Face 載入 GPT-2 模型和 tokenizer
+2. 凍結模型的所有參數（不更新）
+3. 在特定層（如 Attention 層）加入 LoRA 適配器
+4. 只訓練 LoRA 參數，原始權重保持凍結
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>載入模型 Prompt</strong>
+            </p>
+            <pre>
+請幫我建立模型載入模組 `model.py`：
+
+功能：
+1. 使用 transformers 載入 GPT-2 small 模型和 tokenizer：
+   - 模型：gpt2（Hugging Face）
+   - Tokenizer：GPT2Tokenizer
+2. 凍結模型的所有參數：
+   - 設定所有參數的 requires_grad = False
+3. 提供模型和 tokenizer 的存取介面
+
+要求：
+- 使用 transformers 的 AutoModelForCausalLM 和 AutoTokenizer
+- 加上詳細註解
+- 提供載入和測試範例
+
+請建立 model.py 檔案，包含模型載入功能。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>💡 模型資訊</h4>
+            <ul>
+              <li>
+                <strong>GPT-2 small</strong>：
+                - 參數數量：124M
+                - 層數：12 層
+                - 隱藏維度：768
+                - 注意力頭數：12
+              </li>
+              <li>
+                <strong>下載時間</strong>：
+                首次載入會從 Hugging Face 下載模型（約 500MB），需要一些時間
+              </li>
+              <li>
+                <strong>記憶體需求</strong>：
+                載入模型約需 2-3GB RAM
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 4: 實作 LoRA -->
+        <section id="step4" class="lab-section">
+          <h2>🏗️ Step 4: 實作 LoRA 層</h2>
+          
+          <p>
+            現在我們要實作 LoRA 層。LoRA 層會包裝原始的線性層，
+            在保持原始權重凍結的同時，加入可訓練的低秩適配器。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 LoRA 層結構</h4>
+            <pre>
+原始線性層：
+  h = W × x
+
+LoRA 包裝後：
+  h = W × x + (B × A) × x
+    = W × x + ΔW × x
+
+LoRA 層包含：
+  - W：原始權重（凍結）
+  - A：低秩矩陣 A (d × r)，可訓練，初始化為零
+  - B：低秩矩陣 B (r × d)，可訓練，隨機初始化
+  - r：秩（rank），通常為 4、8、16
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>實作 LoRA 層 Prompt</strong>
+            </p>
+            <pre>
+請幫我建立 LoRA 層實作 `lora.py`：
+
+功能：
+1. 實作 LoRALinear 類別：
+   - 包裝原始的 nn.Linear 層
+   - 加入低秩矩陣 A 和 B
+   - 前向傳播：output = W × x + (B × A) × x
+2. 實作 apply_lora() 函數：
+   - 將模型中的特定層（如 Attention 的 q_proj、v_proj）替換為 LoRA 層
+   - 保持原始權重凍結
+   - 只訓練 LoRA 參數
+
+LoRA 參數：
+- rank (r)：低秩矩陣的秩，建議 4、8、16
+- alpha：縮放因子，通常設為 rank
+- dropout：可選的 dropout 率
+
+要求：
+- 使用 PyTorch 的 nn.Module
+- A 矩陣初始化為零（這樣初始時 ΔW = 0）
+- B 矩陣隨機初始化
+- 加上詳細註解
+- 提供使用範例
+
+請建立 lora.py 檔案，包含完整的 LoRA 實作。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>💡 LoRA 參數選擇</h4>
+            <ul>
+              <li>
+                <strong>rank (r)</strong>：
+                - r=4：最少參數，適合簡單任務
+                - r=8：平衡（推薦）
+                - r=16：更多參數，適合複雜任務
+              </li>
+              <li>
+                <strong>alpha</strong>：
+                通常設為 rank，控制 LoRA 的影響強度
+              </li>
+              <li>
+                <strong>應用層</strong>：
+                通常只對 Attention 層（q_proj、k_proj、v_proj、o_proj）應用 LoRA
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 5: 微調訓練 -->
+        <section id="step5" class="lab-section">
+          <h2>🚀 Step 5: 實作微調訓練</h2>
+          
+          <p>
+            現在我們要實作微調訓練循環。與 3.1 的訓練不同，
+            這裡我們只訓練 LoRA 參數，原始模型權重保持凍結。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 微調流程</h4>
+            <pre>
+1. 載入預訓練模型和資料
+2. 應用 LoRA 到特定層
+3. 設定優化器（只優化 LoRA 參數）
+4. 訓練迴圈：
+   for epoch in range(num_epochs):
+     for batch in dataloader:
+       # 前向傳播（使用原始權重 + LoRA）
+       logits = model(input_ids)
+       loss = criterion(logits, targets)
+       
+       # 反向傳播（只更新 LoRA 參數）
+       optimizer.zero_grad()
+       loss.backward()
+       optimizer.step()
+5. 保存 LoRA 適配器（只需要保存 A 和 B 矩陣）
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>微調訓練 Prompt</strong>
+            </p>
+            <pre>
+請幫我建立微調訓練腳本 `train.py`：
+
+功能：
+1. 載入預訓練模型和資料
+2. 應用 LoRA 到模型（使用 lora.py 的 apply_lora()）
+3. 設定優化器：
+   - 只優化 LoRA 參數（requires_grad=True 的參數）
+   - 使用 Adam 優化器
+   - 學習率建議：1e-4 到 5e-4
+4. 訓練迴圈：
+   - 對每個 epoch
+   - 對每個 batch
+   - 前向傳播、計算損失、反向傳播、更新參數
+   - 定期打印損失和進度
+5. 保存 LoRA 適配器：
+   - 只保存 LoRA 參數（A 和 B 矩陣）
+   - 檔案大小會很小（只有幾 MB）
+
+超參數建議：
+- batch_size: 4 或 8（取決於記憶體）
+- learning_rate: 1e-4 或 3e-4
+- num_epochs: 3-5（LoRA 通常收斂很快）
+- rank: 8
+- alpha: 8
+
+要求：
+- 使用 tqdm 顯示進度條
+- 定期打印損失
+- 保存 LoRA 適配器
+- 加上詳細註解
+
+請建立 train.py 檔案，包含完整的微調訓練流程。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>💡 微調提示</h4>
+            <ul>
+              <li>
+                <strong>訓練時間</strong>：
+                LoRA 微調通常很快（3-5 個 epochs），在 Mac 上約需 10-30 分鐘
+              </li>
+              <li>
+                <strong>記憶體需求</strong>：
+                比全量微調少得多，通常只需要 4-8GB RAM
+              </li>
+              <li>
+                <strong>學習率</strong>：
+                LoRA 通常需要較小的學習率（1e-4 到 5e-4）
+              </li>
+              <li>
+                <strong>檢查點</strong>：
+                LoRA 適配器很小，可以輕鬆保存多個檢查點
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 6: 評估與生成 -->
+        <section id="step6" class="lab-section">
+          <h2>✨ Step 6: 評估與生成</h2>
+          
+          <p>
+            訓練完成後，讓我們評估微調後的模型，並用它生成文字！
+            你會看到模型如何適應新任務，生成特定風格的文字。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 評估流程</h4>
+            <pre>
+1. 載入原始模型和 LoRA 適配器
+2. 合併 LoRA 權重到模型（或動態應用）
+3. 在測試集上評估（計算 perplexity 或其他指標）
+4. 生成文字，觀察微調效果
+5. 比較微調前後的生成結果
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>評估與生成 Prompt</strong>
+            </p>
+            <pre>
+請幫我建立評估和生成腳本 `evaluate.py` 和 `generate.py`：
+
+evaluate.py 功能：
+1. 載入原始模型和 LoRA 適配器
+2. 在測試集上評估：
+   - 計算 perplexity（困惑度）
+   - 計算損失
+3. 比較微調前後的性能
+
+generate.py 功能：
+1. 載入原始模型和 LoRA 適配器
+2. 生成文字：
+   - 使用不同的 prompt
+   - 使用不同的生成策略（Top-k、Top-p）
+   - 比較微調前後的生成結果
+3. 展示微調效果
+
+要求：
+- 加上詳細註解
+- 提供使用範例
+- 可選：視覺化比較結果
+
+請建立 evaluate.py 和 generate.py 檔案。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>💡 評估提示</h4>
+            <ul>
+              <li>
+                <strong>Perplexity</strong>：
+                衡量模型對測試資料的預測能力，越低越好
+              </li>
+              <li>
+                <strong>生成對比</strong>：
+                對同一個 prompt，比較微調前後的生成結果，觀察差異
+              </li>
+              <li>
+                <strong>任務適應</strong>：
+                如果微調是針對特定任務（如情感分析、特定領域），
+                可以設計專門的評估指標
+              </li>
+            </ul>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>🎉 恭喜！</h4>
+            <p>
+              你已經完成了 Phase 3 的所有實驗！你現在：
+            </p>
+            <ul>
+              <li>✅ 理解了 LoRA 的原理和優勢</li>
+              <li>✅ 實作了 LoRA 層和微調流程</li>
+              <li>✅ 學會了如何高效微調大模型</li>
+              <li>✅ 掌握了參數高效微調的核心技能</li>
+            </ul>
+            <p>
+              Phase 3 完整學習路徑：
+            </p>
+            <ul>
+              <li>✅ <strong>3.1 nanoGPT</strong>：從零訓練 GPT</li>
+              <li>✅ <strong>3.2 文本生成</strong>：掌握生成策略</li>
+              <li>✅ <strong>3.3 LoRA 微調</strong>：高效微調大模型</li>
+            </ul>
+            <p>
+              接下來，你可以：
+            </p>
+            <ul>
+              <li>🔜 進入 <strong>Phase 4: LLM 應用開發</strong>：學習 RAG、Agent 等應用</li>
+              <li>🔜 嘗試微調其他模型（如 GPT-2 medium、其他開源模型）</li>
+              <li>🔜 探索其他參數高效微調方法（如 Adapter、Prompt Tuning）</li>
+            </ul>
+          </div>
+        </section>
+
+        <div class="chapter-nav">
+          <a href="../index.html" class="nav-link">← 返回 Phase 3</a>
+          <a href="../02-text-generation/index.html" class="nav-link">← 上一實驗：3.2 文本生成</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

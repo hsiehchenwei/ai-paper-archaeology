@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>4.1 向量資料庫 - Embedding 儲存與搜尋 | AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles/global.css" />
+    <link rel="stylesheet" href="../../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1, h2, h3, h4, .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Step Navigation -->
+      <div class="lab-steps">
+        <a href="../index.html" class="lab-step">← Phase 4</a>
+        <a href="#step1" class="lab-step active">Step 1: 理解概念</a>
+        <a href="#step2" class="lab-step">Step 2: 環境設定</a>
+        <a href="#step3" class="lab-step">Step 3: 實作 Chroma</a>
+        <a href="#step4" class="lab-step">Step 4: 中文語境處理</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h1>🗄️ 4.1 向量資料庫 - 讓 AI 擁有長期記憶</h1>
+        <p class="lab-intro-text">
+          如果說 LLM 是大腦，向量資料庫就像是它的「筆記本」。
+          它能儲存大量的 Embedding 向量，並透過「相似度搜尋」快速找出相關內容。
+          在這個實驗中，我們將學習如何建立、儲存並搜尋你的第一個向量資料庫！
+        </p>
+
+        <!-- Step 1: 理解概念 -->
+        <section id="step1" class="lab-section">
+          <h2>🎓 Step 1: 什麼是向量資料庫？</h2>
+          <div class="visual-diagram">
+            <h4>📊 視覺化：相似度搜尋原理</h4>
+            <pre>
+傳統資料庫 (SQL): 搜尋 "貓" → 找包含 "貓" 字眼的資料。
+向量資料庫: 搜尋 "貓" → 找在數學空間中，離 "貓" 的向量最近的資料。
+(例如: "小貓"、"貓咪"、甚至是 "喵星人" 雖然字面不同，但向量很近！)
+            </pre>
+          </div>
+          <h3>常見工具比較</h3>
+          <ul>
+            <li><strong>Chroma:</strong> 開源、極簡、適合本地開發與快速原型。整合 LangChain 方便，但缺乏分散式儲存支援。</li>
+            <li><strong>FAISS:</strong> Meta 開發的函式庫，高效、適合處理超大規模資料。支援 GPU 加速，但需要自行實作元數據過濾與即時更新功能。</li>
+            <li><strong>Qdrant:</strong> 用 Rust 開發的開源向量資料庫，高性能、支援即時 CRUD 操作。具備元數據過濾、混合搜尋（密集+稀疏向量）、分片與複製等企業級功能。可自託管或使用雲端服務，適合需要生產級功能的應用。</li>
+            <li><strong>Pinecone:</strong> 雲端託管服務，開箱即用、適合產品化應用。無需管理基礎設施，但需要付費訂閱。</li>
+          </ul>
+
+          <div class="lab-setup" style="margin-top: 25px; background: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <h4>🤔 Chroma vs Qdrant：如何選擇？</h4>
+            <p style="margin-bottom: 15px;"><strong>選擇 Chroma 如果你：</strong></p>
+            <ul style="margin-bottom: 20px;">
+              <li>正在進行<strong>快速原型開發</strong>或學習階段</li>
+              <li>需要<strong>極簡的 Python 原生</strong>解決方案（<code>pip install chromadb</code> 即可）</li>
+              <li>資料規模<strong>小到中等</strong>（數千到數十萬向量）</li>
+              <li>優先考慮<strong>易用性</strong>而非性能</li>
+              <li>在 Jupyter Notebook 中進行實驗</li>
+            </ul>
+            <p style="margin-bottom: 15px;"><strong>選擇 Qdrant 如果你：</strong></p>
+            <ul>
+              <li>需要<strong>生產環境</strong>部署，要求高可靠性和性能</li>
+              <li>處理<strong>大規模資料</strong>（百萬級以上向量）</li>
+              <li>需要<strong>低延遲</strong>（Qdrant: ~52ms vs Chroma: ~340ms）</li>
+              <li>需要<strong>高吞吐量</strong>（Qdrant: ~2100 QPS vs Chroma: ~180 QPS）</li>
+              <li>需要<strong>進階過濾</strong>、混合搜尋或水平擴展功能</li>
+              <li>需要<strong>即時更新</strong>和元數據管理</li>
+            </ul>
+            <p style="margin-top: 15px; padding: 12px; background: #fff; border-radius: 6px; font-size: 0.95rem;">
+              <strong>💡 建議：</strong>初學者或快速原型階段先用 Chroma，熟悉向量資料庫概念後，若需要生產級功能再遷移到 Qdrant。
+              兩者都支援 LangChain 整合，遷移成本相對較低。
+            </p>
+          </div>
+        </section>
+
+        <!-- Step 2: 環境設定 -->
+        <section id="step2" class="lab-section">
+          <h2>🛠️ Step 2: 環境設定</h2>
+          <div class="ai-prompt-block">
+            <p>複製以下 Prompt 給 Cursor/Claude：</p>
+            <pre>
+請幫我建立一個 Python 實驗環境：
+1. 建立 venv 虛擬環境並啟動。
+2. 安裝必要的套件：chromadb, openai, python-dotenv, faiss-cpu, sentence-transformers
+3. 建立 .env 文件範本，包含 OPENAI_API_KEY。
+4. 建立一個基礎腳本，驗證 chromadb 是否安裝成功。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <!-- Step 3: 實作 Chroma -->
+        <section id="step3" class="lab-section">
+          <h2>💻 Step 3: 實作 Chroma 向量資料庫</h2>
+          <p>我們將實作一個簡單的「技術術語筆記本」。</p>
+          <div class="ai-prompt-block">
+            <pre>
+請撰寫一個 Python 腳本來實作 ChromaDB：
+1. 使用 OpenAI 的 `text-embedding-3-small` 作為 Embedding 模型。
+2. 建立一個 Collection 叫做 "ai_terms"。
+3. 插入 5 條關於 Transformer、RAG、Agent 的簡短定義。
+4. 實作一個 query 函數，當我輸入關鍵字時，返回最相似的 2 條記錄及其距離。
+5. 加入詳細的註解說明每個步驟。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <!-- Step 4: 中文語境處理 -->
+        <section id="step4" class="lab-section">
+          <h2>🌏 Step 4: 中文語境特殊處理</h2>
+          <p>中文處理的挑戰在於：同一個意思有多種寫法（繁簡、詞彙差異）。</p>
+          
+          <div class="lab-setup" style="margin-top: 25px; background: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <h4>🔍 RAG 向量使用的是哪種 Multi-Token Embedding 方式？</h4>
+            <p style="margin-bottom: 15px;">
+              回顧 <a href="../../phase1-text-basics/02-embedding/index.html#step1" target="_blank">Phase 1.2 Embedding 教學</a>，
+              我們學過處理多 token 詞彙有多種方法（平均池化、[CLS] token、最後一個 token）。
+              在 RAG 向量資料庫中，我們使用的是<strong>句子級 Embedding</strong>：
+            </p>
+            <ul style="margin-bottom: 15px;">
+              <li><strong>OpenAI text-embedding-3-small：</strong>輸入整個句子或段落，自動返回<strong>單一向量</strong>（1536 維）。內部使用改進的 Transformer + [CLS] token 變體，經過特殊訓練以產生高品質的句子表示。</li>
+              <li><strong>BGE-M3：</strong>輸入文本，自動返回<strong>單一向量</strong>（1024 維）。使用 <strong>Mean Pooling（平均池化）</strong>方法，將所有 token 的 Transformer 輸出進行加權平均，得到最終的句子表示。</li>
+              <li><strong>Sentence-Transformers 系列：</strong>專門訓練用於生成句子向量的模型，使用各種池化策略（通常是 Mean Pooling 或 CLS Pooling）。</li>
+            </ul>
+            <p style="padding: 12px; background: #fff; border-radius: 6px; font-size: 0.95rem;">
+              <strong>💡 關鍵理解：</strong>RAG 系統不直接儲存單個詞的 embedding，而是儲存<strong>文檔片段（chunks）</strong>的 embedding。
+              每個 chunk 通常是一個段落或幾句話（例如 500-1000 字），模型會自動處理其中的多 token 詞彙，
+              並返回一個代表整個 chunk 語義的單一向量。這個向量已經考慮了所有詞彙的上下文關係。
+            </p>
+          </div>
+          <div class="lab-setup">
+            <h4>💡 中文 Embedding 建議</h4>
+            <ul>
+              <li><strong>OpenAI text-embedding-3-small:</strong> 支援多語言，對中文效果優異且便宜（需 API 調用）。</li>
+              <li><strong>BGE-M3 (2024年1月發布):</strong> 由<strong>北京智源人工智能研究院（BAAI）</strong>開發，目前開源界最強的中文多語言 Embedding 模型。支援超過 100 種語言，具備密集檢索、多向量檢索和稀疏檢索三種功能，特別適合跨語言資訊檢索與多語言文檔分析。模型基於 XLM-RoBERTa 架構，擁有 568M 參數，生成 1024 維的嵌入向量，支援最長 8192 tokens 的文本輸入。可透過 <code>transformers</code> 套件載入使用。詳細資訊可參考 <a href="https://bge-model.com/bge/bge_m3.html" target="_blank">BGE-M3 官方頁面</a> 或 <a href="https://arxiv.org/abs/2402.03216" target="_blank">論文</a>。</li>
+              <li><strong>text2vec-bge-large-chinese:</strong> 由 shibing624 開發，專為中文優化的語義匹配模型。基於 CoSENT 算法，生成 1024 維向量，適用於句子嵌入、文本匹配和語義搜尋。可透過 <code>transformers</code> 套件載入，模型名稱：<code>shibing624/text2vec-bge-large-chinese</code>。</li>
+              <li><strong>text2vec-base-multilingual:</strong> 同樣由 shibing624 開發的多語言模型，支援中文、英文、德文、法文等多種語言，適合跨語言句子相似度計算。模型名稱：<code>shibing624/text2vec-base-multilingual</code>。</li>
+              <li><strong>Dmeta Embedding Zh Small:</strong> 由 Dataloop 開發的輕量級中文嵌入模型（< 300M），推理速度較快，適合對速度和準確性有較高要求的應用場景。</li>
+            </ul>
+            <p style="margin-top: 15px; padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
+              <strong>💡 使用提示：</strong>上述開源模型均可透過 <code>pip install transformers sentence-transformers</code> 安裝後使用。
+              建議先測試 BGE-M3（功能最全面），若需要更輕量的模型可考慮 text2vec 系列。
+            </p>
+          </div>
+          
+          <div class="lab-setup" style="margin-top: 25px; background: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <h4>🔬 研究發現：中文 Embedding Model 效能比較</h4>
+            <p style="margin-bottom: 15px;">
+              根據 <strong>C-MTEB（Chinese Massive Text Embedding Benchmark）</strong> 的評測數據（2024-2025），
+              不同 Embedding 模型在中文檢索任務上的表現差異顯著：
+            </p>
+            
+            <div style="overflow-x: auto; margin-bottom: 20px;">
+              <table style="width: 100%; border-collapse: collapse; background: #fff; font-size: 0.9rem;">
+                <thead>
+                  <tr style="background: #f3f4f6; border-bottom: 2px solid #d1d5db;">
+                    <th style="padding: 10px; text-align: left;">模型名稱</th>
+                    <th style="padding: 10px; text-align: center;">維度</th>
+                    <th style="padding: 10px; text-align: center;">平均分</th>
+                    <th style="padding: 10px; text-align: center;">檢索</th>
+                    <th style="padding: 10px; text-align: center;">重排序</th>
+                    <th style="padding: 10px; text-align: center;">特點</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 10px;"><strong>BAAI/bge-large-zh-v1.5</strong></td>
+                    <td style="padding: 10px; text-align: center;">1024</td>
+                    <td style="padding: 10px; text-align: center;"><strong>64.53</strong></td>
+                    <td style="padding: 10px; text-align: center;">70.46</td>
+                    <td style="padding: 10px; text-align: center;">65.84</td>
+                    <td style="padding: 10px; font-size: 0.85rem;">C-MTEB 排名第一 ✅</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 10px;"><strong>BAAI/bge-base-zh-v1.5</strong></td>
+                    <td style="padding: 10px; text-align: center;">768</td>
+                    <td style="padding: 10px; text-align: center;">63.13</td>
+                    <td style="padding: 10px; text-align: center;">69.49</td>
+                    <td style="padding: 10px; text-align: center;">65.39</td>
+                    <td style="padding: 10px; font-size: 0.85rem;">速度與效能平衡</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 10px;"><strong>BAAI/bge-m3</strong></td>
+                    <td style="padding: 10px; text-align: center;">1024</td>
+                    <td style="padding: 10px; text-align: center;">71.4</td>
+                    <td style="padding: 10px; text-align: center;">-</td>
+                    <td style="padding: 10px; text-align: center;">-</td>
+                    <td style="padding: 10px; font-size: 0.85rem;">多語言 + 混合檢索</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 10px;"><strong>text2vec-bge-large-chinese</strong></td>
+                    <td style="padding: 10px; text-align: center;">1024</td>
+                    <td style="padding: 10px; text-align: center;">~60</td>
+                    <td style="padding: 10px; text-align: center;">-</td>
+                    <td style="padding: 10px; text-align: center;">-</td>
+                    <td style="padding: 10px; font-size: 0.85rem;">專為中文優化</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 10px;"><strong>OpenAI text-embedding-ada-002</strong></td>
+                    <td style="padding: 10px; text-align: center;">1536</td>
+                    <td style="padding: 10px; text-align: center;">53.02</td>
+                    <td style="padding: 10px; text-align: center;">52.00</td>
+                    <td style="padding: 10px; text-align: center;">54.28</td>
+                    <td style="padding: 10px; font-size: 0.85rem;">已被新版取代</td>
+                  </tr>
+                  <tr style="background: #ecfdf5;">
+                    <td style="padding: 10px;"><strong>OpenAI text-embedding-3-large</strong></td>
+                    <td style="padding: 10px; text-align: center;">3072</td>
+                    <td style="padding: 10px; text-align: center;">-</td>
+                    <td style="padding: 10px; text-align: center;">-</td>
+                    <td style="padding: 10px; text-align: center;">-</td>
+                    <td style="padding: 10px; font-size: 0.85rem;">ELO: 1539, nDCG@10: 0.811</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <p style="padding: 15px; background: #fff; border-radius: 6px; margin-bottom: 15px;">
+              <strong>🏆 RAG 實際測試（Timescale 2024 Benchmark）：</strong><br>
+              在 Paul Graham 文章資料集上的檢索準確率：<br>
+              • <strong>BGE-M3:</strong> 72% ✅<br>
+              • <strong>mxbai-embed-large:</strong> 59.25%<br>
+              • <strong>nomic-embed-text:</strong> 57.25%
+            </p>
+            
+            <div style="padding: 15px; background: #fff; border-radius: 6px; margin-bottom: 15px;">
+              <strong>⚡ 效能對比（Agentset ELO Ranking）：</strong>
+              <ul style="margin-top: 10px;">
+                <li><strong>OpenAI text-embedding-3-large:</strong> ELO 1539, 勝率 55.7%, 延遲 11ms</li>
+                <li><strong>BAAI bge-m3:</strong> ELO 1491, 勝率 40.9%, 延遲 29ms</li>
+              </ul>
+            </div>
+            
+            <p style="padding: 15px; background: #ecfdf5; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong>💡 選擇建議：</strong><br>
+              • <strong>預算充足 + 追求最佳效能：</strong>OpenAI text-embedding-3-large（延遲低、準確率高）<br>
+              • <strong>開源 + 中文最佳：</strong>BAAI/bge-large-zh-v1.5 或 bge-m3（C-MTEB 排名第一）<br>
+              • <strong>多語言 + 混合檢索：</strong>BAAI/bge-m3（支援密集/稀疏/多向量檢索）<br>
+              • <strong>輕量快速：</strong>BAAI/bge-base-zh-v1.5 或 Dmeta Embedding Zh Small
+            </p>
+            
+            <p style="margin-top: 15px; font-size: 0.9rem; color: #6b7280;">
+              <strong>📚 相關資源：</strong><br>
+              • C-MTEB Leaderboard: <a href="https://github.com/FlagOpen/FlagEmbedding/tree/master/C_MTEB" target="_blank">github.com/FlagOpen/FlagEmbedding</a><br>
+              • Agentset Embedding Ranking: <a href="https://agentset.ai/leaderboard/embedding-models" target="_blank">agentset.ai/leaderboard</a><br>
+              • Timescale RAG Benchmark: <a href="https://www.timescale.com/blog/how-to-choose-an-embedding-model-for-rag/" target="_blank">timescale.com/blog</a>
+            </p>
+          </div>
+          <div class="visual-diagram" style="margin-top: 25px;">
+            <h4>📊 實例說明：RAG 如何處理多 Token 中文詞彙</h4>
+            <pre>
+<strong>範例：儲存繁體中文文檔片段</strong>
+
+文檔片段 (Chunk 1): "Transformer 是一種革命性的深度學習架構，使用自注意力機制處理序列資料。"
+  ↓ Tokenization（內部，使用者看不到）
+Tokens: ["Trans", "form", "er", "是", "一", "種", "革命", "性", "的", ...]
+  ↓ Embedding（每個 token 獲得一個向量）
+Token Embeddings: [[0.1, ...], [0.2, ...], [0.3, ...], ...]
+  ↓ Transformer 處理 + Mean Pooling（或 CLS）
+<strong>最終向量: [0.25, -0.45, 0.78, ...]  ← 單一向量，代表整個 chunk！</strong>
+
+儲存到向量資料庫:
+- ID: chunk_001
+- Vector: [0.25, -0.45, 0.78, ...]  (1536 維)
+- Text: "Transformer 是一種革命性的..."
+
+<strong>查詢時：</strong>
+使用者查詢: "什麼是 Transformer？"
+  ↓ 同樣的處理流程
+查詢向量: [0.24, -0.43, 0.76, ...]  (1536 維)
+  ↓ 相似度搜尋
+找到最接近的 chunk_001（相似度 0.92）
+
+✨ 關鍵理解：
+1. RAG 不儲存單詞的 embedding，而是儲存文檔片段的 embedding
+2. 每個片段無論包含多少 tokens，都只有一個向量
+3. 向量資料庫儲存的是這個「片段級」的向量
+4. 多 token 詞彙的處理已經在 Embedding 模型內部完成
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>測試中文語義相似度：</p>
+            <pre>
+修改之前的 ChromaDB 腳本，加入中文測試資料：
+1. 插入繁體中文資料片段，例如：
+   - 「人工智慧是一門研究如何讓機器模擬人類智能的科學。」
+   - 「機器學習是人工智慧的一個重要分支。」
+   - 「深層神經網路是現代 AI 系統的基礎架構。」
+2. 測試以下查詢的相似度結果：
+   - 查詢 "什麼是 AI？" → 看是否能找到人工智慧相關的片段
+   - 查詢 "Machine Learning 和 AI 的關係" → 看是否能找到機器學習的片段
+3. 觀察每個片段只有一個向量（雖然包含多個 token）。
+4. 使用 matplotlib 將這些向量降維後繪製成 2D 散佈圖，展示片段在語義空間中的分布。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">📋 複製 Prompt</button>
+          </div>
+        </section>
+
+        <div class="chapter-nav">
+          <a href="../index.html" class="nav-link">← 返回 Phase 4</a>
+        </div>
+      </div>
+    </div>
+    <script>
+      function copyPrompt(btn) {
+        const pre = btn.previousElementSibling;
+        navigator.clipboard.writeText(pre.innerText);
+        const originalText = btn.innerText;
+        btn.innerText = "✅ 已複製！";
+        setTimeout(() => btn.innerText = originalText, 2000);
+      }
+    </script>
+  </body>
+</html>

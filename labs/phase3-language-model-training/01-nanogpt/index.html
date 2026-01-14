@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3.1 nanoGPT - 從零訓練你的第一個 GPT | AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles/global.css" />
+    <link rel="stylesheet" href="../../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+    <script>
+      function copyPrompt(button) {
+        const pre = button.previousElementSibling;
+        const text = pre.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          button.textContent = "✅ 已複製";
+          setTimeout(() => {
+            button.textContent = "📋 複製 Prompt";
+          }, 2000);
+        });
+      }
+      function copyTerminal(button) {
+        const code = button.previousElementSibling;
+        const text = code.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          button.textContent = "✅ 已複製";
+          setTimeout(() => {
+            button.textContent = "📋 複製指令";
+          }, 2000);
+        });
+      }
+      function toggleCodeBlock(header) {
+        const block = header.closest(".lab-code-block");
+        block.classList.toggle("collapsed");
+        const btn = header.querySelector(".toggle-btn");
+        btn.textContent = block.classList.contains("collapsed") ? "展開" : "收起";
+      }
+      function copyCode(button) {
+        const codeBlock = button.closest(".lab-code-block").querySelector("code");
+        const text = codeBlock.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          button.textContent = "✅ 已複製";
+          setTimeout(() => {
+            button.textContent = "複製";
+          }, 2000);
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Step Navigation -->
+      <div class="lab-steps">
+        <a href="../index.html" class="lab-step">← Phase 3</a>
+        <a href="#step1" class="lab-step active">Step 1: 理解 GPT</a>
+        <a href="#step2" class="lab-step">Step 2: 環境設定</a>
+        <a href="#step3" class="lab-step">Step 3: 準備資料</a>
+        <a href="#step4" class="lab-step">Step 4: 實作模型</a>
+        <a href="#step5" class="lab-step">Step 5: 訓練循環</a>
+        <a href="#step6" class="lab-step">Step 6: 生成文字</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h1>🧠 3.1 nanoGPT - 從零訓練你的第一個 GPT</h1>
+        <p class="lab-intro-text">
+          這是 Phase 3 的核心實驗！從零開始訓練一個真正的 GPT 模型，讓它學會生成莎士比亞風格的文字。
+          你會看到模型如何從亂碼逐漸學會生成有意義的文字，那種成就感無與倫比！🚀
+        </p>
+
+        <!-- Step 1: 理解 GPT -->
+        <section id="step1" class="lab-section">
+          <h2>🎓 Step 1: 理解 GPT 架構</h2>
+          
+          <p>
+            GPT（Generative Pre-trained Transformer）是一個<strong>自回歸語言模型</strong>，
+            基於 Transformer 的解碼器（Decoder）架構。在 Phase 2 中，你已經學會了 Transformer 的核心機制，
+            現在我們要組裝一個完整的 GPT！
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 GPT 架構全景圖</h4>
+            <p>
+              GPT 就像一個「文字預測工廠」：
+            </p>
+            <pre>
+輸入序列："To be or not to be"
+  ↓
+Tokenization → [To, be, or, not, to, be]
+  ↓
+Embedding + Positional Encoding
+  ↓
+Transformer Blocks (重複 N 次):
+  ┌─────────────────────┐
+  │ Masked Self-Attention│  ← 只能看前面的字
+  │   + Residual         │
+  │   + LayerNorm        │
+  └─────────────────────┘
+          ↓
+  ┌─────────────────────┐
+  │ Feed-Forward Network │  ← 處理資訊
+  │   + Residual         │
+  │   + LayerNorm        │
+  └─────────────────────┘
+  ↓
+Output Layer → 下一個字的機率分布
+            </pre>
+          </div>
+
+          <h3>🤔 GPT 和 Phase 2 的 Transformer 有什麼不同？</h3>
+          <p>
+            Phase 2 我們訓練的是 Character-Level 的名字生成器，而 GPT 是更通用的語言模型：
+          </p>
+          <ul class="lab-list-spacing">
+            <li>
+              <strong>Tokenization 層級</strong>：
+              Phase 2 用 Character-Level（字元級），GPT 通常用 BPE/WordPiece（詞彙級）
+            </li>
+            <li>
+              <strong>資料規模</strong>：
+              Phase 2 用 100+ 個名字，GPT 用數 GB 的文字資料
+            </li>
+            <li>
+              <strong>模型規模</strong>：
+              Phase 2 用小型模型（10M 參數），GPT 用大型模型（數百 M 到數 B 參數）
+            </li>
+            <li>
+              <strong>訓練目標</strong>：
+              都是「預測下一個 token」，但 GPT 的資料更多樣化
+            </li>
+          </ul>
+
+          <div class="visual-diagram lab-spacing-top">
+            <h4>🎯 nanoGPT 的訓練目標</h4>
+            <pre>
+訓練階段（Teacher Forcing）：
+  輸入："To be or not"
+  目標："be or not to"
+  
+  模型學習：
+    "To" → 預測 "be"
+    "To be" → 預測 "or"
+    "To be or" → 預測 "not"
+    "To be or not" → 預測 "to"
+
+生成階段（自回歸）：
+  輸入："To"
+  Step 1: 模型預測 → "be"
+  Step 2: 模型看到 "To be"，預測 → "or"
+  Step 3: 模型看到 "To be or"，預測 → "not"
+  Step 4: 模型看到 "To be or not"，預測 → "to"
+  
+  結果："To be or not to"
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              想更深入了解？把這段 prompt 給 Cursor / Claude Code：
+            </p>
+            <pre>
+請用簡單易懂的方式解釋：
+1. GPT 的架構和 Phase 2 的 Transformer 有什麼相同和不同？
+2. 什麼是 Masked Self-Attention？為什麼 GPT 需要它？
+3. 什麼是自回歸生成？如何一步步生成文字？
+4. Teacher Forcing 和自回歸生成有什麼不同？為什麼訓練時用 Teacher Forcing？
+
+請用具體例子，並解釋每一步的直觀意義。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+        </section>
+
+        <!-- Step 2: 環境設定 -->
+        <section id="step2" class="lab-section">
+          <h2>⚙️ Step 2: 環境設定</h2>
+          
+          <p>
+            我們需要 PyTorch 來建立和訓練 GPT。別擔心，完全可以在 Mac 本機運行！
+          </p>
+
+          <div class="terminal-command">
+            <code># 建立專案目錄（必須手動執行）
+mkdir -p nanogpt && cd nanogpt</code>
+            <button class="copy-terminal-btn" onclick="copyTerminal(this)">
+              📋 複製指令
+            </button>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              讓 AI 幫你建立虛擬環境、專案結構和檔案：
+            </p>
+            <pre>
+請幫我建立一個 Python 專案，用於訓練 nanoGPT：
+
+⚠️ 重要：請使用 Python 虛擬環境（venv）來管理專案依賴！
+
+請執行以下步驟：
+1. 建立 Python 虛擬環境：python3 -m venv venv
+2. 啟動虛擬環境：source venv/bin/activate (macOS/Linux) 或 venv\Scripts\activate (Windows)
+3. 確認虛擬環境已啟動（終端機提示符會顯示 (venv)）
+4. 安裝依賴套件：pip install torch numpy matplotlib tqdm
+
+然後建立以下檔案和目錄結構：
+- model.py (GPT 模型檔案，先留空或加上基本註解)
+- train.py (訓練腳本，先留空)
+- generate.py (生成腳本，先留空)
+- data.py (資料處理，先留空)
+- config.py (配置檔案，包含超參數)
+- requirements.txt (包含：torch, numpy, matplotlib, tqdm)
+- README.md (專案簡介，包含：專案目的、如何建立虛擬環境、如何執行)
+
+請建立這些檔案，並在 README.md 中寫上完整的專案說明和虛擬環境使用指南。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup">
+            <h4>💡 提示</h4>
+            <ul>
+              <li>
+                <strong>重要：請使用虛擬環境！</strong>
+                PyTorch 是一個大套件，使用虛擬環境可以避免套件衝突。
+              </li>
+              <li>建議使用 Python 3.8+</li>
+              <li>PyTorch 會自動偵測你的系統（Mac 會使用 MPS，如果有 GPU 會用 CUDA）</li>
+              <li>完全可以在 Mac 128GB 本機運行，無需 GPU</li>
+              <li>訓練時間約 30-60 分鐘（取決於硬體和訓練輪數）</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 3: 準備資料 -->
+        <section id="step3" class="lab-section">
+          <h2>📚 Step 3: 準備 Shakespeare 資料集</h2>
+          
+          <p>
+            我們使用 Shakespeare 的劇本作為訓練資料。這個資料集公開且易於取得，
+            非常適合學習 GPT 的訓練流程。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 資料格式</h4>
+            <pre>
+原始文字：
+  "To be or not to be, that is the question..."
+
+Tokenization (BPE 或簡單的 Word-Level)：
+  ["To", " be", " or", " not", " to", " be", ",", " that", " is", " the", " question", "..."]
+
+詞彙表（Vocab）：
+  {'<PAD>': 0, '<UNK>': 1, 'To': 2, ' be': 3, ' or': 4, ' not': 5, ...}
+
+訓練序列對 (input, target)：
+  input:  ["To", " be", " or", " not", " to"]
+  target: [" be", " or", " not", " to", " be"]
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>準備資料 Prompt</strong>
+            </p>
+            <pre>
+請幫我建立資料處理模組 `data.py`：
+
+功能：
+1. 下載 Shakespeare 資料集：
+   - 從 https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt 下載
+   - 或使用本地檔案
+2. 建立簡單的 Tokenizer：
+   - Word-Level Tokenization（按空格和標點符號切分）
+   - 建立詞彙表（vocab）：包含所有出現的詞彙 + '<PAD>' + '<UNK>'
+   - 提供 encode() 和 decode() 函數
+3. 建立資料集類別（Dataset）：
+   - 將文字轉換成訓練用的序列對 (input, target)
+   - 例如："To be or not to be" → 
+     input: [To, be, or, not, to], target: [be, or, not, to, be]
+   - 使用固定長度的序列（例如：block_size = 128）
+4. 提供一個函數來獲取資料載入器（DataLoader）
+
+要求：
+- 使用 PyTorch 的 Dataset 和 DataLoader
+- 處理不同長度的序列（使用 padding 或 truncation）
+- 加上詳細註解
+- 提供資料統計資訊（詞彙表大小、資料集大小等）
+
+請建立 data.py 檔案，包含完整的實作。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>💡 資料集資訊</h4>
+            <ul>
+              <li>資料集大小：約 1MB（111,539 個字元）</li>
+              <li>詞彙表大小：約 10,000+ 個唯一詞彙（取決於 Tokenization 方式）</li>
+              <li>處理時間：約 1-2 分鐘（取決於硬體）</li>
+              <li>序列長度：建議使用 128 或 256（block_size）</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 4: 實作模型 -->
+        <section id="step4" class="lab-section">
+          <h2>🏗️ Step 4: 實作 GPT 模型</h2>
+          
+          <p>
+            現在我們要實作完整的 GPT 模型。基於 Phase 2 的 Transformer 架構，
+            但加入 Masked Self-Attention 來實現自回歸生成。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 GPT 模型組件</h4>
+            <pre>
+GPT 模型包含：
+1. Token Embedding（詞彙嵌入）
+2. Positional Encoding（位置編碼）
+3. Transformer Blocks（重複 N 次）：
+   - Masked Self-Attention（只能看前面的 token）
+   - Feed-Forward Network
+   - Residual Connection + LayerNorm
+4. Output Layer（輸出層，預測下一個 token）
+            </pre>
+          </div>
+
+          <h3>🎯 關鍵差異：Masked Self-Attention</h3>
+          <p>
+            GPT 使用 <strong>Masked Self-Attention</strong>，這意味著每個 token 只能看到它前面的 token：
+          </p>
+          <pre>
+序列："To be or not to be"
+
+Attention Mask（下三角矩陣）：
+      To  be  or  not  to  be
+To    1   0   0   0   0   0
+be    1   1   0   0   0   0
+or    1   1   1   0   0   0
+not   1   1   1   1   0   0
+to    1   1   1   1   1   0
+be    1   1   1   1   1   1
+
+這樣 "or" 只能看到 "To be or"，不能看到後面的 "not to be"
+          </pre>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>實作 GPT 模型 Prompt</strong>
+            </p>
+            <pre>
+請幫我實作 GPT 模型 `model.py`：
+
+架構：
+1. TokenEmbedding：將 token ID 轉換成向量
+2. PositionalEncoding：位置編碼（學習式或正弦式）
+3. TransformerBlock：
+   - Masked Self-Attention（使用 PyTorch 的 nn.MultiheadAttention，設定 is_causal=True）
+   - Feed-Forward Network
+   - Residual Connection + LayerNorm
+4. GPT 主模型：
+   - 組合多個 TransformerBlock
+   - 輸出層：預測下一個 token 的機率分布
+
+超參數建議：
+- vocab_size: 詞彙表大小（從 data.py 取得）
+- d_model: 128 或 256（模型維度）
+- num_heads: 4 或 8（注意力頭數）
+- num_layers: 4 或 6（Transformer Block 數量）
+- d_ff: d_model * 4（前饋網路維度）
+- max_seq_len: 128 或 256（最大序列長度）
+- dropout: 0.1（Dropout 率）
+
+要求：
+- 使用 PyTorch 的 nn.Module
+- 加上詳細註解
+- 提供 forward() 方法
+- 可以加上 generate() 方法（用於生成文字，稍後會用到）
+
+請建立 model.py 檔案，包含完整的 GPT 模型實作。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+        </section>
+
+        <!-- Step 5: 訓練循環 -->
+        <section id="step5" class="lab-section">
+          <h2>🚀 Step 5: 實作訓練循環</h2>
+          
+          <p>
+            最激動人心的時刻！實作完整的訓練循環，看著模型從亂碼逐漸學會生成有意義的文字！
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 訓練流程</h4>
+            <pre>
+1. 載入資料和建立 DataLoader
+2. 初始化模型、優化器、損失函數
+3. 訓練迴圈：
+   for epoch in range(num_epochs):
+     for batch in dataloader:
+       # 前向傳播
+       logits = model(input_ids)
+       loss = criterion(logits, targets)
+       
+       # 反向傳播
+       optimizer.zero_grad()
+       loss.backward()
+       optimizer.step()
+       
+       # 記錄損失
+       log_loss(loss)
+4. 保存模型檢查點
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>訓練 Prompt</strong>
+            </p>
+            <pre>
+請幫我建立訓練腳本 `train.py`：
+
+功能：
+1. 載入配置（從 config.py 或直接定義）
+2. 載入資料和建立資料載入器
+3. 初始化模型（GPT）
+4. 設定優化器（Adam）和損失函數（CrossEntropyLoss）
+5. 訓練迴圈：
+   - 對每個 epoch
+   - 對每個 batch
+   - 前向傳播、計算損失、反向傳播、更新參數
+   - 定期打印損失和進度（使用 tqdm）
+   - 可選：保存訓練損失曲線圖
+6. 保存模型檢查點（每 N 個 epochs 或最佳模型）
+
+超參數建議：
+- batch_size: 32 或 64
+- learning_rate: 3e-4 或 1e-3
+- num_epochs: 10-20（先試試看效果）
+- eval_interval: 每 500 個 steps 評估一次
+- save_interval: 每 5 個 epochs 保存一次
+
+要求：
+- 使用 tqdm 顯示進度條
+- 定期打印損失（每個 epoch 或每 N 個 steps）
+- 保存最佳模型（loss 最低的）
+- 加上詳細註解
+- 可選：繪製訓練損失曲線
+
+請建立 train.py 檔案，包含完整的訓練流程。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>💡 訓練提示</h4>
+            <ul>
+              <li>
+                <strong>觀察訓練過程</strong>：
+                不要只是等待訓練完成，要觀察損失曲線。如果損失不下降，可能需要調整學習率。
+              </li>
+              <li>
+                <strong>批次大小</strong>：
+                如果記憶體不足，可以減小 batch_size 或使用梯度累積。
+              </li>
+              <li>
+                <strong>訓練時間</strong>：
+                在 Mac 128GB 上，訓練 10 個 epochs 約需 30-60 分鐘（取決於模型大小）。
+              </li>
+              <li>
+                <strong>檢查點</strong>：
+                定期保存模型，這樣即使中斷也可以從檢查點繼續訓練。
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 6: 生成文字 -->
+        <section id="step6" class="lab-section">
+          <h2>✨ Step 6: 生成 Shakespeare 風格文字</h2>
+          
+          <p>
+            訓練完成後，讓我們用訓練好的模型生成文字！這是見證 AI 創造力的時刻！
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 生成流程</h4>
+            <pre>
+1. 載入訓練好的模型
+2. 輸入起始文字（prompt）
+3. 自回歸生成：
+   while not finished:
+     - 模型預測下一個 token 的機率分布
+     - 根據策略選擇下一個 token（Greedy、Top-k、Top-p）
+     - 將新 token 加入序列
+     - 重複直到達到最大長度或遇到結束符號
+4. 輸出生成的文字
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>生成腳本 Prompt</strong>
+            </p>
+            <pre>
+請幫我建立生成腳本 `generate.py`：
+
+功能：
+1. 載入訓練好的模型和 tokenizer
+2. 提供生成函數：
+   - 輸入：起始文字（prompt）和生成參數
+   - 輸出：生成的文字
+3. 實作不同的生成策略：
+   - Greedy：選擇機率最高的 token
+   - Top-k：從機率最高的 k 個 token 中選擇
+   - Top-p (Nucleus Sampling)：從累積機率達到 p 的 token 中選擇
+   - Temperature：調整機率分布的平滑度
+4. 主程式：讓使用者輸入 prompt，生成文字
+
+要求：
+- 使用訓練好的模型（從檢查點載入）
+- 支援不同的生成策略
+- 加上詳細註解
+- 提供使用範例
+
+請建立 generate.py 檔案，包含完整的生成功能。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>💡 生成提示</h4>
+            <ul>
+              <li>
+                <strong>起始文字（Prompt）</strong>：
+                可以輸入 "To be or not" 或 "First Citizen:" 等 Shakespeare 風格的開頭。
+              </li>
+              <li>
+                <strong>生成策略</strong>：
+                - Greedy：最簡單，但可能重複
+                - Top-k (k=40)：平衡多樣性和品質
+                - Top-p (p=0.9)：動態選擇候選 token
+                - Temperature (0.7-1.0)：控制創造性
+              </li>
+              <li>
+                <strong>觀察生成結果</strong>：
+                如果生成的文字沒有意義，可能需要：
+                - 增加訓練輪數
+                - 調整模型大小
+                - 檢查資料處理是否正確
+              </li>
+            </ul>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>🎉 恭喜！</h4>
+            <p>
+              你已經完成了 Phase 3 的核心實驗！你現在：
+            </p>
+            <ul>
+              <li>✅ 理解了 GPT 的完整架構</li>
+              <li>✅ 從零訓練了一個語言模型</li>
+              <li>✅ 學會了如何生成文字</li>
+              <li>✅ 掌握了訓練循環的完整流程</li>
+            </ul>
+            <p>
+              接下來，你可以：
+            </p>
+            <ul>
+              <li>🔜 進入 <strong>3.2 文本生成</strong>：學習更多生成策略</li>
+              <li>🔜 進入 <strong>3.3 LoRA 微調</strong>：學習如何高效微調大模型</li>
+              <li>🔜 嘗試調整超參數，看看如何改進模型</li>
+            </ul>
+          </div>
+        </section>
+
+        <div class="chapter-nav">
+          <a href="../index.html" class="nav-link">← 返回 Phase 3</a>
+          <a href="../02-text-generation/index.html" class="nav-link">下一實驗：3.2 文本生成 →</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

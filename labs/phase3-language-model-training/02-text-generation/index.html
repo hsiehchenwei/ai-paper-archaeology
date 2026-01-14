@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3.2 文本生成 - 讓模型說話 | AI 實驗 Playground</title>
+    <!-- Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800;900&family=Nunito:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../../styles/global.css" />
+    <link rel="stylesheet" href="../../../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../../../styles/labs.css" />
+    <style>
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      .phase-link {
+        font-family: "Fredoka", sans-serif;
+      }
+    </style>
+    <script>
+      function copyPrompt(button) {
+        const pre = button.previousElementSibling;
+        const text = pre.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          button.textContent = "✅ 已複製";
+          setTimeout(() => {
+            button.textContent = "📋 複製 Prompt";
+          }, 2000);
+        });
+      }
+      function copyTerminal(button) {
+        const code = button.previousElementSibling;
+        const text = code.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          button.textContent = "✅ 已複製";
+          setTimeout(() => {
+            button.textContent = "📋 複製指令";
+          }, 2000);
+        });
+      }
+      function toggleCodeBlock(header) {
+        const block = header.closest(".lab-code-block");
+        block.classList.toggle("collapsed");
+        const btn = header.querySelector(".toggle-btn");
+        btn.textContent = block.classList.contains("collapsed") ? "展開" : "收起";
+      }
+      function copyCode(button) {
+        const codeBlock = button.closest(".lab-code-block").querySelector("code");
+        const text = codeBlock.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          button.textContent = "✅ 已複製";
+          setTimeout(() => {
+            button.textContent = "複製";
+          }, 2000);
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Step Navigation -->
+      <div class="lab-steps">
+        <a href="../index.html" class="lab-step">← Phase 3</a>
+        <a href="#step1" class="lab-step active">Step 1: 理解生成</a>
+        <a href="#step2" class="lab-step">Step 2: Greedy 策略</a>
+        <a href="#step3" class="lab-step">Step 3: Top-k 策略</a>
+        <a href="#step4" class="lab-step">Step 4: Top-p 策略</a>
+        <a href="#step5" class="lab-step">Step 5: Temperature</a>
+        <a href="#step6" class="lab-step">Step 6: 互動生成器</a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="story-container">
+        <h1>✨ 3.2 文本生成 - 讓模型說話</h1>
+        <p class="lab-intro-text">
+          基於 3.1 訓練好的 nanoGPT 模型，學習不同的文字生成策略。
+          你會發現，不同的生成策略會產生完全不同的文字風格！從保守的 Greedy 到創意十足的 Top-p，
+          每一種策略都有其適用場景。🎨
+        </p>
+
+        <!-- Step 1: 理解生成 -->
+        <section id="step1" class="lab-section">
+          <h2>🎓 Step 1: 理解文字生成</h2>
+          
+          <p>
+            在 3.1 中，我們訓練了一個 GPT 模型，它能夠預測下一個 token 的機率分布。
+            但如何從這個機率分布中「選擇」下一個 token，這就是生成策略的關鍵！
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 生成流程</h4>
+            <pre>
+模型輸出：下一個 token 的機率分布
+  P("be") = 0.4
+  P("or") = 0.3
+  P("not") = 0.2
+  P("to") = 0.1
+  ...
+
+生成策略決定如何選擇：
+  - Greedy：選擇機率最高的（"be"）
+  - Top-k：從前 k 個中隨機選擇
+  - Top-p：從累積機率達到 p 的 token 中選擇
+  - Temperature：調整機率分布的平滑度
+            </pre>
+          </div>
+
+          <h3>🤔 為什麼需要不同的生成策略？</h3>
+          <p>
+            不同的生成策略會產生不同的文字風格：
+          </p>
+          <ul class="lab-list-spacing">
+            <li>
+              <strong>Greedy</strong>：
+              最簡單，但可能產生重複、缺乏創意的文字
+            </li>
+            <li>
+              <strong>Top-k</strong>：
+              平衡多樣性和品質，從前 k 個候選中選擇
+            </li>
+            <li>
+              <strong>Top-p (Nucleus Sampling)</strong>：
+              動態選擇候選 token，根據累積機率
+            </li>
+            <li>
+              <strong>Temperature</strong>：
+              控制機率分布的平滑度，影響創造性
+            </li>
+          </ul>
+
+          <div class="visual-diagram lab-spacing-top">
+            <h4>🎯 不同策略的效果對比</h4>
+            <pre>
+輸入："To be or not"
+
+Greedy (Temperature=1.0)：
+  "To be or not to be, that is the question..."
+
+Top-k (k=10, Temperature=0.8)：
+  "To be or not to be, that is the question whether..."
+
+Top-p (p=0.9, Temperature=0.7)：
+  "To be or not to be, that is the question whether 'tis nobler..."
+
+Temperature=0.5 (更保守)：
+  "To be or not to be, that is the question."
+
+Temperature=1.5 (更創意)：
+  "To be or not to be, that is the question whether 'tis nobler in the mind..."
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block lab-spacing-top">
+            <p>
+              想更深入了解？把這段 prompt 給 Cursor / Claude Code：
+            </p>
+            <pre>
+請用簡單易懂的方式解釋：
+1. 什麼是文字生成策略？為什麼需要不同的策略？
+2. Greedy、Top-k、Top-p 有什麼不同？各自的優缺點是什麼？
+3. Temperature 參數如何影響生成結果？
+4. 什麼時候應該用哪種策略？
+
+請用具體例子，並解釋每一步的直觀意義。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+        </section>
+
+        <!-- Step 2: Greedy 策略 -->
+        <section id="step2" class="lab-section">
+          <h2>🎯 Step 2: 實作 Greedy 策略</h2>
+          
+          <p>
+            Greedy 是最簡單的生成策略：總是選擇機率最高的 token。
+            雖然簡單，但可能產生重複、缺乏創意的文字。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 Greedy 策略</h4>
+            <pre>
+模型輸出機率分布：
+  P("be") = 0.4  ← 最高
+  P("or") = 0.3
+  P("not") = 0.2
+  P("to") = 0.1
+
+Greedy 選擇：argmax(P) = "be"
+
+優點：簡單、快速、可預測
+缺點：可能重複、缺乏創意
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>實作 Greedy 生成 Prompt</strong>
+            </p>
+            <pre>
+請幫我建立一個生成模組 `generation.py`，實作 Greedy 策略：
+
+功能：
+1. 載入訓練好的模型和 tokenizer
+2. 實作 greedy_generate() 函數：
+   - 輸入：起始文字（prompt）、最大長度
+   - 過程：
+     a. 將 prompt 轉換成 token IDs
+     b. 循環生成：
+        - 模型預測下一個 token 的機率分布
+        - 選擇機率最高的 token（argmax）
+        - 將新 token 加入序列
+        - 重複直到達到最大長度或遇到結束符號
+   - 輸出：生成的文字
+
+要求：
+- 使用訓練好的模型（從檢查點載入）
+- 加上詳細註解
+- 提供使用範例
+- 可選：顯示每個步驟選擇的 token 和其機率
+
+請建立 generation.py 檔案，包含 Greedy 生成策略。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>💡 Greedy 策略提示</h4>
+            <ul>
+              <li>
+                <strong>適用場景</strong>：
+                需要確定性結果、快速生成、或作為 baseline 比較
+              </li>
+              <li>
+                <strong>缺點</strong>：
+                可能產生重複的文字（例如："the the the..."）
+              </li>
+              <li>
+                <strong>改進</strong>：
+                可以加上重複懲罰（repetition penalty）來避免重複
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 3: Top-k 策略 -->
+        <section id="step3" class="lab-section">
+          <h2>🎲 Step 3: 實作 Top-k 策略</h2>
+          
+          <p>
+            Top-k 策略從機率最高的 k 個 token 中隨機選擇，平衡多樣性和品質。
+            這是 GPT-2 預設使用的策略。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 Top-k 策略</h4>
+            <pre>
+模型輸出機率分布（排序後）：
+  P("be") = 0.4
+  P("or") = 0.3
+  P("not") = 0.2
+  P("to") = 0.05
+  P("that") = 0.03
+  ... (其他低機率 token)
+
+Top-k (k=3)：
+  只考慮前 3 個：["be", "or", "not"]
+  從這 3 個中隨機選擇（根據機率加權）
+
+優點：平衡多樣性和品質
+缺點：k 值需要調整（太小可能重複，太大可能產生無意義文字）
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>實作 Top-k 生成 Prompt</strong>
+            </p>
+            <pre>
+請在 `generation.py` 中新增 topk_generate() 函數：
+
+功能：
+1. 輸入：起始文字（prompt）、最大長度、k 值
+2. 過程：
+   a. 將 prompt 轉換成 token IDs
+   b. 循環生成：
+      - 模型預測下一個 token 的機率分布
+      - 選擇機率最高的 k 個 token
+      - 從這 k 個 token 中根據機率加權隨機選擇（使用 torch.multinomial）
+      - 將新 token 加入序列
+      - 重複直到達到最大長度或遇到結束符號
+   c. 輸出：生成的文字
+
+要求：
+- 使用 torch.topk() 選擇前 k 個 token
+- 使用 torch.multinomial() 進行加權隨機選擇
+- 加上詳細註解
+- 提供使用範例，比較不同 k 值的效果
+
+請更新 generation.py 檔案，加入 Top-k 生成策略。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>💡 Top-k 策略提示</h4>
+            <ul>
+              <li>
+                <strong>k 值選擇</strong>：
+                - k=1：等同於 Greedy
+                - k=10-50：平衡多樣性和品質（推薦）
+                - k=100+：可能產生無意義的文字
+              </li>
+              <li>
+                <strong>適用場景</strong>：
+                需要多樣性但保持一定品質的生成任務
+              </li>
+              <li>
+                <strong>與 Temperature 結合</strong>：
+                可以同時使用 Top-k 和 Temperature 來進一步控制生成
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 4: Top-p 策略 -->
+        <section id="step4" class="lab-section">
+          <h2>🎨 Step 4: 實作 Top-p (Nucleus) 策略</h2>
+          
+          <p>
+            Top-p（也稱為 Nucleus Sampling）是動態選擇候選 token 的策略。
+            它會選擇累積機率達到 p 的所有 token，然後從中隨機選擇。
+            這是 GPT-3 預設使用的策略。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 Top-p 策略</h4>
+            <pre>
+模型輸出機率分布（排序後）：
+  P("be") = 0.4
+  P("or") = 0.3
+  P("not") = 0.2
+  P("to") = 0.05
+  P("that") = 0.03
+  P("is") = 0.02
+  ... (其他低機率 token)
+
+Top-p (p=0.9)：
+  累積機率：
+    "be": 0.4
+    "or": 0.4 + 0.3 = 0.7
+    "not": 0.7 + 0.2 = 0.9  ← 達到 p=0.9
+    "to": 0.9 + 0.05 = 0.95 (超過，不包含)
+  
+  選擇候選：["be", "or", "not"]
+  從這 3 個中根據機率加權隨機選擇
+
+優點：動態適應不同情況，更靈活
+缺點：p 值需要調整
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>實作 Top-p 生成 Prompt</strong>
+            </p>
+            <pre>
+請在 `generation.py` 中新增 topp_generate() 函數：
+
+功能：
+1. 輸入：起始文字（prompt）、最大長度、p 值
+2. 過程：
+   a. 將 prompt 轉換成 token IDs
+   b. 循環生成：
+      - 模型預測下一個 token 的機率分布
+      - 對機率分布排序（從高到低）
+      - 計算累積機率
+      - 選擇累積機率達到 p 的所有 token
+      - 從這些 token 中根據機率加權隨機選擇（使用 torch.multinomial）
+      - 將新 token 加入序列
+      - 重複直到達到最大長度或遇到結束符號
+   c. 輸出：生成的文字
+
+要求：
+- 使用 torch.sort() 排序機率
+- 使用 torch.cumsum() 計算累積機率
+- 使用 torch.multinomial() 進行加權隨機選擇
+- 加上詳細註解
+- 提供使用範例，比較不同 p 值的效果
+
+請更新 generation.py 檔案，加入 Top-p 生成策略。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>💡 Top-p 策略提示</h4>
+            <ul>
+              <li>
+                <strong>p 值選擇</strong>：
+                - p=0.5：較保守，只考慮高機率 token
+                - p=0.9：平衡（推薦）
+                - p=0.95：較創意，考慮更多候選
+                - p=1.0：等同於從所有 token 中選擇
+              </li>
+              <li>
+                <strong>適用場景</strong>：
+                需要高品質且多樣化的生成任務（如創意寫作）
+              </li>
+              <li>
+                <strong>與 Top-k 比較</strong>：
+                Top-p 更靈活，會根據情況動態調整候選數量
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 5: Temperature -->
+        <section id="step5" class="lab-section">
+          <h2>🌡️ Step 5: 理解 Temperature</h2>
+          
+          <p>
+            Temperature 不是一個獨立的生成策略，而是一個「調整器」，
+            可以與任何策略（Greedy、Top-k、Top-p）結合使用。
+          </p>
+
+          <div class="visual-diagram">
+            <h4>📊 Temperature 的作用</h4>
+            <pre>
+原始機率分布：
+  P("be") = 0.4
+  P("or") = 0.3
+  P("not") = 0.2
+  P("to") = 0.1
+
+應用 Temperature (T)：
+  P_new = softmax(logits / T)
+
+Temperature = 0.5 (更保守)：
+  - 高機率的 token 機率更高
+  - 低機率的 token 機率更低
+  - 結果：更確定、更保守
+
+Temperature = 1.0 (原始)：
+  - 保持原始機率分布
+
+Temperature = 1.5 (更創意)：
+  - 高機率和低機率的差異變小
+  - 結果：更多樣、更創意
+            </pre>
+          </div>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>實作 Temperature Prompt</strong>
+            </p>
+            <pre>
+請更新 `generation.py` 中的所有生成函數，加入 Temperature 參數：
+
+功能：
+1. 在每個生成函數中加入 temperature 參數（預設值 1.0）
+2. 在計算機率分布時應用 Temperature：
+   - 將 logits 除以 temperature
+   - 然後應用 softmax
+   - 公式：probs = softmax(logits / temperature)
+3. 提供使用範例，比較不同 temperature 值的效果
+
+要求：
+- 更新 greedy_generate()、topk_generate()、topp_generate()
+- 加上詳細註解
+- 提供使用範例，展示不同 temperature 的效果
+
+請更新 generation.py 檔案，加入 Temperature 支援。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>💡 Temperature 提示</h4>
+            <ul>
+              <li>
+                <strong>Temperature 值選擇</strong>：
+                - T < 1.0：更保守、更確定（適合事實性任務）
+                - T = 1.0：原始機率分布（平衡）
+                - T > 1.0：更創意、更多樣（適合創意任務）
+              </li>
+              <li>
+                <strong>常見組合</strong>：
+                - Top-p (p=0.9) + Temperature (T=0.7)：高品質創意生成
+                - Top-k (k=40) + Temperature (T=0.8)：平衡多樣性和品質
+              </li>
+              <li>
+                <strong>注意</strong>：
+                Temperature 過高（>2.0）可能產生無意義的文字
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Step 6: 互動生成器 -->
+        <section id="step6" class="lab-section">
+          <h2>🎮 Step 6: 建立互動式生成器</h2>
+          
+          <p>
+            最後，讓我們建立一個互動式的文字生成器，讓使用者可以輸入 prompt 並選擇不同的生成策略！
+          </p>
+
+          <div class="ai-prompt-block">
+            <p>
+              <strong>建立互動生成器 Prompt</strong>
+            </p>
+            <pre>
+請幫我建立一個互動式生成器 `interactive_generate.py`：
+
+功能：
+1. 載入訓練好的模型和 tokenizer
+2. 提供互動式介面：
+   - 讓使用者輸入起始文字（prompt）
+   - 讓使用者選擇生成策略（Greedy、Top-k、Top-p）
+   - 讓使用者設定參數（k 值、p 值、temperature、最大長度）
+   - 生成文字並顯示結果
+3. 可以比較不同策略的效果：
+   - 對同一個 prompt，用不同策略生成
+   - 並排顯示結果
+
+要求：
+- 使用簡單的命令列介面（input()）
+- 加上詳細註解
+- 提供使用說明
+- 可選：保存生成結果到檔案
+
+請建立 interactive_generate.py 檔案，包含完整的互動式生成功能。
+            </pre>
+            <button class="ai-prompt-copy-btn" onclick="copyPrompt(this)">
+              📋 複製 Prompt
+            </button>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>💡 互動生成器提示</h4>
+            <ul>
+              <li>
+                <strong>使用範例</strong>：
+                <pre>
+請輸入起始文字：To be or not
+請選擇生成策略 (greedy/topk/topp): topk
+請輸入 k 值 (預設 40): 40
+請輸入 temperature (預設 0.8): 0.8
+請輸入最大長度 (預設 100): 100
+
+生成結果：
+"To be or not to be, that is the question whether 'tis nobler in the mind..."
+                </pre>
+              </li>
+              <li>
+                <strong>比較不同策略</strong>：
+                可以對同一個 prompt 用不同策略生成，觀察差異
+              </li>
+              <li>
+                <strong>調整參數</strong>：
+                嘗試不同的參數組合，找到最適合的設定
+              </li>
+            </ul>
+          </div>
+
+          <div class="lab-setup lab-spacing-top">
+            <h4>🎉 恭喜！</h4>
+            <p>
+              你已經完成了 3.2 文本生成實驗！你現在：
+            </p>
+            <ul>
+              <li>✅ 理解了不同的文字生成策略</li>
+              <li>✅ 實作了 Greedy、Top-k、Top-p 策略</li>
+              <li>✅ 學會了如何使用 Temperature 調整生成</li>
+              <li>✅ 建立了互動式文字生成器</li>
+            </ul>
+            <p>
+              接下來，你可以：
+            </p>
+            <ul>
+              <li>🔜 進入 <strong>3.3 LoRA 微調</strong>：學習如何高效微調大模型</li>
+              <li>🔜 嘗試不同的參數組合，找到最適合的生成設定</li>
+              <li>🔜 將生成器應用到其他任務（如寫詩、寫故事）</li>
+            </ul>
+          </div>
+        </section>
+
+        <div class="chapter-nav">
+          <a href="../index.html" class="nav-link">← 返回 Phase 3</a>
+          <a href="../01-nanogpt/index.html" class="nav-link">← 上一實驗：3.1 nanoGPT</a>
+          <a href="../03-lora-finetuning/index.html" class="nav-link">下一實驗：3.3 LoRA 微調 →</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
