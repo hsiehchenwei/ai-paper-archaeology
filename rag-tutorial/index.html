@@ -29,6 +29,7 @@
     <link rel="stylesheet" href="../styles/global.css" />
     <link rel="stylesheet" href="../styles/paper-reading.css" />
     <link rel="stylesheet" href="../styles/articles.css" />
+    <link rel="stylesheet" href="rag-tutorial.css" />
 
     <style>
       /* Modern Magazine Theme - Swiss Modernism 2.0 */
@@ -304,94 +305,14 @@
   </head>
   <body>
     <!-- Hero Section -->
-    <div
-      class="hero-section"
-      style="
-        background: linear-gradient(
-          135deg,
-          #1e3a8a 0%,
-          #3b82f6 50%,
-          #10b981 100%
-        );
-        height: 85vh;
-        position: relative;
-        overflow: hidden;
-      "
-    >
-      <div
-        style="
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            180deg,
-            rgba(0, 0, 0, 0.4) 0%,
-            rgba(0, 0, 0, 0.7) 100%
-          );
-        "
-      ></div>
-      <div
-        style="
-          position: relative;
-          z-index: 1;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          text-align: center;
-          padding: 40px 20px;
-        "
-      >
-        <h1
-          style="
-            font-size: clamp(2.5rem, 8vw, 5rem);
-            font-weight: 800;
-            color: white;
-            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
-            margin: 0;
-            line-height: 1.1;
-          "
-        >
-          RAG 的真實故事
-        </h1>
-        <p
-          style="
-            font-size: clamp(1.2rem, 3vw, 2rem);
-            color: rgba(255, 255, 255, 0.95);
-            margin: 30px 0;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
-            font-family: 'Noto Serif TC', serif;
-          "
-        >
-          從學術突破到企業妥協方案
-        </p>
-        <p
-          style="
-            font-size: clamp(1rem, 2vw, 1.3rem);
-            color: rgba(255, 255, 255, 0.85);
-            margin: 20px 0;
-            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
-          "
-        >
-          2020-2026 · 演進、質疑與未來定位
-        </p>
-        <div style="margin-top: 40px">
-          <a
-            href="#story-start"
-            style="
-              background: rgba(255, 255, 255, 0.2);
-              backdrop-filter: blur(10px);
-              color: white;
-              padding: 15px 40px;
-              border-radius: 50px;
-              text-decoration: none;
-              font-weight: 600;
-              border: 2px solid rgba(255, 255, 255, 0.3);
-              transition: all 0.3s;
-            "
-          >
-            探索故事 ↓
-          </a>
+    <div class="rag-hero">
+      <div class="rag-hero-overlay"></div>
+      <div class="rag-hero-content">
+        <h1 class="rag-hero-title">RAG 的真實故事</h1>
+        <p class="rag-hero-subtitle">從學術突破到企業妥協方案</p>
+        <p class="rag-hero-meta">2020-2026 · 演進、質疑與未來定位</p>
+        <div class="rag-hero-cta">
+          <a href="#story-start" class="rag-hero-button">探索故事 ↓</a>
         </div>
       </div>
     </div>
@@ -441,120 +362,57 @@
           為什麼 AI 需要「查資料」？
         </h2>
 
-        <div class="key-concept" style="margin-top: 30px">
-          <h4 style="color: var(--danger-color)">🚨 大語言模型的兩大致命傷</h4>
-
-          <div
-            style="
-              background: linear-gradient(135deg, #fee2e2, #fecaca);
-              padding: 30px;
-              border-radius: 16px;
-              margin: 25px 0;
-            "
-          >
-            <h5
-              style="
-                color: var(--danger-color);
-                margin-top: 0;
-                font-size: 1.3rem;
-              "
-            >
-              1. 幻覺 (Hallucination)
-            </h5>
-            <p style="font-size: 1.05rem; line-height: 1.8">
+        <div class="rag-problem-grid">
+          <div class="rag-problem-card rag-problem-card-danger">
+            <div class="rag-problem-title rag-problem-title-danger">
+              <span>1. 幻覺 (Hallucination)</span>
+            </div>
+            <p class="rag-problem-desc">
               LLM
               會一本正經地「胡說八道」。當它不知道答案時，不會誠實說「我不知道」，
-              而是編造一個聽起來很合理的答案。就像學生考試時不會的題目，也要硬著頭皮寫滿。
+              而是編造一個聽起來很合理的答案。
             </p>
-            <p
-              style="
-                margin-top: 15px;
-                font-style: italic;
-                color: var(--text-secondary);
-              "
-            >
+            <div class="rag-problem-example">
               例子：問
               ChatGPT「台灣第一座核電廠是誰設計的？」，它可能會編造一個不存在的建築師名字。
-            </p>
+            </div>
           </div>
 
-          <div
-            style="
-              background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-              padding: 30px;
-              border-radius: 16px;
-              margin: 25px 0;
-            "
-          >
-            <h5
-              style="
-                color: var(--primary-color);
-                margin-top: 0;
-                font-size: 1.3rem;
-              "
-            >
-              2. 知識過時
-            </h5>
-            <p style="font-size: 1.05rem; line-height: 1.8">
-              LLM 的訓練資料有截止日期。GPT-4 的知識截止於 2023 年某月，
-              它無法知道昨天發生的新聞、今天的股價、剛發布的新產品。
-            </p>
-            <p
-              style="
-                margin-top: 15px;
-                font-style: italic;
-                color: var(--text-secondary);
-              "
-            >
-              這就像一個 2023 年就冬眠的人，醒來後還以為世界停在那一刻。
+          <div class="rag-problem-card rag-problem-card-info">
+            <div class="rag-problem-title rag-problem-title-info">
+              <span>2. 知識過時</span>
+            </div>
+            <p class="rag-problem-desc">
+              LLM
+              的訓練資料有截止日期。它無法知道昨天發生的新聞、今天的股價、剛發布的新產品。
+              就像一個冬眠的人，醒來後還以為世界停在那一刻。
             </p>
           </div>
         </div>
 
-        <div class="analogy" style="margin-top: 40px">
-          <h4 style="font-size: 1.4rem">💡 RAG 的解法：開卷考試</h4>
-          <div
-            style="
-              display: grid;
-              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-              gap: 25px;
-              margin-top: 25px;
-            "
-          >
-            <div
-              style="
-                background: var(--bg-card);
-                padding: 25px;
-                border-radius: 12px;
-                border-left: 4px solid var(--danger-color);
-              "
-            >
-              <h5 style="color: var(--danger-color); margin-top: 0">
-                ❌ 傳統 LLM = 閉卷考
-              </h5>
-              <ul style="line-height: 1.8">
+        <div class="rag-comparison-box">
+          <h4 class="rag-comparison-title">💡 RAG 的解法：開卷考試</h4>
+
+          <div class="rag-vs-grid">
+            <div class="rag-vs-item rag-vs-item-bad">
+              <div class="rag-vs-header rag-vs-header-bad">
+                <span>❌ 傳統 LLM = 閉卷考</span>
+              </div>
+              <ul class="rag-vs-list">
                 <li>所有知識必須事先「背」在參數裡</li>
-                <li>答題時只能靠記憶</li>
-                <li>記錯就錯了，還不自知</li>
+                <li>答題時只能靠記憶，記錯就錯了</li>
                 <li>知識更新 = 重新訓練整個模型</li>
               </ul>
             </div>
-            <div
-              style="
-                background: var(--bg-card);
-                padding: 25px;
-                border-radius: 12px;
-                border-left: 4px solid var(--secondary-color);
-              "
-            >
-              <h5 style="color: var(--secondary-color); margin-top: 0">
-                ✅ RAG = 開卷考
-              </h5>
-              <ul style="line-height: 1.8">
+
+            <div class="rag-vs-item rag-vs-item-good">
+              <div class="rag-vs-header rag-vs-header-good">
+                <span>✅ RAG = 開卷考</span>
+              </div>
+              <ul class="rag-vs-list">
                 <li>可以帶「參考書」（向量資料庫）</li>
                 <li>答題前先翻書找相關資料</li>
-                <li>答案有出處，可追溯來源</li>
-                <li>知識更新 = 更新資料庫即可</li>
+                <li>答案有出處，知識更新只需更新資料庫</li>
               </ul>
             </div>
           </div>
@@ -642,111 +500,6 @@
           <h3
             style="
               font-size: 1.8rem;
-              margin-top: 50px;
-              color: var(--secondary-color);
-            "
-          >
-            ✅ RAG 的三大核心要素
-          </h3>
-
-          <div
-            style="
-              display: grid;
-              grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-              gap: 25px;
-              margin-top: 30px;
-            "
-          >
-            <div
-              style="
-                background: var(--primary-light);
-                padding: 30px;
-                border-radius: 12px;
-                border-left: 5px solid var(--primary-color);
-              "
-            >
-              <h4
-                style="
-                  margin-top: 0;
-                  color: var(--primary-color);
-                  font-size: 1.3rem;
-                "
-              >
-                1️⃣ 外部知識庫
-              </h4>
-              <p style="line-height: 1.8">
-                <strong>必須有</strong>一個獨立於模型參數之外的知識來源：
-              </p>
-              <ul style="line-height: 1.9; margin-top: 15px">
-                <li>向量資料庫（最常見）</li>
-                <li>傳統搜尋引擎</li>
-                <li>知識圖譜</li>
-                <li>結構化資料庫</li>
-                <li>文檔集合</li>
-              </ul>
-            </div>
-
-            <div
-              style="
-                background: var(--secondary-light);
-                padding: 30px;
-                border-radius: 12px;
-                border-left: 5px solid var(--secondary-color);
-              "
-            >
-              <h4
-                style="
-                  margin-top: 0;
-                  color: var(--secondary-color);
-                  font-size: 1.3rem;
-                "
-              >
-                2️⃣ 檢索機制
-              </h4>
-              <p style="line-height: 1.8">
-                <strong>必須有</strong>一個檢索器（Retriever）動態查詢知識庫：
-              </p>
-              <ul style="line-height: 1.9; margin-top: 15px">
-                <li>Dense Retrieval（DPR、BERT）</li>
-                <li>Sparse Retrieval（BM25、TF-IDF）</li>
-                <li>混合檢索（Hybrid）</li>
-                <li>可微分檢索器</li>
-                <li>神經檢索模型</li>
-              </ul>
-            </div>
-
-            <div
-              style="
-                background: var(--accent-light);
-                padding: 30px;
-                border-radius: 12px;
-                border-left: 5px solid var(--accent-color);
-              "
-            >
-              <h4
-                style="
-                  margin-top: 0;
-                  color: var(--accent-color);
-                  font-size: 1.3rem;
-                "
-              >
-                3️⃣ 生成模型
-              </h4>
-              <p style="line-height: 1.8">
-                <strong>必須有</strong>一個語言模型基於檢索結果生成回答：
-              </p>
-              <ul style="line-height: 1.9; margin-top: 15px">
-                <li>Seq2Seq 模型（BART、T5）</li>
-                <li>Decoder-only LLM（GPT 系列）</li>
-                <li>Encoder-Decoder 架構</li>
-                <li>任何支援條件生成的模型</li>
-              </ul>
-            </div>
-          </div>
-
-          <h3
-            style="
-              font-size: 1.8rem;
               margin-top: 60px;
               color: var(--danger-color);
             "
@@ -756,11 +509,12 @@
 
           <div
             style="
-              background: linear-gradient(135deg, #fef2f2, #fee2e2);
+              background: var(--rag-bg-elevated);
               padding: 35px;
               border-radius: 16px;
               margin-top: 30px;
-              border: 3px solid var(--danger-color);
+              border: 1px solid var(--rag-border);
+              box-shadow: var(--rag-shadow-sm);
             "
           >
             <table
@@ -837,45 +591,6 @@
                   </td>
                   <td style="padding: 20px; border-radius: 0 8px 8px 0">
                     把所有內容放 context，不是動態檢索
-                  </td>
-                </tr>
-                <tr style="background: rgba(16, 185, 129, 0.2)">
-                  <td style="padding: 20px; border-radius: 8px 0 0 8px">
-                    <strong>DPR + BART（RAG 原始論文）</strong>
-                  </td>
-                  <td
-                    style="padding: 20px; text-align: center; font-size: 1.5rem"
-                  >
-                    ✅
-                  </td>
-                  <td style="padding: 20px; border-radius: 0 8px 8px 0">
-                    檢索器 + 生成器，經典 RAG
-                  </td>
-                </tr>
-                <tr style="background: rgba(16, 185, 129, 0.2)">
-                  <td style="padding: 20px; border-radius: 8px 0 0 8px">
-                    <strong>Vector DB + LLM（企業常用）</strong>
-                  </td>
-                  <td
-                    style="padding: 20px; text-align: center; font-size: 1.5rem"
-                  >
-                    ✅
-                  </td>
-                  <td style="padding: 20px; border-radius: 0 8px 8px 0">
-                    動態檢索向量庫，符合 RAG 定義
-                  </td>
-                </tr>
-                <tr style="background: rgba(16, 185, 129, 0.2)">
-                  <td style="padding: 20px; border-radius: 8px 0 0 8px">
-                    <strong>GraphRAG（知識圖譜）</strong>
-                  </td>
-                  <td
-                    style="padding: 20px; text-align: center; font-size: 1.5rem"
-                  >
-                    ✅
-                  </td>
-                  <td style="padding: 20px; border-radius: 0 8px 8px 0">
-                    檢索圖譜社群摘要，Modular RAG
                   </td>
                 </tr>
               </tbody>
@@ -969,115 +684,55 @@
           </p>
         </div>
 
-        <div class="timeline-container" style="margin: 50px 0">
-          <div class="timeline-line"></div>
+        <div class="rag-timeline-container">
+          <div class="rag-timeline-line"></div>
 
           <!-- 2020: 起源 -->
-          <div class="timeline-item left">
-            <div
-              class="timeline-dot"
-              style="border-color: #6366f1; width: 24px; height: 24px"
-            ></div>
-            <div class="timeline-card" style="border-left-color: #6366f1">
-              <h3 style="color: #6366f1; font-size: 1.5rem">🏛️ 2020：起源</h3>
-              <p
-                style="
-                  font-size: 0.9rem;
-                  color: var(--text-secondary);
-                  margin-bottom: 15px;
-                "
-              >
-                Google & Meta 的平行創新
-              </p>
+          <div class="rag-timeline-item left">
+            <div class="rag-timeline-dot"></div>
+            <div class="rag-timeline-card">
+              <h3>🏛️ 2020：起源</h3>
+              <p class="rag-timeline-meta">Google & Meta 的平行創新</p>
 
-              <div
-                style="
-                  background: rgba(99, 102, 241, 0.1);
-                  padding: 15px;
-                  border-radius: 8px;
-                  margin-bottom: 12px;
-                "
-              >
-                <h4 style="margin: 0 0 8px 0; font-size: 1.1rem">
-                  REALM (2 月)
-                </h4>
-                <p style="margin: 0; font-size: 0.95rem">
+              <div class="rag-timeline-box">
+                <h4>REALM (2 月)</h4>
+                <p>
                   Google Research
-                  首創在<strong>預訓練階段</strong>整合檢索器。證明「可微分檢索」可行。
+                  首創在<strong>預訓練階段</strong>整合檢索器。證明「可微分檢索」可行。<br />
+                  <a href="01-realm.html" class="rag-timeline-link"
+                    >深入了解 REALM →</a
+                  >
                 </p>
               </div>
 
-              <div
-                style="
-                  background: rgba(16, 185, 129, 0.1);
-                  padding: 15px;
-                  border-radius: 8px;
-                "
-              >
-                <h4 style="margin: 0 0 8px 0; font-size: 1.1rem">
-                  ⭐ RAG 原始論文 (5 月)
-                </h4>
-                <p style="margin: 0; font-size: 0.95rem">
+              <div class="rag-timeline-box">
+                <h4>⭐ RAG 原始論文 (5 月)</h4>
+                <p>
                   <strong>Patrick Lewis</strong> 等人正式定義 RAG 架構：DPR +
-                  BART。成為後續所有 RAG 系統的基礎。
+                  BART。成為後續所有 RAG 系統的基礎。<br />
+                  <a href="02-rag-original.html" class="rag-timeline-link"
+                    >深入了解 RAG →</a
+                  >
                 </p>
-              </div>
-
-              <div
-                style="
-                  display: flex;
-                  gap: 10px;
-                  margin-top: 15px;
-                  flex-wrap: wrap;
-                "
-              >
-                <a
-                  href="01-realm.html"
-                  class="quick-link"
-                  style="font-size: 0.85rem"
-                  >📖 REALM 解析</a
-                >
-                <a
-                  href="02-rag-original.html"
-                  class="quick-link"
-                  style="font-size: 0.85rem"
-                  >📖 RAG 解析</a
-                >
               </div>
             </div>
           </div>
 
           <!-- 2021: 規模化 -->
-          <div class="timeline-item right">
-            <div
-              class="timeline-dot"
-              style="border-color: #f59e0b; width: 24px; height: 24px"
-            ></div>
-            <div class="timeline-card" style="border-left-color: #f59e0b">
-              <h3 style="color: #f59e0b; font-size: 1.5rem">
-                🚀 2021：規模化突破
-              </h3>
-              <p
-                style="
-                  font-size: 0.9rem;
-                  color: var(--text-secondary);
-                  margin-bottom: 15px;
-                "
-              >
-                DeepMind 證明參數效率
-              </p>
+          <div class="rag-timeline-item right">
+            <div class="rag-timeline-dot"></div>
+            <div class="rag-timeline-card">
+              <h3>🚀 2021：規模化突破</h3>
+              <p class="rag-timeline-meta">DeepMind 證明參數效率</p>
 
-              <div
-                style="
-                  background: rgba(245, 158, 11, 0.1);
-                  padding: 20px;
-                  border-radius: 8px;
-                "
-              >
-                <h4 style="margin: 0 0 10px 0; font-size: 1.2rem">RETRO</h4>
-                <p style="margin: 0 0 15px 0; font-size: 1.05rem">
+              <div class="rag-timeline-box">
+                <h4>RETRO</h4>
+                <p>
                   使用 <strong>2 兆 token</strong> 檢索資料庫，7.5B 參數模型達到
-                  GPT-3 175B 水準！
+                  GPT-3 175B 水準！<br />
+                  <a href="03-retro.html" class="rag-timeline-link"
+                    >深入了解 RETRO →</a
+                  >
                 </p>
                 <div
                   style="
@@ -1085,13 +740,15 @@
                     padding: 12px;
                     border-radius: 6px;
                     text-align: center;
+                    margin-top: 10px;
+                    border: 1px solid var(--rag-border);
                   "
                 >
                   <span
                     style="
                       font-size: 2rem;
                       font-weight: 700;
-                      color: var(--accent-color);
+                      color: var(--rag-primary);
                     "
                     >25×</span
                   >
@@ -1099,55 +756,33 @@
                     style="
                       margin: 5px 0 0 0;
                       font-size: 0.9rem;
-                      color: var(--text-secondary);
+                      color: var(--rag-text-secondary);
                     "
                   >
                     參數效率提升
                   </p>
                 </div>
               </div>
-
-              <a
-                href="03-retro.html"
-                class="quick-link"
-                style="
-                  display: inline-block;
-                  margin-top: 15px;
-                  font-size: 0.9rem;
-                "
-                >📖 深度解析 →</a
-              >
             </div>
           </div>
 
           <!-- 2022: 企業落地 -->
-          <div class="timeline-item left">
-            <div
-              class="timeline-dot"
-              style="border-color: #06b6d4; width: 24px; height: 24px"
-            ></div>
-            <div class="timeline-card" style="border-left-color: #06b6d4">
-              <h3 style="color: #06b6d4; font-size: 1.5rem">
-                🏢 2022：企業落地
-              </h3>
-              <p
-                style="
-                  font-size: 0.9rem;
-                  color: var(--text-secondary);
-                  margin-bottom: 15px;
-                "
-              >
-                向量資料庫與 RAG 框架興起
-              </p>
+          <div class="rag-timeline-item left">
+            <div class="rag-timeline-dot"></div>
+            <div class="rag-timeline-card">
+              <h3>🏢 2022：企業落地</h3>
+              <p class="rag-timeline-meta">向量資料庫與 RAG 框架興起</p>
 
-              <div
-                style="
-                  background: rgba(6, 182, 212, 0.1);
-                  padding: 15px;
-                  border-radius: 8px;
-                "
-              >
-                <ul style="margin: 0; font-size: 0.95rem; line-height: 1.9">
+              <div class="rag-timeline-box">
+                <ul
+                  style="
+                    margin: 0;
+                    padding-left: 20px;
+                    font-size: 0.95rem;
+                    line-height: 1.9;
+                    color: var(--rag-text-secondary);
+                  "
+                >
                   <li><strong>Pinecone</strong> 等向量資料庫快速成長</li>
                   <li><strong>LangChain</strong> 開源，RAG 開發變簡單</li>
                   <li>企業開始將 RAG 用於內部知識庫</li>
@@ -1158,86 +793,58 @@
           </div>
 
           <!-- 2023: 自我反思 -->
-          <div class="timeline-item right">
-            <div
-              class="timeline-dot"
-              style="border-color: #8b5cf6; width: 24px; height: 24px"
-            ></div>
-            <div class="timeline-card" style="border-left-color: #8b5cf6">
-              <h3 style="color: #8b5cf6; font-size: 1.5rem">
-                🧠 2023：自我反思
-              </h3>
-              <p
-                style="
-                  font-size: 0.9rem;
-                  color: var(--text-secondary);
-                  margin-bottom: 15px;
-                "
-              >
-                從 Naive RAG 到 Advanced RAG
-              </p>
+          <div class="rag-timeline-item right">
+            <div class="rag-timeline-dot"></div>
+            <div class="rag-timeline-card">
+              <h3>🧠 2023：自我反思</h3>
+              <p class="rag-timeline-meta">從 Naive RAG 到 Advanced RAG</p>
 
-              <div
-                style="
-                  background: rgba(139, 92, 246, 0.1);
-                  padding: 18px;
-                  border-radius: 8px;
-                "
-              >
-                <h4 style="margin: 0 0 10px 0; font-size: 1.1rem">Self-RAG</h4>
-                <p style="margin: 0 0 12px 0">
-                  引入 <strong>Reflection Tokens</strong>，模型學會問自己：
+              <div class="rag-timeline-box">
+                <h4>Self-RAG</h4>
+                <p>
+                  引入
+                  <strong>Reflection Tokens</strong>，模型學會問自己：<br />
+                  <a href="04-self-rag.html" class="rag-timeline-link"
+                    >深入了解 Self-RAG →</a
+                  >
                 </p>
-                <ul style="margin: 0; padding-left: 20px; line-height: 1.8">
+                <ul
+                  style="
+                    margin: 0;
+                    padding-left: 20px;
+                    line-height: 1.8;
+                    color: var(--rag-text-secondary);
+                    margin-top: 10px;
+                  "
+                >
                   <li>我該檢索嗎？</li>
                   <li>檢索結果相關嗎？</li>
                   <li>我的回答有依據嗎？</li>
                 </ul>
               </div>
-
-              <a
-                href="04-self-rag.html"
-                class="quick-link"
-                style="
-                  display: inline-block;
-                  margin-top: 15px;
-                  font-size: 0.9rem;
-                "
-                >📖 深度解析 →</a
-              >
             </div>
           </div>
 
           <!-- 2024: 知識圖譜 -->
-          <div class="timeline-item left">
+          <div class="rag-timeline-item left">
             <div
-              class="timeline-dot"
-              style="border-color: #10b981; width: 24px; height: 24px"
+              class="rag-timeline-dot"
+              style="border-color: var(--rag-success)"
             ></div>
-            <div class="timeline-card" style="border-left-color: #10b981">
-              <h3 style="color: #10b981; font-size: 1.5rem">
-                🕸️ 2024：知識圖譜時代
-              </h3>
-              <p
-                style="
-                  font-size: 0.9rem;
-                  color: var(--text-secondary);
-                  margin-bottom: 15px;
-                "
-              >
-                Microsoft 解決全局推理難題
-              </p>
+            <div class="rag-timeline-card rag-timeline-card-highlight">
+              <h3 style="color: var(--rag-success)">🕸️ 2024：知識圖譜時代</h3>
+              <p class="rag-timeline-meta">Microsoft 解決全局推理難題</p>
 
-              <div
-                style="
-                  background: rgba(16, 185, 129, 0.1);
-                  padding: 18px;
-                  border-radius: 8px;
-                "
-              >
-                <h4 style="margin: 0 0 10px 0; font-size: 1.1rem">GraphRAG</h4>
-                <p style="margin: 0 0 12px 0">
-                  整合知識圖譜，突破傳統 RAG 的「局部問題」限制：
+              <div class="rag-timeline-box">
+                <h4 style="color: var(--rag-success)">GraphRAG</h4>
+                <p>
+                  整合知識圖譜，突破傳統 RAG 的「局部問題」限制：<br />
+                  <a
+                    href="05-graphrag.html"
+                    class="rag-timeline-link"
+                    style="color: var(--rag-success)"
+                    >深入了解 GraphRAG →</a
+                  >
                 </p>
                 <div
                   style="
@@ -1253,13 +860,14 @@
                       padding: 10px;
                       border-radius: 6px;
                       text-align: center;
+                      border: 1px solid var(--rag-border);
                     "
                   >
                     <div
                       style="
                         font-size: 1.1rem;
                         font-weight: 600;
-                        color: var(--secondary-color);
+                        color: var(--rag-primary);
                       "
                     >
                       Local
@@ -1267,7 +875,7 @@
                     <div
                       style="
                         font-size: 0.85rem;
-                        color: var(--text-secondary);
+                        color: var(--rag-text-secondary);
                         margin-top: 4px;
                       "
                     >
@@ -1280,13 +888,14 @@
                       padding: 10px;
                       border-radius: 6px;
                       text-align: center;
+                      border: 1px solid var(--rag-border);
                     "
                   >
                     <div
                       style="
                         font-size: 1.1rem;
                         font-weight: 600;
-                        color: var(--secondary-color);
+                        color: var(--rag-primary);
                       "
                     >
                       Global
@@ -1294,7 +903,7 @@
                     <div
                       style="
                         font-size: 0.85rem;
-                        color: var(--text-secondary);
+                        color: var(--rag-text-secondary);
                         margin-top: 4px;
                       "
                     >
@@ -1303,228 +912,91 @@
                   </div>
                 </div>
               </div>
-
-              <a
-                href="05-graphrag.html"
-                class="quick-link"
-                style="
-                  display: inline-block;
-                  margin-top: 15px;
-                  font-size: 0.9rem;
-                "
-                >📖 深度解析 →</a
-              >
             </div>
           </div>
 
           <!-- 2024 中: 批判性檢驗 -->
-          <div class="timeline-item right">
+          <div class="rag-timeline-item right">
             <div
-              class="timeline-dot"
-              style="
-                border-color: #dc2626;
-                width: 24px;
-                height: 24px;
-                border-width: 3px;
-              "
+              class="rag-timeline-dot"
+              style="border-color: var(--rag-danger)"
             ></div>
-            <div
-              class="timeline-card"
-              style="
-                border-left-color: #dc2626;
-                background: linear-gradient(135deg, #fef2f2, #fee2e2);
-              "
-            >
-              <h3 style="color: #dc2626; font-size: 1.5rem">
-                ⚠️ 2024：批判性檢驗
-              </h3>
-              <p
-                style="
-                  font-size: 0.9rem;
-                  color: var(--text-secondary);
-                  margin-bottom: 15px;
-                "
-              >
-                學術界質疑 RAG 的真實效能
-              </p>
+            <div class="rag-timeline-card rag-timeline-card-warning">
+              <h3 style="color: var(--rag-danger)">⚠️ 2024：批判性檢驗</h3>
+              <p class="rag-timeline-meta">學術界質疑 RAG 的真實效能</p>
 
-              <div
-                style="
-                  background: rgba(220, 38, 38, 0.1);
-                  padding: 18px;
-                  border-radius: 8px;
-                  margin-bottom: 12px;
-                "
-              >
-                <h4
-                  style="margin: 0 0 10px 0; font-size: 1.15rem; color: #991b1b"
-                >
-                  RAG vs Long Context 實證研究
-                </h4>
-                <p style="margin: 0 0 12px 0; line-height: 1.7">
-                  多項研究（包含 EMNLP 2024 等）顯示，在資源充足的情況下：
+              <div class="rag-timeline-box">
+                <h4 style="color: var(--rag-danger)">技術局限與挑戰</h4>
+                <p>
+                  隨著 Long Context 模型（如 Gemini 1.5
+                  Pro）的崛起，學術界開始重新檢視 RAG
+                  的必要性。研究顯示在資源充足下，Long Context 的準確率往往優於
+                  RAG。
                 </p>
-                <div
-                  style="
-                    background: white;
-                    padding: 15px;
-                    border-radius: 6px;
-                    margin: 10px 0;
-                  "
-                >
-                  <div
-                    style="
-                      display: grid;
-                      grid-template-columns: 1fr 1fr;
-                      gap: 15px;
-                      text-align: center;
-                    "
-                  >
-                    <div>
-                      <div
-                        style="
-                          font-size: 2rem;
-                          font-weight: 800;
-                          color: #dc2626;
-                        "
-                      >
-                        56.3%
-                      </div>
-                      <div
-                        style="
-                          font-size: 0.85rem;
-                          color: var(--text-secondary);
-                          margin-top: 4px;
-                        "
-                      >
-                        Long Context 正確率
-                      </div>
-                    </div>
-                    <div>
-                      <div
-                        style="
-                          font-size: 2rem;
-                          font-weight: 800;
-                          color: #dc2626;
-                        "
-                      >
-                        49.0%
-                      </div>
-                      <div
-                        style="
-                          font-size: 0.85rem;
-                          color: var(--text-secondary);
-                          margin-top: 4px;
-                        "
-                      >
-                        RAG 正確率
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <p
-                  style="
-                    margin: 12px 0 0 0;
-                    font-size: 0.95rem;
-                    font-weight: 600;
-                    color: #991b1b;
-                  "
-                >
-                  結論：在理想條件下（資源充足、context 足夠長），Long Context
-                  往往表現更好
-                </p>
-              </div>
-
-              <div
-                style="
-                  background: white;
-                  padding: 15px;
-                  border-radius: 8px;
-                  border-left: 3px solid #dc2626;
-                "
-              >
-                <h5
-                  style="margin: 0 0 8px 0; font-size: 0.95rem; color: #dc2626"
-                >
-                  其他批判性研究
-                </h5>
                 <ul
                   style="
-                    margin: 0;
+                    margin: 12px 0 0 0;
                     padding-left: 20px;
                     font-size: 0.9rem;
                     line-height: 1.8;
-                    color: var(--text-secondary);
+                    color: var(--rag-text-secondary);
                   "
                 >
                   <li>
-                    <strong>RefusalBench</strong>：錯誤上下文時無法拒絕回答
+                    <strong>Long Context 挑戰：</strong>理想條件下表現優於 RAG
                   </li>
-                  <li><strong>RAGProbe</strong>：組合問題有高失敗率</li>
-                  <li><strong>RAGCHECKER</strong>：系統性揭露檢索錯誤</li>
+                  <li>
+                    <strong>系統性失敗：</strong
+                    >錯誤上下文無法拒絕、組合問題失敗
+                  </li>
+                  <li>
+                    <strong>幻覺問題：</strong>RAG 無法完全根除幻覺，僅能降低
+                  </li>
                 </ul>
+                <a
+                  href="07-rag-vs-long-context.html"
+                  class="rag-timeline-link"
+                  style="color: var(--rag-danger)"
+                  >深入了解 RAG vs Long Context 解析 →</a
+                >
               </div>
             </div>
           </div>
 
           <!-- 2025-2026: Agentic -->
-          <div class="timeline-item right">
+          <div class="rag-timeline-item left">
             <div
-              class="timeline-dot"
-              style="border-color: #ef4444; width: 28px; height: 28px"
+              class="rag-timeline-dot"
+              style="border-color: var(--rag-purple)"
             ></div>
-            <div
-              class="timeline-card"
-              style="
-                border-left-color: #ef4444;
-                background: linear-gradient(135deg, #fef2f2, #fee2e2);
-              "
-            >
-              <h3 style="color: #ef4444; font-size: 1.6rem">
+            <div class="rag-timeline-card rag-timeline-card-future">
+              <h3 style="color: var(--rag-purple)">
                 🤖 2025-2026：Agentic 時代
               </h3>
-              <p
-                style="
-                  font-size: 0.9rem;
-                  color: var(--text-secondary);
-                  margin-bottom: 15px;
-                "
-              >
-                RAG 與 AI Agent 深度融合
-              </p>
+              <p class="rag-timeline-meta">RAG 與 AI Agent 深度融合</p>
 
-              <div
-                style="
-                  background: white;
-                  padding: 20px;
-                  border-radius: 8px;
-                  margin-bottom: 15px;
-                "
-              >
-                <h4 style="margin: 0 0 12px 0; font-size: 1.2rem">
-                  技術百花齊放
-                </h4>
-                <ul style="margin: 0; line-height: 2; font-size: 0.95rem">
+              <div class="rag-timeline-box">
+                <h4>技術百花齊放</h4>
+                <ul
+                  style="
+                    margin: 0;
+                    line-height: 2;
+                    font-size: 0.95rem;
+                    color: var(--rag-text-secondary);
+                  "
+                >
                   <li><strong>CRAG</strong>：Corrective RAG 自我糾正</li>
                   <li><strong>HiRAG</strong>：階層式檢索</li>
                   <li><strong>VideoRAG</strong>：多模態擴展</li>
                   <li><strong>Multi-Agent RAG</strong>：協作式檢索</li>
                 </ul>
+                <a
+                  href="06-agentic-rag.html"
+                  class="rag-timeline-link"
+                  style="color: var(--rag-purple)"
+                  >深入了解 Agentic RAG →</a
+                >
               </div>
-
-              <a
-                href="06-agentic-rag.html"
-                class="quick-link"
-                style="
-                  display: inline-block;
-                  margin-top: 15px;
-                  font-size: 0.9rem;
-                  background: white;
-                  color: var(--danger-color);
-                  border: 2px solid var(--danger-color);
-                "
-                >📖 深度解析 →</a
-              >
             </div>
           </div>
         </div>
@@ -2584,7 +2056,6 @@
           </div>
         </div>
 
-        <!-- 導航卡片 -->
         <div style="margin: 60px 0">
           <div
             style="
@@ -2597,138 +2068,84 @@
           >
             <a
               href="technical-analysis.html"
-              style="
-                text-decoration: none;
-                display: block;
-                background: linear-gradient(135deg, #3b82f6, #2563eb);
-                padding: 40px;
-                border-radius: 16px;
-                color: white;
-                box-shadow: var(--shadow-lg);
-                transition: transform 0.3s;
-              "
+              class="rag-nav-card rag-nav-card-primary"
             >
-              <h3 style="margin: 0 0 15px 0; font-size: 1.8rem">
-                🔬 技術深度分析
-              </h3>
-              <p style="margin: 0; opacity: 0.9; line-height: 1.8">
-                深入了解 RAG 的技術缺陷、檢索演進與運作原理
-              </p>
+              <h3>🔬 技術深度分析</h3>
+              <p>深入了解 RAG 的技術缺陷、檢索演進與運作原理</p>
             </a>
 
             <a
               href="practical-guide.html"
-              style="
-                text-decoration: none;
-                display: block;
-                background: linear-gradient(135deg, #10b981, #059669);
-                padding: 40px;
-                border-radius: 16px;
-                color: white;
-                box-shadow: var(--shadow-lg);
-                transition: transform 0.3s;
-              "
+              class="rag-nav-card rag-nav-card-secondary"
             >
-              <h3 style="margin: 0 0 15px 0; font-size: 1.8rem">
-                💼 實務應用指南
-              </h3>
-              <p style="margin: 0; opacity: 0.9; line-height: 1.8">
-                企業案例、RAG vs Long Context、Agentic RAG 趨勢
-              </p>
+              <h3>💼 實務應用指南</h3>
+              <p>企業案例、RAG vs Long Context、Agentic RAG 趨勢</p>
             </a>
           </div>
         </div>
 
         <div class="section-divider"><span>✦</span></div>
 
-        <div
-          style="
-            margin-top: 50px;
-            text-align: center;
-            padding: 40px;
-            background: var(--bg-body);
-            border-radius: var(--radius-md);
-          "
-        >
-          <h3 style="color: var(--primary-color); margin-bottom: 20px">
-            📚 相關資源
-          </h3>
-          <div class="quick-links">
-            <a href="../index.html" class="quick-link">← 回到首頁</a>
+        <div class="rag-footer-section">
+          <h3 class="rag-resources-title">📚 延伸閱讀與資源</h3>
+          <div class="rag-resources-grid">
+            <a href="../index.html" class="rag-resource-card">
+              <span class="rag-resource-icon">🏠</span>
+              <span class="rag-resource-text">回到首頁</span>
+            </a>
             <a
               href="https://arxiv.org/abs/2005.11401"
-              class="quick-link"
+              class="rag-resource-card"
               target="_blank"
-              >📄 RAG 原始論文</a
             >
+              <span class="rag-resource-icon">📄</span>
+              <span class="rag-resource-text">RAG 原始論文</span>
+            </a>
             <a
               href="https://arxiv.org/abs/2312.10997"
-              class="quick-link"
+              class="rag-resource-card"
               target="_blank"
-              >📊 RAG Survey (2023)</a
             >
+              <span class="rag-resource-icon">📊</span>
+              <span class="rag-resource-text">RAG Survey (2023)</span>
+            </a>
+            <a href="../topics/nlp-trilogy.html" class="rag-resource-card">
+              <span class="rag-resource-icon">🌟</span>
+              <span class="rag-resource-text">NLP 三部曲</span>
+            </a>
+            <a href="../gpt3-tutorial/index.html" class="rag-resource-card">
+              <span class="rag-resource-icon">📖</span>
+              <span class="rag-resource-text">GPT-3 教學</span>
+            </a>
+            <a
+              href="../transformer-tutorial/index.html"
+              class="rag-resource-card"
+            >
+              <span class="rag-resource-icon">⚡</span>
+              <span class="rag-resource-text">Transformer 教學</span>
+            </a>
           </div>
-          <div class="quick-links" style="margin-top: 15px">
-            <a href="../topics/nlp-trilogy.html" class="quick-link"
-              >🌟 NLP 三部曲</a
-            >
-            <a href="../gpt3-tutorial/index.html" class="quick-link"
-              >📖 GPT-3 教學</a
-            >
-            <a href="../transformer-tutorial/index.html" class="quick-link"
-              >⚡ Transformer 教學</a
-            >
-          </div>
-        </div>
 
-        <div
-          style="
-            margin-top: 60px;
-            padding: 50px 30px;
-            background: linear-gradient(135deg, #1e3a8a, #3b82f6, #10b981);
-            border-radius: 16px;
-            text-align: center;
-            color: white;
-          "
-        >
-          <h3
-            style="
-              font-size: 2rem;
-              margin: 0 0 25px 0;
-              text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
-            "
-          >
-            關於本專題報導
-          </h3>
-          <p
-            style="
-              font-size: 1.1rem;
-              line-height: 1.9;
-              max-width: 700px;
-              margin: 0 auto;
-              text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
-            "
-          >
-            本專題報導系統性地介紹 RAG (Retrieval-Augmented Generation)
-            的歷史演進， 從 2020 年的起源到 2026 年的 Agentic 時代。
-            用<strong>雜誌敘事</strong>的方式講述技術故事，
-            配合<strong>視覺化時間軸</strong>與<strong>產業應用案例</strong>，
-            讓你不只理解「是什麼」，更能看見「為什麼重要」與「如何改變世界」。
-          </p>
-          <p
-            style="
-              font-size: 1.3rem;
-              font-weight: 700;
-              margin-top: 30px;
-              font-family: 'Noto Serif TC', serif;
-              text-shadow: 0 2px 15px rgba(0, 0, 0, 0.4);
-            "
-          >
-            AI Paper Archaeology
-          </p>
-          <p style="font-size: 0.95rem; margin-top: 8px; opacity: 0.9">
-            考古改變世界的 AI 論文
-          </p>
+          <div class="rag-about-block">
+            <div class="rag-about-bg-circle rag-about-bg-1"></div>
+            <div class="rag-about-bg-circle rag-about-bg-2"></div>
+
+            <div class="rag-about-content">
+              <h3 class="rag-about-title">關於本專題報導</h3>
+              <p class="rag-about-text">
+                本專題報導系統性地介紹 RAG (Retrieval-Augmented Generation)
+                的歷史演進， 從 2020 年的起源到 2026 年的 Agentic 時代。
+                用<strong>雜誌敘事</strong>的方式講述技術故事，
+                配合<strong>視覺化時間軸</strong>與<strong>產業應用案例</strong>，
+                讓你不只理解「是什麼」，更能看見「為什麼重要」與「如何改變世界」。
+              </p>
+
+              <div class="rag-about-signature">
+                <div class="rag-about-brand">AI Paper Archaeology</div>
+                <div class="rag-about-slogan">考古改變世界的 AI 論文</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

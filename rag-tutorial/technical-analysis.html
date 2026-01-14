@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../styles/global.css" />
     <link rel="stylesheet" href="../styles/paper-reading.css" />
     <link rel="stylesheet" href="../styles/articles.css" />
+    <link rel="stylesheet" href="rag-tutorial.css" />
   </head>
   <body>
     <div class="container">
@@ -19,15 +20,15 @@
       </div>
 
       <!-- 頁面標題 -->
-      <div class="index-header" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
-        <h1>🔬 技術深度分析</h1>
-        <p>RAG 的運作原理、技術缺陷與檢索演進</p>
-        <p style="font-size: 0.9rem; margin-top: 15px; opacity: 0.95;">
+      <div class="rag-header-primary">
+        <h1 style="margin: 0 0 10px 0; font-size: 2.5rem;">🔬 技術深度分析</h1>
+        <p style="font-size: 1.2rem; opacity: 0.95; margin: 0;">RAG 的運作原理、技術缺陷與檢索演進</p>
+        <p style="font-size: 0.95rem; margin-top: 15px; opacity: 0.9;">
           <strong>深入理解 RAG 的技術細節</strong>
         </p>
-        <p style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; margin-top: 15px; font-size: 0.9rem;">
+        <div class="rag-header-badge">
           🎯 從架構設計到實作挑戰
-        </p>
+        </div>
       </div>
 
       <!-- 導言 -->
@@ -60,9 +61,9 @@
           </p>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 30px;">
-          <div style="background: var(--primary-light); padding: 25px; border-radius: 12px; border-left: 4px solid var(--primary-color);">
-            <h4 style="color: var(--primary-color); margin-top: 0;">🔍 檢索器（Retriever）</h4>
+        <div class="rag-info-grid">
+          <div class="rag-concept-primary">
+            <h4 style="color: var(--rag-primary); margin-top: 0;">🔍 檢索器（Retriever）</h4>
             <p style="line-height: 1.8; margin-bottom: 15px;">
               <strong>職責：</strong>根據使用者查詢，從知識庫中找出最相關的文檔片段。
             </p>
@@ -73,8 +74,8 @@
             </ul>
           </div>
 
-          <div style="background: var(--secondary-light); padding: 25px; border-radius: 12px; border-left: 4px solid var(--secondary-color);">
-            <h4 style="color: var(--secondary-color); margin-top: 0;">✍️ 生成器（Generator）</h4>
+          <div class="rag-concept-secondary">
+            <h4 style="color: var(--rag-secondary); margin-top: 0;">✍️ 生成器（Generator）</h4>
             <p style="line-height: 1.8; margin-bottom: 15px;">
               <strong>職責：</strong>基於檢索到的文檔和使用者查詢，生成最終回答。
             </p>
@@ -447,46 +448,68 @@
       </div>
 
       <!-- 導航 -->
-      <div style="margin: 60px 0; text-align: center;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-width: 900px; margin: 0 auto;">
+      <div style="margin: 60px 0; text-align: center">
+        <div class="rag-info-grid-2">
           <a
             href="index.html"
-            style="
-              text-decoration: none;
-              display: block;
-              background: linear-gradient(135deg, #6366f1, #4f46e5);
-              padding: 30px;
-              border-radius: 16px;
-              color: white;
-              box-shadow: var(--shadow-lg);
-            "
+            class="rag-nav-card rag-nav-card-primary"
           >
-            <h3 style="margin: 0 0 10px 0; font-size: 1.5rem">← 回到 RAG 演進史</h3>
+            <h3 style="margin: 0 0 10px 0; font-size: 1.5rem">
+              ← 回到 RAG 演進史
+            </h3>
           </a>
           <a
             href="practical-guide.html"
-            style="
-              text-decoration: none;
-              display: block;
-              background: linear-gradient(135deg, #10b981, #059669);
-              padding: 30px;
-              border-radius: 16px;
-              color: white;
-              box-shadow: var(--shadow-lg);
-            "
+            class="rag-nav-card rag-nav-card-secondary"
           >
-            <h3 style="margin: 0 0 10px 0; font-size: 1.5rem">實務應用指南 →</h3>
+            <h3 style="margin: 0 0 10px 0; font-size: 1.5rem">
+              實務應用指南 →
+            </h3>
           </a>
         </div>
       </div>
 
       <!-- 相關資源 -->
-      <div style="margin-top: 50px; text-align: center; padding: 40px; background: var(--bg-body); border-radius: var(--radius-md);">
-        <h3 style="color: var(--primary-color); margin-bottom: 20px">📚 相關資源</h3>
-        <div class="quick-links">
-          <a href="../index.html" class="quick-link">← 回到首頁</a>
-          <a href="index.html" class="quick-link">📚 RAG 演進史</a>
-          <a href="https://arxiv.org/abs/2005.11401" class="quick-link" target="_blank">📄 RAG 原始論文</a>
+      <div class="rag-footer-section">
+        <h3 class="rag-resources-title">📚 延伸閱讀與資源</h3>
+        <div class="rag-resources-grid">
+          <a href="../index.html" class="rag-resource-card">
+            <span class="rag-resource-icon">🏠</span>
+            <span class="rag-resource-text">回到首頁</span>
+          </a>
+          <a href="index.html" class="rag-resource-card">
+            <span class="rag-resource-icon">📚</span>
+            <span class="rag-resource-text">RAG 演進史</span>
+          </a>
+          <a href="https://arxiv.org/abs/2005.11401" class="rag-resource-card" target="_blank">
+            <span class="rag-resource-icon">📄</span>
+            <span class="rag-resource-text">RAG 原始論文</span>
+          </a>
+          <a href="https://arxiv.org/abs/2312.10997" class="rag-resource-card" target="_blank">
+            <span class="rag-resource-icon">📊</span>
+            <span class="rag-resource-text">RAG Survey</span>
+          </a>
+        </div>
+
+        <div class="rag-about-block">
+          <div class="rag-about-bg-circle rag-about-bg-1"></div>
+          <div class="rag-about-bg-circle rag-about-bg-2"></div>
+          
+          <div class="rag-about-content">
+            <h3 class="rag-about-title">關於本專題報導</h3>
+            <p class="rag-about-text">
+              本專題報導系統性地介紹 RAG (Retrieval-Augmented Generation)
+              的歷史演進， 從 2020 年的起源到 2026 年的 Agentic 時代。
+              用<strong>雜誌敘事</strong>的方式講述技術故事，
+              配合<strong>視覺化時間軸</strong>與<strong>產業應用案例</strong>，
+              讓你不只理解「是什麼」，更能看見「為什麼重要」與「如何改變世界」。
+            </p>
+            
+            <div class="rag-about-signature">
+              <div class="rag-about-brand">AI Paper Archaeology</div>
+              <div class="rag-about-slogan">考古改變世界的 AI 論文</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

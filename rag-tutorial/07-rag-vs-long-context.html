@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>批判性檢驗：RAG vs Long Context 深度對決 | RAG 演進史</title>
+    <meta name="description" content="EMNLP 2024 最新研究：RAG 真的被 Long Context 模型打敗了嗎？深度解析 56.3% vs 49.0% 的背後意義，以及 RAG 的未來定位。" />
+    <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/paper-reading.css" />
+    <link rel="stylesheet" href="../styles/articles.css" />
+    <link rel="stylesheet" href="rag-tutorial.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- 麵包屑導航 -->
+      <div class="breadcrumb">
+        <a href="../index.html">🏠 首頁</a> / 
+        <a href="index.html">📚 RAG 演進史</a> / 
+        批判性檢驗
+      </div>
+
+      <!-- 論文資訊卡 -->
+      <div class="rag-header-primary" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);">
+        <h1 style="color: white; margin-bottom: 10px;">⚠️ 批判性檢驗</h1>
+        <p style="color: rgba(255,255,255,0.9); font-size: 1.2rem;">RAG vs Long Context：檢索增強還有未來嗎？</p>
+        <p style="font-size: 0.9rem; margin-top: 15px; color: rgba(255,255,255,0.8);">
+          <strong>EMNLP 2024 深度解析</strong>
+        </p>
+        <div class="rag-header-badge" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+          📉 56.3% vs 49.0% 的警訊
+        </div>
+      </div>
+
+      <!-- 一句話總結 -->
+      <div class="key-concept" style="border-left-color: var(--rag-danger);">
+        <h4 style="color: var(--rag-danger);">💡 核心爭議</h4>
+        <p style="font-size: 1.1rem; line-height: 1.8;">
+          隨著 Gemini 1.5 Pro 等百萬級 Context 模型的出現，一個靈魂拷問隨之而來：<br>
+          <strong>「如果可以把整本書塞進 Prompt，我們還需要 RAG 嗎？」</strong><br>
+          EMNLP 2024 的研究給出了一個令人震驚的數據：在資源充足的情況下，Long Context 模型的表現顯著優於 RAG。
+        </p>
+      </div>
+
+      <!-- 數據對決 -->
+      <h2>⚔️ 數據對決：EMNLP 2024 實證研究</h2>
+      
+      <div class="section-block">
+        <h3 style="color: var(--rag-text-primary);">論文：Retrieval Augmented Generation or Long-Context LLMs?</h3>
+        <p style="margin-bottom: 30px;">
+          這項研究在多個問答資料集上，直接比較了 RAG (檢索 Top-K 片段) 與 Long Context (輸入全文) 的表現。結果如下：
+        </p>
+
+        <div class="rag-stats-grid">
+          <div class="rag-stats-box" style="border-color: var(--rag-danger);">
+            <div class="rag-stats-value" style="color: var(--rag-danger);">56.3%</div>
+            <div class="rag-stats-label">Long Context 正確率</div>
+            <div style="margin-top: 10px; font-size: 0.9rem; color: var(--rag-text-secondary);">
+              直接閱讀全文，理解更全面
+            </div>
+          </div>
+          <div class="rag-stats-box">
+            <div class="rag-stats-value" style="color: var(--rag-text-secondary);">49.0%</div>
+            <div class="rag-stats-label">RAG 正確率</div>
+            <div style="margin-top: 10px; font-size: 0.9rem; color: var(--rag-text-secondary);">
+              檢索片段破碎，遺漏關鍵資訊
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #fef2f2; border-radius: 12px; border-left: 4px solid var(--rag-danger);">
+          <h4 style="color: var(--rag-danger); margin-top: 0;">📉 RAG 輸在哪裡？</h4>
+          <ul style="line-height: 1.8; margin-bottom: 0;">
+            <li><strong>跨段落推理失敗</strong>：當答案需要整合文章開頭與結尾的資訊時，RAG 往往只檢索到其中一部分。</li>
+            <li><strong>排序錯誤</strong>：關鍵資訊雖然在知識庫中，但檢索器給出的排序不夠高（Top-K 之外），導致 LLM 根本沒看到。</li>
+            <li><strong>上下文破碎</strong>：切分文檔（Chunking）破壞了語義連貫性，導致 LLM 誤解片段含義。</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 系統性失敗分析 -->
+      <h2>🚨 RAG 的系統性失敗</h2>
+      <p style="margin-bottom: 25px;">除了效能差異，其他研究還揭露了 RAG 更深層的結構性問題：</p>
+
+      <div class="rag-info-grid">
+        <div class="rag-concept-primary" style="border-color: var(--rag-warning); background: #fffbeb;">
+          <h4 style="color: var(--rag-warning); margin-top: 0;">🛑 RefusalBench：無法拒絕</h4>
+          <p style="font-size: 0.95rem; line-height: 1.8;">
+            當檢索到的內容包含<strong>錯誤資訊</strong>或<strong>無關雜訊</strong>時，RAG 系統往往「照單全收」，無法像人類一樣判斷「這份資料沒用」並拒絕回答。這導致了嚴重的幻覺與誤導。
+          </p>
+        </div>
+        <div class="rag-concept-secondary" style="border-color: var(--rag-danger); background: #fef2f2;">
+          <h4 style="color: var(--rag-danger); margin-top: 0;">🧩 RAGProbe：組合無力</h4>
+          <p style="font-size: 0.95rem; line-height: 1.8;">
+            對於「比較 A 和 B」或「先 A 後 B 的結果」這類<strong>組合型問題</strong>，RAG 的失敗率極高。因為檢索器通常只能針對單一事實進行優化，難以同時抓取多個相關片段並維持其邏輯關係。
+          </p>
+        </div>
+      </div>
+
+      <!-- RAG 的反擊 -->
+      <h2 style="margin-top: 60px;">🛡️ RAG 的生存空間：為何我們仍需要它？</h2>
+      
+      <div class="analogy" style="margin-top: 30px;">
+        <h4 style="font-size: 1.4rem;">💡 「記憶」vs「筆記」的比喻</h4>
+        <p style="font-size: 1.1rem; line-height: 1.8;">
+          如果 Long Context 是擁有<strong>超強短期記憶</strong>的天才（能一次看完一本書並記住），<br>
+          那 RAG 就是擁有<strong>無限圖書館</strong>的研究員（能隨時查閱數百萬本書）。
+        </p>
+        
+        <div class="rag-decision-flow" style="margin-top: 25px;">
+          <div class="rag-decision-step">
+            <div class="rag-decision-title">成本考量 (Cost)</div>
+            <div class="rag-decision-desc">
+              Long Context 的成本與輸入長度成正比。每次查詢都輸入 100萬 tokens 是極其昂貴的。<br>
+              <strong>RAG 勝：</strong>只檢索相關片段，成本低廉且穩定。
+            </div>
+          </div>
+          <div class="rag-decision-step">
+            <div class="rag-decision-title">延遲 (Latency)</div>
+            <div class="rag-decision-desc">
+              處理超長文本需要顯著的計算時間（Time to First Token）。<br>
+              <strong>RAG 勝：</strong>檢索 + 短文本生成，響應速度快。
+            </div>
+          </div>
+          <div class="rag-decision-step">
+            <div class="rag-decision-title">知識庫規模 (Scale)</div>
+            <div class="rag-decision-desc">
+              即便是 2M context window，也裝不下企業級的 TB 級數據庫。<br>
+              <strong>RAG 勝：</strong>理論上支援無限大的外部知識庫。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 未來解方 -->
+      <h2>🚀 未來解方：SELF-ROUTE (混合策略)</h2>
+      <p style="margin-bottom: 25px;">
+        這篇 EMNLP 論文最終提出了一個務實的解決方案：<strong>SELF-ROUTE</strong>。
+        讓模型自己決定該用哪種方式！
+      </p>
+
+      <div class="section-block" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 2px solid var(--rag-primary);">
+        <h3 style="color: var(--rag-primary); text-align: center;">🤖 SELF-ROUTE 機制</h3>
+        <p style="text-align: center; margin-bottom: 30px; color: var(--rag-text-secondary);">
+          既然兩者各有優缺，何不讓 AI 自己選？
+        </p>
+
+        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+          <div style="background: white; padding: 20px; border-radius: 12px; flex: 1; min-width: 250px; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 10px;">❓</div>
+            <h4 style="margin: 0;">簡單查詢</h4>
+            <p style="font-size: 0.9rem; color: var(--rag-text-secondary);">"客服電話是多少？"</p>
+            <div style="margin-top: 15px; font-weight: bold; color: var(--rag-secondary);">⬇️ 走 RAG 路徑</div>
+            <div style="font-size: 0.85rem; color: var(--rag-text-secondary);">低成本、快速</div>
+          </div>
+
+          <div style="background: white; padding: 20px; border-radius: 12px; flex: 1; min-width: 250px; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🧠</div>
+            <h4 style="margin: 0;">複雜推理</h4>
+            <p style="font-size: 0.9rem; color: var(--rag-text-secondary);">"總結這份財報的風險"</p>
+            <div style="margin-top: 15px; font-weight: bold; color: var(--rag-danger);">⬇️ 走 LC 路徑</div>
+            <div style="font-size: 0.85rem; color: var(--rag-text-secondary);">高成本、高品質</div>
+          </div>
+        </div>
+
+        <p style="margin-top: 25px; text-align: center;">
+          <strong>結果：</strong>這種混合方法在保持較低成本的同時，達到了接近 Long Context 的高效能。
+        </p>
+      </div>
+
+      <!-- 導航 -->
+      <div style="margin: 60px 0; text-align: center">
+        <div class="rag-info-grid-2">
+          <a href="05-graphrag.html" class="rag-nav-card rag-nav-card-secondary">
+            <h3 style="margin: 0 0 10px 0; font-size: 1.5rem">← 上一篇：GraphRAG</h3>
+          </a>
+          <a href="06-agentic-rag.html" class="rag-nav-card rag-nav-card-primary">
+            <h3 style="margin: 0 0 10px 0; font-size: 1.5rem">下一篇：Agentic RAG →</h3>
+          </a>
+        </div>
+      </div>
+
+      <!-- 頁尾 -->
+      <div class="rag-footer-section">
+        <h3 class="rag-resources-title">📚 延伸閱讀與資源</h3>
+        <div class="rag-resources-grid">
+          <a href="../index.html" class="rag-resource-card">
+            <span class="rag-resource-icon">🏠</span>
+            <span class="rag-resource-text">回到首頁</span>
+          </a>
+          <a href="index.html" class="rag-resource-card">
+            <span class="rag-resource-icon">📚</span>
+            <span class="rag-resource-text">RAG 演進史</span>
+          </a>
+          <a href="https://aclanthology.org/2024.emnlp-industry.66/" class="rag-resource-card" target="_blank">
+            <span class="rag-resource-icon">📄</span>
+            <span class="rag-resource-text">EMNLP 2024 論文</span>
+          </a>
+        </div>
+
+        <div class="rag-about-block">
+          <div class="rag-about-bg-circle rag-about-bg-1"></div>
+          <div class="rag-about-bg-circle rag-about-bg-2"></div>
+          
+          <div class="rag-about-content">
+            <h3 class="rag-about-title">關於本專題報導</h3>
+            <p class="rag-about-text">
+              本專題報導系統性地介紹 RAG (Retrieval-Augmented Generation)
+              的歷史演進， 從 2020 年的起源到 2026 年的 Agentic 時代。
+              用<strong>雜誌敘事</strong>的方式講述技術故事，
+              讓你不只理解「是什麼」，更能看見「為什麼重要」。
+            </p>
+            
+            <div class="rag-about-signature">
+              <div class="rag-about-brand">AI Paper Archaeology</div>
+              <div class="rag-about-slogan">考古改變世界的 AI 論文</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
