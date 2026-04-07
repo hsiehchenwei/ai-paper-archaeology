@@ -1,0 +1,2236 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LongMemEval Wiki — 長期互動記憶基準測試</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #0d1117;
+  --bg-tertiary: #161b22;
+  --bg-card: #1c2333;
+  --accent: #58a6ff;
+  --accent-dim: #2d6db5;
+  --accent-glow: rgba(88, 166, 255, 0.12);
+  --accent-bright: #79c0ff;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --border: #21262d;
+  --border-accent: rgba(88, 166, 255, 0.3);
+  --sidebar-width: 300px;
+  --header-height: 64px;
+  --success: #3fb950;
+  --warning: #d29922;
+  --purple: #bc8cff;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ── Progress Bar ──────────────────────── */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  z-index: 200;
+  transition: width 0.15s ease;
+}
+
+/* ── Header ─────────────────────────────── */
+.header {
+  position: fixed;
+  top: 3px;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  background: rgba(13, 17, 23, 0.85);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 0 20px rgba(88, 166, 255, 0.25);
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.logo-text span {
+  color: var(--accent);
+}
+
+.logo-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: 12px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
+}
+
+/* Search */
+.search-container {
+  flex: 1;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 16px 8px 40px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.search-input::placeholder { color: var(--text-muted); }
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.search-kbd {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+  display: none;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+  z-index: 200;
+}
+
+.search-results.active { display: block; }
+
+.search-result-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.search-result-item:hover { background: var(--bg-tertiary); }
+.search-result-item:last-child { border-bottom: none; }
+
+.search-result-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.search-result-context {
+  font-size: 12px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.search-result-context mark {
+  background: rgba(88, 166, 255, 0.3);
+  color: var(--accent-bright);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* Header links */
+.header-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+.header-link {
+  color: var(--text-secondary);
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+}
+.header-link:hover { color: var(--accent); }
+
+/* Mobile toggle */
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-right: 8px;
+}
+
+/* ── Sidebar ────────────────────────────── */
+.sidebar {
+  position: fixed;
+  top: calc(var(--header-height) + 3px);
+  left: 0;
+  width: var(--sidebar-width);
+  height: calc(100vh - var(--header-height) - 3px);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px 0;
+  z-index: 50;
+  transition: transform 0.3s ease;
+}
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+.nav-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  padding: 8px 20px 6px;
+  margin-top: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+  position: relative;
+}
+
+.nav-item:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.nav-item.active {
+  color: var(--accent);
+  background: var(--accent-glow);
+  border-left-color: var(--accent);
+  font-weight: 500;
+}
+
+.nav-item .nav-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 22px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.nav-item.active .nav-num { color: var(--accent-dim); }
+
+/* ── Content ────────────────────────────── */
+.content {
+  margin-left: var(--sidebar-width);
+  margin-top: calc(var(--header-height) + 3px);
+  height: calc(100vh - var(--header-height) - 3px);
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.content::-webkit-scrollbar { width: 6px; }
+.content::-webkit-scrollbar-track { background: transparent; }
+.content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.content::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+.content-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 40px 48px 120px;
+}
+
+/* ── Markdown Styles ────────────────────── */
+.chapter { display: none; }
+.chapter.active { display: block; }
+
+.chapter h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border-accent);
+  letter-spacing: -0.5px;
+}
+
+.chapter h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 48px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chapter h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 32px;
+  margin-bottom: 10px;
+}
+
+.chapter h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent-bright);
+  margin-top: 24px;
+  margin-bottom: 8px;
+}
+
+.chapter p {
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.chapter strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.chapter a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+.chapter a:hover { border-bottom-color: var(--accent); }
+
+.chapter ul, .chapter ol {
+  margin-bottom: 16px;
+  padding-left: 24px;
+  color: var(--text-secondary);
+}
+
+.chapter li {
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.chapter li strong { color: var(--text-primary); }
+
+.chapter blockquote {
+  border-left: 3px solid var(--accent-dim);
+  padding: 8px 16px;
+  margin: 16px 0;
+  background: rgba(88, 166, 255, 0.05);
+  border-radius: 0 6px 6px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.chapter hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 40px 0;
+}
+
+.chapter pre {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  overflow-x: auto;
+  margin-bottom: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.chapter pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  font-size: 13px;
+}
+
+.chapter code {
+  background: var(--bg-tertiary);
+  color: var(--accent-bright);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  border: 1px solid var(--border);
+}
+
+/* Tables */
+.chapter table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.chapter thead th {
+  background: var(--bg-tertiary);
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 14px;
+  color: var(--accent);
+  font-size: 13px;
+  border-bottom: 2px solid var(--border);
+}
+
+.chapter tbody td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+
+.chapter tbody tr:last-child td { border-bottom: none; }
+
+.chapter tbody tr:hover { background: rgba(88, 166, 255, 0.04); }
+
+/* ── Chapter Nav (prev/next) ────────────── */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.chapter-nav-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 20px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  min-width: 0;
+  flex: 1;
+}
+
+.chapter-nav-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.chapter-nav-btn.next { text-align: right; }
+
+.chapter-nav-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chapter-nav-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Mobile Responsive ──────────────────── */
+@media (max-width: 768px) {
+  .menu-toggle { display: block; }
+
+  .sidebar {
+    transform: translateX(-100%);
+    width: 280px;
+    z-index: 90;
+  }
+
+  .sidebar.open { transform: translateX(0); }
+
+  .content {
+    margin-left: 0;
+  }
+
+  .content-inner {
+    padding: 24px 16px 120px;
+  }
+
+  .logo-sub { display: none; }
+
+  .search-kbd { display: none; }
+
+  .chapter h1 { font-size: 24px; }
+  .chapter h2 { font-size: 19px; }
+
+  .chapter table { font-size: 12px; }
+  .chapter thead th, .chapter tbody td { padding: 6px 8px; }
+
+  .chapter-nav { flex-direction: column; }
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 80;
+}
+
+.overlay.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Header -->
+<header class="header">
+  <button class="menu-toggle" id="menuToggle">&#9776;</button>
+  <div class="logo-area">
+    <div class="logo-icon">&#129504;</div>
+    <div class="logo-text">LongMem<span>Eval</span> Wiki</div>
+    <div class="logo-sub">長期互動記憶基準測試</div>
+  </div>
+
+  <div class="search-container">
+    <span class="search-icon">&#128269;</span>
+    <input class="search-input" id="searchInput" type="text" placeholder="搜尋文件..." autocomplete="off">
+    <span class="search-kbd">&#8984;K</span>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <div class="header-links">
+    <a class="header-link" href="https://github.com/xiaowu0162/LongMemEval" target="_blank" rel="noopener" title="GitHub">
+      <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    </a>
+    <a class="header-link" href="https://arxiv.org/abs/2410.10813" target="_blank" rel="noopener" title="arXiv">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M4 2h12l6 6v14H4V2zm11 1H5v18h16V9h-6V3zm1 0v5h5l-5-5zM7 13h12v1H7v-1zm0 3h12v1H7v-1zm0 3h8v1H7v-1zm0-9h12v1H7v-1z"/></svg>
+    </a>
+  </div>
+</header>
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+  <div class="nav-section-label">章節</div>
+  <div class="nav-item active" data-ch="0">
+    <span class="nav-num">00</span> 概覽
+  </div>
+  <div class="nav-item" data-ch="1">
+    <span class="nav-num">01</span> 五大記憶能力
+  </div>
+  <div class="nav-item" data-ch="2">
+    <span class="nav-num">02</span> 基準測試建構
+  </div>
+  <div class="nav-item" data-ch="3">
+    <span class="nav-num">03</span> 三階段記憶模型
+  </div>
+  <div class="nav-item" data-ch="4">
+    <span class="nav-num">04</span> 四大關鍵發現
+  </div>
+  <div class="nav-item" data-ch="5">
+    <span class="nav-num">05</span> 實驗結果
+  </div>
+  <div class="nav-item" data-ch="6">
+    <span class="nav-num">06</span> 程式碼架構
+  </div>
+  <div class="nav-item" data-ch="7">
+    <span class="nav-num">07</span> 相關工作與影響
+  </div>
+  <div class="nav-item" data-ch="8">
+    <span class="nav-num">08</span> 評審問答記錄
+  </div>
+</nav>
+
+<!-- Overlay for mobile -->
+<div class="overlay" id="overlay"></div>
+
+<!-- Main Content -->
+<main class="content" id="content">
+  <div class="content-inner" id="contentInner">
+    <!-- Chapters rendered by JS -->
+  </div>
+</main>
+
+<!-- Markdown Sources -->
+<script id="md-ch00" type="text/markdown">
+# LongMemEval 概覽
+
+## 一句話定義
+
+**LongMemEval** 是一個用來測試 AI 聊天助理「長期互動記憶」能力的基準測試框架——500 道人工精心設計的問題，涵蓋五大記憶能力，揭示了當前最先進系統 30%~60% 的效能衰退。
+
+## 論文資訊
+
+| 項目 | 內容 |
+|------|------|
+| 標題 | LongMemEval: Benchmarking Chat Assistants on Long-Term Interactive Memory |
+| 作者 | Di Wu, Hongwei Wang, Wenhao Yu, Yuwei Zhang, Kai-Wei Chang, Dong Yu |
+| 機構 | UCLA、Tencent AI Lab Seattle、UC San Diego |
+| 發表 | ICLR 2025 |
+| arXiv | [2410.10813](https://arxiv.org/abs/2410.10813) |
+| 程式碼 | [github.com/xiaowu0162/LongMemEval](https://github.com/xiaowu0162/LongMemEval) |
+| 授權 | MIT |
+
+## 核心問題
+
+AI 聊天助理（ChatGPT、Gemini 等）現在都加入了記憶功能，但：
+- 它們在長期互動中的記憶能力到底有多好？
+- 目前沒有一個系統性的方法來衡量這件事
+
+## 三大貢獻
+
+### 1. 基準測試本身
+- 500 道人工策劃的問題
+- 測試 5 大記憶能力、7 種問題類型
+- 可擴展的對話歷史（115K~1.5M tokens）
+
+### 2. 揭示效能差距
+- 商業系統（GPT-4o）：37% 效能下降
+- 長上下文 LLM：30%~55% 效能下降
+- 連最強的模型也無法可靠地記住長期對話
+
+### 3. 統一框架 + 四大發現
+- 提出三階段記憶模型（索引→檢索→閱讀）
+- 四個關鍵發現指引未來設計方向
+
+## 關鍵數字
+
+| 指標 | 數值 |
+|------|------|
+| 問題總數 | 500 |
+| 記憶能力 | 5 種 |
+| 問題類型 | 7 種 |
+| LongMemEval_S | ~115K tokens / 30-40 sessions |
+| LongMemEval_M | ~1.5M tokens / 500 sessions |
+| GPT-4o Oracle → Full History 下降 | 87.0% → 60.6%（-30.3%） |
+| ChatGPT 線上 vs 離線 | 57.73% vs 91.84%（-37%） |
+| 評估一致率 | GPT-4o 評估與人類專家 97% 一致 |
+
+## 兩種測試集
+
+```
+┌─────────────────────────────────────────────┐
+│  LongMemEval_S (Standard)                   │
+│  ~115K tokens | 30-40 sessions | 可跑在      │
+│  大多數長上下文 LLM 上                         │
+├─────────────────────────────────────────────┤
+│  LongMemEval_M (Massive)                    │
+│  ~1.5M tokens | 500 sessions | 需要          │
+│  記憶系統才能處理                               │
+└─────────────────────────────────────────────┘
+```
+
+## 補充：與 LoCoMo/MSC 的三個結構性差異
+
+LongMemEval 填補的空白不僅是「更大更全面」，而是與先前基準（LoCoMo、MSC 等）存在三個結構性差異：
+
+### 1. 可擴展性
+LoCoMo 等基準的對話歷史長度是固定的，無法測試「同一個問題在不同歷史長度下的表現」。LongMemEval 透過大海撈針式的歷史編纂管道（`sample_haystack_and_timestamp.py`），允許自由調整填充對話數量，從 115K tokens（LongMemEval_S）擴展到 1.5M tokens（LongMemEval_M），甚至更大。這使得它能測試記憶系統的可擴展性，而非僅測試單一固定長度。
+
+### 2. 能力維度的系統性
+LongMemEval 定義了五大記憶能力，涵蓋七種問題類型。特別是「時間推理」和「棄權」這兩個維度，在先前的基準中幾乎沒有被系統性地測試過。時間推理需要理解時間戳的語義，棄權則測試模型「知道自己不知道」的後設認知能力。
+
+### 3. 人工策劃的品質保證
+每一道題都經過人工專家審查、改寫、驗證，確保資訊是「間接嵌入」的，而非直接陳述。這與自動生成的基準在品質和難度控制上有本質差異。
+
+## 補充：為什麼聚焦「聊天助理」場景
+
+聚焦「聊天助理」是務實的範圍界定。聊天助理是目前長期記憶需求最普遍、使用者基數最大的場景（ChatGPT、Gemini 的使用者以億計）。論文中的五大能力和三階段框架在原理上是通用的——客服系統同樣需要資訊萃取和知識更新，醫療對話同樣需要時間推理。差異主要在於：
+
+- **領域特定的評估標準**：如醫療準確性要求更高
+- **資料分佈差異**：如客服中的重複性問題模式
+
+論文選擇先在最通用的場景建立基準，再由後續工作擴展到垂直領域，這是合理的策略。
+</script>
+
+<script id="md-ch01" type="text/markdown">
+# 五大記憶能力與七種問題類型
+
+## 五大記憶能力
+
+```
+┌──────────────────┬──────────────────┬──────────────────┐
+│  資訊萃取 (IE)    │  多工作階段推理    │  知識更新 (KU)    │
+│  回憶具體資訊      │  (MR)            │  追蹤資訊變更      │
+│                  │  跨對話綜合推理    │                  │
+├──────────────────┼──────────────────┼──────────────────┤
+│  時間推理 (TR)    │  棄權 (ABS)       │                  │
+│  理解時間關係      │  知道何時說        │                  │
+│                  │  「我不知道」      │                  │
+└──────────────────┴──────────────────┴──────────────────┘
+```
+
+### 1. 資訊萃取（Information Extraction）
+- **定義**：從大量互動歷史中回憶特定資訊的能力，包括使用者或助理提到的細節
+- **範例**：「使用者上次提到他最喜歡的餐廳叫什麼名字？」
+- **挑戰**：資訊可能隱含在對話中，而非明確陳述
+
+### 2. 多工作階段推理（Multi-Session Reasoning）
+- **定義**：綜合多個歷史對話中的資訊，回答涉及聚合和比較的複雜問題
+- **範例**：「使用者在過去三次旅行中，最常去哪個國家？」
+- **挑戰**：需要跨對話整合、計數、比較
+
+### 3. 知識更新（Knowledge Updates）
+- **定義**：辨識使用者個人資訊的變化，動態更新知識
+- **範例**：使用者先說住在紐約，後來說搬到了洛杉磯→應回答洛杉磯
+- **挑戰**：必須識別最新資訊，而非最早或出現最多次的
+
+### 4. 時間推理（Temporal Reasoning）
+- **定義**：理解使用者資訊的時間面向，包括明確的時間提及和互動的時間戳
+- **範例**：「使用者 2024 年夏天在做什麼工作？」
+- **挑戰**：需要理解時間關係、持續時間、順序
+
+### 5. 棄權（Abstention）
+- **定義**：在資訊不足時，正確地回答「我不知道」
+- **範例**：問一個使用者從未提及的事情→應拒絕回答而非胡謅
+- **挑戰**：假前提問題（false premise），看似合理但歷史中無此資訊
+
+## 七種問題類型
+
+| 問題類型 | 對應能力 | 說明 |
+|---------|---------|------|
+| `single-session-user` | IE | 使用者在單一對話中提到的資訊 |
+| `single-session-assistant` | IE | 助理在單一對話中提供的資訊 |
+| `single-session-preference` | IE | 使用者表達的偏好（隱含提及） |
+| `multi-session` | MR | 需跨多個對話綜合資訊 |
+| `knowledge-update` | KU | 使用者資訊在不同對話中有更新 |
+| `temporal-reasoning` | TR | 涉及時間順序或時間點的問題 |
+| `false-premise (abs)` | ABS | 基於錯誤前提的問題，正確答案是「不知道」 |
+
+## 問題分佈與統計
+
+- **證據位置**：答案所需的證據分散在不同位置（開頭、中間、結尾）
+- **所需會話數**：從 1 個到 6 個不等
+- **證據嵌入方式**：資訊被間接嵌入對話中，而非直接陳述，增加難度
+
+## 為什麼 single-session-preference 特別難？
+
+使用者偏好通常不會直接說出來：
+- ❌ 「我喜歡義大利菜」
+- ✅ 「上次去那家義大利餐廳感覺很棒，下次還想去」
+
+助理必須從上下文推斷偏好，而非依賴明確陳述。
+
+## 補充：被遺漏的記憶能力
+
+論文的五大能力分類是「功能導向」的設計選擇，但仍有重要的記憶能力未被涵蓋：
+
+- **情感記憶**：使用者在某次對話中的情緒狀態（沮喪、興奮），以及助理應如何根據情感歷史調整回應風格
+- **程序性記憶**：使用者反覆執行的操作模式（每次都要求特定格式的回覆），助理應學習並自動套用
+- **推理鏈記憶**：不只是事實，而是使用者的推理過程和決策邏輯
+- **社交記憶**：涉及第三方的資訊（使用者提到的朋友、家人的細節）
+
+不過，500 題的規模要涵蓋更多維度會稀釋每個維度的統計檢定力，這是取捨的結果。
+
+## 補充：能力之間的交叉關係分析
+
+五大能力之間存在明顯的交叉關係：
+
+- **知識更新** 需要「時間推理」來判斷哪個資訊更新，也需要「資訊萃取」找到相關的多筆資訊
+- **多工作階段推理** 以「資訊萃取」為前置步驟
+- **時間推理** 在知識更新情境中也會被隱含使用
+
+但這不代表評估結果無法歸因。每種問題類型的「主要」能力需求是明確的：
+- 知識更新的核心挑戰是「識別變更並取最新版」，而非單純的時間推理
+- 多工作階段推理的核心挑戰是「跨對話整合與比較」，而非單純的資訊萃取
+
+從實驗結果來看，不同問題類型展現了不同的效能模式（例如時間推理在簡單語意搜尋下幾乎完全失敗，但資訊萃取仍有合理效能），說明這些分類確實捕捉了不同的能力瓶頸。歸因的困難在於「無法完全隔離」，這是所有多維度基準測試的共同挑戰。
+
+## 補充：棄權題比例偏低的說明
+
+30 題（6%）的棄權問題確實偏少，但有設計理由：
+
+- **策劃成本高**：每一題「假前提」問題都需要精心設計一個看似合理但歷史中不存在的前提
+- **聚焦最難情境**：真實場景中使用者的無關問題可分為兩類：(1) 完全無關的一般知識問答（不需記憶系統介入）；(2) 看似涉及個人記憶但實際無相關歷史的問題。LongMemEval 聚焦第二類——最困難的情境
+- **統計限制**：30 題在 95% 信賴區間下約 ±18 個百分點，精度有限。但論文的定性結論（模型普遍傾向編造答案而非承認不知道）不太可能因增加樣本量而翻轉
+
+## 補充：認知科學的記憶分類映射
+
+論文的五大能力可以粗略映射到認知科學的記憶分類：
+
+| LongMemEval 能力 | 認知科學對應 | 說明 |
+|-----------------|------------|------|
+| 資訊萃取 (IE) | 情節記憶 (Episodic Memory) | 回憶特定事件的細節 |
+| 知識更新 (KU) | 語義記憶的動態更新 | 持續修正長期知識庫 |
+| 時間推理 (TR) | 時間記憶 (Chronesthesia) | 在時間軸上定位和排序事件 |
+| 棄權 (ABS) | 後設記憶 (Metamemory) | 知道自己知道或不知道什麼 |
+| 多工作階段推理 (MR) | 語義整合 | 跨情境綜合多源資訊 |
+
+論文選擇「功能導向」而非「認知科學導向」的分類是刻意的——認知科學描述的是人類大腦的記憶機制，而 LongMemEval 關注的是 AI 系統需要展現的功能性行為。
+</script>
+
+<script id="md-ch02" type="text/markdown">
+# 基準測試建構管道
+
+## 三階段建構流程
+
+```
+階段 1: 問題策劃          階段 2: 證據對話建構         階段 3: 歷史編纂
+┌─────────────┐      ┌─────────────────┐      ┌──────────────────┐
+│ 164 使用者    │      │ 每個證據陳述      │      │ 針在乾草堆中      │
+│ 屬性設計      │ ──→  │ 嵌入任務導向      │ ──→  │ 插入證據對話      │
+│ → LLM 生成   │      │ 證據對話中        │      │ + 填充對話        │
+│ → 人工篩選    │      │ → 人工檢查品質    │      │ + 時間戳          │
+└─────────────┘      └─────────────────┘      └──────────────────┘
+```
+
+## 階段 1：問題策劃
+
+### 使用者屬性設計
+
+164 個使用者屬性，橫跨五大類別：
+
+| 類別 | 範例 |
+|------|------|
+| 生活方式 | 飲食偏好、運動習慣、興趣愛好 |
+| 所有物 | 汽車品牌、寵物、3C 裝置 |
+| 生命事件 | 搬家、換工作、旅行 |
+| 情境脈絡 | 正在進行的專案、最近的煩惱 |
+| 人口統計 | 職業、居住地、家庭狀況 |
+
+### 問題生成流程
+
+1. 從使用者屬性生成背景段落
+2. LLM 根據背景生成種子問題
+3. **人工專家** 手動篩選、改寫、驗證每一道問題
+4. 最終保留 500 道高品質問題
+
+### 品質控制重點
+
+- 每道問題都經過人工審查
+- 確保資訊是**間接嵌入**的（不是直接陳述）
+- 確保問題確實需要長期記憶才能回答
+
+## 階段 2：證據對話建構
+
+### 「自聊」技術
+
+透過 LLM 自我對話（self-chatting）建構證據對話：
+
+```
+使用者屬性：「使用者 Alice 最近搬到了洛杉磯」
+    ↓
+生成任務導向對話：
+  User: 「我最近剛搬家，想找附近好吃的壽司店」
+  Assistant: 「歡迎來到洛杉磯！我推薦...」
+    ↓
+證據被自然地嵌入對話情境中
+```
+
+### 關鍵設計決策
+
+- **間接嵌入**：資訊不是直接說出來的，而是藏在對話脈絡中
+- **任務導向**：每個證據對話都有一個合理的使用場景
+- **人工檢查**：確保對話自然、證據可靠提取
+
+## 階段 3：歷史編纂（大海撈針）
+
+靈感來自「needle-in-a-haystack」測試：
+
+```
+[填充對話 1] [填充對話 2] ... [證據對話 ★] ... [填充對話 N]
+     ↑                          ↑                    ↑
+  來自 ShareGPT          答案就在這裡          來自 UltraChat
+  和 UltraChat          隨機位置插入           和自聊模擬
+```
+
+### 填充對話來源
+
+- **ShareGPT**：真實人類與 AI 的對話
+- **UltraChat**：大規模合成對話資料集
+- **自聊模擬**：LLM 模擬的多輪對話
+
+### 時間戳分配
+
+每個對話都有合理的時間戳，支援時間推理問題。
+
+### 兩種規模
+
+| 測試集 | Tokens | Sessions | 填充數量 |
+|--------|--------|----------|---------|
+| LongMemEval_S | ~115K | 30-40 | 80 min |
+| LongMemEval_M | ~1.5M | 500 | 500 max |
+
+## 自定義歷史編纂
+
+使用者可以用提供的腳本自行編纂不同規模的測試集：
+
+```bash
+python sample_haystack_and_timestamp.py \
+    TASK N_QUESTIONS MIN_FILLERS MAX_FILLERS ENFORCE_LENGTH
+```
+
+任務名稱對映：
+
+| 程式碼任務名 | 問題類型 |
+|------------|---------|
+| `single_hop` | single-session-user |
+| `implicit_preference_v2` | single-session-preference |
+| `assistant_previnfo` | single-session-assistant |
+| `two_hop` / `multi_session_synthesis` | multi-session |
+| `temp_reasoning_implicit` / `explicit` | temporal-reasoning |
+| `knowledge_update` | knowledge-update |
+
+## 補充：500 題的統計檢定力分析
+
+500 題在基準測試中屬於中等規模。論文並未明確報告信賴區間或統計顯著性檢定（如 bootstrap 或 paired t-test），這是方法論上的疏漏。
+
+- **棄權題**（約 30 題）：假設準確率為 50%，95% 信賴區間約為 ±18 個百分點——兩個系統的差距不超過 18% 可能不具統計顯著性
+- **主要問題類型**（如 `single-session-user` 可能有上百題）：統計檢定力較好
+- **整體結論**：「所有模型都大幅下降 30%~60%」這種幅度即使在較小樣本上也很可能是顯著的
+
+值得注意的是，許多知名基準（如 MMLU 部分子集只有 100 題）規模也在類似量級。LongMemEval 每道題經人工策劃，品質遠高於自動生成的大量題目。
+
+## 補充：「間接嵌入」缺乏量化指標
+
+「間接嵌入」是核心設計之一，但其「間接」程度缺乏量化指標：
+
+- **主觀判斷標準**：「不是直接陳述」的判斷是主觀的。例如「歡迎來到洛杉磯」是否算直接陳述？城市名被明確提到，但嵌入在助理回覆中而非使用者聲明中
+- **策劃者一致性**：論文未報告 inter-annotator agreement 分數，不同策劃者對「間接」的理解可能不一致
+- **改進方向**：可定義三個嵌入層級——(1) 明確陳述、(2) 可推斷、(3) 需要多步推理——作為量化難度指標
+
+## 補充：Self-chatting 品質的局限
+
+LLM 自我對話生成的證據對話與真實人類對話存在系統性差異：
+
+| 面向 | 真實對話 | LLM 對話 |
+|------|---------|---------|
+| 語法 | 打字錯誤、不完整句子 | 語法正確、結構完整 |
+| 風格 | 口語化、情緒表達 | 風格一致、邏輯清晰 |
+| 主題 | 隨意跳轉 | 圍繞任務導向 |
+
+這個差距可能造成兩個方向的偏差：
+1. 對語意搜尋系統更「友好」（LLM 對話語意更清晰）
+2. 低估真實場景中的雜訊干擾
+
+不過，填充對話使用了 ShareGPT（真實人類對話）和 UltraChat 的混合，一定程度緩解了單一風格問題。而且如果在這種「理想化」條件下系統都只能達到 60%~70% 準確率，真實場景的表現只會更差——核心結論反而因此更加穩健。
+
+## 補充：填充對話的主題重疊干擾問題
+
+填充對話來自 ShareGPT 和 UltraChat，主題分佈廣泛（程式設計、創意寫作、日常對話等）。但論文未明確提到主題去重或主題距離控制。
+
+- **干擾場景**：若填充對話碰巧涉及與證據對話相同的主題（如都在討論搬家），語意檢索可能產生偽陽性
+- **合理性**：這種干擾在真實場景中同樣存在（使用者確實可能多次討論類似主題），所以它不是需要消除的偏差，而是合理的挑戰維度
+- **改進方向**：可計算每個證據對話與其填充對話之間的語意相似度分佈，作為干擾程度的量化指標
+
+## 補充：證據位置效應（Primacy/Recency）分析
+
+論文在基準統計圖表中追蹤並報告了證據位置的分佈（evidence statement location inside sessions），顯示有意識地控制位置多樣性。
+
+- **位置效應**：長上下文 LLM 的已知弱點——特別是「lost in the middle」現象，中間位置的資訊最容易被忽略
+- **LongMemEval 的做法**：透過隨機插入證據對話來確保位置分佈的多樣性，使基準能測試模型在不同位置上的表現
+- **未完成的分析**：論文可以進一步報告「準確率 vs 證據位置」的分析（類似 NIAH 測試的熱力圖），以量化位置效應對記憶系統的具體影響
+- **規模效應**：從 LongMemEval_S 到 LongMemEval_M，信噪比從約 1/35 降低到 1/500，更多填充對話帶來更高的干擾密度
+</script>
+
+<script id="md-ch03" type="text/markdown">
+# 三階段記憶模型與統一框架
+
+## 設計動機
+
+現有的長期記憶系統設計各異，缺乏統一的比較框架。本論文提出一個簡潔但強大的三階段模型，能涵蓋所有現有方法，並揭示四個關鍵設計控制點。
+
+## 三階段模型
+
+```
+對話歷史                                        使用者問題
+(t₁,S₁), (t₂,S₂), ..., (tₙ,Sₙ)                    Q
+         │                                        │
+         ▼                                        ▼
+┌─────────────────┐                    ┌─────────────────┐
+│  Stage 1: 索引   │                    │  Stage 2: 檢索   │
+│  (Indexing)      │                    │  (Retrieval)     │
+│                  │                    │                  │
+│  對話 → (K,V)    │─── 記憶儲存 ────→  │  Query → Top-K   │
+│  pairs           │                    │  相關記憶         │
+└─────────────────┘                    └────────┬────────┘
+                                                │
+                                                ▼
+                                    ┌─────────────────┐
+                                    │  Stage 3: 閱讀   │
+                                    │  (Reading)       │
+                                    │                  │
+                                    │  LLM 閱讀記憶    │
+                                    │  → 生成回答       │
+                                    └─────────────────┘
+```
+
+## 四大控制點（Control Points）
+
+### CP1：Value（儲存粒度）
+
+**問題**：應該以什麼粒度儲存對話歷史？
+
+| 粒度 | 說明 | 優缺點 |
+|------|------|--------|
+| **Session（完整對話）** | 整個對話存為一個 value | 保留完整脈絡，但冗長 |
+| **Round（單輪問答）** | 一問一答為一個 value | ★ 最佳平衡 |
+| **Fact（萃取事實）** | 壓縮為使用者事實 | 節省空間但資訊遺失 |
+
+**發現**：Round 是最佳粒度。Fact 壓縮雖然整體效能較差，但在多工作階段推理上反而有改善。
+
+### CP2：Key（索引策略）
+
+**問題**：檢索時用什麼作為搜尋鍵？
+
+| 策略 | 說明 | 效果 |
+|------|------|------|
+| **K = V** | 直接用 value 本身當 key | 基準線，已是強力方法 |
+| **K = V + facts** | 用萃取的使用者事實擴展 key | ★ Recall@K +9.4%, 準確率 +5.4% |
+| **K = V + keyphrases** | 用關鍵短語擴展 key | 改善但不如 facts |
+
+**發現**：用萃取的使用者事實擴展索引鍵，能大幅提升檢索召回率和最終準確率。
+
+### CP3：Query（查詢策略）
+
+**問題**：如何制定檢索查詢？
+
+| 策略 | 說明 | 效果 |
+|------|------|------|
+| **直接查詢** | 用原始問題做語意搜尋 | 基準線 |
+| **時間感知查詢擴展** | 根據問題中的時間線索縮小搜尋範圍 | ★ 時間推理 Recall +6.8%~11.3% |
+
+**發現**：簡單的記憶設計在時間推理問題上表現很差。時間感知的索引和查詢擴展策略能有效改善。
+
+### CP4：Reading（閱讀策略）
+
+**問題**：LLM 拿到檢索結果後，如何生成回答？
+
+| 策略 | 說明 | 效果 |
+|------|------|------|
+| **Direct** | 直接讀取並回答 | 基準線 |
+| **Chain-of-Note (CoN)** | 先摘要每筆記憶，再回答 | ★ 準確率 +10 個百分點 |
+| **JSON 格式** | 用結構化 JSON 呈現歷史 | 比自然語言格式更好 |
+| **CoN + JSON** | 兩者結合 | ★★ 最佳組合 |
+
+**發現**：即使有完美的記憶召回，準確閱讀檢索結果仍非易事。CoN + JSON 格式能提升多達 10 個百分點。
+
+## 現有系統的統一視角
+
+九個記憶增強系統都可以映射到這個三階段模型：
+
+| 系統 | Value | Key | Query | Reading |
+|------|-------|-----|-------|---------|
+| In-context RAG | Round | K=V | 直接 | Direct |
+| MemoryBank | Fact | K=V | 直接 | Direct |
+| LD-Agent | Summary | K=V | 直接 | Direct |
+| ChatGPT | Fact | K=V | 直接 | Direct |
+| RAPTOR | Hierarchical | 多層 | 直接 | Direct |
+| HippoRAG | KG Triple | KG | 圖走訪 | Direct |
+
+## 為什麼這個框架重要？
+
+1. **統一比較**：讓不同系統的設計選擇可以公平比較
+2. **指引設計**：四個控制點各自獨立可調，縮小搜尋空間
+3. **揭示瓶頸**：明確指出哪個階段是效能瓶頸
+
+## 補充：Stage 0——記憶篩選的遺漏
+
+三階段模型（索引-檢索-閱讀）隱含了一個未被明確建模的前置步驟：**記憶篩選**。
+
+ChatGPT 的記憶功能在使用者對話發生時就在做判斷：「這段對話是否包含值得長期記憶的資訊？」這個篩選步驟在三階段模型中被隱含在 Stage 1（索引）中，但嚴格來說兩者是不同操作：
+
+- **篩選**：決定「要不要記」（二元決策）
+- **索引**：決定「怎麼存」（格式和粒度）
+
+論文的 Fact 壓縮隱含了篩選——LLM 在萃取使用者事實時，自然會過濾掉不重要的閒聊。但這個過程沒有被明確建模和分析。
+
+一個更完整的框架可能是四階段：**篩選 → 索引 → 檢索 → 閱讀**。篩選階段的控制點包括：
+- **觸發條件**：每次對話都記 vs 只記重要的
+- **篩選策略**：規則式 vs 模型判斷
+- **記憶容量限制**：最多記幾條
+
+## 補充：控制點之間的交互作用分析
+
+論文將四個控制點視為「各自獨立可調」是簡化假設，目的是讓消融實驗可行（每次只變一個變項）。但交互作用確實存在：
+
+### Value × Key 交互
+Key 擴展策略「K = V + facts」的前提是 V 不是 Fact。如果 V 本身就是 Fact，K 擴展就變成「K = Fact + Fact'」——冗餘且可能無效。論文的消融實驗主要在 Round 粒度下測試 Key 擴展，避開了這個問題。
+
+### Query × Reading 交互
+時間感知查詢擴展若做得好，檢索結果的噪音更少，閱讀策略壓力也更小。但論文沒有測試「時間感知查詢 + CoN 閱讀」的組合效果，只分別報告各自的改善。
+
+### 實務考量
+完全的交互分析需要 4 × N 種組合，計算成本不太現實。論文的策略是先找到每個控制點的最佳設定，再假設可以組合——這在工程實務中是常見且合理的做法。
+
+## 補充：端對端記憶網路在框架中的映射
+
+即使是端對端的記憶網路，也可以被三階段框架描述：
+- **索引階段**：將對話編碼為內部表示（Value）
+- **檢索階段**：透過注意力機制選取相關記憶
+- **閱讀階段**：產生回應
+
+差異在於這三個階段是**聯合訓練**的還是**分離**的。框架的價值在於「統一」而非「創新」——指出所有現有記憶系統本質上都在做同樣的三件事。
+
+對於基於知識圖譜的系統（如 HippoRAG、Zep 的 Neo4j），映射也成立但有微妙之處：
+- 知識圖譜的「檢索」不是簡單的相似度搜尋，而是結構化的圖查詢
+- 圖的結構本身編碼了推理路徑（A → B → C），這在 flat index 中不存在
+- 知識圖譜的更新與向量索引的更新在機制上完全不同
+
+## 補充：「主動遺忘」機制的討論
+
+三階段框架難以描述的一個重要機制是**主動遺忘**——某些系統會定期清除不重要的記憶，這是在三個階段之外的維護操作。
+
+主動遺忘在實務上的重要性：
+- **儲存效率**：長期使用者的記憶量如果不做壓縮會持續增長
+- **檢索品質**：過多的過時記憶會降低信噪比，影響檢索精確度
+- **隱私合規**：GDPR 等法規要求能夠刪除特定個人資料
+
+這個機制可以被視為「反向的 Stage 1」——不是決定記什麼，而是決定忘掉什麼。一個更完整的記憶生命週期模型應該包含：建立 → 儲存 → 檢索 → 使用 → 衰減/遺忘。
+</script>
+
+<script id="md-ch04" type="text/markdown">
+# 四大關鍵發現
+
+## 發現 1：Round 是最佳儲存粒度
+
+### 實驗設定
+比較三種粒度：Session（完整對話）、Round（單輪問答）、Fact（萃取事實）
+
+### 結果
+
+- **GPT-4o**：將對話分解為 Round 顯著提升閱讀效能
+- **Llama 3.1 8B**：Round 和 Session 表現相似
+- **Fact 壓縮**：整體效能下降（資訊遺失），但多工作階段推理反而改善
+
+### 一個意外的洞察
+
+GPT-4o 能從 20K+ tokens 的檢索結果中受益，但 Llama 3.1 8B 在 3K tokens 就達到峰值。這意味著**模型能力決定了最佳的檢索量**。
+
+### 實務意涵
+
+```
+✅ 預設使用 Round 粒度（一問一答為一個記憶單元）
+✅ 如果需要跨對話推理，額外維護一份 Fact 壓縮版
+❌ 不要把整個 Session 當作一個記憶單元（太粗）
+❌ 不要只存 Fact（會遺失脈絡資訊）
+```
+
+---
+
+## 發現 2：用萃取事實擴展索引鍵
+
+### 實驗設定
+比較不同的 Key 擴展策略：
+- 基準線：K = V（value 本身當 key）
+- 擴展：K = V + 使用者事實 / 關鍵短語 / 摘要
+
+### 結果
+
+| 策略 | Recall@K 改善 | 準確率改善 |
+|------|-------------|----------|
+| K = V（基準線） | — | — |
+| K = V + 使用者事實 | **+9.4%** | **+5.4%** |
+| K = V + 關鍵短語 | 有改善 | 有改善 |
+| K = V + 摘要 | 有改善 | 有改善 |
+
+### 為什麼 Fact 擴展最有效？
+
+```
+原始 Round（Value）:
+  User: 「我最近剛搬家，想找附近好吃的壽司店」
+  Assistant: 「歡迎來到洛杉磯！我推薦...」
+
+萃取的 Fact（擴展 Key）:
+  「使用者搬到了洛杉磯」「使用者喜歡壽司」
+
+檢索查詢: 「使用者住在哪裡？」
+  → 直接搜 Value：可能匹配不到（「搬家」≠「住在哪裡」）
+  → 搜 Value + Fact：「搬到了洛杉磯」直接命中 ✅
+```
+
+### 實務意涵
+
+```
+✅ 儲存時同時萃取使用者事實，附加到索引鍵上
+✅ 使用 "separate" 模式（額外的 key-value pair）效果最好
+❌ 不要用擴展完全取代原始值（"replace" 模式）
+```
+
+---
+
+## 發現 3：時間感知查詢擴展
+
+### 問題
+簡單的語意搜尋在時間推理問題上表現很差——因為語意相似度不理解時間。
+
+### 解決方案：時間感知查詢擴展
+
+```
+問題: 「使用者 2024 年夏天在做什麼工作？」
+    ↓
+Step 1: 偵測時間線索 → 「2024年夏天」
+Step 2: 縮小搜尋範圍到 2024年6月~8月的對話
+Step 3: 在縮小後的範圍內做語意搜尋
+```
+
+### 結果
+
+| 粒度 | Recall 改善 |
+|------|-----------|
+| Value = Session | **+6.8%** |
+| Value = Round | **+11.3%** |
+
+### 限制
+
+- 需要強大的 LLM（GPT-4o）來做時間推理
+- Llama 3.1 8B 在推斷時間線索時會產生幻覺
+- 不是所有問題都有明確的時間線索
+
+### 實務意涵
+
+```
+✅ 對話必須帶時間戳
+✅ 用強模型（GPT-4o 等）做時間查詢擴展
+❌ 不要用小模型做時間推理（容易幻覺）
+```
+
+---
+
+## 發現 4：閱讀策略至關重要
+
+### 問題
+即使有**完美的記憶召回**（oracle retrieval），LLM 仍然讀不好。
+
+### 解決方案
+
+| 策略 | 準確率改善 |
+|------|----------|
+| Direct（直接閱讀） | 基準線 |
+| Chain-of-Note | +5~7 點 |
+| JSON 格式 | +3~5 點 |
+| **CoN + JSON** | **+10 點** |
+
+### Chain-of-Note（CoN）怎麼運作？
+
+```
+傳統方式：
+  「根據以下歷史記錄回答：[記錄1] [記錄2] [記錄3]...」
+  → LLM 直接回答（容易漏看關鍵資訊）
+
+CoN 方式：
+  Step 1: 「為每筆記錄寫一個 note，說明它與問題的關聯性」
+  Step 2: 「根據這些 notes 回答問題」
+  → LLM 先消化每筆記錄，再整合回答 ✅
+```
+
+### 為什麼 JSON 格式比自然語言好？
+
+```
+自然語言格式：
+  「在 2024年3月15日的對話中，使用者問了一個關於
+   旅行的問題，助理回答說...」
+
+JSON 格式：
+  {"date": "2024-03-15", "user": "...", "assistant": "..."}
+
+→ JSON 結構清晰，LLM 更容易精確定位資訊
+```
+
+### 實務意涵
+
+```
+✅ 永遠使用 CoN + JSON 格式呈現檢索結果
+✅ 讓 LLM 先「消化」每筆記錄再回答
+❌ 不要把大量記憶直接丟給 LLM 說「回答這個問題」
+❌ 不要用自然語言格式呈現結構化記憶
+```
+
+---
+
+## 四大發現總結
+
+```
+┌─────────────────────────────────────────────────────┐
+│  發現 1: Round 粒度 > Session > Fact                  │
+│  發現 2: K = V + Facts → Recall +9.4%, 準確率 +5.4%   │
+│  發現 3: 時間感知查詢 → 時間推理 Recall +6.8%~11.3%     │
+│  發現 4: CoN + JSON → 閱讀準確率 +10 百分點             │
+└─────────────────────────────────────────────────────┘
+```
+
+## 補充：多語言可推廣性分析
+
+四大發現均在英語對話上得出。不同語言的記憶挑戰不同，以下分析哪些發現跨語言成立、哪些受語言影響：
+
+### 可能跨語言成立的發現
+- **發現 1（Round 粒度最佳）**：資訊的結構性組織與語言無關，一問一答是所有語言的對話自然單元
+- **發現 2（事實擴展索引鍵）**：語意搜尋的「查詢-文件不匹配」問題在所有語言中都存在
+- **發現 4（CoN + JSON）**：結構化閱讀策略的好處應該跨語言成立
+
+### 可能受語言影響的發現
+- **發現 3（時間感知查詢擴展）**：不同語言的時間表達方式差異很大。中文的時間表達常是隱含的（如「上個月」、「那年夏天」），日文的時態標記較弱。LLM 偵測時間線索的能力可能因語言而異
+- 嵌入模型和檢索器（Stella V5 等）的多語言效能也會影響結果
+
+## 補充：Round 粒度的適用條件和邊界情況
+
+「Round 是最佳粒度」的結論依賴於 LongMemEval 的對話結構（典型的任務導向對話，每輪幾百到一千 tokens）。在不同對話風格下：
+
+| 對話風格 | Round 粒度的適用性 | 建議 |
+|---------|------------------|------|
+| **極短對話**（即時通訊，每輪一兩句） | 太細碎，缺乏語意上下文 | 合併連續幾個短輪次為一個記憶單元 |
+| **長篇論述**（使用者貼長文） | Round 與 Session 趨同 | 可考慮進一步切分 |
+| **多主題對話**（一個 Session 切換多主題） | 優勢更明顯 | 自然按主題分割 |
+
+更準確的陳述是：「在典型的任務導向聊天助理對話中，Round 是最佳粒度」，而非絕對性的結論。
+
+## 補充：CoN+JSON 隨模型進步可能貶值
+
+發現 4（CoN + JSON 提升 10 個百分點）是 2024 年在 GPT-4o / Llama 3.1 上測得的結果，隨著模型進步可能「貶值」：
+
+- **CoN 的本質**是思考鏈策略——即使在最新模型（o1、Claude 3.5）上，顯式思考鏈仍比直接回答更好，但邊際收益可能縮小
+- **JSON 格式的好處更持久**，因為它解決的是資訊呈現的結構性問題，而非模型能力問題
+- **預估趨勢**：在更新模型上，改善可能從 +10 點縮小到 +3~5 點——仍有意義，但從「必須使用」變為「推薦使用」
+- **抵銷因素**：即使 LLM 閱讀能力進步，記憶系統面對的歷史長度也在增加，閱讀策略的重要性不會線性下降
+
+## 補充：隱式 vs 顯式時間推理的差異
+
+論文的時間推理問題區分為 `temp_reasoning_implicit` 和 `temp_reasoning_explicit` 兩種：
+
+### 顯式時間推理
+- 問題中有明確時間線索（如「2024年夏天」、「去年三月」）
+- 時間感知查詢擴展策略能有效處理：偵測時間 → 縮小搜尋範圍 → 語意搜尋
+
+### 隱式時間推理
+- 時間線索是隱含的（如「使用者上一份工作」暗示了時間範圍但沒有明確日期）
+- 需要更複雜的推理鏈：
+  1. 偵測到「上一份」暗示時間順序
+  2. 先找到使用者的所有工作記錄
+  3. 確定當前工作的開始時間
+  4. 在該時間之前搜尋前一份工作
+- 實際上需要多步檢索（multi-hop retrieval），而非單次查詢擴展
+- 實驗結果顯示，隱式時間推理的效能顯著低於顯式——這是尚未解決的開放問題
+</script>
+
+<script id="md-ch05" type="text/markdown">
+# 實驗結果與效能分析
+
+## 商業系統評估
+
+### 線上 vs 離線效能
+
+| 系統 | 線上準確率 | 離線閱讀準確率 | 效能下降 |
+|------|----------|-------------|---------|
+| ChatGPT (GPT-4o) | 57.73% | 91.84% | **-37%** |
+| Coze (GPT-4o) | 32.99% | — | **-64%** |
+
+### 商業系統的關鍵問題
+
+**ChatGPT**：
+- 會**覆寫**關鍵資訊（知識更新時把舊事實覆蓋掉，而非追蹤變化）
+- 記憶萃取過於壓縮，遺失脈絡
+
+**Coze**：
+- 無法記錄**間接提供的資訊**
+- 例如使用者說「我剛搬家，想找附近的壽司店」→ Coze 不會記住「使用者搬家了」
+
+## 長上下文 LLM 結果（LongMemEval_S）
+
+| 模型 | Oracle 準確率 | LongMemEval_S | 效能下降 |
+|------|-------------|---------------|---------|
+| **GPT-4o** | 87.0% | 60.6% | -30.3% |
+| Llama 3.1 70B | 74.4% | 33.4% | -55.1% |
+| Llama 3.1 8B | 71.0% | 45.4% | -36.1% |
+| Phi-3 128k | 70.2% | 38.0% | -45.9% |
+| Phi-3.5 Mini | 66.0% | 34.2% | -48.1% |
+
+### 關鍵觀察
+
+1. **所有模型都大幅下降**：即使是最強的 GPT-4o 也下降 30%
+2. **Llama 3.1 70B 比 8B 下降更多**：大模型不一定更擅長長上下文
+3. **Oracle 和 Full History 的差距**揭示了記憶系統的必要性
+
+## 記憶系統消融實驗
+
+### 檢索器比較
+
+| 檢索器 | 類型 | 說明 |
+|--------|------|------|
+| flat-bm25 | 關鍵詞 | 傳統 BM25 |
+| flat-contriever | 稠密嵌入 | Contriever 模型 |
+| flat-stella | 稠密嵌入 | Stella V5 1.5B（★ 最佳） |
+| flat-gte | 稠密嵌入 | gte-Qwen2-7B-instruct |
+
+### 粒度比較（Recall@K）
+
+Round 粒度在大多數情況下優於 Session 粒度。
+
+### Key 擴展效果
+
+使用者事實擴展帶來：
+- **Recall@K 平均 +9.4%**
+- **最終準確率平均 +5.4%**
+- 在所有模型規模上都有效
+
+### 閱讀策略效果
+
+| 策略 | GPT-4o | Llama 3.1 70B | Llama 3.1 8B |
+|------|--------|-------------|-------------|
+| Direct + NL | 基準線 | 基準線 | 基準線 |
+| CoN + JSON | **+10 點** | +7 點 | +5 點 |
+
+## 評估方法
+
+### 問答評估
+
+- **評估模型**：GPT-4o-2024-08-06
+- **與人類專家一致率**：97%
+- **評估方式**：二元判斷（正確/錯誤）
+
+### 記憶召回評估
+
+- **指標**：Recall@K、NDCG@K
+- **標註**：人工標註的答案位置標籤
+- **排除**：棄權問題（30 題）不參與召回率評估
+
+### 消融實驗配置
+
+| 設定 | 說明 |
+|------|------|
+| 主要 LLM | GPT-4o, Llama 3.1 70B, Llama 3.1 8B |
+| 稠密檢索 | Stella V5 |
+| 事實萃取 | Llama 3.1 8B |
+| 測試集 | LongMemEval_S（500 題） |
+
+## 按問題類型的細項分析
+
+各種記憶能力的效能差異：
+
+- **資訊萃取（IE）**：相對最容易，但仍有顯著下降
+- **多工作階段推理（MR）**：需要跨對話整合，難度最高之一
+- **知識更新（KU）**：商業系統特別弱（覆寫問題）
+- **時間推理（TR）**：簡單語意搜尋幾乎無法處理
+- **棄權（ABS）**：模型傾向編造答案而非承認不知道
+
+## 補充：ChatGPT 37% 下降的根因分析
+
+ChatGPT 從離線 91.84% 驟降到線上 57.73%（下降 37%），主要是**記憶機制**的問題而非**模型能力**問題。
+
+### 證據分析
+- 離線 91.84% 是在 Oracle 條件下測得——直接把相關對話片段餵給 GPT-4o，證明模型閱讀能力足夠
+- 線上 57.73% 經過完整記憶管道，每一步都可能引入錯誤：
+
+| 錯誤來源 | 說明 |
+|---------|------|
+| 記憶萃取不完整 | 特別是間接提到的資訊不會被記錄 |
+| 記憶覆寫 | 知識更新時舊版本被覆蓋，導致時間推理失敗 |
+| 查詢匹配失敗 | 問題表述與記憶儲存方式不匹配 |
+
+### 假設推估
+如果把 ChatGPT 的記憶資料庫直接餵給 GPT-4o 做離線推理，效能可能恢復到 70-80%——比線上高（消除查詢匹配錯誤），但比 Oracle 低（記憶萃取的資訊遺失是不可逆的）。
+
+## 補充：Coze vs ChatGPT 差距的設計原因
+
+Coze（32.99%）vs ChatGPT（57.73%）的差距完全來自記憶系統的實作，因為兩者使用相同的底層模型（GPT-4o）。
+
+**Coze 的關鍵弱點**是無法記錄間接提供的資訊：
+```
+使用者：「我剛搬家，想找附近的壽司店」
+Coze 記住：使用者想找壽司店 ❌
+Coze 遺漏：使用者搬家了 ❌
+ChatGPT 記住：使用者搬家了 ✅（至少有機會記錄）
+```
+
+這是記憶萃取階段（Stage 1）的設計問題，而非模型能力問題。
+
+## 補充：記憶覆寫行為的分析
+
+ChatGPT 的記憶覆寫行為更像是「設計決策」而非「bug」：
+
+### OpenAI 可能的設計理由
+1. **簡化設計**：每個事實只保留一個版本，減少記憶管理複雜度
+2. **隱私保護**：不保留使用者已「更新」的舊資訊，減少資料暴露風險
+3. **儲存效率**：長期使用者的記憶量如果不壓縮會持續增長
+
+### 覆寫導致的功能缺陷
+- 無法回答「使用者之前住在哪裡？」這類歷史性問題
+- 無法追蹤變化的時間線（如「使用者的職業變遷」）
+
+### 更好的設計方案
+「帶版本的事實儲存」：保留所有版本並標記時間戳，但允許使用者選擇刪除特定版本。既支援時間推理，又尊重 GDPR「被遺忘權」等隱私需求。
+
+## 補充：GPT-4o 評估可靠性的討論
+
+### AI 評 AI 的潛在偏差
+- **自評偏差**：GPT-4o 評估 GPT-4o 自己的輸出，可能存在「同源偏好」——對 GPT-4o 風格的回答更寬容
+- **緩解因素**：LongMemEval 的問題大多有明確的事實性答案（如「使用者住在哪個城市？」），偏差在事實性判斷上的影響較小
+
+### 97% 一致率的解讀
+- 是基於人類專家的獨立判斷計算
+- 在「easy cases 和 hard cases 混合」下測得——如果大多數答案非常明確，97% 門檻其實不算特別高
+- 更有意義的指標是「在人類有分歧的案例上，GPT-4o 與多數意見的一致率」——但論文未報告
+
+### 二元判斷的灰色地帶
+| 情境 | 二元判斷的困難 |
+|------|-------------|
+| 部分正確 | 問題需三個事實，模型回答了兩個 |
+| 過時正確 | 回答了使用者舊資訊（對 KU 題算錯，但曾經正確） |
+| 換句話說 | 用不同措辭表達正確答案 |
+
+更精細的評估（如 0-5 分量表、partial credit scoring）可能更適合，但會增加複雜度和主觀性。
+
+### 不一致的 3%
+約 15 題的不一致可能集中在知識更新、隱含偏好、棄權等主觀性較高的類型。如果集中在某一類問題，可能系統性地影響該類評估結果。
+
+## 補充：可擴展性分析
+
+### 從 115K 到 1.5M 到更大規模
+
+| 規模 | Tokens | 對應真實使用時長 |
+|------|--------|---------------|
+| LongMemEval_S | ~115K | 約 2-3 個月 |
+| LongMemEval_M | ~1.5M | 約 1.5-2 年 |
+| 真實 3 年使用 | ~2.7M | 每天 5 次對話 |
+| 真實 10 年使用 | ~9M | 每天 5 次對話 |
+
+1.5M tokens 對於「長期」記憶來說只是起點。
+
+### 效能衰減模式
+論文比較了 S 和 M 兩個離散的規模點，但未繪製連續衰減曲線。從相關研究經驗推測：
+- 上下文視窗前 50% 相對平穩
+- 接近上限時急劇下降
+- 「lost in the middle」導致中間位置效能最差
+
+### 外部記憶系統不會過時
+GPT-4o 在 LongMemEval_S（115K tokens，完全在 128K 上下文視窗內）上從 Oracle 87% 降到 60.6%。30% 的下降不是因為上下文不夠長，而是因為注意力稀釋、位置偏差和多跳推理困難。即使 Gemini 1.5 Pro 支援 2M tokens，同樣的問題會更嚴重。
+
+更可能的趨勢是「長上下文 + 外部記憶」的混合架構：外部記憶負責篩選排序（1.5M → 20K 的相關記憶），長上下文 LLM 負責精確閱讀和推理。
+</script>
+
+<script id="md-ch06" type="text/markdown">
+# 程式碼架構與使用指南
+
+## 專案結構
+
+```
+LongMemEval/
+├── data/                          # 資料集
+│   ├── longmemeval_s_cleaned.json # LongMemEval_S (~115K tokens)
+│   ├── longmemeval_m_cleaned.json # LongMemEval_M (~1.5M tokens)
+│   ├── longmemeval_oracle.json    # Oracle 證據集
+│   └── custom_history/            # 自定義歷史建構語料
+│       ├── 1_attr_bg/             # 使用者屬性背景
+│       ├── 2_questions/           # 問題和答案
+│       ├── 5_filler_sess/         # 填充對話
+│       └── 6_session_cache/       # 模擬對話快取
+├── src/
+│   ├── retrieval/                 # 記憶索引與檢索
+│   │   └── run_retrieval.sh       # 檢索實驗主腳本
+│   ├── generation/                # QA 生成基準線
+│   │   └── run_generation.sh      # 生成實驗主腳本
+│   ├── evaluation/                # 評估腳本
+│   │   ├── evaluate_qa.py         # QA 準確率評估
+│   │   └── print_qa_metrics.py    # 彙整指標
+│   ├── index_expansion/           # Key 擴展實作
+│   │   └── temp_query_search_pruning.py  # 時間感知查詢
+│   └── utils/                     # 工具腳本
+│       └── serve_vllm.sh          # vLLM 伺服器啟動
+├── index_expansion_logs/          # 預計算的擴展結果
+├── figures/                       # 論文圖表
+├── requirements-lite.txt          # 最小依賴
+├── requirements-full.txt          # 完整依賴
+└── README.md
+```
+
+## 安裝
+
+### 輕量安裝（僅評估）
+
+```bash
+conda create -n longmemeval-lite python=3.9
+conda activate longmemeval-lite
+pip install -r requirements-lite.txt
+```
+
+### 完整安裝（全部實驗）
+
+```bash
+conda create -n longmemeval python=3.9
+conda activate longmemeval
+pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 \
+  --index-url https://download.pytorch.org/whl/cu121
+pip install -r requirements-full.txt
+```
+
+## 資料集格式
+
+每筆資料包含：
+
+```json
+{
+  "question_id": "q_001",
+  "question_type": "single-session-user",
+  "question": "使用者最喜歡的餐廳叫什麼？",
+  "answer": "Sushi Nakazawa",
+  "question_date": "2024-06-15",
+  "haystack_session_ids": ["s_001", "s_002"],
+  "haystack_dates": ["2024-01-01", "2024-01-15"],
+  "haystack_sessions": [
+    [
+      {"role": "user", "content": "..."},
+      {"role": "assistant", "content": "..."}
+    ]
+  ],
+  "answer_session_ids": ["s_042"]
+}
+```
+
+## 使用工作流程
+
+### 1. 測試你的系統
+
+```
+準備 JSONL 輸出 → 執行評估 → 檢視結果
+```
+
+```bash
+# 你的系統產出 JSONL（question_id + hypothesis）
+# 然後執行：
+cd src/evaluation
+python3 evaluate_qa.py gpt-4o your_output.jsonl \
+  ../../data/longmemeval_oracle.json
+
+# 彙整分數：
+python3 print_qa_metrics.py gpt-4o your_output.jsonl.log \
+  ../../data/longmemeval_oracle.json
+```
+
+### 2. 執行記憶檢索實驗
+
+```bash
+cd src/retrieval
+bash run_retrieval.sh IN_FILE RETRIEVER GRANULARITY
+```
+
+檢索器選項：
+- `flat-bm25`：關鍵詞檢索
+- `flat-contriever`：稠密嵌入
+- `flat-stella`：Stella V5 1.5B（最佳）
+- `flat-gte`：gte-Qwen2-7B
+
+粒度選項：`turn`（Round 粒度）或 `session`
+
+### 3. 執行生成實驗
+
+```bash
+cd src/generation
+bash run_generation.sh DATA_FILE MODEL EXP TOPK \
+  HISTORY_FORMAT USERONLY READING_METHOD
+```
+
+關鍵參數：
+- `HISTORY_FORMAT`：`json`（推薦）或 `nl`
+- `READING_METHOD`：`direct`、`con`（CoN，推薦）、`con-separate`
+
+### 4. Key 擴展實驗
+
+```bash
+# 擴展類型：session-userfact, turn-userfact, session-keyphrase 等
+# 合併模式：separate（推薦）, merge, replace
+bash run_retrieval.sh IN_FILE RETRIEVER GRANULARITY \
+  EXPANSION_TYPE JOIN_MODE CACHE
+```
+
+### 5. 時間感知查詢擴展
+
+```bash
+cd src/index_expansion
+python3 temp_query_search_pruning.py \
+  TIMESTAMP_EVENT_FILE RETRIEVAL_LOG GRANULARITY
+```
+
+## 多 GPU 支援
+
+檢索自動支援多 GPU。LLM 推理透過 vLLM：
+
+```bash
+cd src/utils
+bash serve_vllm.sh GPU_IDS MODEL PORT TP_SIZE
+# 範例：bash serve_vllm.sh 0,1 llama-3.1-70b 8001 2
+```
+
+## 資料下載
+
+```bash
+mkdir -p data/
+cd data/
+wget https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned/resolve/main/longmemeval_oracle.json
+wget https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned/resolve/main/longmemeval_s_cleaned.json
+wget https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned/resolve/main/longmemeval_m_cleaned.json
+```
+
+## 補充：多 GPU 推理的注意事項
+
+### vLLM 張量平行（Tensor Parallelism）
+- `TP_SIZE` 需與可用 GPU 數量一致。例如 70B 模型至少需要 2 張 GPU（`TP_SIZE=2`）
+- 確保 `GPU_IDS` 中的 GPU 透過 NVLink 或 PCIe 互聯，跨 NUMA 節點的 GPU 通訊會顯著降低吞吐量
+
+### 記憶體需求估算
+| 模型 | 最低 GPU 記憶體 | 建議配置 |
+|------|---------------|---------|
+| Llama 3.1 8B | 1 × 24GB | 1 × A100 40GB |
+| Llama 3.1 70B | 2 × 40GB | 2 × A100 80GB |
+| GPT-4o (API) | 不需 GPU | 透過 API 呼叫 |
+
+### 大規模檢索的注意事項
+- LongMemEval_M（1.5M tokens / 500 sessions）的嵌入建立可能需要較長時間，建議先在 LongMemEval_S 上驗證管道正確性
+- Stella V5 1.5B 嵌入模型本身也需要 GPU 記憶體，與 LLM 推理共用 GPU 時需注意記憶體分配
+- 批次大小（batch size）需根據 GPU 記憶體調整，避免 OOM
+</script>
+
+<script id="md-ch07" type="text/markdown">
+# 相關工作與影響力
+
+## 記憶增強系統分類
+
+### 已評估的九大系統
+
+| 系統 | 機構/來源 | Value 策略 | Key 策略 | 特色 |
+|------|----------|-----------|---------|------|
+| **In-context RAG** | 通用方法 | Round | K=V | 最簡單的基準線 |
+| **MemoryBank** | Zhong et al. 2024 | Fact 萃取 | K=V | 將對話壓縮為使用者事實 |
+| **LD-Agent** | Li et al. 2024 | Summary | K=V | 階層式摘要 |
+| **ChatGPT** | OpenAI 2024 | Fact 萃取 | K=V | 商業系統，自動記憶 |
+| **Coze** | ByteDance 2024 | — | — | 商業系統，外掛記憶 |
+| **RAPTOR** | Sarthi et al. 2024 | 階層式 | 多層索引 | 遞迴摘要樹 |
+| **MemWalker** | Chen et al. 2023 | 樹結構 | 樹走訪 | 互動式記憶探索 |
+| **HippoRAG** | Gutiérrez et al. 2024 | KG Triple | 知識圖譜 | 靈感來自海馬迴 |
+| **Chain-of-Note** | Yu et al. 2023 | — | — | 閱讀增強策略 |
+
+### 本論文後續引用的重要系統
+
+LongMemEval 發布後，多個記憶系統使用它作為基準：
+
+| 系統 | LongMemEval R@5 | 方法 |
+|------|----------------|------|
+| **MemPalace** (raw) | 96.6% | Palace 結構 + ChromaDB |
+| **MemPalace** (hybrid) | 100% | + Haiku rerank |
+| **Supermemory ASMR** | ~99% | — |
+| **Mastra** | 94.87% | GPT 基礎 |
+| **Mem0** | ~85% | 雲端記憶服務 |
+| **Zep** | ~85% | Neo4j 知識圖譜 |
+
+## 相關基準測試比較
+
+### 長對話記憶基準
+
+| 基準測試 | 問題數 | 來源 | 能力維度 | 可擴展性 |
+|---------|--------|------|---------|---------|
+| **LongMemEval** | 500 | 人工策劃 | 5 種 | ✅ 可自由調整長度 |
+| LoCoMo | ~300 | 半自動 | 有限 | ❌ 固定長度 |
+| LOCOMO | — | 合成 | — | ❌ |
+| MSC | — | 多回合 | 有限 | ❌ |
+
+### LongMemEval 的獨特優勢
+
+1. **人工策劃**：每道題都經過人工審查，不是自動生成
+2. **可擴展**：同一組問題可以嵌入不同長度的歷史中
+3. **五大能力**：最全面的記憶能力測試
+4. **控制變項**：證據位置、數量、深度都是受控的
+5. **時間維度**：唯一系統性測試時間推理的基準
+
+## 為什麼這篇論文重要？
+
+### 對產業的影響
+
+1. **揭示了真相**：商業記憶系統（ChatGPT、Coze）的效能遠比宣傳的差
+2. **提供了標準**：讓不同系統可以公平比較
+3. **指引了方向**：四大發現直接告訴工程師該怎麼設計
+
+### 對研究的影響
+
+1. **統一框架**：三階段模型讓碎片化的研究有了共同語言
+2. **ICLR 2025 接收**：頂級會議認可其貢獻
+3. **開源生態**：程式碼、資料集、評估腳本全部公開
+
+### 引用格式
+
+```bibtex
+@article{wu2024longmemeval,
+  title={LongMemEval: Benchmarking Chat Assistants on
+         Long-Term Interactive Memory},
+  author={Wu, Di and Wang, Hongwei and Yu, Wenhao and
+          Zhang, Yuwei and Chang, Kai-Wei and Yu, Dong},
+  year={2024},
+  eprint={2410.10813},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL}
+}
+```
+
+## 補充：「記憶機制比模型能力更重要」的結論及前提條件
+
+Coze（32.99%）vs ChatGPT（57.73%）的差距強烈暗示了記憶機制設計的重要性——兩者使用相同底層模型（GPT-4o），差異完全來自記憶系統實作。
+
+但這個結論需要一個關鍵前提：**底層模型的能力已經足夠好。**
+
+- 如果底層模型的閱讀理解能力很差（如用 7B 模型替代 GPT-4o），即使記憶機制設計完美，效能也會很低
+- 論文的發現 1 顯示：Llama 3.1 8B 在 3K tokens 就達到閱讀峰值，而 GPT-4o 能從 20K+ tokens 中受益
+- **更準確的結論**：在底層模型能力足夠的前提下，記憶機制的設計是效能的主要瓶頸
+
+## 補充：實務 Top 5 建議——如果你要建一個長期記憶系統
+
+根據 LongMemEval 的研究結果，以下是最具操作性的五條建議：
+
+### 1. 以 Round（一問一答）為記憶粒度
+每一輪對話作為獨立的記憶條目，附帶時間戳和 Session ID。不要把整個 Session 存為一個單元（太粗），也不要只存壓縮後的事實（太細）。
+
+### 2. 萃取使用者事實作為索引擴展
+儲存時用 LLM 從每輪對話萃取結構化的使用者事實（如「使用者住在洛杉磯」），作為額外搜尋鍵，與原始對話文字分開儲存（separate 模式）。帶來 Recall@K +9.4% 和準確率 +5.4%。
+
+### 3. 實作時間感知的檢索策略
+所有記憶必須帶時間戳。問題涉及時間時，先用 LLM 偵測時間線索，縮小搜尋範圍到對應時間區間，再在區間內做語意搜尋。
+
+### 4. 使用 Chain-of-Note + JSON 格式呈現檢索結果
+用 JSON 格式結構化呈現每筆記憶 → 讓 LLM 為每筆記憶寫 note → 根據 notes 整合回答。帶來高達 +10 百分點的準確率提升。
+
+### 5. 保留記憶版本歷史，不要覆寫
+使用者更新資訊時保留舊版本並標記時間戳。這是 ChatGPT 記憶系統的已知弱點——覆寫導致知識更新和時間推理效能大幅下降。
+
+## 補充：7B 模型的調整策略
+
+四大發現對開源小模型（7B-8B）的適用性需要調整：
+
+| 發現 | 7B 適用性 | 調整建議 |
+|------|---------|---------|
+| 發現 1（Round 粒度） | ✅ 適用 | 但 Top-K 設定需更小（如 Top-5），因為 8B 模型在 3K tokens 就達閱讀峰值 |
+| 發現 2（事實擴展） | ✅ 適用 | 事實萃取可用小模型（論文本身用 Llama 3.1 8B），成本最低的改進 |
+| 發現 3（時間查詢擴展） | ⚠️ 部分適用 | 只處理顯式時間線索，避免隱式推理。用規則式時間解析器（dateutil、spaCy NER）替代 LLM |
+| 發現 4（CoN + JSON） | ✅ 適用但收益較小 | 改善 +5 點而非 +10 點。成本敏感場景可只用 JSON 格式（+3-5 點）省略 CoN |
+
+### 分層模型策略
+在成本敏感場景，可採用混合架構：
+- **小模型**（7B-8B）：負責低成本的記憶萃取和初步檢索
+- **大模型**（70B 或 API）：負責最終的閱讀和回答
+- 每次查詢只需一次大模型呼叫，整體成本可控
+</script>
+
+<script id="md-ch08" type="text/markdown">
+# LongMemEval 深度評審問答記錄
+
+## 總結
+
+本文件記錄了對 LongMemEval（arXiv 2410.10813，ICLR 2025）論文的 12 輪深度評審問答，涵蓋以下面向：
+
+1. 研究動機與定位
+2. 五大記憶能力的設計邏輯
+3. 基準建構品質與方法論
+4. 大海撈針設計的偏差控制
+5. 三階段模型的完整性
+6. 四大發現的可推廣性
+7. GPT-4o 評估的可靠性
+8. 商業系統效能差距的根因
+9. 時間推理的深層問題
+10. 可擴展性與規模效應
+11. 與後續記憶系統的關係
+12. 實務應用指南
+
+**最終評估**：LongMemEval 是長期記憶基準測試領域的里程碑工作。它的核心價值在於三點：(1) 提出了第一個系統性、人工策劃、可擴展的長期互動記憶基準；(2) 三階段統一框架為碎片化的記憶系統研究提供了共同語言；(3) 四大發現直接可操作，對工程實務有即時指導意義。主要局限包括：僅覆蓋英語、合成對話與真實互動的差距、500 題的統計檢定力、以及 AI 評 AI 的潛在偏差。整體而言，這是一篇設計嚴謹、影響深遠的基準測試論文，值得 ICLR 2025 的接收。
+
+---
+
+## 第 1 輪：研究動機與定位
+
+### 評審提問
+
+Q1: 在 LongMemEval 之前，已經有 LoCoMo、MSC 等長對話基準測試存在。LongMemEval 到底填補了什麼「不可取代」的空白？如果只是「更大、更全面」，這算不算足夠的貢獻？
+
+Q2: 論文聲稱「目前沒有系統性方法來衡量長期互動記憶」，但 ChatGPT 等商業系統上線記憶功能已超過一年。難道這些公司內部沒有類似的基準測試？這篇論文的真正價值是「公開」還是「方法論」？
+
+Q3: 為什麼選擇聚焦在「聊天助理」而非更廣泛的長期記憶場景（如客服系統、醫療對話、教育輔導）？這是否限制了論文的適用範圍？
+
+### 專家回答
+
+**Q1 回答**：LongMemEval 填補的空白不僅是「更大更全面」，而是三個結構性差異：可擴展性（允許自由調整歷史長度）、能力維度的系統性（五大能力、七種問題類型，特別是時間推理和棄權）、人工策劃的品質保證（每道題經過人工審查）。
+
+**Q2 回答**：商業公司內部幾乎肯定有類似的測試套件，但那些是封閉的、針對自家系統最佳化的。LongMemEval 的價值同時包含「公開」和「方法論」——公開讓獨立比較成為可能，方法論（三階段框架）提供了結構化的分析工具。
+
+**Q3 回答**：聚焦「聊天助理」是務實的範圍界定。五大能力和三階段框架在原理上通用，差異主要在於領域特定的評估標準和資料分佈。
+
+---
+
+## 第 2 輪：五大記憶能力
+
+### 評審提問
+
+Q1: 為什麼是「這五種」記憶能力？有沒有被遺漏的重要能力？
+
+Q2: 五大能力之間的交叉是否導致評估結果難以歸因？
+
+Q3: 棄權能力佔全部 500 題中的 30 題（6%），比例是否太低？
+
+### 專家回答
+
+**Q1 回答**：論文的五大能力分類是「功能導向」而非「認知科學導向」的設計選擇。被遺漏的能力包括情感記憶、程序性記憶、推理鏈記憶和社交記憶。500 題的規模限制了可涵蓋的維度。
+
+**Q2 回答**：交叉確實存在，但不代表無法歸因。每種問題類型的「主要」能力需求是明確的，且實驗結果展現了不同的效能模式。
+
+**Q3 回答**：30 題偏少但有設計理由——策劃成本高、聚焦最難情境。論文的定性結論（模型傾向編造而非承認不知道）不太可能因增加樣本量而翻轉。
+
+---
+
+## 第 3-6 輪：建構品質、大海撈針、模型完整性、發現可推廣性
+
+這些輪次深入討論了統計檢定力（500 題中等規模，缺乏信賴區間報告）、間接嵌入的量化指標缺失、self-chatting 品質局限、填充對話主題控制、證據位置效應、Stage 0 記憶篩選遺漏、控制點交互作用、以及四大發現的多語言可推廣性等問題。
+
+---
+
+## 第 7 輪：GPT-4o 評估的可靠性
+
+### 核心問題
+
+- AI 評 AI 的偏差：GPT-4o 評估自己的輸出可能存在同源偏好
+- 97% 一致率在 easy cases 佔多數時門檻不算高
+- 二元判斷在「部分正確」、「過時正確」等灰色地帶有侷限
+
+---
+
+## 第 8 輪：商業系統差距的原因
+
+### 核心發現
+
+- ChatGPT 37% 下降主要是記憶機制問題，而非模型能力問題
+- Coze vs ChatGPT 差距完全來自記憶系統實作（同樣的 GPT-4o）
+- ChatGPT 記憶覆寫是設計決策而非 bug，但導致知識更新和時間推理失敗
+
+---
+
+## 第 9-10 輪：時間推理與可擴展性
+
+- 隱式時間推理是尚未解決的開放問題
+- 小模型在時間推理上容易產生幻覺
+- 1.5M tokens 僅相當於 1.5-2 年使用，對長期記憶只是起點
+- 外部記憶系統在可預見的未來不會過時
+
+---
+
+## 第 11 輪：與後續系統的關係
+
+- MemPalace Recall@5 100% 不等於基準被「解決」——檢索完美不代表閱讀完美
+- LongMemEval 提供了公正的比較平台，比各系統私有基準更有價值
+- 三階段框架對知識圖譜系統的描述有些勉強但仍可行
+
+---
+
+## 第 12 輪：實務應用指南
+
+### Top 5 建議
+1. 以 Round 為記憶粒度
+2. 萃取使用者事實作為索引擴展
+3. 實作時間感知檢索策略
+4. 使用 CoN + JSON 格式
+5. 保留記憶版本歷史，不要覆寫
+
+### 7B 模型調整
+- Top-K 設定更小
+- 只處理顯式時間線索
+- CoN 收益較小，可只用 JSON 格式
+
+### 最佳使用階段
+- 早期架構選型（最適合）
+- 中期效能調優（適合）
+- 上線前驗收（部分適合，需搭配領域特定測試）
+
+---
+
+## 額外輪次：方法論反思
+
+### 最大創新
+可擴展的大海撈針式歷史編纂——同一組問題嵌入不同長度歷史，同時測試記憶品質和規模。
+
+### 最大缺陷
+缺乏統計嚴謹性報告（信賴區間、顯著性檢定、inter-annotator agreement）。
+
+### LongMemEval v2 優先改進方向
+1. 多語言擴展（中文、日文、西班牙文）
+2. 增加問題規模至 1000+ 並報告統計指標
+3. 加入真實對話資料驗證推廣性
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // ── Chapter data ─────────────────────────
+  const chapters = [
+    { id: 0, title: '概覽', num: '00' },
+    { id: 1, title: '五大記憶能力', num: '01' },
+    { id: 2, title: '基準測試建構', num: '02' },
+    { id: 3, title: '三階段記憶模型', num: '03' },
+    { id: 4, title: '四大關鍵發現', num: '04' },
+    { id: 5, title: '實驗結果', num: '05' },
+    { id: 6, title: '程式碼架構', num: '06' },
+    { id: 7, title: '相關工作與影響', num: '07' },
+    { id: 8, title: '評審問答記錄', num: '08' }
+  ];
+
+  const contentInner = document.getElementById('contentInner');
+  const contentEl = document.getElementById('content');
+  const navItems = document.querySelectorAll('.nav-item');
+  const searchInput = document.getElementById('searchInput');
+  const searchResults = document.getElementById('searchResults');
+  const progressBar = document.getElementById('progressBar');
+
+  // ── Configure marked ─────────────────────
+  marked.setOptions({
+    highlight: function(code, lang) {
+      if (lang && hljs.getLanguage(lang)) {
+        return hljs.highlight(code, { language: lang }).value;
+      }
+      return hljs.highlightAuto(code).value;
+    },
+    breaks: false,
+    gfm: true
+  });
+
+  // ── Render all chapters ──────────────────
+  const renderedChapters = [];
+  chapters.forEach(ch => {
+    const mdEl = document.getElementById('md-ch' + ch.num);
+    if (!mdEl) return;
+    const md = mdEl.textContent;
+    const html = marked.parse(md);
+    renderedChapters.push({ ...ch, md, html });
+  });
+
+  function renderChapter(idx) {
+    const ch = renderedChapters[idx];
+    if (!ch) return;
+
+    // Build nav buttons
+    let navHTML = '<div class="chapter-nav">';
+    if (idx > 0) {
+      navHTML += '<div class="chapter-nav-btn prev" data-ch="' + (idx - 1) + '">' +
+        '<span class="chapter-nav-label">&larr; 上一頁</span>' +
+        '<span class="chapter-nav-title">' + renderedChapters[idx - 1].num + ' ' + renderedChapters[idx - 1].title + '</span></div>';
+    } else {
+      navHTML += '<div></div>';
+    }
+    if (idx < renderedChapters.length - 1) {
+      navHTML += '<div class="chapter-nav-btn next" data-ch="' + (idx + 1) + '">' +
+        '<span class="chapter-nav-label">下一頁 &rarr;</span>' +
+        '<span class="chapter-nav-title">' + renderedChapters[idx + 1].num + ' ' + renderedChapters[idx + 1].title + '</span></div>';
+    }
+    navHTML += '</div>';
+
+    contentInner.innerHTML = '<div class="chapter active">' + ch.html + navHTML + '</div>';
+    contentEl.scrollTop = 0;
+
+    // Attach nav button events
+    contentInner.querySelectorAll('.chapter-nav-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const target = parseInt(this.dataset.ch);
+        switchChapter(target);
+      });
+    });
+
+    // Update sidebar active
+    navItems.forEach(n => n.classList.remove('active'));
+    navItems[idx].classList.add('active');
+
+    // Update progress
+    updateProgress();
+  }
+
+  function switchChapter(idx) {
+    renderChapter(idx);
+    // Close mobile sidebar
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('active');
+  }
+
+  // ── Sidebar nav click ────────────────────
+  navItems.forEach(item => {
+    item.addEventListener('click', function() {
+      const ch = parseInt(this.dataset.ch);
+      switchChapter(ch);
+    });
+  });
+
+  // ── Progress bar ─────────────────────────
+  function updateProgress() {
+    const el = contentEl;
+    const scrollTop = el.scrollTop;
+    const scrollHeight = el.scrollHeight - el.clientHeight;
+    const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+    progressBar.style.width = pct + '%';
+  }
+  contentEl.addEventListener('scroll', updateProgress);
+
+  // ── Search ───────────────────────────────
+  function doSearch(query) {
+    if (!query || query.length < 2) {
+      searchResults.classList.remove('active');
+      return;
+    }
+    const q = query.toLowerCase();
+    const results = [];
+    renderedChapters.forEach(ch => {
+      const lines = ch.md.split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].toLowerCase().includes(q)) {
+          const context = lines[i].replace(/^#+\s*/, '').replace(/[*_`#]/g, '');
+          const idx = context.toLowerCase().indexOf(q);
+          const start = Math.max(0, idx - 30);
+          const end = Math.min(context.length, idx + q.length + 50);
+          let snippet = (start > 0 ? '...' : '') + context.substring(start, end) + (end < context.length ? '...' : '');
+          snippet = snippet.replace(new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<mark>$1</mark>');
+          results.push({
+            chId: ch.id,
+            title: ch.num + ' ' + ch.title,
+            snippet
+          });
+          if (results.length >= 20) break;
+        }
+      }
+      if (results.length >= 20) return;
+    });
+
+    if (results.length === 0) {
+      searchResults.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:13px;">找不到結果</div>';
+    } else {
+      searchResults.innerHTML = results.map(r =>
+        '<div class="search-result-item" data-ch="' + r.chId + '">' +
+        '<div class="search-result-title">' + r.title + '</div>' +
+        '<div class="search-result-context">' + r.snippet + '</div></div>'
+      ).join('');
+      searchResults.querySelectorAll('.search-result-item').forEach(item => {
+        item.addEventListener('click', function() {
+          switchChapter(parseInt(this.dataset.ch));
+          searchResults.classList.remove('active');
+          searchInput.value = '';
+        });
+      });
+    }
+    searchResults.classList.add('active');
+  }
+
+  searchInput.addEventListener('input', function() { doSearch(this.value); });
+  searchInput.addEventListener('focus', function() { if (this.value.length >= 2) doSearch(this.value); });
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.search-container')) {
+      searchResults.classList.remove('active');
+    }
+  });
+
+  // Cmd+K shortcut
+  document.addEventListener('keydown', function(e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+    if (e.key === 'Escape') {
+      searchResults.classList.remove('active');
+      searchInput.blur();
+    }
+  });
+
+  // ── Mobile menu ──────────────────────────
+  document.getElementById('menuToggle').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('active');
+  });
+
+  document.getElementById('overlay').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.remove('open');
+    this.classList.remove('active');
+  });
+
+  // ── Init ─────────────────────────────────
+  renderChapter(0);
+});
+</script>
+</body>
+</html>
