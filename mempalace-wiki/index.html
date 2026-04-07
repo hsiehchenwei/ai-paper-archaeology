@@ -1,0 +1,3571 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MemPalace Wiki — 知識圖譜文件</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #0a0e14;
+  --bg-secondary: #0d1117;
+  --bg-tertiary: #161b22;
+  --bg-card: #1c2333;
+  --accent: #4dc9f6;
+  --accent-dim: #2a7a99;
+  --accent-glow: rgba(77, 201, 246, 0.15);
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --border: #21262d;
+  --border-accent: rgba(77, 201, 246, 0.3);
+  --sidebar-width: 300px;
+  --header-height: 64px;
+  --success: #3fb950;
+  --warning: #d29922;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ── Header ─────────────────────────────── */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, var(--accent), #7c3aed);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 0 20px rgba(77, 201, 246, 0.25);
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.logo-text span {
+  color: var(--accent);
+}
+
+.logo-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: 12px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
+}
+
+/* Search */
+.search-container {
+  flex: 1;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 16px 8px 40px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.search-input::placeholder { color: var(--text-muted); }
+
+.github-link {
+  flex-shrink: 0;
+  margin-left: 16px;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+}
+.github-link:hover { color: var(--accent); }
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.search-kbd {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+  display: none;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+  z-index: 200;
+}
+
+.search-results.active { display: block; }
+
+.search-result-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.search-result-item:hover { background: var(--bg-tertiary); }
+
+.search-result-item:last-child { border-bottom: none; }
+
+.search-result-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.search-result-context {
+  font-size: 12px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.search-result-context mark {
+  background: rgba(77, 201, 246, 0.3);
+  color: var(--accent);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* Mobile toggle */
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-right: 8px;
+}
+
+/* ── Sidebar ────────────────────────────── */
+.sidebar {
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  width: var(--sidebar-width);
+  height: calc(100vh - var(--header-height));
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px 0;
+  z-index: 50;
+  transition: transform 0.3s ease;
+}
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+.nav-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  padding: 8px 20px 6px;
+  margin-top: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+  position: relative;
+}
+
+.nav-item:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.nav-item.active {
+  color: var(--accent);
+  background: var(--accent-glow);
+  border-left-color: var(--accent);
+  font-weight: 500;
+}
+
+.nav-item .nav-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 22px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.nav-item.active .nav-num { color: var(--accent-dim); }
+
+.nav-badge {
+  margin-left: auto;
+  font-size: 10px;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+/* ── Content ────────────────────────────── */
+.content {
+  margin-left: var(--sidebar-width);
+  margin-top: var(--header-height);
+  height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.content::-webkit-scrollbar { width: 6px; }
+.content::-webkit-scrollbar-track { background: transparent; }
+.content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.content::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+.content-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 40px 48px 120px;
+}
+
+/* ── Markdown Styles ────────────────────── */
+.chapter { display: none; }
+.chapter.active { display: block; }
+
+.chapter h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border-accent);
+  letter-spacing: -0.5px;
+}
+
+.chapter h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 48px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chapter h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 32px;
+  margin-bottom: 12px;
+}
+
+.chapter h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-top: 24px;
+  margin-bottom: 8px;
+}
+
+.chapter p {
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.chapter a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.chapter a:hover { border-bottom-color: var(--accent); }
+
+.chapter strong { color: #f0f6fc; font-weight: 600; }
+
+.chapter em { color: var(--text-secondary); font-style: italic; }
+
+.chapter blockquote {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-glow);
+  padding: 12px 20px;
+  margin: 16px 0;
+  border-radius: 0 8px 8px 0;
+  color: var(--text-secondary);
+}
+
+.chapter blockquote strong { color: var(--accent); }
+
+.chapter ul, .chapter ol {
+  margin: 12px 0 16px 20px;
+}
+
+.chapter li {
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.chapter li::marker { color: var(--accent-dim); }
+
+.chapter hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 40px 0;
+}
+
+/* Code */
+.chapter code {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 13px;
+}
+
+.chapter p code, .chapter li code, .chapter td code {
+  background: var(--bg-tertiary);
+  padding: 2px 7px;
+  border-radius: 5px;
+  color: #f97583;
+  border: 1px solid var(--border);
+  font-size: 12.5px;
+}
+
+.chapter pre {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  margin: 16px 0;
+  position: relative;
+}
+
+.chapter pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Tables */
+.chapter table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.chapter thead {
+  background: var(--bg-tertiary);
+}
+
+.chapter th {
+  padding: 10px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--accent);
+  border-bottom: 2px solid var(--border);
+  font-size: 13px;
+  text-transform: none;
+}
+
+.chapter td {
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.chapter tbody tr:hover {
+  background: rgba(77, 201, 246, 0.04);
+}
+
+.chapter tbody tr:last-child td { border-bottom: none; }
+
+/* ── Scroll Progress ────────────────────── */
+.progress-bar {
+  position: fixed;
+  top: var(--header-height);
+  left: var(--sidebar-width);
+  right: 0;
+  height: 2px;
+  background: var(--bg-primary);
+  z-index: 90;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #7c3aed);
+  width: 0%;
+  transition: width 0.1s;
+}
+
+/* ── Chapter Nav Footer ─────────────────── */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  gap: 16px;
+}
+
+.chapter-nav-btn {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  flex: 1;
+  max-width: 48%;
+}
+
+.chapter-nav-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.chapter-nav-btn.next { align-items: flex-end; text-align: right; }
+
+.chapter-nav-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.chapter-nav-title {
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ── Overlay for mobile ─────────────────── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 40;
+}
+
+/* ── Responsive ─────────────────────────── */
+@media (max-width: 768px) {
+  .menu-toggle { display: block; }
+  .logo-sub { display: none; }
+  .search-kbd { display: none; }
+
+  .sidebar {
+    transform: translateX(-100%);
+    z-index: 60;
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; }
+
+  .content { margin-left: 0; }
+  .progress-bar { left: 0; }
+  .content-inner { padding: 24px 20px 100px; }
+
+  .chapter h1 { font-size: 24px; }
+  .chapter h2 { font-size: 19px; }
+
+  .chapter pre { font-size: 12px; padding: 12px; }
+  .chapter table { font-size: 12px; }
+  .chapter th, .chapter td { padding: 6px 10px; }
+}
+
+@media (max-width: 480px) {
+  .search-container { max-width: 200px; }
+  .chapter-nav { flex-direction: column; }
+  .chapter-nav-btn { max-width: 100%; }
+}
+
+/* Placeholder chapter */
+.placeholder-notice {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+.placeholder-notice .icon { font-size: 48px; margin-bottom: 16px; }
+.placeholder-notice p { font-size: 15px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <button class="menu-toggle" onclick="toggleSidebar()" aria-label="選單">☰</button>
+  <div class="logo-area">
+    <div class="logo-icon">🏛</div>
+    <div class="logo-text">Mem<span>Palace</span></div>
+    <div class="logo-sub">知識圖譜 Wiki</div>
+  </div>
+  <div class="search-container">
+    <span class="search-icon">🔍</span>
+    <input type="text" class="search-input" id="searchInput" placeholder="搜尋所有章節..." autocomplete="off">
+    <span class="search-kbd">⌘K</span>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <a href="https://github.com/milla-jovovich/mempalace" target="_blank" rel="noopener noreferrer" class="github-link" title="GitHub Repository">
+    <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+  </a>
+</header>
+
+<!-- Sidebar -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<nav class="sidebar" id="sidebar">
+  <div class="nav-section-label">文件目錄</div>
+  <div class="nav-item active" data-chapter="ch00" onclick="goTo('ch00')">
+    <span class="nav-num">00</span> 概覽
+  </div>
+  <div class="nav-item" data-chapter="ch01" onclick="goTo('ch01')">
+    <span class="nav-num">01</span> 核心概念：記憶宮殿
+  </div>
+  <div class="nav-item" data-chapter="ch02" onclick="goTo('ch02')">
+    <span class="nav-num">02</span> AAAK 壓縮方言
+  </div>
+  <div class="nav-item" data-chapter="ch03" onclick="goTo('ch03')">
+    <span class="nav-num">03</span> 四層記憶堆疊
+  </div>
+  <div class="nav-item" data-chapter="ch04" onclick="goTo('ch04')">
+    <span class="nav-num">04</span> 知識圖譜
+  </div>
+  <div class="nav-item" data-chapter="ch05" onclick="goTo('ch05')">
+    <span class="nav-num">05</span> 資料擷取管道
+  </div>
+  <div class="nav-item" data-chapter="ch06" onclick="goTo('ch06')">
+    <span class="nav-num">06</span> 語意搜尋與導航
+  </div>
+  <div class="nav-item" data-chapter="ch07" onclick="goTo('ch07')">
+    <span class="nav-num">07</span> MCP 伺服器
+  </div>
+  <div class="nav-item" data-chapter="ch08" onclick="goTo('ch08')">
+    <span class="nav-num">08</span> 實體偵測系統
+  </div>
+  <div class="nav-item" data-chapter="ch09" onclick="goTo('ch09')">
+    <span class="nav-num">09</span> 專家代理與設定系統
+  </div>
+  <div class="nav-item" data-chapter="ch10" onclick="goTo('ch10')">
+    <span class="nav-num">10</span> 模組依賴與架構圖
+  </div>
+  <div class="nav-item" data-chapter="ch11" onclick="goTo('ch11')">
+    <span class="nav-num">11</span> 基準測試與效能
+  </div>
+  <div class="nav-item" data-chapter="ch12" onclick="goTo('ch12')">
+    <span class="nav-num">12</span> 評審問答記錄
+  </div>
+  <div class="nav-item" data-chapter="ch13" onclick="goTo('ch13')">
+    <span class="nav-num">13</span> 中文語境改善建議
+  </div>
+</nav>
+
+<!-- Progress bar -->
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<!-- Content -->
+<main class="content" id="contentArea">
+  <div class="content-inner" id="contentInner">
+    <!-- Chapters rendered by JS -->
+  </div>
+</main>
+
+<!-- Markdown Data -->
+<script id="md-ch00" type="text/markdown">
+# MemPalace 專案概覽
+
+## 一句話定義
+
+**MemPalace** 是一套完全本機運行、免費開源的 AI 記憶系統，讓任何 LLM（Claude、GPT、Gemini、Llama、Mistral）都能「記住」你所有的對話和專案內容。
+
+## 核心問題
+
+每天與 AI 對話產生的決策、除錯過程、架構討論——在工作階段結束後全部消失。六個月的日常 AI 使用 = 1950 萬 tokens，全部蒸發。
+
+## 解決方案的三根支柱
+
+```
+┌─────────────────────────────────────────────────┐
+│           MemPalace 三大支柱                      │
+├─────────────┬──────────────┬────────────────────┤
+│  Palace     │  AAAK        │  本機優先           │
+│  結構化儲存   │  30x 壓縮    │  零 API、零雲端     │
+│  +34% 檢索   │  零資訊遺失   │  ChromaDB+SQLite   │
+└─────────────┴──────────────┴────────────────────┘
+```
+
+### 1. Palace（記憶宮殿架構）
+靈感來自古希臘記憶術——將資訊放入虛擬建築的房間中。你的對話被組織成 Wing（人物/專案）→ Hall（記憶類型）→ Room（具體主題）→ Closet（摘要）→ Drawer（原文）。
+
+### 2. AAAK（壓縮方言）
+一種專為 AI 代理設計的無損速記語言。30 倍壓縮，零資訊遺失。任何能讀文字的模型都能理解——不需要解碼器、不需要微調。
+
+### 3. 本機優先
+一切都在你的電腦上執行。ChromaDB 做向量儲存，SQLite 做知識圖譜。安裝後不需要網路。
+
+## 關鍵數字
+
+| 指標 | 數值 |
+|------|------|
+| LongMemEval R@5（純本機） | **96.6%** |
+| LongMemEval R@5（+Haiku重排） | **100%** |
+| Palace 結構帶來的檢索提升 | **+34%** |
+| 喚醒成本 | ~170 tokens |
+| 年度使用成本 | ~$10 |
+| 依賴套件 | chromadb + pyyaml |
+| Python 版本 | 3.9+ |
+| 授權 | MIT |
+
+## 技術棧
+
+```
+Python 3.9+ → CLI/MCP 入口
+ChromaDB    → 向量資料庫（本機持久化）
+SQLite      → 知識圖譜（時間性三元組）
+PyYAML      → 設定檔解析
+```
+
+## 與競品比較
+
+| 系統 | LongMemEval | 需要 API | 費用 |
+|------|------------|---------|------|
+| **MemPalace (hybrid)** | **100%** | 可選 | 免費 |
+| **MemPalace (raw)** | **96.6%** | **否** | **免費** |
+| Mem0 | ~85% | 是 | $19-249/月 |
+| Zep | ~85% | 是 | $25/月+ |
+| Mastra | 94.87% | 是 | API 費用 |
+</script>
+
+<script id="md-ch01" type="text/markdown">
+# 核心概念：記憶宮殿架構
+
+## 設計哲學
+
+> 「儲存一切，然後讓它可被找到。」
+
+其他記憶系統讓 AI 決定什麼值得記住。MemPalace 反其道而行：**保留每一個字**，用結構讓它可搜尋。
+
+## 六大建築元素
+
+```
+  ┌─────────────────────────────────────────────────────────────┐
+  │  WING: Person (人物翼)                                       │
+  │                                                            │
+  │    ┌──────────┐  ──hall──  ┌──────────┐                    │
+  │    │  Room A  │            │  Room B  │                    │
+  │    │  (auth)  │   事實走廊   │(security)│                    │
+  │    └────┬─────┘            └──────────┘                    │
+  │         │                                                  │
+  │         ▼                                                  │
+  │    ┌──────────┐      ┌──────────┐                          │
+  │    │  Closet  │ ───▶ │  Drawer  │                          │
+  │    │  (摘要)   │      │  (原文)   │                          │
+  │    └──────────┘      └──────────┘                          │
+  └─────────┼──────────────────────────────────────────────────┘
+            │ tunnel (隧道)
+  ┌─────────┼──────────────────────────────────────────────────┐
+  │  WING: Project (專案翼)                                     │
+  │         │                                                  │
+  │    ┌────┴─────┐  ──hall──  ┌──────────┐                    │
+  │    │  Room A  │            │  Room C  │                    │
+  │    │  (auth)  │            │(billing) │                    │
+  │    └──────────┘            └──────────┘                    │
+  └─────────────────────────────────────────────────────────────┘
+```
+
+### 1. Wing（翼）
+- **定義**：最頂層分類，一個人或一個專案
+- **範例**：`wing_kai`（人物）、`wing_driftwood`（專案）
+- **數量**：無上限
+- **程式碼位置**：`config.py` 的 `wing_config.json`
+
+### 2. Room（房間）
+- **定義**：翼內的具體主題，用連字號命名
+- **範例**：`auth-migration`、`graphql-switch`、`ci-pipeline`
+- **偵測方式**：`room_detector_local.py` 使用 70+ 模式自動偵測
+- **程式碼位置**：`miner.py:detect_room()`、`convo_miner.py:detect_convo_room()`
+
+### 3. Hall（走廊）
+- **定義**：房間之間的連接，代表記憶類型
+- **五種走廊**（每個翼都相同）：
+
+| 走廊 | 記憶類型 | 範例 |
+|------|---------|------|
+| `hall_facts` | 已做的決策、確定的選擇 | 「團隊決定遷移到 Clerk」 |
+| `hall_events` | 會議、里程碑、除錯記錄 | 「Kai 修好了 OAuth refresh」 |
+| `hall_discoveries` | 突破性發現、新見解 | 「發現 ChromaDB 可以這樣用」 |
+| `hall_preferences` | 習慣、偏好、意見 | 「偏好 Postgres 而非 SQLite」 |
+| `hall_advice` | 建議和解決方案 | 「Priya 批准了 Clerk 方案」 |
+
+### 4. Tunnel（隧道）
+- **定義**：跨翼連接——當同名 Room 出現在不同 Wing 時自動建立
+- **範例**：
+
+```
+wing_kai       / hall_events / auth-migration  → 「Kai 除錯了 OAuth」
+wing_driftwood / hall_facts  / auth-migration  → 「團隊決定遷移 auth」
+wing_priya     / hall_advice / auth-migration  → 「Priya 批准了 Clerk」
+```
+
+同一個 Room，三個 Wing。隧道自動連接它們。
+
+- **程式碼位置**：`palace_graph.py:find_tunnels()`
+
+### 5. Closet（衣櫃）
+- **定義**：壓縮摘要，指向原始內容，AI 讀取快速
+- **未來計劃**：將使用 AAAK 壓縮，大幅減少空間
+
+### 6. Drawer（抽屜）
+- **定義**：原始逐字內容，永不摘要
+- **儲存**：ChromaDB 向量資料庫
+- **分塊**：800 字元/塊，100 字元重疊（`miner.py`）
+
+## 結構為什麼重要
+
+在 22,000+ 真實對話記憶上測試：
+
+```
+搜尋所有衣櫃:           60.9%  R@10
+搜尋特定翼:             73.1%  (+12%)
+搜尋翼 + 走廊:          84.8%  (+24%)
+搜尋翼 + 房間:          94.8%  (+34%)
+```
+
+**結論：Palace 結構不是裝飾，是核心產品。** 光是「知道該去哪個翼」就帶來了巨大差異。
+
+## 資料流
+
+```
+使用者對話 → normalize → chunk → detect_room → ChromaDB (palace)
+                                                    ↕
+                                            knowledge_graph (SQLite)
+                                                    ↕
+使用者查詢 → MCP/CLI → searcher → 精確結果
+                    → kg_query → 實體關係
+```
+</script>
+
+<script id="md-ch02" type="text/markdown">
+# AAAK 壓縮方言
+
+## 定義
+
+AAAK 是一種**無損速記方言**，專為 AI 代理設計。不是向量嵌入，不是英文散文，而是一種結構化符號格式，任何 LLM 都能原生閱讀。
+
+## 關鍵特性
+
+| 特性 | 說明 |
+|------|------|
+| 壓縮率 | ~30 倍 |
+| 資訊遺失 | 零（無損） |
+| 需要解碼器 | 否 |
+| 需要微調 | 否 |
+| 相容模型 | Claude、GPT、Gemini、Llama、Mistral、任何文字模型 |
+| 離線運行 | 完全支援 |
+
+## 格式規範
+
+### 實體編碼
+- 3 字母大寫代碼：`ALC=Alice`、`JOR=Jordan`、`KAI=Kai`
+- 自動生成：取名字前 3 個字母
+- 碰撞處理：取前 4 個字母
+
+### 情緒標記
+```
+*action markers*：
+*warm* = 喜悅    *fierce* = 堅決    *raw* = 脆弱    *bloom* = 溫柔
+```
+
+完整情緒代碼表（`dialect.py:EMOTION_CODES`）：
+
+| 情緒 | 代碼 | 情緒 | 代碼 |
+|------|------|------|------|
+| vulnerability | vul | joy | joy |
+| fear | fear | trust | trust |
+| grief | grief | wonder | wonder |
+| love | love | hope | hope |
+| relief | relief | humor | humor |
+| anxiety | anx | exhaustion | exhaust |
+
+### 旗標系統
+
+| 旗標 | 含義 | 觸發詞 |
+|------|------|--------|
+| ORIGIN | 起源時刻 | founded, created, started, born |
+| CORE | 核心信念 | core, fundamental, principle |
+| SENSITIVE | 小心處理 | sensitivity=MAXIMUM |
+| PIVOT | 轉折點 | turning point, realized, breakthrough |
+| GENESIS | 直接導致現有事物 | genesis |
+| DECISION | 明確決策 | decided, chose, switched |
+| TECHNICAL | 技術細節 | api, database, architecture |
+
+### 結構語法
+
+```
+管道分隔:    KEY:value | GROUP(details)
+日期:       ISO 格式 (2026-03-31)
+計數:       Nx = N 次提及 (570x)
+重要性:     ★ 到 ★★★★★ (1-5 級)
+走廊:       hall_facts, hall_events, hall_discoveries, hall_preferences, hall_advice
+```
+
+## 壓縮範例
+
+### 英文原文（~1000 tokens）
+```
+Priya manages the Driftwood team: Kai (backend, 3 years), Soren (frontend),
+Maya (infrastructure), and Leo (junior, started last month). They're building
+a SaaS analytics platform. Current sprint: auth migration to Clerk.
+Kai recommended Clerk over Auth0 based on pricing and DX.
+```
+
+### AAAK 壓縮（~120 tokens）
+```
+TEAM: PRI(lead) | KAI(backend,3yr) SOR(frontend) MAY(infra) LEO(junior,new)
+PROJ: DRIFTWOOD(saas.analytics) | SPRINT: auth.migration→clerk
+DECISION: KAI.rec:clerk>auth0(pricing+dx) | ★★★★
+```
+
+**8 倍更少的 tokens，相同資訊。**
+
+## 程式碼架構（`dialect.py`）
+
+### `Dialect` 類別
+
+```python
+class Dialect:
+    def __init__(self, entities, skip_names)  # 實體對映表
+    def compress(text, metadata) -> str        # ★ 主要方法：純文字 → AAAK
+    def encode_entity(name) -> str             # 名稱 → 3字母代碼
+    def encode_emotions(emotions) -> str       # 情緒列表 → 代碼
+    def encode_zettel(zettel) -> str           # Zettel JSON → AAAK
+    def encode_file(zettel_json) -> str        # 整檔 → AAAK
+    def decode(dialect_text) -> dict           # AAAK → 結構化 dict
+    def generate_layer1(zettel_dir) -> str     # 生成 L1 喚醒檔案
+    def compression_stats(original, compressed) -> dict
+```
+
+### 壓縮流程
+
+```
+純文字輸入
+    ↓
+_detect_entities_in_text()  → 找出已知實體或大寫名詞
+    ↓
+_extract_topics()           → 頻率分析提取關鍵詞
+    ↓
+_extract_key_sentence()     → 評分選出最重要句子
+    ↓
+_detect_emotions()          → 關鍵詞匹配情緒
+    ↓
+_detect_flags()             → 關鍵詞匹配旗標
+    ↓
+組合為 AAAK 格式輸出
+```
+
+### Token 計算
+
+```python
+# 粗略估算：1 token ≈ 3 字元（結構化文字）
+@staticmethod
+def count_tokens(text: str) -> int:
+    return len(text) // 3
+```
+
+## CLI 用法
+
+```bash
+# 壓縮文字
+python dialect.py "We decided to use GraphQL instead of REST..."
+
+# 壓縮 Zettel JSON
+python dialect.py --file zettels/file_001.json
+
+# 批量壓縮
+python dialect.py --all zettel_dir/
+
+# 生成 Layer 1
+python dialect.py --layer1 zettel_dir/
+
+# 帶實體設定
+python dialect.py --config entities.json "text to compress"
+```
+</script>
+
+<script id="md-ch03" type="text/markdown">
+# 四層記憶堆疊（Memory Stack）
+
+## 設計原則
+
+> 只載入你需要的，在你需要的時候。
+
+傳統方法：把所有東西丟進 context window → 太慢、太貴、放不下。
+MemPalace 方法：分層按需載入。
+
+## 四層架構
+
+```
+┌─────────────────────────────────────────┐
+│  L0: 身份層 (Identity)                   │
+│  ~50 tokens | 永遠載入                    │
+│  「我是誰？」                              │
+├─────────────────────────────────────────┤
+│  L1: 關鍵事實層 (Essential Story)         │
+│  ~120 tokens (AAAK) | 永遠載入            │
+│  團隊、專案、偏好                          │
+├─────────────────────────────────────────┤
+│  L2: 按需回憶層 (On-Demand)              │
+│  ~200-500 tokens/次 | 話題出現時載入       │
+│  最近會議、當前專案                        │
+├─────────────────────────────────────────┤
+│  L3: 深度搜尋層 (Deep Search)            │
+│  無限制 | 明確要求時載入                    │
+│  全宮殿語意搜尋                            │
+└─────────────────────────────────────────┘
+```
+
+## 各層詳解
+
+### Layer 0：身份層（`layers.py:Layer0`）
+
+```python
+class Layer0:
+    # 讀取 ~/.mempalace/identity.txt
+    # 純文字，使用者自己撰寫
+    # 範例：
+    #   I am Atlas, a personal AI assistant for Alice.
+    #   Traits: warm, direct, remembers everything.
+    #   People: Alice (creator), Bob (Alice's partner).
+```
+
+- **大小**：~100 tokens
+- **載入時機**：每次對話開始
+- **來源**：`~/.mempalace/identity.txt`
+
+### Layer 1：關鍵事實層（`layers.py:Layer1`）
+
+```python
+class Layer1:
+    MAX_DRAWERS = 15    # 最多 15 個記憶片段
+    MAX_CHARS = 3200    # 硬性上限 (~800 tokens)
+
+    def generate(self):
+        # 從 ChromaDB 拉取最高權重/最新的抽屜
+        # 按房間分組
+        # 截斷成精簡格式
+```
+
+- **大小**：~500-800 tokens
+- **載入時機**：每次對話開始
+- **演算法**：按重要性排序，取前 15 個，按房間分組
+
+### Layer 2：按需回憶層（`layers.py:Layer2`）
+
+```python
+class Layer2:
+    def retrieve(self, wing=None, room=None, n_results=10):
+        # Wing/Room 過濾的 ChromaDB 查詢
+        # 回傳格式化文字
+```
+
+- **大小**：~200-500 tokens/次
+- **載入時機**：特定話題出現時
+- **過濾**：按 Wing 和/或 Room
+
+### Layer 3：深度搜尋層（`layers.py:Layer3`）
+
+```python
+class Layer3:
+    def search(self, query, wing=None, room=None, n_results=5):
+        # 全語意搜尋
+        # 支援 Wing/Room 過濾
+        # 回傳相似度分數
+
+    def search_raw(self, query, ...):
+        # 回傳原始 dict（供程式使用）
+```
+
+- **大小**：無限制
+- **載入時機**：使用者明確搜尋
+- **引擎**：ChromaDB 語意向量搜尋
+
+## 統一介面（`MemoryStack`）
+
+```python
+stack = MemoryStack(palace_path="~/.mempalace/palace")
+
+# 喚醒：L0 + L1（~600-900 tokens）
+text = stack.wake_up(wing="driftwood")
+
+# 按需回憶：L2
+text = stack.recall(wing="my_app", room="auth")
+
+# 深度搜尋：L3
+text = stack.search("pricing change", wing="my_app")
+
+# 狀態檢查
+status = stack.status()
+```
+
+## 成本比較
+
+| 方法 | 每次載入 tokens | 年度成本 |
+|------|--------------|---------|
+| 貼上所有對話 | 1950 萬（放不下） | 不可能 |
+| LLM 摘要 | ~65 萬 | ~$507 |
+| **MemPalace 喚醒** | **~170** | **~$0.70** |
+| **MemPalace + 5 次搜尋** | **~13,500** | **~$10** |
+</script>
+
+<script id="md-ch04" type="text/markdown">
+# 知識圖譜（Knowledge Graph）
+
+## 定位
+
+知識圖譜是 MemPalace 的**結構化事實引擎**——Palace 儲存逐字原文，知識圖譜儲存**實體之間的關係和時間軸**。
+
+## 與 Zep Graphiti 的比較
+
+| 特性 | MemPalace | Zep (Graphiti) |
+|------|-----------|----------------|
+| 儲存 | SQLite（本機） | Neo4j（雲端） |
+| 費用 | 免費 | $25/月+ |
+| 時間有效性 | 支援 | 支援 |
+| 自託管 | 永遠 | 僅企業版 |
+| 隱私 | 完全本機 | SOC 2, HIPAA |
+
+## 資料模型
+
+### 實體表（`entities`）
+
+```sql
+CREATE TABLE entities (
+    id TEXT PRIMARY KEY,          -- 小寫底線格式 (e.g. "kai")
+    name TEXT NOT NULL,           -- 原始名稱 (e.g. "Kai")
+    type TEXT DEFAULT 'unknown',  -- person/project/tool/concept
+    properties TEXT DEFAULT '{}', -- JSON 屬性（性別、生日等）
+    created_at TEXT
+);
+```
+
+### 三元組表（`triples`）
+
+```sql
+CREATE TABLE triples (
+    id TEXT PRIMARY KEY,
+    subject TEXT NOT NULL,       -- 主語實體 ID
+    predicate TEXT NOT NULL,     -- 關係類型 (e.g. "works_on")
+    object TEXT NOT NULL,        -- 賓語實體 ID
+    valid_from TEXT,             -- 何時開始為真
+    valid_to TEXT,               -- 何時不再為真（NULL=仍然有效）
+    confidence REAL DEFAULT 1.0, -- 信心度
+    source_closet TEXT,          -- 來源衣櫃 ID
+    source_file TEXT,
+    extracted_at TEXT
+);
+```
+
+## 核心操作
+
+### 寫入
+
+```python
+kg = KnowledgeGraph()
+
+# 新增三元組
+kg.add_triple("Kai", "works_on", "Orion", valid_from="2025-06-01")
+kg.add_triple("Maya", "assigned_to", "auth-migration", valid_from="2026-01-15")
+
+# 自動建立不存在的實體
+# 自動偵測重複（相同 subject+predicate+object 且 valid_to=NULL）
+
+# 使事實失效
+kg.invalidate("Kai", "works_on", "Orion", ended="2026-03-01")
+# → 現在查詢 Kai 的現在工作不會回傳 Orion，歷史查詢仍會
+```
+
+### 查詢
+
+```python
+# 查詢實體的所有關係
+kg.query_entity("Kai")
+# → [Kai→works_on→Orion (current), Kai→recommended→Clerk]
+
+# 時間點查詢：2026年1月 Maya 在做什麼？
+kg.query_entity("Maya", as_of="2026-01-20")
+# → [Maya→assigned_to→auth-migration (active)]
+
+# 方向過濾
+kg.query_entity("Kai", direction="outgoing")  # Kai→?
+kg.query_entity("Kai", direction="incoming")  # ?→Kai
+kg.query_entity("Kai", direction="both")      # 雙向
+
+# 按關係類型查詢
+kg.query_relationship("works_on")
+# → 所有「某人在做某事」的三元組
+
+# 時間軸
+kg.timeline("Orion")
+# → Orion 專案的時間順序故事
+```
+
+### 統計
+
+```python
+kg.stats()
+# → {entities: 12, triples: 45, current_facts: 38,
+#    expired_facts: 7, relationship_types: ["works_on", "child_of", ...]}
+```
+
+## 矛盾偵測
+
+知識圖譜支援矛盾偵測——透過比對已知事實：
+
+```
+輸入:  「Soren 完成了 auth 遷移」
+輸出:  🔴 AUTH-MIGRATION: 歸屬衝突 — 記錄顯示是 Maya 負責，不是 Soren
+
+輸入:  「Kai 在這裡兩年了」
+輸出:  🟡 KAI: 年資錯誤 — 記錄顯示 3 年（2023-04 入職）
+
+輸入:  「Sprint 週五結束」
+輸出:  🟡 SPRINT: 日期過時 — 當前 sprint 週四結束
+```
+
+## 從已知事實種子化
+
+```python
+# 從 ENTITY_FACTS 字典批量匯入
+kg.seed_from_entity_facts({
+    "kai": {
+        "full_name": "Kai",
+        "type": "person",
+        "gender": "male",
+        "birthday": "1992-03-15",
+        "interests": ["backend", "Rust"],
+    }
+})
+# 自動建立實體 + 興趣三元組
+```
+
+## 儲存位置
+
+```
+~/.mempalace/knowledge_graph.sqlite3
+```
+
+SQLite 檔案，可直接用任何 SQLite 工具查看。
+</script>
+
+<script id="md-ch05" type="text/markdown">
+# 資料擷取管道（Data Ingestion Pipeline）
+
+## 概覽
+
+MemPalace 有兩條擷取路徑，共用同一個 Palace 和搜尋引擎：
+
+```
+路徑 A: 專案檔案 → miner.py → ChromaDB
+路徑 B: 對話匯出 → normalize.py → convo_miner.py → ChromaDB
+```
+
+## 路徑 A：專案採礦（`miner.py`）
+
+### 流程
+
+```
+掃描目錄
+  ↓ scan_project() — 遞迴走訪，過濾可讀副檔名
+讀取檔案
+  ↓ 跳過已採礦的檔案（file_already_mined）
+分塊
+  ↓ chunk_text() — 800字元/塊，100字元重疊
+路由到房間
+  ↓ detect_room() — 資料夾路徑 > 檔名 > 關鍵詞評分 > fallback "general"
+存入 ChromaDB
+  ↓ add_drawer() — 帶 wing/room/source metadata
+```
+
+### 支援的副檔名
+
+```python
+READABLE_EXTENSIONS = {
+    ".txt", ".md", ".py", ".js", ".ts", ".jsx", ".tsx",
+    ".json", ".yaml", ".yml", ".html", ".css", ".java",
+    ".go", ".rs", ".rb", ".sh", ".csv", ".sql", ".toml",
+}
+```
+
+### 跳過的目錄
+
+```python
+SKIP_DIRS = {
+    ".git", "node_modules", "__pycache__", ".venv", "venv",
+    "env", "dist", "build", ".next", "coverage", ".mempalace",
+}
+```
+
+### 分塊策略
+
+```python
+CHUNK_SIZE = 800     # 每個抽屜的字元數
+CHUNK_OVERLAP = 100  # 塊之間的重疊
+MIN_CHUNK_SIZE = 50  # 跳過太小的塊
+```
+
+優先在段落邊界分割（`\n\n`），其次在行邊界（`\n`）。
+
+### 房間偵測優先順序
+
+1. **資料夾路徑**包含房間名稱
+2. **檔名**匹配房間名稱
+3. **內容關鍵詞**評分（從 `mempalace.yaml` 中的房間關鍵詞）
+4. **Fallback**：`"general"`
+
+## 路徑 B：對話採礦（`convo_miner.py`）
+
+### 流程
+
+```
+掃描對話檔案
+  ↓ scan_convos() — .txt/.md/.json/.jsonl
+格式正規化
+  ↓ normalize.py — 5 種格式 → 統一 "> user\nassistant" 格式
+分塊（兩種模式）
+  ↓ exchange: chunk_exchanges() — 一問一答 = 一塊
+  ↓ general: general_extractor.py — 分類為 5 種記憶類型
+路由到房間
+  ↓ exchange: detect_convo_room() — 關鍵詞評分
+  ↓ general: 直接使用 memory_type 作為房間名
+存入 ChromaDB
+```
+
+### 支援的對話格式（`normalize.py`）
+
+| 格式 | 偵測方式 | 解析函式 |
+|------|---------|---------|
+| 純文字 `>` 標記 | 3+ 行以 `>` 開頭 | 直接通過 |
+| Claude Code JSONL | JSONL + `type: "human"/"assistant"` | `_try_claude_code_jsonl()` |
+| Claude.ai JSON | `[{role, content}]` 或 `{messages:[...]}` | `_try_claude_ai_json()` |
+| ChatGPT JSON | `{mapping: {tree}}` | `_try_chatgpt_json()` |
+| Slack JSON | `[{type:"message", user, text}]` | `_try_slack_json()` |
+| 純文字 | 無特殊標記 | 段落分塊 |
+
+### 對話房間偵測關鍵詞
+
+```python
+TOPIC_KEYWORDS = {
+    "technical":    ["code", "python", "bug", "api", "database", ...],
+    "architecture": ["architecture", "design", "pattern", "schema", ...],
+    "planning":     ["plan", "roadmap", "milestone", "deadline", ...],
+    "decisions":    ["decided", "chose", "switched", "trade-off", ...],
+    "problems":     ["problem", "issue", "broken", "crash", ...],
+}
+```
+
+## 通用萃取器（`general_extractor.py`）
+
+### 五種記憶類型
+
+| 類型 | 正則模式範例 | 說明 |
+|------|------------|------|
+| `decision` | `"let's use"`, `"we decided"`, `"instead of"` | 做出的選擇 |
+| `preference` | `"I prefer"`, `"always use"`, `"never do"` | 偏好和規則 |
+| `milestone` | `"it works"`, `"breakthrough"`, `"shipped"` | 突破和里程碑 |
+| `problem` | `"bug"`, `"doesn't work"`, `"root cause"` | 問題和修復 |
+| `emotional` | `"love"`, `"scared"`, `"I feel"` | 情感和脆弱 |
+
+### 消歧邏輯
+
+- 已解決的問題 → 里程碑
+- 問題 + 正面情緒 → 里程碑或情感
+- 自動跳過程式碼行（`_is_code_line()`）
+
+## 預處理：分割巨型檔案（`split_mega_files.py`）
+
+某些匯出工具會把多個對話串接成一個巨大檔案：
+
+```bash
+mempalace split ~/chats/                    # 分割成單次對話檔案
+mempalace split ~/chats/ --dry-run          # 預覽
+mempalace split ~/chats/ --min-sessions 3   # 只分割含 3+ 對話的檔案
+```
+
+## CLI 用法
+
+```bash
+# 專案採礦
+mempalace mine ~/projects/myapp
+
+# 對話採礦（交換對模式）
+mempalace mine ~/chats/ --mode convos
+
+# 對話採礦（通用萃取模式）
+mempalace mine ~/chats/ --mode convos --extract general
+
+# 指定翼
+mempalace mine ~/chats/ --mode convos --wing myapp
+
+# 預覽
+mempalace mine ~/chats/ --mode convos --dry-run
+
+# 限制檔案數
+mempalace mine ~/projects/ --limit 10
+```
+</script>
+
+<script id="md-ch06" type="text/markdown">
+# 語意搜尋與宮殿導航
+
+## 搜尋引擎（`searcher.py`）
+
+### 核心原則
+
+> 回傳逐字原文——真正的文字，永遠不是摘要。
+
+### 搜尋流程
+
+```
+使用者查詢
+  ↓
+ChromaDB 語意向量搜尋（cosine similarity）
+  ↓ 可選過濾：wing、room
+回傳結果
+  ↓ 文件內容 + metadata + 相似度分數
+```
+
+### 兩個搜尋介面
+
+#### 1. CLI 搜尋（`search()`）
+
+```python
+def search(query, palace_path, wing=None, room=None, n_results=5):
+    # 直接列印格式化結果
+    # 顯示：[排名] wing/room | Source | Match 分數 | 逐字內容
+```
+
+#### 2. 程式化搜尋（`search_memories()`）
+
+```python
+def search_memories(query, palace_path, wing=None, room=None, n_results=5):
+    # 回傳 dict，供 MCP 伺服器和其他呼叫者使用
+    return {
+        "query": "auth decisions",
+        "filters": {"wing": "driftwood", "room": None},
+        "results": [
+            {
+                "text": "原始逐字內容...",
+                "wing": "wing_driftwood",
+                "room": "decisions",
+                "source_file": "session_2026-01-15.txt",
+                "similarity": 0.892,
+            }
+        ]
+    }
+```
+
+### 過濾機制
+
+```python
+# 無過濾（搜尋全宮殿）
+mempalace search "query"
+
+# Wing 過濾
+mempalace search "query" --wing myapp
+
+# Room 過濾
+mempalace search "query" --room auth-migration
+
+# 組合過濾
+mempalace search "query" --wing myapp --room decisions
+```
+
+內部使用 ChromaDB 的 `where` 條件：
+
+```python
+# 單一過濾
+where = {"wing": wing}
+
+# 組合過濾
+where = {"$and": [{"wing": wing}, {"room": room}]}
+```
+
+## 宮殿圖導航（`palace_graph.py`）
+
+### 建構圖
+
+```python
+def build_graph(col):
+    # 從 ChromaDB metadata 建構
+    # nodes = {room: {wings: set, halls: set, count: int, dates: set}}
+    # edges = rooms 跨越多個 wings 的連接（即 tunnels）
+```
+
+### 三個導航工具
+
+#### 1. `traverse(start_room, max_hops=2)`
+
+BFS 遍歷：從一個房間出發，透過共享 Wing 找到相連的房間。
+
+```python
+traverse("chromadb-setup")
+# → [
+#   {room: "chromadb-setup", wings: ["wing_code"], hop: 0},
+#   {room: "vector-db",     wings: ["wing_code", "wing_research"], hop: 1},
+#   {room: "gpu-pricing",   wings: ["wing_research"], hop: 2},
+# ]
+```
+
+**演算法**：
+1. 起始房間的所有 Wing
+2. 找出與這些 Wing 共享的其他房間
+3. 重複直到 `max_hops`
+4. 按 (跳數, -計數) 排序
+
+#### 2. `find_tunnels(wing_a, wing_b)`
+
+找出連接兩個 Wing 的共享房間：
+
+```python
+find_tunnels("wing_code", "wing_team")
+# → [{room: "auth-migration", wings: [...], count: 12}]
+```
+
+#### 3. `graph_stats()`
+
+```python
+graph_stats()
+# → {
+#   total_rooms: 47,
+#   tunnel_rooms: 8,      # 跨越多 Wing 的房間
+#   total_edges: 15,
+#   rooms_per_wing: {"wing_code": 23, "wing_team": 12, ...},
+#   top_tunnels: [{room: "auth-migration", wings: [...]}]
+# }
+```
+
+### 模糊匹配
+
+如果房間名不精確，提供建議：
+
+```python
+def _fuzzy_match(query, nodes, n=5):
+    # 子字串匹配 + 分割詞匹配
+    # "auth" → ["auth-migration", "auth-tokens", "auth-setup"]
+```
+
+## 重複偵測
+
+寫入前自動檢查重複：
+
+```python
+def tool_check_duplicate(content, threshold=0.9):
+    # ChromaDB 查詢前 5 個最相似
+    # similarity >= threshold → 視為重複
+    # 回傳匹配列表（ID、wing、room、相似度、內容預覽）
+```
+</script>
+
+<script id="md-ch07" type="text/markdown">
+# MCP 伺服器（19 個工具）
+
+## 安裝
+
+```bash
+claude mcp add mempalace -- python -m mempalace.mcp_server
+```
+
+## 架構
+
+MCP 伺服器是 MemPalace 的**對外介面**——AI 工具（Claude、ChatGPT、Cursor）透過它存取宮殿。
+
+```
+AI 工具 ──JSON-RPC──→ mcp_server.py ──→ searcher.py (ChromaDB)
+                                    ──→ knowledge_graph.py (SQLite)
+                                    ──→ palace_graph.py (圖導航)
+```
+
+### 通訊協定
+
+- **協定**：JSON-RPC 2.0（透過 stdin/stdout）
+- **版本**：`2024-11-05`
+- **自動教學**：`mempalace_status` 回應中包含 AAAK 規範和記憶協議
+
+## 19 個工具分類
+
+### 宮殿讀取（7 個）
+
+| 工具 | 功能 | 參數 |
+|------|------|------|
+| `mempalace_status` | 宮殿概覽 + AAAK 規範 + 記憶協議 | 無 |
+| `mempalace_list_wings` | 所有翼和抽屜計數 | 無 |
+| `mempalace_list_rooms` | 翼內的房間 | `wing?` |
+| `mempalace_get_taxonomy` | 完整 wing→room→count 樹 | 無 |
+| `mempalace_search` | 語意搜尋 | `query`, `limit?`, `wing?`, `room?` |
+| `mempalace_check_duplicate` | 寫入前查重 | `content`, `threshold?` |
+| `mempalace_get_aaak_spec` | AAAK 方言規範 | 無 |
+
+### 宮殿寫入（2 個）
+
+| 工具 | 功能 | 參數 |
+|------|------|------|
+| `mempalace_add_drawer` | 存入逐字內容 | `wing`, `room`, `content`, `source_file?` |
+| `mempalace_delete_drawer` | 刪除抽屜 | `drawer_id` |
+
+### 知識圖譜（5 個）
+
+| 工具 | 功能 | 參數 |
+|------|------|------|
+| `mempalace_kg_query` | 查詢實體關係 | `entity`, `as_of?`, `direction?` |
+| `mempalace_kg_add` | 新增事實 | `subject`, `predicate`, `object`, `valid_from?` |
+| `mempalace_kg_invalidate` | 標記事實失效 | `subject`, `predicate`, `object`, `ended?` |
+| `mempalace_kg_timeline` | 時間軸 | `entity?` |
+| `mempalace_kg_stats` | 圖譜統計 | 無 |
+
+### 導航（3 個）
+
+| 工具 | 功能 | 參數 |
+|------|------|------|
+| `mempalace_traverse` | 從房間出發走圖 | `start_room`, `max_hops?` |
+| `mempalace_find_tunnels` | 找跨翼橋接房間 | `wing_a?`, `wing_b?` |
+| `mempalace_graph_stats` | 圖連通性概覽 | 無 |
+
+### 代理日記（2 個）
+
+| 工具 | 功能 | 參數 |
+|------|------|------|
+| `mempalace_diary_write` | 寫日記（AAAK 格式） | `agent_name`, `entry`, `topic?` |
+| `mempalace_diary_read` | 讀最近日記 | `agent_name`, `last_n?` |
+
+## 記憶協議（Palace Protocol）
+
+每次 AI 呼叫 `mempalace_status` 時，自動收到這個協議：
+
+```
+1. 喚醒時：呼叫 mempalace_status 載入宮殿概覽
+2. 回應前：先查詢 mempalace_kg_query 或 mempalace_search，不要猜
+3. 不確定時：說「讓我查查」然後查詢
+4. 每次對話結束：呼叫 mempalace_diary_write 記錄
+5. 事實改變時：invalidate 舊事實，add 新事實
+```
+
+> **儲存不是記憶——但儲存 + 這個協議 = 記憶。**
+
+## 代理日記系統
+
+每個代理擁有自己的 Wing 和日記房間：
+
+```python
+# 寫入日記（AAAK 格式）
+mempalace_diary_write(
+    agent_name="reviewer",
+    entry="SESSION:2026-04-04|built.palace.graph+diary.tools|★★★",
+    topic="code_review"
+)
+
+# 讀取最近 10 筆
+mempalace_diary_read(agent_name="reviewer", last_n=10)
+```
+
+日記存在 `wing_{agent_name}/diary` 房間中，帶時間戳。
+
+## 自動儲存 Hooks
+
+### Save Hook（每 15 則訊息觸發）
+
+```bash
+hooks/mempal_save_hook.sh
+```
+- 觸發結構化儲存：主題、決策、引用、程式碼變更
+- 重新生成 L1 關鍵事實層
+
+### PreCompact Hook（context 壓縮前觸發）
+
+```bash
+hooks/mempal_precompact_hook.sh
+```
+- 緊急儲存：在 context window 縮小前搶救記憶
+</script>
+
+<script id="md-ch08" type="text/markdown">
+# 實體偵測系統
+
+## 三層實體管道
+
+```
+入職引導 (onboarding.py)     → 使用者明確告知
+  ↓
+自動偵測 (entity_detector.py) → 從檔案內容推斷
+  ↓
+實體註冊 (entity_registry.py) → 持久化儲存 + 查詢消歧
+```
+
+## 第一層：入職引導（`onboarding.py`）
+
+### 互動流程
+
+```
+步驟 1: 模式選擇 → work / personal / combo
+步驟 2: 人物登記 → 名字、關係、暱稱
+步驟 3: 專案登記 → 專案名稱列表
+步驟 4: 翼命名   → 預設建議或自訂
+步驟 5: 自動掃描 → 從檔案偵測額外實體
+步驟 6: 歧義警告 → 名字也是常見英文單詞時提醒
+```
+
+### 預設翼分類
+
+| 模式 | 預設翼 |
+|------|--------|
+| work | projects, clients, team, decisions, research |
+| personal | family, health, creative, reflections, relationships |
+| combo | family, work, health, creative, projects, reflections |
+
+### AAAK 引導產出
+
+入職完成後自動生成：
+- `~/.mempalace/aaak_entities.md` — 實體代碼表
+- `~/.mempalace/critical_facts.md` — 關鍵事實引導檔
+
+## 第二層：自動偵測（`entity_detector.py`）
+
+### 兩階段偵測
+
+```
+階段 1: 候選萃取 — 找所有大寫專有名詞，頻率 ≥ 3
+階段 2: 評分分類 — 人物 vs 專案 vs 不確定
+```
+
+### 人物訊號模式
+
+| 訊號類型 | 模式範例 | 權重 |
+|---------|---------|------|
+| 對話標記 | `> Name:`, `[Name]`, `"Name said` | ×3 |
+| 人物動詞 | `Name said/asked/laughed/felt/decided` | ×2 |
+| 代名詞鄰近 | she/he/they 在名字附近 3 行內 | ×2 |
+| 直接稱呼 | `hey Name`, `thanks Name` | ×4 |
+
+### 專案訊號模式
+
+| 訊號類型 | 模式範例 | 權重 |
+|---------|---------|------|
+| 專案動詞 | `building Name`, `deploy Name` | ×2 |
+| 版本化 | `Name v2`, `Name-core` | ×3 |
+| 程式碼引用 | `Name.py`, `import Name` | ×3 |
+
+### 分類規則
+
+```python
+if person_ratio >= 0.7 AND 兩種以上訊號類型 AND person_score >= 5:
+    → person（信心度 0.85-0.99）
+elif person_ratio >= 0.7 BUT 只有代名詞訊號:
+    → uncertain（降級，信心度 0.4）  # 避免誤判！
+elif person_ratio <= 0.3:
+    → project（信心度 0.85-0.99）
+else:
+    → uncertain（需人工審查）
+```
+
+**關鍵設計決策**：需要**兩種不同的訊號類別**才能確信分類為人物。單一訊號類型的大量命中可能只是巧合。
+
+## 第三層：實體註冊表（`entity_registry.py`）
+
+### 持久化格式
+
+```json
+{
+  "version": 1,
+  "mode": "personal",
+  "people": {
+    "Riley": {
+      "source": "onboarding",
+      "contexts": ["personal"],
+      "aliases": ["Ri"],
+      "relationship": "daughter",
+      "confidence": 1.0
+    }
+  },
+  "projects": ["MemPalace", "Acme"],
+  "ambiguous_flags": ["riley", "max"],
+  "wiki_cache": {}
+}
+```
+
+### 查詢消歧
+
+當名字也是常見英文單詞時（如 "Ever", "Grace", "Max"）：
+
+```python
+# 人物語境模式
+"with Riley" → 人物 ✓
+"Riley said"  → 人物 ✓
+"Riley's"     → 人物 ✓
+
+# 概念語境模式
+"have you ever" → 概念（副詞）✓
+"if you ever"   → 概念（副詞）✓
+```
+
+### Wikipedia 查詢
+
+對未知詞彙，可透過 Wikipedia REST API 查詢：
+
+```python
+registry.research("Soren")
+# → 查詢 Wikipedia
+# → 如果描述包含 "given name" → person (信心度 0.80-0.90)
+# → 如果 404 → 可能是專有名詞 (信心度 0.70)
+# → 結果快取在 wiki_cache
+```
+
+### 從對話學習
+
+```python
+registry.learn_from_text(session_text, min_confidence=0.75)
+# → 自動偵測新實體
+# → 信心度 ≥ 0.75 時自動加入
+# → 標記歧義名字
+```
+
+## 名字感知拼字檢查（`spellcheck.py`）
+
+```
+一般拼字檢查：「Riley」→ 「Really」❌ 錯誤修正！
+MemPalace：「Riley」→ 「Riley」✓ 已知實體，不修正
+```
+</script>
+
+<script id="md-ch09" type="text/markdown">
+# 專家代理與設定系統
+
+## 專家代理（Specialist Agents）
+
+### 概念
+
+每個代理專注於特定領域，擁有自己的翼和日記——不佔用 `CLAUDE.md`。
+
+```
+~/.mempalace/agents/
+  ├── reviewer.json       # 程式碼品質、模式、bug
+  ├── architect.json      # 設計決策、取捨
+  └── ops.json            # 部署、事故、基礎設施
+```
+
+### 你的 CLAUDE.md 只需一行
+
+```
+You have MemPalace agents. Run mempalace_list_agents to see them.
+```
+
+### 每個代理的特性
+
+| 特性 | 說明 |
+|------|------|
+| **專注領域** | 它關注什麼（程式碼品質、架構、運維...） |
+| **日記** | 用 AAAK 撰寫，跨 session 持久化 |
+| **專業知識** | 讀取自己的歷史來保持領域敏銳度 |
+
+### 日記寫入範例
+
+```python
+mempalace_diary_write(
+    "reviewer",
+    "PR#42|auth.bypass.found|missing.middleware.check|pattern:3rd.time.this.quarter|★★★★"
+)
+```
+
+### 日記讀取範例
+
+```python
+mempalace_diary_read("reviewer", last_n=10)
+# → 最近 10 筆發現，AAAK 壓縮格式
+```
+
+### 與 Letta 的比較
+
+| 特性 | MemPalace | Letta |
+|------|-----------|-------|
+| 費用 | 免費 | $20-200/月 |
+| 記憶機制 | Palace 翼 + AAAK 日記 | 雲端代理記憶 |
+| 代理數量 | 無限制 | 依方案 |
+| 自訂性 | JSON 設定 | SaaS 介面 |
+
+## 設定系統
+
+### 三層設定
+
+```
+1. 全域設定:  ~/.mempalace/config.json
+2. 翼設定:    ~/.mempalace/wing_config.json
+3. 身份設定:  ~/.mempalace/identity.txt
+```
+
+### 全域設定（`config.py:MempalaceConfig`）
+
+```json
+{
+  "palace_path": "/custom/path/to/palace",
+  "collection_name": "mempalace_drawers",
+  "people_map": {"Kai": "KAI", "Priya": "PRI"}
+}
+```
+
+**載入優先順序**：
+1. `--palace` 命令列參數
+2. `~/.mempalace/config.json` 中的 `palace_path`
+3. 預設：`~/.mempalace/palace`
+
+### 翼設定
+
+```json
+{
+  "default_wing": "wing_general",
+  "wings": {
+    "wing_kai": {"type": "person", "keywords": ["kai", "kai's"]},
+    "wing_driftwood": {"type": "project", "keywords": ["driftwood", "analytics"]}
+  }
+}
+```
+
+由 `mempalace init` 自動生成。
+
+### 身份設定
+
+純文字檔案 `~/.mempalace/identity.txt`，成為 Layer 0。
+
+```
+I am Atlas, a personal AI assistant for Alice.
+Traits: warm, direct, remembers everything.
+People: Alice (creator), Bob (partner).
+Project: A journaling app.
+```
+
+### 專案設定（`mempalace.yaml`）
+
+每個專案目錄中的設定檔：
+
+```yaml
+wing: my_project
+rooms:
+  - name: backend
+    description: Server-side code
+    keywords: [api, server, database, endpoint]
+  - name: frontend
+    description: Client-side code
+    keywords: [react, component, ui, css]
+  - name: infra
+    description: Infrastructure
+    keywords: [docker, deploy, ci, pipeline]
+```
+
+## CLI 指令總覽
+
+```bash
+# 設定
+mempalace init <dir>                    # 引導式設定
+
+# 採礦
+mempalace mine <dir>                    # 專案檔案
+mempalace mine <dir> --mode convos      # 對話匯出
+mempalace mine <dir> --mode convos --extract general  # 通用萃取
+
+# 分割
+mempalace split <dir>                   # 分割串接的轉錄稿
+mempalace split <dir> --dry-run         # 預覽
+
+# 搜尋
+mempalace search "query"                # 全域搜尋
+mempalace search "query" --wing myapp   # 翼內搜尋
+mempalace search "query" --room auth    # 房間內搜尋
+
+# 記憶堆疊
+mempalace wake-up                       # L0+L1 context
+mempalace wake-up --wing driftwood      # 專案特定
+
+# 壓縮
+mempalace compress --wing myapp         # AAAK 壓縮
+mempalace compress --wing myapp --dry-run
+
+# 狀態
+mempalace status                        # 宮殿概覽
+```
+</script>
+
+<script id="md-ch10" type="text/markdown">
+# 模組依賴與架構圖
+
+## 全域架構
+
+```
+                    ┌──────────────┐
+                    │   使用者      │
+                    └──────┬───────┘
+                           │
+              ┌────────────┼────────────┐
+              │            │            │
+         ┌────▼────┐  ┌───▼────┐  ┌───▼────────┐
+         │  CLI    │  │  MCP   │  │  Python API │
+         │ cli.py  │  │Server  │  │  (import)   │
+         └────┬────┘  └───┬────┘  └───┬─────────┘
+              │            │           │
+    ┌─────────┼────────────┼───────────┼─────────────┐
+    │         │   核心引擎層   │           │             │
+    │  ┌──────▼──────┐  ┌──▼────────┐  ┌▼──────────┐ │
+    │  │   miner     │  │ searcher  │  │  layers   │ │
+    │  │ convo_miner │  │           │  │           │ │
+    │  └──────┬──────┘  └──┬────────┘  └┬──────────┘ │
+    │         │            │            │             │
+    │  ┌──────▼────────────▼────────────▼──────────┐  │
+    │  │            ChromaDB (palace)               │  │
+    │  │         mempalace_drawers 集合              │  │
+    │  └───────────────────────────────────────────┘  │
+    │                                                 │
+    │  ┌─────────────┐  ┌──────────────┐              │
+    │  │ knowledge   │  │ palace_graph │              │
+    │  │ _graph.py   │  │    .py       │              │
+    │  │  (SQLite)   │  │ (從ChromaDB  │              │
+    │  │             │  │  建構圖)      │              │
+    │  └─────────────┘  └──────────────┘              │
+    │                                                 │
+    │  ┌─────────────┐  ┌──────────────┐              │
+    │  │ dialect.py  │  │ normalize.py │              │
+    │  │  (AAAK)     │  │ (5種格式)     │              │
+    │  └─────────────┘  └──────────────┘              │
+    │                                                 │
+    │  ┌─────────────────────────────────────────┐    │
+    │  │ 實體系統                                  │    │
+    │  │ entity_detector → entity_registry        │    │
+    │  │ onboarding → spellcheck                  │    │
+    │  └─────────────────────────────────────────┘    │
+    └─────────────────────────────────────────────────┘
+```
+
+## 模組依賴圖
+
+```
+cli.py
+  ├── config.py
+  ├── miner.py
+  │     └── chromadb
+  ├── convo_miner.py
+  │     ├── normalize.py
+  │     │     └── spellcheck.py
+  │     └── general_extractor.py
+  ├── searcher.py
+  │     └── chromadb
+  ├── layers.py
+  │     ├── config.py
+  │     └── chromadb
+  ├── dialect.py  (獨立)
+  ├── entity_detector.py
+  ├── room_detector_local.py
+  └── split_mega_files.py
+
+mcp_server.py
+  ├── config.py
+  ├── searcher.py
+  ├── palace_graph.py
+  │     ├── config.py
+  │     └── chromadb
+  ├── knowledge_graph.py
+  │     └── sqlite3
+  └── chromadb
+```
+
+## 各模組職責表
+
+| 模組 | 行數 | 依賴 | 職責 |
+|------|------|------|------|
+| `cli.py` | 376 | config, 所有子模組 | CLI 入口點，路由指令 |
+| `config.py` | ~50 | pyyaml | 設定載入、預設值 |
+| `miner.py` | 418 | chromadb | 專案檔案擷取、分塊、路由 |
+| `convo_miner.py` | 401 | normalize, chromadb | 對話擷取、交換對分塊 |
+| `normalize.py` | 239 | json | 5 種聊天格式 → 統一轉錄稿 |
+| `searcher.py` | 143 | chromadb | 語意搜尋、wing/room 過濾 |
+| `layers.py` | 507 | chromadb, config | 四層記憶堆疊 |
+| `dialect.py` | 1050 | json, re | AAAK 壓縮/解壓縮 |
+| `knowledge_graph.py` | 385 | sqlite3 | 時間性三元組圖譜 |
+| `palace_graph.py` | 228 | chromadb, config | 房間導航圖、BFS、隧道 |
+| `mcp_server.py` | 769 | 多個子模組 | MCP 伺服器、19 個工具 |
+| `onboarding.py` | 490 | entity_registry, entity_detector | 引導式設定 |
+| `entity_detector.py` | 854 | re | 自動偵測人物/專案 |
+| `entity_registry.py` | 644 | json, urllib | 持久化實體註冊、消歧 |
+| `general_extractor.py` | 522 | re | 5 種記憶類型萃取 |
+| `room_detector_local.py` | ~200 | - | 70+ 模式偵測房間 |
+| `spellcheck.py` | ~100 | - | 名字感知拼字檢查 |
+| `split_mega_files.py` | ~150 | - | 分割串接的大檔案 |
+
+## 外部依賴
+
+```
+chromadb >= 0.4.0    # 向量資料庫（本機持久化）
+pyyaml >= 6.0        # YAML 設定檔解析
+sqlite3              # Python 內建，知識圖譜用
+```
+
+**設計原則**：最小化依賴。只有 ChromaDB + PyYAML。不要無故新增依賴。
+
+## 資料流向摘要
+
+```
+寫入路徑:
+  檔案/對話 → normalize → chunk → detect_room → ChromaDB
+                                              → KnowledgeGraph (可選)
+
+讀取路徑:
+  查詢 → ChromaDB semantic search → 結果 (逐字原文)
+  查詢 → KnowledgeGraph SQL → 結果 (結構化事實)
+  查詢 → palace_graph BFS → 結果 (相關房間)
+
+壓縮路徑:
+  ChromaDB drawers → dialect.compress() → mempalace_compressed 集合
+```
+</script>
+
+<script id="md-ch11" type="text/markdown">
+# 基準測試與效能
+
+## 測試結果摘要
+
+| 基準測試 | 模式 | 分數 | API 呼叫 |
+|---------|------|------|---------|
+| **LongMemEval R@5** | Raw（僅 ChromaDB） | **96.6%** | 零 |
+| **LongMemEval R@5** | Hybrid + Haiku rerank | **100%**（500/500） | ~500 |
+| **LoCoMo R@10** | Raw, session level | **60.3%** | 零 |
+| **Personal palace R@10** | Heuristic bench | **85%** | 零 |
+| **Palace 結構影響** | Wing+room filtering | **+34%** R@10 | 零 |
+
+## 與已發佈系統比較
+
+| 系統 | LongMemEval R@5 | 需要 API | 費用 |
+|------|----------------|---------|------|
+| **MemPalace (hybrid)** | **100%** | 可選 | 免費 |
+| Supermemory ASMR | ~99% | 是 | — |
+| **MemPalace (raw)** | **96.6%** | **否** | **免費** |
+| Mastra | 94.87% | 是(GPT) | API 費用 |
+| Mem0 | ~85% | 是 | $19-249/月 |
+| Zep | ~85% | 是 | $25/月+ |
+
+**96.6% raw 分數是已發佈的最高 LongMemEval 結果中，不需要 API key、不需要雲端、任何階段都不使用 LLM 的。**
+
+## Palace 結構的具體影響
+
+在 22,000+ 真實對話記憶上測試：
+
+```
+搜尋所有衣櫃（無結構）:    60.9%  R@10  ← 基準線
+加上 Wing 過濾:           73.1%  (+12.2%)
+加上 Wing + Hall:         84.8%  (+23.9%)
+加上 Wing + Room:         94.8%  (+33.9%)
+```
+
+**Wing 和 Room 不是裝飾品。它們是 34% 的檢索提升。Palace 結構就是產品。**
+
+## 基準測試執行器
+
+### LongMemEval（`longmemeval_bench.py`）
+
+```bash
+# 快速測試（20 題，~30 秒）
+python benchmarks/longmemeval_bench.py data.json --limit 20
+
+# 完整測試（500 題，~5 分鐘）
+python benchmarks/longmemeval_bench.py data.json
+```
+
+### LoCoMo（`locomo_bench.py`）
+
+```bash
+python benchmarks/locomo_bench.py data/
+```
+
+### MemBench（`membench_bench.py`）
+
+```bash
+python benchmarks/membench_bench.py
+```
+
+### 個人宮殿基準（`convomem_bench.py`）
+
+```bash
+python benchmarks/convomem_bench.py
+```
+
+## Hybrid 模式
+
+- **Raw 模式**：純 ChromaDB 向量搜尋，零 API 呼叫
+- **Hybrid 模式**：ChromaDB 搜尋 + Claude Haiku 重排序
+
+Hybrid 模式在 LongMemEval 上達到 100%（500/500），但需要 ~500 次 API 呼叫。
+
+## 可重現性
+
+所有基準測試使用標準學術資料集，執行器在 `benchmarks/` 目錄中。
+</script>
+
+<script id="md-ch12" type="text/markdown">
+# MemPalace 深度評審問答記錄
+
+## 總結
+
+本文件記錄了 12 輪技術深度評審，涵蓋 MemPalace 專案的商業價值、Palace 架構設計、AAAK 壓縮方言、ChromaDB 使用策略、知識圖譜、實體偵測、MCP 伺服器、記憶堆疊效能、測試品質、擴展性、安全隱私，以及開發者體驗等面向。
+
+**最終評估**：MemPalace 是一個設計理念極為清晰的開源 AI 記憶系統。其核心洞察——「原文逐字儲存 + 結構化導航」優於「LLM 摘要提取」——被 LongMemEval 96.6% 的無 API 分數所驗證。三大支柱（Palace 結構、AAAK 壓縮、本機優先）形成了差異化定位。主要風險在於：AAAK 的「30 倍無損壓縮」宣稱需要更嚴謹的定義；ChromaDB 預設嵌入模型在大規模場景的效能瓶頸；以及測試覆蓋率偏低（僅 4 個測試檔案）。但作為 v3.0.0 的開源專案，其完成度和基準測試的可重現性令人印象深刻。
+
+---
+
+## 第 1 輪：商業價值與定位
+
+### 評審提問
+
+Q1: MemPalace 到底解決了什麼問題？市面上已經有 Mem0、Zep、Letta 這些付費方案，MemPalace 的差異化在哪裡？
+
+Q2: README 聲稱「$10/年記住一切 vs $507/年用 LLM 摘要」——這個成本比較的假設基礎是什麼？是否存在隱藏成本？
+
+Q3: 目標使用者是誰？獨立開發者？團隊？企業？
+
+### 專案回答
+
+**Q1 回答**：MemPalace 解決的核心問題是「AI 對話的記憶消失」——六個月的日常 AI 使用產生約 1950 萬 tokens 的對話紀錄，全部在工作階段結束後蒸發。
+
+與競品的差異化體現在三個層面：
+
+1. **哲學差異**：Mem0、Zep 等系統使用 LLM 來「決定什麼值得記住」，提取出「使用者偏好 Postgres」這類結構化事實，但丟掉了原始對話中的「為什麼」。MemPalace 的核心理念是「儲存一切，然後讓它可搜尋」——從不摘要、從不丟棄原文。BENCHMARKS.md 第 17 行明確指出：「The field is over-engineering the memory extraction step. Raw verbatim text with good embeddings is a stronger baseline than anyone realized.」
+
+2. **成本差異**：Mem0 月費 $19-249，Zep 月費 $25+，Letta 月費 $20-200。MemPalace 完全免費，零 API 呼叫，所有計算在本機完成。
+
+3. **隱私差異**：MemPalace 一切都在本機執行（ChromaDB + SQLite），不需要網路連線。相比之下，Zep 使用雲端 Neo4j，Mem0 需要 API 呼叫。
+
+具體見 `pyproject.toml` 第 31-34 行，依賴套件僅 `chromadb>=0.4.0` 和 `pyyaml>=6.0`。
+
+**Q2 回答**：這個成本比較基於以下假設（見 README 第 127-137 行的表格）：
+
+- 六個月日常 AI 使用 = 1950 萬 tokens
+- LLM 摘要方案需載入約 65 萬 tokens/年，按 API 定價約 $507/年
+- MemPalace 喚醒載入約 170 tokens（L0+L1），加上平均 5 次搜尋約 13,500 tokens，按 API 定價約 $10/年
+
+隱藏成本確實存在：
+1. **初始設定時間**：`mempalace init` + `mempalace mine` 需要使用者投入時間
+2. **硬碟空間**：ChromaDB 的向量索引會佔用本機儲存
+3. **可選的 Haiku 重排成本**：若要達到 100% LongMemEval 分數，需要用 Haiku 做重排，每次查詢約 $0.001
+
+但核心宣稱——純本機模式完全免費——是準確的。
+
+**Q3 回答**：從 onboarding.py 的設計可以看出，MemPalace 支援三種模式（第 88-112 行）：
+- **Work**：專案、客戶、團隊、決策、研究
+- **Personal**：家庭、健康、創作、反思、關係
+- **Combo**：混合模式
+
+主要目標使用者是**獨立開發者和小團隊**——經常與 AI 助手對話、需要跨工作階段保持記憶的技術人員。README 的兩個使用案例也印證了這點：「Solo developer across multiple projects」和「Team lead managing a product」。
+
+---
+
+## 第 2 輪：Palace 架構深度
+
+### 評審提問
+
+Q1: Wing/Room/Hall/Tunnel/Closet/Drawer 這六層結構具體是怎麼在程式碼中實現的？是真正的巢狀資料結構，還是用 metadata 模擬的扁平結構？
+
+Q2: 「+34% 檢索提升」是怎麼測出來的？具體的實驗設計是什麼？
+
+Q3: Tunnel（跨 Wing 的連結）是怎麼自動建立的？其品質如何保證？
+
+### 專案回答
+
+**Q1 回答**：這是最關鍵的架構洞察——Palace 結構**並非真正的巢狀資料結構**，而是完全透過 ChromaDB 的 metadata 來模擬。
+
+查看 `miner.py` 第 201-225 行的 `add_drawer` 函式：
+
+```python
+collection.add(
+    documents=[content],
+    ids=[drawer_id],
+    metadatas=[{
+        "wing": wing,
+        "room": room,
+        "source_file": source_file,
+        "chunk_index": chunk_index,
+        ...
+    }]
+)
+```
+
+每個 drawer 只是 ChromaDB 中的一個文件，附帶 `wing` 和 `room` 兩個 metadata 欄位。搜尋時透過 `where` 條件來過濾，見 `searcher.py` 第 29-36 行：
+
+```python
+if wing and room:
+    where = {"$and": [{"wing": wing}, {"room": room}]}
+elif wing:
+    where = {"wing": wing}
+```
+
+Hall 的概念則體現在 `convo_miner.py` 的 `TOPIC_KEYWORDS`（第 127-191 行），用關鍵字匹配來分類。Closet 目前就是 drawer 本身的摘要（README 提到下一版本會加入 AAAK 壓縮的 closet）。
+
+而 Tunnel 的實現在 `palace_graph.py` 第 69-84 行——它是動態計算的，不是預先儲存的。當同一個 room 名稱出現在不同 wing 時，就自動形成 tunnel。
+
+所以整個 Palace 結構是一個**扁平的向量資料庫 + metadata 標籤系統 + 動態圖計算**。這個設計的優點是簡單可靠，缺點是沒有真正的層次索引。
+
+**Q2 回答**：34% 提升的測量來自 README 第 216-224 行的實驗：
+
+```
+Search all closets:          60.9%  R@10
+Search within wing:          73.1%  (+12%)
+Search wing + hall:          84.8%  (+24%)
+Search wing + room:          94.8%  (+34%)
+```
+
+這是在 22,000+ 個真實對話記憶上測試的。實驗邏輯很直觀：
+1. 不帶任何過濾搜尋全部 closets → 基準線 60.9%
+2. 限制在正確的 wing 搜尋 → 73.1%（因為縮小了搜尋空間，噪音減少）
+3. 再加上 hall 過濾 → 84.8%
+4. 精確到 room → 94.8%
+
+本質上就是**縮小搜尋空間帶來的精準度提升**。這不是什麼魔法——當你知道要在哪個房間找東西時，找到的機率自然更高。但這正是 Palace 結構的價值所在：它幫 AI 知道「從哪裡開始找」。
+
+**Q3 回答**：Tunnel 的建立完全是自動的，基於 room 名稱的共現。見 `palace_graph.py` 第 69-84 行：
+
+```python
+for room, data in room_data.items():
+    wings = sorted(data["wings"])
+    if len(wings) >= 2:
+        for i, wa in enumerate(wings):
+            for wb in wings[i + 1:]:
+                for hall in data["halls"]:
+                    edges.append({
+                        "room": room,
+                        "wing_a": wa,
+                        "wing_b": wb,
+                        ...
+                    })
+```
+
+當 room 名稱（例如 `auth-migration`）出現在兩個不同的 wing（例如 `wing_kai` 和 `wing_driftwood`）時，就自動建立 tunnel。
+
+品質保證方面有一個隱含假設：**room 名稱的一致性**。如果同一概念在不同 wing 用了不同的 room 名稱（例如 `auth-migration` vs `authentication-update`），tunnel 就不會建立。這完全依賴 `detect_room`（miner.py 第 89-127 行）和 `detect_convo_room`（convo_miner.py 第 194-204 行）的命名一致性。目前沒有同義詞合併機制。
+
+---
+
+## 第 3 輪：AAAK 壓縮
+
+### 評審提問
+
+Q1: AAAK 宣稱「30 倍壓縮，零資訊遺失」——這在技術上怎麼可能？壓縮率和無損兩者之間的矛盾如何解決？
+
+Q2: AAAK 的壓縮真的是「任何 LLM 都能讀」嗎？有沒有做過跨模型的理解測試？
+
+Q3: `dialect.py` 的 `compress` 方法具體做了什麼？真的是「無損」嗎？
+
+### 專案回答
+
+**Q1 回答**：這是需要仔細區分的宣稱。查看 `dialect.py` 第 539-602 行的 `compress` 方法，它做的事情是：
+
+1. **偵測實體**：從文字中找出已知實體，轉成 3 字母代碼（如 Alice → ALC）
+2. **擷取主題關鍵字**：提取前 3 個最重要的詞
+3. **擷取關鍵句**：選出最重要的一句話（最多 55 字元）
+4. **偵測情緒**：關鍵字匹配偵測情緒代碼
+5. **偵測旗標**：偵測 DECISION、ORIGIN、CORE 等旗標
+
+輸出格式如：`0:ALC+BOB|auth_migration|"chose Clerk over Auth0"|determ|DECISION`
+
+**嚴格來說，這不是無損壓縮。** 它是一種「有損摘要」——只保留了實體、主題、關鍵句和情緒。原始文字的完整句子和段落都被丟棄了。
+
+但 MemPalace 的「無損」宣稱有一個隱含的架構前提：AAAK 壓縮只用在 **closet 層**（摘要索引），而原始文字永遠保存在 **drawer 層**。所以「資訊完整性」是在系統層面而非在壓縮演算法層面保證的——你永遠可以從 drawer 讀回原文。
+
+壓縮率的計算見 `dialect.py` 第 932-946 行的 `compression_stats` 方法，使用粗估 token 計算（1 token ≈ 3 字元）。30 倍是在特定範例上的壓縮率，實際壓縮率因內容長度和密度而異。
+
+**Q2 回答**：「任何 LLM 都能讀」的宣稱基於 AAAK 的設計原則——它本質上就是**結構化的英文縮寫**。見 `mcp_server.py` 第 102-119 行的 `AAAK_SPEC`：
+
+```
+ENTITIES: 3-letter uppercase codes. ALC=Alice, JOR=Jordan...
+EMOTIONS: *action markers* before/during text.
+STRUCTURE: Pipe-separated fields.
+```
+
+這不是一種需要特殊解碼器的編碼，而是一種任何人（或任何能讀英文的模型）都能理解的簡寫格式。就像 `FAM: ALC→♡JOR | 2D(kids): RIL(18,sports) MAX(11,chess)` 這樣的格式，人類也能直接讀懂。
+
+但需要指出：**並沒有公開的跨模型理解測試結果**。README 列出了 Claude、GPT、Gemini、Llama、Mistral 作為相容模型，但基準測試（`benchmarks/`）都是測試檢索品質，不是測試 AAAK 的可讀性。這是一個尚未被嚴格驗證的宣稱。
+
+**Q3 回答**：如上所述，`compress` 方法是一個**有損摘要管道**，而非傳統意義的無損壓縮。
+
+具體步驟（`dialect.py` 第 539-602 行）：
+
+1. `_detect_entities_in_text`：查找已知實體或大寫字母開頭的詞 → 最多 3 個
+2. `_extract_topics`：頻率分析 + 專有名詞加權 → 最多 3 個主題
+3. `_extract_key_sentence`：用決策相關詞評分每個句子 → 選最高分、截斷至 55 字元
+4. `_detect_emotions`：關鍵字匹配 → 最多 3 個情緒代碼
+5. `_detect_flags`：關鍵字匹配 → 最多 3 個旗標
+
+一段 1000 字的文字壓縮後可能變成 2 行共 80 個字元。大量資訊確實被丟棄了。但在 MemPalace 的整體架構中，AAAK 壓縮的產物是用來**快速定位**（找到對的 drawer），而非用來**取代原文**。
+
+---
+
+## 第 4 輪：ChromaDB 使用
+
+### 評審提問
+
+Q1: 為什麼選 ChromaDB 而不是 FAISS、Qdrant 或 Milvus？嵌入模型是什麼？
+
+Q2: ChromaDB 的預設嵌入模型（all-MiniLM-L6-v2）在中文或多語言場景下的表現如何？
+
+Q3: 相似度計算用的是什麼距離函式？`similarity = 1 - dist` 這個公式暗示了什麼？
+
+### 專案回答
+
+**Q1 回答**：查看 `pyproject.toml` 第 31-34 行，MemPalace 的依賴只有 `chromadb>=0.4.0` 和 `pyyaml>=6.0`。選擇 ChromaDB 的理由在 README 中隱含但明確：
+
+1. **本機持久化**：`chromadb.PersistentClient(path=...)` 直接將資料存在本機檔案系統
+2. **零設定**：不需要啟動獨立服務、不需要 Docker、不需要雲端帳號
+3. **自帶嵌入**：ChromaDB 預設使用 `all-MiniLM-L6-v2`（sentence-transformers），開箱即用
+4. **Python 原生**：完全 Python 生態，pip install 即可
+
+對比：FAISS 是 Meta 的底層向量庫，需要自己管理嵌入和持久化；Qdrant 和 Milvus 都是獨立服務，需要運行額外的伺服器。對一個強調「pip install 後即可使用、零設定」的專案來說，ChromaDB 是最合理的選擇。
+
+嵌入模型：MemPalace 程式碼中**沒有顯式指定嵌入模型**——查看 `miner.py` 第 183-189 行的 `get_collection`：
+
+```python
+client = chromadb.PersistentClient(path=palace_path)
+return client.create_collection("mempalace_drawers")
+```
+
+這意味著完全使用 ChromaDB 的預設值，即 `all-MiniLM-L6-v2`（384 維度，英文最佳化）。BENCHMARKS.md 也提到基準測試中曾嘗試 `bge-large-en-v1.5`（1024 維度），在 LoCoMo 上提升了 3.5 個百分點。
+
+**Q2 回答**：`all-MiniLM-L6-v2` 是一個**英文最佳化**的嵌入模型，對中文和多語言場景的支援非常有限。
+
+具體問題：
+- 訓練資料以英文為主，中文語義理解能力弱
+- 384 維度對於跨語言語義空間來說偏低
+- 中文的分詞特性（沒有空格分隔）也與 sentence-transformers 的預處理不完全契合
+
+如果要支援中文，至少需要切換到 `paraphrase-multilingual-MiniLM-L12-v2` 或中文專用模型如 `shibing624/text2vec-base-chinese`。但 MemPalace 目前**沒有提供切換嵌入模型的設定選項**——`config.py` 中沒有 embedding model 的設定欄位。
+
+這是一個顯著的限制：MemPalace 目前本質上是一個**英文專用**系統。
+
+**Q3 回答**：見 `searcher.py` 第 69 行：
+
+```python
+similarity = round(1 - dist, 3)
+```
+
+以及 `mcp_server.py` 第 197 行的 `tool_check_duplicate`：
+
+```python
+similarity = round(1 - dist, 3)
+```
+
+ChromaDB 預設使用 **L2 距離**（歐幾里得距離），但在歸一化向量上 L2 距離與餘弦距離成正比。`1 - dist` 這個公式在 L2 距離空間中並不精確對應到餘弦相似度——精確的轉換應該是 `1 - dist²/2`。
+
+不過在實務上，由於 sentence-transformers 產出的向量通常已經歸一化，且 MemPalace 主要用相似度做排序而非精確閾值判斷（除了 `tool_check_duplicate` 用 0.9 做重複偵測），這個近似在大多數情況下不會造成問題。
+
+---
+
+## 第 5 輪：知識圖譜 vs Palace
+
+### 評審提問
+
+Q1: 知識圖譜（SQLite）和 Palace（ChromaDB）各自儲存什麼？分工的界線在哪裡？
+
+Q2: 知識圖譜的「時間有效性」（temporal validity）具體如何運作？比 Zep 的 Graphiti 如何？
+
+Q3: 兩套系統之間有自動同步機制嗎？新增 drawer 時會自動提取三元組嗎？
+
+### 專案回答
+
+**Q1 回答**：兩套系統有明確分工：
+
+**Palace（ChromaDB）**：儲存**原文內容**——對話逐字稿、專案文件、程式碼片段。用於語意搜尋（「找到我們討論過 GraphQL 的那段對話」）。這是 MemPalace 的主要資料儲存。
+
+**知識圖譜（SQLite）**：儲存**結構化事實**——實體關係三元組，例如「Kai → works_on → Orion」「Max → child_of → Alice」。用於事實查詢（「Kai 目前在做什麼專案？」「Maya 的工作歷史？」）。
+
+分工界線：Palace 回答「**發生了什麼**」（搜尋原文），知識圖譜回答「**什麼是真的**」（查詢事實）。見 `knowledge_graph.py` 第 1-36 行的模組說明。
+
+在 MCP 伺服器中，兩套系統各有自己的工具組（`mcp_server.py` 第 441-688 行）：
+- Palace 工具：`mempalace_search`、`mempalace_add_drawer`、`mempalace_traverse` 等
+- KG 工具：`mempalace_kg_query`、`mempalace_kg_add`、`mempalace_kg_timeline` 等
+
+**Q2 回答**：時間有效性透過 `valid_from` 和 `valid_to` 兩個欄位實現。見 `knowledge_graph.py` 第 57-85 行的 schema：
+
+```sql
+CREATE TABLE IF NOT EXISTS triples (
+    ...
+    valid_from TEXT,
+    valid_to TEXT,
+    ...
+);
+```
+
+查詢時透過 `as_of` 參數過濾（第 186-241 行）：
+
+```python
+if as_of:
+    query += " AND (t.valid_from IS NULL OR t.valid_from <= ?) AND (t.valid_to IS NULL OR t.valid_to >= ?)"
+```
+
+`invalidate` 方法（第 169-180 行）設定 `valid_to` 日期來標記事實不再為真。
+
+與 Zep Graphiti 的比較：
+- 功能上類似——都支援時間戳的三元組
+- Zep 用 Neo4j（圖資料庫，原生圖查詢），MemPalace 用 SQLite（關聯式，模擬圖查詢）
+- Zep 支援更複雜的圖遍歷演算法，MemPalace 的查詢相對簡單（單層實體查詢 + 時間過濾）
+- 但 Zep 需要雲端（$25/月+），MemPalace 完全本機且免費
+
+**Q3 回答**：**沒有自動同步機制。** 這是一個重要的架構限制。
+
+查看 `convo_miner.py` 的 `mine_convos` 函式（第 252-393 行），它只把內容存入 ChromaDB，完全不觸碰 `KnowledgeGraph`。同樣，`miner.py` 的 `mine` 函式（第 316-384 行）也只操作 ChromaDB。
+
+知識圖譜的填充有兩種方式：
+1. **手動**：透過 MCP 工具 `mempalace_kg_add` 由 AI 代理在對話中手動新增
+2. **種子匯入**：透過 `seed_from_entity_facts`（knowledge_graph.py 第 338-384 行）批次匯入
+
+但沒有自動的「挖掘 drawer → 提取三元組 → 寫入 KG」管道。這意味著知識圖譜的價值高度依賴 AI 代理是否記得呼叫 `mempalace_kg_add`——而這又依賴 `PALACE_PROTOCOL`（mcp_server.py 第 93-100 行）被 AI 正確遵循。
+
+---
+
+## 第 6 輪：實體偵測的邊界情況
+
+### 評審提問
+
+Q1: 當名字也是常見英文單字時（例如 May、Grace、Will），系統如何處理？準確率如何？
+
+Q2: 實體偵測支援多語言嗎？中文名字如何處理？
+
+Q3: `entity_registry.py` 的 Wikipedia 查詢是否違反「本機優先」的設計原則？
+
+### 專案回答
+
+**Q1 回答**：MemPalace 有一套相當完整的歧義處理機制。見 `entity_registry.py` 第 32-89 行的 `COMMON_ENGLISH_WORDS` 集合，包含了 `ever`、`grace`、`will`、`mark`、`may`、`june`、`max`、`rose` 等數十個常見的名字/單字歧義詞。
+
+處理流程（`entity_registry.py` 第 400-504 行的 `lookup` 和 `_disambiguate` 方法）：
+
+1. 如果一個詞在 `ambiguous_flags` 中，且有上下文（context），就進入消歧程序
+2. 用 `PERSON_CONTEXT_PATTERNS`（如 `{name} said`、`with {name}`、`{name}'s`）計算「人名分數」
+3. 用 `CONCEPT_CONTEXT_PATTERNS`（如 `have you {name}`、`{name} since`）計算「概念分數」
+4. 人名分數 > 概念分數 → 判定為人名；反之 → 判定為概念
+
+例如：
+- 「I picked up Riley」→ `with {name}` 匹配 → 人名
+- 「Have you ever tried」→ `have you {name}` 匹配 → 概念
+
+`entity_detector.py` 第 586-626 行的 `classify_entity` 也有額外保護：要求**至少兩種不同類型的信號**（對話標記、動作動詞、代詞鄰近、直接稱呼）才能確認為人名，防止單一模式的誤判。
+
+準確率方面，程式碼中沒有公開的精確數字，但設計的保守性（寧可判定為 `uncertain` 也不誤判）是合理的。
+
+**Q2 回答**：**不支援多語言。** 實體偵測完全依賴英文的正則表達式模式。
+
+- `entity_detector.py` 第 449 行：`re.findall(r"\b([A-Z][a-z]{1,19})\b", text)` — 只匹配英文大寫字母開頭的詞
+- `PERSON_VERB_PATTERNS`（第 27-48 行）全部是英文動詞模式
+- `DIALOGUE_PATTERNS`（第 64-68 行）也是英文格式
+
+中文名字（如「王大明」「陳威」）無法被偵測。中文沒有大小寫區分，也不使用空格分隔，現有的所有模式都無法適用。
+
+這與嵌入模型的英文限制一起，構成了 MemPalace 目前的**英文專用**特性。
+
+**Q3 回答**：確實存在矛盾。`entity_registry.py` 第 179-260 行的 `_wikipedia_lookup` 函式會透過 `urllib` 呼叫 Wikipedia REST API：
+
+```python
+url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{urllib.parse.quote(word)}"
+```
+
+這是程式碼中**唯一需要網路的功能**。不過有幾個緩解因素：
+
+1. 這個功能是**可選的**——只在 `research` 方法被明確呼叫時才觸發，一般的挖掘和搜尋流程不需要
+2. 結果會被快取在 `wiki_cache` 中，同一個詞只查一次
+3. 如果網路不可用（timeout 5 秒），會 fallback 到 `"person"` 判定（第 248-258 行），信心度 0.7
+
+嚴格來說，這確實違反了「Everything local」的宣稱。但它是一個邊緣功能，不影響核心流程。
+
+---
+
+## 第 7 輪：MCP 伺服器的生命週期
+
+### 評審提問
+
+Q1: MCP 伺服器是怎麼保持連線的？錯誤處理機制完善嗎？
+
+Q2: 並發問題怎麼處理？多個 Claude Code 視窗同時存取 Palace 會出問題嗎？
+
+Q3: 19 個 MCP 工具中，哪些是真正常用的？有沒有過度設計的嫌疑？
+
+### 專案回答
+
+**Q1 回答**：MCP 伺服器是一個極簡的 **stdin/stdout JSON-RPC 伺服器**。見 `mcp_server.py` 第 746-768 行：
+
+```python
+def main():
+    while True:
+        try:
+            line = sys.stdin.readline()
+            if not line:
+                break
+            request = json.loads(line)
+            response = handle_request(request)
+            if response is not None:
+                sys.stdout.write(json.dumps(response) + "\n")
+                sys.stdout.flush()
+        except KeyboardInterrupt:
+            break
+        except Exception as e:
+            logger.error(f"Server error: {e}")
+```
+
+這是一個**同步的、逐行讀取的迴圈**。沒有 WebSocket、沒有 HTTP、沒有心跳機制。連線的維持完全依賴 stdin pipe 是否開著——當 Claude Code 關閉 pipe 時，`readline()` 返回空字串，伺服器自然結束。
+
+錯誤處理：
+- 工具執行層：每個 handler 都用 try/except 包裹（第 720-737 行），錯誤以 JSON-RPC error 回傳
+- 伺服器層：最外層的 except 捕獲所有例外並 log，但**不會中斷伺服器**
+- 但沒有重試機制、沒有連線恢復、沒有 health check
+
+**Q2 回答**：並發是一個潛在問題。
+
+ChromaDB 的 `PersistentClient` 使用 SQLite 作為後端。SQLite 支援多讀但對寫入有鎖機制。MemPalace 的 `_get_collection` 函式（mcp_server.py 第 41-49 行）每次呼叫都建立新的 `PersistentClient`，這意味著每次工具呼叫都是獨立的 SQLite 連線。
+
+知識圖譜的 `_conn()` 方法（knowledge_graph.py 第 89-90 行）設定了 `timeout=10`：
+
+```python
+def _conn(self):
+    return sqlite3.connect(self.db_path, timeout=10)
+```
+
+這在寫入衝突時會等待最多 10 秒。但如果兩個 Claude Code 視窗同時對同一個 drawer 進行操作，可能會出現 `database is locked` 錯誤。
+
+實際上，MemPalace 的使用場景（個人/小團隊）通常不會有高並發，所以這個限制在實務中影響不大。但如果要擴展到團隊使用，這會是第一個要解決的問題。
+
+**Q3 回答**：19 個工具可分為使用頻率層級：
+
+**高頻（核心）**：
+- `mempalace_status`：每次喚醒時呼叫，載入 AAAK spec 和 protocol
+- `mempalace_search`：最常用的搜尋工具
+- `mempalace_add_drawer`：新增記憶
+- `mempalace_kg_query`：查詢實體事實
+
+**中頻（導航）**：
+- `mempalace_list_wings`、`mempalace_list_rooms`：瀏覽結構
+- `mempalace_kg_add`、`mempalace_kg_invalidate`：維護知識圖譜
+- `mempalace_diary_write`、`mempalace_diary_read`：代理日誌
+
+**低頻（進階）**：
+- `mempalace_traverse`、`mempalace_find_tunnels`、`mempalace_graph_stats`：圖導航
+- `mempalace_get_taxonomy`、`mempalace_check_duplicate`：管理工具
+- `mempalace_get_aaak_spec`、`mempalace_delete_drawer`：輔助工具
+- `mempalace_kg_timeline`、`mempalace_kg_stats`：知識圖譜管理
+
+是否過度設計？我認為工具數量合理。每個工具都對應一個清晰的操作，且 MCP 協定本身就鼓勵「小而專精」的工具設計。AI 代理可以根據需要選擇性呼叫，不需要知道所有 19 個工具的用法。
+
+---
+
+## 第 8 輪：記憶堆疊的效能
+
+### 評審提問
+
+Q1: 「170 tokens 喚醒成本」是怎麼算出來的？這個數字可靠嗎？
+
+Q2: Layer 1 的自動生成品質如何？它是從哪裡拉資料的？
+
+Q3: Layer 2 和 Layer 3 的觸發條件是什麼？AI 如何知道何時該從 L2 升級到 L3？
+
+### 專案回答
+
+**Q1 回答**：170 tokens 來自 L0（~50 tokens）+ L1（~120 tokens AAAK）的估算。
+
+`layers.py` 第 67-68 行的 L0 token 估算：
+
+```python
+def token_estimate(self) -> int:
+    return len(self.render()) // 4
+```
+
+用字元數除以 4 來粗估 token 數。L0 是 `~/.mempalace/identity.txt` 的內容，通常是 3-5 行自我描述。
+
+L1 的 120 tokens 來自 AAAK 壓縮後的關鍵事實。README 的例子（第 249-253 行）顯示：
+
+```
+TEAM: PRI(lead) | KAI(backend,3yr) SOR(frontend) MAY(infra) LEO(junior,new)
+PROJ: DRIFTWOOD(saas.analytics) | SPRINT: auth.migration→clerk
+DECISION: KAI.rec:clerk>auth0(pricing+dx) | ★★★★
+```
+
+這段大約 120 tokens（按 `len(text)//3` 估算，見 `dialect.py` 第 932-934 行）。
+
+**可靠性**：粗估而非精確計算。真正的 token 計數取決於 tokenizer（不同模型不同）。但 170 tokens 作為數量級估算是合理的——即使偏差 50%，也就是 250 tokens，相對於現代 LLM 的 100K+ 上下文視窗來說仍然微不足道。
+
+**Q2 回答**：Layer 1 的自動生成在 `layers.py` 第 91-168 行的 `Layer1.generate` 方法中實現。
+
+它的邏輯是：
+
+1. 從 ChromaDB 拉出所有 drawer（可選 wing 過濾）
+2. 按 `importance`/`emotional_weight`/`weight` metadata 排序
+3. 取前 15 個最重要的 drawer（`MAX_DRAWERS = 15`）
+4. 按 room 分組
+5. 每個 drawer 截斷至 200 字元
+6. 總文字量不超過 3200 字元（`MAX_CHARS = 3200`，約 800 tokens）
+
+品質問題：
+
+- **依賴 metadata 品質**：如果 drawer 沒有 `importance` 欄位（目前的 miner 不自動設定），所有 drawer 預設 importance = 3，無法區分優先順序
+- **只看 drawer 內容的前 200 字元**：可能丟失重要的後文
+- **沒有使用 AAAK 壓縮**：L1 的自動生成用的是截斷原文，不是 AAAK 格式（這與 README 宣稱的「~120 tokens AAAK」有出入——AAAK 壓縮的 L1 需要透過 `dialect.py` 的 `generate_layer1` 單獨生成）
+
+`dialect.py` 第 784-902 行的 `generate_layer1` 才是真正的 AAAK 版 L1 生成器，但它需要 zettel JSON 格式的輸入，而非直接從 ChromaDB drawer 生成。兩條路徑目前**沒有整合**。
+
+**Q3 回答**：觸發條件完全由 AI 代理自行判斷——MemPalace 不會自動決定。
+
+見 `PALACE_PROTOCOL`（mcp_server.py 第 93-100 行）：
+
+```
+1. ON WAKE-UP: Call mempalace_status to load palace overview + AAAK spec.
+2. BEFORE RESPONDING about any person, project, or past event: call mempalace_kg_query or mempalace_search FIRST.
+```
+
+協定指示 AI：
+- **L0+L1**：每次喚醒時自動載入（`mempalace_status` 的回傳包含概覽）
+- **L2**：「當話題出現時」（`mempalace_list_rooms` + wing 過濾的 retrieve）
+- **L3**：「被明確詢問時」（`mempalace_search` 語意搜尋）
+
+但這完全依賴 AI 代理正確遵循 protocol。沒有程式化的觸發機制——不像 Mem0 會在每次對話輪次自動觸發記憶提取。MemPalace 把這個決策權交給了 AI。
+
+---
+
+## 第 9 輪：測試覆蓋率和品質
+
+### 評審提問
+
+Q1: 測試了什麼？有多少測試？覆蓋率如何？
+
+Q2: 知識圖譜、Palace 圖、AAAK 壓縮、實體偵測——這些核心元件有測試嗎？
+
+Q3: 基準測試（benchmarks/）算不算測試？它們驗證的是什麼？
+
+### 專案回答
+
+**Q1 回答**：測試非常稀少。`tests/` 目錄只有 4 個檔案：
+
+1. `test_config.py`（4 個測試）：設定載入、預設值、環境變數覆蓋、初始化
+2. `test_normalize.py`（3 個測試）：純文字、Claude JSON、空檔案的正規化
+3. `test_miner.py`（1 個測試）：專案挖掘的端到端流程
+4. `test_convo_miner.py`（1 個測試）：對話挖掘的端到端流程
+
+**共計 9 個測試**。這對一個 20 個模組的專案來說，覆蓋率嚴重不足。
+
+沒有被測試的關鍵路徑：
+- AAAK 壓縮/解壓
+- 知識圖譜的 CRUD 操作
+- Palace 圖的遍歷和 tunnel 偵測
+- 實體偵測和消歧
+- MCP 伺服器的所有 19 個工具
+- 記憶堆疊的 4 層邏輯
+- Spellcheck
+- General extractor 的 5 種記憶類型提取
+- Split mega files
+
+**Q2 回答**：如上所述，**核心元件幾乎都沒有測試**。
+
+- `knowledge_graph.py`：零測試。add_triple、query_entity、invalidate、timeline 全部未測
+- `palace_graph.py`：零測試。build_graph、traverse、find_tunnels 全部未測
+- `dialect.py`：零測試。compress、decode、generate_layer1 全部未測
+- `entity_detector.py`：零測試。score_entity、classify_entity 全部未測
+- `entity_registry.py`：零測試。lookup、disambiguate、wikipedia_lookup 全部未測
+
+這表示重構任何核心元件時，沒有安全網來保證不引入回歸錯誤。
+
+**Q3 回答**：`benchmarks/` 目錄包含 4 個基準測試 runner：
+
+1. `longmemeval_bench.py`：LongMemEval（500 題，6 種問題類型）
+2. `locomo_bench.py`：LoCoMo（1,986 題，多跳 QA）
+3. `convomem_bench.py`：ConvoMem（75K+ QA pairs）
+4. `membench_bench.py`：MemBench
+
+基準測試驗證的是**檢索品質**（Recall@K），而非程式碼正確性。它們證明了：
+- ChromaDB + 原文儲存的檢索效果優於 LLM 摘要方案
+- Palace 結構（wing/room 過濾）確實提升檢索精準度
+- Hybrid scoring（關鍵字 + 時間 + 語意）可以進一步提升
+
+但它們不是單元測試或整合測試。基準測試需要外部資料集才能執行，而且主要測試的是「資料管道 + 搜尋品質」，不測試錯誤處理、邊界情況、或 MCP 通訊協定。
+
+---
+
+## 第 10 輪：擴展性問題
+
+### 評審提問
+
+Q1: 當 drawer 數量達到 10 萬甚至 100 萬時，ChromaDB 的效能如何？搜尋延遲？
+
+Q2: `palace_graph.py` 的 `build_graph` 每次呼叫都掃描全部 metadata——這在大規模下會怎樣？
+
+Q3: 記憶的生命週期管理？舊記憶會不會被淹沒？有沒有遺忘機制？
+
+### 專案回答
+
+**Q1 回答**：ChromaDB 底層使用 hnswlib（HNSW 圖索引）。HNSW 的查詢複雜度是 O(log N)，理論上隨資料量成長緩慢。
+
+但 MemPalace 有幾個效能隱患：
+
+1. **全量 metadata 掃描**：`tool_status`（mcp_server.py 第 63-86 行）呼叫 `col.get(include=["metadatas"])`，拉出**所有** drawer 的 metadata 來計算 wing/room 統計。10 萬個 drawer 時，這會佔用大量記憶體且很慢。
+
+2. **`tool_list_wings`、`tool_list_rooms`、`tool_get_taxonomy`** 都有同樣的問題——全量掃描。
+
+3. **搜尋本身**是 O(log N) 的向量相似度查詢，所以 `mempalace_search` 應該在大規模下仍然快速。
+
+4. **`miner.py` 的 `file_already_mined`**（第 192-196 行）用 `where={"source_file": source_file}` 做精確匹配，ChromaDB 可以用索引最佳化，但在大量 drawer 下仍可能變慢。
+
+5. **持久化磁碟佔用**：`all-MiniLM-L6-v2` 的 384 維 float32 向量，每個 drawer 約 1.5 KB 向量 + metadata + 原文。10 萬個 drawer 大約 150 MB-500 MB，視原文大小。
+
+實際上，對個人使用（數千到數萬 drawer）來說，效能不會是問題。但 10 萬級以上確實需要重構 metadata 統計邏輯。
+
+**Q2 回答**：`palace_graph.py` 的 `build_graph`（第 33-96 行）確實是每次呼叫都完整掃描：
+
+```python
+offset = 0
+while offset < total:
+    batch = col.get(limit=1000, offset=offset, include=["metadatas"])
+    ...
+```
+
+以 1000 為批次大小遍歷所有 drawer。10 萬 drawer 需要 100 次批次讀取。
+
+更嚴重的是，`traverse`、`find_tunnels`、`graph_stats` 都呼叫 `build_graph`，意味著**每次圖查詢都要從頭建構圖**。沒有快取機制。
+
+這三個 MCP 工具在大規模下可能需要數秒到數十秒才能回應。改進方案：
+- 建立圖的快取（hash 變化偵測）
+- 使用 ChromaDB 的 metadata 聚合而非全量掃描
+- 或將圖結構持久化到 SQLite
+
+**Q3 回答**：**目前沒有遺忘機制。** MemPalace 的設計哲學是「永不丟棄」——原文永遠保存在 drawer 中。
+
+知識圖譜有 `invalidate` 方法（knowledge_graph.py 第 169-180 行），但它只是標記事實為「不再為真」，不刪除資料。
+
+Palace 有 `mempalace_delete_drawer` 工具，但需要手動觸發。
+
+在大規模場景下，舊記憶確實可能被「淹沒」——當搜尋結果被大量新記憶的高相似度覆蓋時，早期記憶可能排不進 top-K。
+
+缺少的機制：
+- 時間衰減（讓較新的記憶有更高權重）
+- 記憶整合（合併重複的記憶）
+- 自動歸檔（將舊記憶移到低優先級索引）
+- 重要性標記（讓使用者標記某些記憶為「永不遺忘」）
+
+這些都是 v3.0.0 之後可以加入的功能。
+
+---
+
+## 第 11 輪：安全和隱私
+
+### 評審提問
+
+Q1: 所有資料真的都在本機嗎？有沒有任何隱藏的外部通訊？
+
+Q2: ChromaDB 和 SQLite 的資料有加密嗎？其他使用者或程式可以讀取嗎？
+
+Q3: MCP 伺服器的權限控制？任何連到 MCP 的 client 都可以刪除 drawer 嗎？
+
+### 專案回答
+
+**Q1 回答**：幾乎全部在本機，但有兩個例外：
+
+1. **WikipediaLookup**（`entity_registry.py` 第 179-260 行）：查詢 Wikipedia REST API 來解析未知名詞。如第 6 輪所述，這是可選功能，有快取機制。
+
+2. **ChromaDB 的嵌入模型下載**：首次使用時，`all-MiniLM-L6-v2` 模型會從 HuggingFace 下載（約 80 MB）。之後完全離線。
+
+3. **Hybrid 模式的 Haiku/Sonnet 呼叫**：要達到 100% LongMemEval，需要用 API 做 rerank。但純本機模式（96.6%）完全不需要。
+
+除此之外，所有搜尋、儲存、挖掘、圖計算都在本機完成。沒有 telemetry、沒有 analytics、沒有把資料送到任何雲端服務。
+
+**Q2 回答**：**沒有加密。** 
+
+ChromaDB 的持久化資料存在 `~/.mempalace/palace/` 目錄中，以 SQLite 和 parquet 格式儲存。任何有檔案系統存取權的程式或使用者都可以讀取。
+
+知識圖譜存在 `~/.mempalace/knowledge_graph.sqlite3`，同樣無加密。
+
+設定檔（`~/.mempalace/config.json`、`entity_registry.json`）也是純文字 JSON。
+
+這在個人筆電上通常不是問題（檔案系統權限已提供基本保護），但在共用機器或企業環境中，敏感的對話記憶可能被其他使用者讀取。
+
+改進方案：
+- SQLite 支援 SQLCipher 加密擴充
+- ChromaDB 可以設定 encryption at rest
+- 但目前都沒有實作
+
+**Q3 回答**：**完全沒有權限控制。** MCP 伺服器是一個無認證的 stdin/stdout 介面。
+
+任何連接到 MCP pipe 的 client 都可以：
+- 讀取所有 drawer（`mempalace_search`、`mempalace_status`）
+- 新增任意 drawer（`mempalace_add_drawer`）
+- **刪除任意 drawer**（`mempalace_delete_drawer`，mcp_server.py 第 290-303 行）
+- 修改知識圖譜（`mempalace_kg_add`、`mempalace_kg_invalidate`）
+
+沒有操作日誌、沒有確認步驟（除了 `tool_add_drawer` 的重複偵測）、沒有刪除的復原機制。
+
+在目前的使用場景（個人使用、本機 Claude Code）下，這不是嚴重問題——因為唯一的 client 就是使用者自己的 AI 助手。但如果要支援多代理或團隊場景，權限控制是必須的。
+
+---
+
+## 第 12 輪：開發者體驗和上手門檻
+
+### 評審提問
+
+Q1: 新手從 `pip install` 到第一次成功搜尋，需要多少步驟？最大的 friction 在哪裡？
+
+Q2: 文件的完整度如何？Wiki 11 篇文件夠不夠？
+
+Q3: 如果我想貢獻程式碼，開發環境的設定容易嗎？CI/CD 呢？
+
+### 專案回答
+
+**Q1 回答**：最少需要 4 個步驟：
+
+```bash
+pip install mempalace          # 1. 安裝
+mempalace init ~/my-project    # 2. 初始化（互動式，2 分鐘）
+mempalace mine ~/my-project    # 3. 挖掘
+mempalace search "query"       # 4. 搜尋
+```
+
+最大的 friction 點：
+
+1. **`mempalace init` 是互動式的**：需要回答模式選擇、人員輸入、專案輸入、wing 命名等問題。對不熟悉 Palace 概念的使用者來說，可能不知道該怎麼回答。雖然有 `--yes` 旗標可以跳過（`cli.py` 第 279 行），但自動偵測的品質取決於檔案內容。
+
+2. **對話挖掘需要預處理**：如果對話匯出是大型合併檔案，需要先 `mempalace split` 再 `mempalace mine --mode convos`。
+
+3. **MCP 連接需要額外設定**：`claude mcp add mempalace -- python -m mempalace.mcp_server` 這行命令對不熟悉 MCP 的使用者來說不直覺。
+
+4. **概念門檻**：Wing、Room、Hall、Tunnel、Closet、Drawer——六個概念需要理解才能有效使用過濾搜尋。
+
+相比之下，Mem0 的上手體驗是 `from mem0 import Memory; m = Memory(); m.add("text"); m.search("query")`——4 行 Python 就完成了。MemPalace 的結構化設計帶來了更高的初始認知成本。
+
+**Q2 回答**：Wiki 有 12 篇文件（00-11），涵蓋：
+
+```
+00_概覽.md
+01_核心概念_記憶宮殿.md
+02_AAAK_壓縮方言.md
+03_四層記憶堆疊.md
+04_知識圖譜.md
+05_資料擷取管道.md
+06_語意搜尋與導航.md
+07_MCP_伺服器.md
+08_實體偵測系統.md
+09_專家代理與設定系統.md
+10_模組依賴與架構圖.md
+11_基準測試與效能.md
+```
+
+加上 README（660 行）、BENCHMARKS.md（詳盡的效能分析）、CONTRIBUTING.md，文件量是充足的。
+
+缺少的文件：
+- **API 參考文件**：每個函式的參數和回傳值說明
+- **故障排除指南**：常見錯誤和解法
+- **多語言支援說明**：明確說明目前的語言限制
+- **效能最佳化指南**：大規模使用時的建議
+
+**Q3 回答**：開發環境設定相對簡單。`pyproject.toml` 第 47-48 行定義了開發依賴：
+
+```toml
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "build>=1.0", "twine>=4.0"]
+```
+
+```bash
+git clone https://github.com/milla-jovovich/mempalace
+cd mempalace
+pip install -e ".[dev]"
+pytest
+```
+
+但有幾個問題：
+
+1. **沒有 CI/CD**：沒有 GitHub Actions 設定檔，沒有自動化測試、linting、或發布流程。
+
+2. **Ruff 設定**（pyproject.toml 第 50-58 行）定義了 linting 規則，但沒有 pre-commit hook 強制執行。
+
+3. **測試只有 9 個**：如第 9 輪所述，貢獻者沒有安全網來驗證修改是否引入回歸。
+
+4. **沒有開發者文件**：CONTRIBUTING.md 存在但內容不明（未讀取），缺少架構決策記錄（ADR）和模組間依賴說明。
+
+整體而言，MemPalace 目前更像是一個「作者驅動的專案」而非「社群驅動的專案」——程式碼品質不錯，但貢獻的基礎設施（CI、測試、開發文件）尚未完善。
+
+</script>
+
+<script id="md-ch13" type="text/markdown">
+# 中文語境改善建議
+
+## 總結
+
+MemPalace 的核心架構（Palace 結構、四層記憶堆疊、知識圖譜）是語言無關的，但**實作層幾乎全部假設英文輸入**。以下是逐模組的具體瓶頸和改善方案。
+
+## 優先順序總覽
+
+| 優先級 | 改善項目 | 影響 | 難度 |
+|-------|---------|------|------|
+| **P0** | 嵌入模型換 bge-m3 | 語意搜尋從不可用→可用 | 低（改 1 行） |
+| **P0** | 實體偵測加 jieba | 人名偵測從 0→可用 | 中 |
+| **P1** | AAAK 中文情緒/停用詞 | 壓縮品質 | 中 |
+| **P1** | 通用萃取器中文 marker | 記憶分類從失效→可用 | 中 |
+| **P1** | 分塊大小調整 | 資訊密度合理化 | 低 |
+| **P2** | LINE 對話格式 | 台灣使用者最常用通訊工具 | 低 |
+| **P2** | 房間偵測中文關鍵詞 | 路由準確度 | 低 |
+| **P3** | 中文消歧系統 | 邊界情況 | 高 |
+
+---
+
+## 1. 嵌入模型：最根本的問題
+
+### 現狀
+
+ChromaDB 預設使用 `all-MiniLM-L6-v2`——一個英文為主的嵌入模型。
+
+### 影響
+
+中文語意搜尋準確率會大幅下降。這是 96.6% R@5 分數**無法直接複製到中文的根本原因**。
+
+### 建議
+
+```python
+# searcher.py / miner.py 中的 get_collection()
+# 替換為多語言嵌入模型
+import chromadb.utils.embedding_functions as ef
+
+embedding_fn = ef.SentenceTransformerEmbeddingFunction(
+    model_name="BAAI/bge-m3"          # 多語言，中英混合最強
+    # 或 "shibing624/text2vec-base-chinese"  # 純中文場景
+)
+collection = client.get_or_create_collection(
+    "mempalace_drawers",
+    embedding_function=embedding_fn
+)
+```
+
+**評分：必做，影響最大。沒有這一步，其他改善都是白費。**
+
+---
+
+## 2. 實體偵測：完全失效
+
+### 現狀
+
+`entity_detector.py` 第 443-463 行：
+
+```python
+# 靠大寫字母開頭偵測專有名詞——中文沒有大小寫
+raw = re.findall(r"\b([A-Z][a-z]{1,19})\b", text)
+```
+
+### 影響
+
+中文人名、專案名完全偵測不到。
+
+### 建議
+
+引入 jieba 分詞 + 詞性標注（`nr` = 人名，`ns` = 地名，`nt` = 機構）：
+
+```python
+import jieba.posseg as pseg
+
+def extract_candidates_zh(text):
+    words = pseg.cut(text)
+    people = {}
+    for word, flag in words:
+        if flag == 'nr' and len(word) >= 2:  # 人名
+            people[word] = people.get(word, 0) + 1
+    return {k: v for k, v in people.items() if v >= 2}
+```
+
+或用正則匹配常見中文姓氏（百家姓前 100 姓 + 2-3 字組合）。
+
+---
+
+## 3. AAAK 壓縮：英文設計，中文不適用
+
+### 現狀
+
+`dialect.py` 中的所有壓縮機制假設英文：
+
+- 實體代碼用名字前 3 字母大寫：`Alice → ALC`
+- 情緒關鍵詞全是英文：`"decided": "determ"`, `"worried": "anx"`
+- 停用詞全是英文（`_STOP_WORDS`，270+ 個英文詞）
+- 主題萃取靠英文詞邊界：`re.findall(r"[a-zA-Z][a-zA-Z_-]{2,}", text)`
+
+### 建議
+
+```python
+# 實體代碼：中文用拼音首字母
+from pypinyin import pinyin, Style
+
+def encode_entity_zh(name):
+    initials = pinyin(name, style=Style.FIRST_LETTER)
+    return ''.join([i[0] for i in initials]).upper()[:3]
+# 「陳偉」→ "CW_" 或 "CHW"
+
+# 情緒關鍵詞：加入中文對照
+_EMOTION_SIGNALS_ZH = {
+    "決定": "determ", "擔心": "anx", "興奮": "excite",
+    "困惑": "confuse", "喜歡": "love", "討厭": "rage",
+    "希望": "hope", "害怕": "fear", "信任": "trust",
+    "滿意": "satis", "挫折": "frust", "感謝": "grat",
+}
+
+# 停用詞：中文版
+_STOP_WORDS_ZH = {
+    "的", "了", "在", "是", "我", "有", "和", "就",
+    "不", "人", "都", "一", "這", "中", "大", "為",
+    "上", "個", "到", "說", "會", "也", "要", "他",
+    "她", "它", "們", "你", "那", "被", "從", "把",
+}
+
+# 主題萃取：用 jieba 的 TF-IDF
+import jieba.analyse
+
+def extract_topics_zh(text, max_topics=3):
+    return jieba.analyse.extract_tags(text, topK=max_topics)
+```
+
+---
+
+## 4. 對話格式正規化：缺少中文 AI 平台
+
+### 現狀
+
+`normalize.py` 支援：Claude Code JSONL、Claude.ai JSON、ChatGPT JSON、Slack JSON。
+
+### 缺少
+
+- **LINE**（台灣使用者最常用通訊工具）
+- **通義千問**匯出格式
+- **Kimi (Moonshot)** 匯出格式
+- **微信** 聊天匯出
+
+### 建議
+
+至少加入 LINE 聊天記錄的解析：
+
+```python
+def _try_line_txt(content: str) -> Optional[str]:
+    """LINE 匯出格式：[2026/04/07 14:30] 陳偉: 訊息內容"""
+    lines = content.split("\n")
+    pattern = re.compile(
+        r'\[(\d{4}/\d{2}/\d{2} \d{2}:\d{2})\] (.+?): (.+)'
+    )
+    messages = []
+    speakers = {}
+    for line in lines:
+        m = pattern.match(line)
+        if m:
+            speaker, text = m.group(2), m.group(3)
+            if speaker not in speakers:
+                speakers[speaker] = (
+                    "user" if len(speakers) == 0 else "assistant"
+                )
+            messages.append((speakers[speaker], text))
+    if len(messages) >= 2:
+        return _messages_to_transcript(messages)
+    return None
+```
+
+---
+
+## 5. 通用萃取器：正則全是英文
+
+### 現狀
+
+`general_extractor.py` 中所有 marker 正則都是英文：
+
+```python
+DECISION_MARKERS = [
+    r"\blet'?s (use|go with|try|pick)\b",
+    r"\bwe (should|decided|chose)\b",
+    ...
+]
+```
+
+### 建議
+
+加入中文 marker：
+
+```python
+DECISION_MARKERS_ZH = [
+    r"(決定|選擇|採用|改用|換成)",
+    r"(我們應該|最後決定|最終選了)",
+    r"(而不是|取代了|比.*好)",
+    r"(原因是|因為|所以選)",
+    r"(架構|方案|策略|方法)",
+]
+
+MILESTONE_MARKERS_ZH = [
+    r"(成功了|搞定了|修好了|解決了)",
+    r"(突破|終於|第一次|從來沒有)",
+    r"(上線了|部署了|發布了|完成了)",
+    r"(原來是|關鍵是|訣竅是)",
+]
+
+PROBLEM_MARKERS_ZH = [
+    r"(bug|錯誤|當掉|壞了|不能用)",
+    r"(問題是|根本原因|修復方法)",
+    r"(一直失敗|跑不動|卡住了)",
+]
+
+EMOTION_MARKERS_ZH = [
+    r"(喜歡|愛|開心|感動|溫暖)",
+    r"(害怕|擔心|焦慮|緊張)",
+    r"(難過|傷心|哭|沮喪|失望)",
+    r"(生氣|憤怒|煩|受不了)",
+    r"(感謝|感恩|謝謝)",
+    r"(驕傲|自豪|成就感)",
+]
+
+PREFERENCE_MARKERS_ZH = [
+    r"(我偏好|我習慣|一律用|絕不用)",
+    r"(永遠不要|每次都|一定要)",
+    r"(風格|慣例|規則|原則)",
+]
+```
+
+---
+
+## 6. 房間偵測：關鍵詞全英文
+
+### 現狀
+
+`convo_miner.py` 第 127-191 行：
+
+```python
+TOPIC_KEYWORDS = {
+    "technical":    ["code", "python", "bug", ...],
+    "architecture": ["architecture", "design", ...],
+}
+```
+
+### 建議
+
+```python
+TOPIC_KEYWORDS_ZH = {
+    "技術":   ["程式碼", "函式", "除錯", "API", "資料庫", "部署",
+               "伺服器", "測試", "重構"],
+    "架構":   ["架構", "設計", "模式", "介面", "模組", "服務",
+               "元件", "分層", "微服務"],
+    "規劃":   ["計畫", "路線圖", "里程碑", "期限", "需求", "排程",
+               "優先順序", "待辦", "範圍"],
+    "決策":   ["決定", "選擇", "取捨", "替代方案", "比較",
+               "優缺點", "評估"],
+    "問題":   ["問題", "錯誤", "壞掉", "修復", "解決", "暫時方案",
+               "當機", "卡住", "根本原因"],
+}
+```
+
+---
+
+## 7. 分塊策略：中文字元密度不同
+
+### 現狀
+
+`miner.py`：
+
+```python
+CHUNK_SIZE = 800     # chars
+CHUNK_OVERLAP = 100  # chars
+```
+
+### 影響
+
+800 個中文字 ≈ 800 tokens，但 800 個英文字元 ≈ 200 tokens。同樣的 chunk size，中文資訊密度是英文的 3-4 倍。
+
+### 建議
+
+```python
+# 根據語言調整
+CHUNK_SIZE_EN = 800
+CHUNK_SIZE_ZH = 400   # 中文字元資訊密度高，400 字就夠
+CHUNK_OVERLAP_ZH = 50
+```
+
+或用 token 計數替代字元計數：
+
+```python
+def count_tokens_approx(text):
+    """中英混合 token 估算"""
+    zh_chars = sum(1 for c in text if '\u4e00' <= c <= '\u9fff')
+    en_chars = len(text) - zh_chars
+    return zh_chars + en_chars // 4  # 中文 1字≈1token, 英文 4字≈1token
+```
+
+---
+
+## 8. 消歧系統：不適用中文
+
+### 現狀
+
+`entity_registry.py`：
+
+- `COMMON_ENGLISH_WORDS` — 英文歧義詞（ever, grace, will...）
+- `PERSON_CONTEXT_PATTERNS` — 全是英文語法模式（`{name} said`, `with {name}`）
+
+### 中文的歧義問題
+
+中文的歧義問題完全不同：
+
+- 「小明」是人名還是「小+明」？
+- 「大衛」是人名還是「大+衛」？
+- 「林」是姓氏還是「森林」？
+- 「金」是姓氏還是「黃金」？
+
+### 建議
+
+```python
+COMMON_ZH_AMBIGUOUS = {
+    "林", "王", "金", "石", "花", "白", "馬", "龍",
+    "秋", "春", "夏", "冬", "雲", "雨", "風",
+}
+
+PERSON_CONTEXT_ZH = [
+    r"{name}(說|問|回答|笑|哭|覺得|認為|建議|提到)",
+    r"(跟|和|與){name}(一起|討論|聊|合作)",
+    r"{name}(的|是|在|也|會|要|把|讓|給|向)",
+    r"(叫|是|找|問|請){name}",
+    r"(老師|同事|朋友|老闆){name}",
+]
+```
+
+---
+
+## 9. 額外建議：Token 計算
+
+### 現狀
+
+`dialect.py` 第 932-934 行：
+
+```python
+@staticmethod
+def count_tokens(text: str) -> int:
+    """Rough token count (1 token ~ 3 chars for structured text)."""
+    return len(text) // 3
+```
+
+### 影響
+
+中文每個字大約 1-2 token，不是 3 字元 1 token。這個估算對中文嚴重低估。
+
+### 建議
+
+```python
+@staticmethod
+def count_tokens(text: str) -> int:
+    zh_chars = sum(1 for c in text if '\u4e00' <= c <= '\u9fff')
+    other_chars = len(text) - zh_chars
+    return zh_chars + other_chars // 3  # 中文 1字≈1.5token 取整
+```
+
+---
+
+## 一句話結論
+
+**換嵌入模型（bge-m3）+ 加 jieba 分詞**——這兩步就能讓 MemPalace 在中文場景下從「基本不可用」變成「堪用」。後續再逐步補齊 marker、壓縮方言、和對話格式支援。
+
+---
+
+> 上一頁：[12_評審問答記錄](12_評審問答記錄.md) | 回到：[00_概覽](00_概覽.md)
+
+</script>
+
+<script>
+// ── Chapter metadata ──────────────────────
+const chapters = [
+  { id: 'ch00', title: '概覽', num: '00' },
+  { id: 'ch01', title: '核心概念：記憶宮殿', num: '01' },
+  { id: 'ch02', title: 'AAAK 壓縮方言', num: '02' },
+  { id: 'ch03', title: '四層記憶堆疊', num: '03' },
+  { id: 'ch04', title: '知識圖譜', num: '04' },
+  { id: 'ch05', title: '資料擷取管道', num: '05' },
+  { id: 'ch06', title: '語意搜尋與導航', num: '06' },
+  { id: 'ch07', title: 'MCP 伺服器', num: '07' },
+  { id: 'ch08', title: '實體偵測系統', num: '08' },
+  { id: 'ch09', title: '專家代理與設定系統', num: '09' },
+  { id: 'ch10', title: '模組依賴與架構圖', num: '10' },
+  { id: 'ch11', title: '基準測試與效能', num: '11' },
+  { id: 'ch12', title: '評審問答記錄', num: '12' },
+  { id: 'ch13', title: '中文語境改善建議', num: '13' },
+];
+
+let currentChapter = 'ch00';
+const chapterContent = {};
+const chapterRawMd = {};
+
+// ── Parse & render ────────────────────────
+function init() {
+  const renderer = new marked.Renderer();
+  // Remove nav links at bottom of each md (lines starting with "> 上一頁" or "> 下一頁")
+  marked.setOptions({
+    renderer: renderer,
+    gfm: true,
+    breaks: false,
+  });
+
+  const inner = document.getElementById('contentInner');
+
+  chapters.forEach((ch, idx) => {
+    const script = document.getElementById('md-' + ch.id);
+    let md = script ? script.textContent.trim() : '';
+
+    // Remove the trailing nav line
+    md = md.replace(/\n---\n\n>.*$/s, '');
+
+    chapterRawMd[ch.id] = md;
+
+    const html = marked.parse(md);
+    chapterContent[ch.id] = html;
+
+    const div = document.createElement('div');
+    div.className = 'chapter' + (idx === 0 ? ' active' : '');
+    div.id = ch.id;
+
+    // Build prev/next nav
+    let navHtml = '<div class="chapter-nav">';
+    if (idx > 0) {
+      const prev = chapters[idx - 1];
+      navHtml += `<div class="chapter-nav-btn prev" onclick="goTo('${prev.id}')">
+        <span class="chapter-nav-label">&larr; 上一頁</span>
+        <span class="chapter-nav-title">${prev.num} ${prev.title}</span>
+      </div>`;
+    } else {
+      navHtml += '<div></div>';
+    }
+    if (idx < chapters.length - 1) {
+      const next = chapters[idx + 1];
+      navHtml += `<div class="chapter-nav-btn next" onclick="goTo('${next.id}')">
+        <span class="chapter-nav-label">下一頁 &rarr;</span>
+        <span class="chapter-nav-title">${next.num} ${next.title}</span>
+      </div>`;
+    }
+    navHtml += '</div>';
+
+    div.innerHTML = html + navHtml;
+    inner.appendChild(div);
+  });
+
+  // Highlight code blocks
+  document.querySelectorAll('pre code').forEach(block => {
+    hljs.highlightElement(block);
+  });
+
+  // Scroll progress
+  const content = document.getElementById('contentArea');
+  content.addEventListener('scroll', () => {
+    const el = content;
+    const pct = el.scrollTop / (el.scrollHeight - el.clientHeight) * 100;
+    document.getElementById('progressFill').style.width = Math.min(pct, 100) + '%';
+  });
+
+  // Keyboard shortcut
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      document.getElementById('searchInput').focus();
+    }
+    if (e.key === 'Escape') {
+      document.getElementById('searchResults').classList.remove('active');
+      document.getElementById('searchInput').blur();
+    }
+  });
+
+  // Search
+  const searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', debounce(handleSearch, 200));
+  searchInput.addEventListener('focus', () => {
+    if (searchInput.value.trim().length >= 2) handleSearch();
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.search-container')) {
+      document.getElementById('searchResults').classList.remove('active');
+    }
+  });
+}
+
+// ── Navigation ────────────────────────────
+function goTo(id) {
+  document.querySelectorAll('.chapter').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelector(`.nav-item[data-chapter="${id}"]`).classList.add('active');
+  document.getElementById('contentArea').scrollTop = 0;
+  currentChapter = id;
+
+  // Close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+
+  // Update URL hash
+  history.replaceState(null, '', '#' + id);
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+// ── Search ────────────────────────────────
+function handleSearch() {
+  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+  const results = document.getElementById('searchResults');
+
+  if (query.length < 2) {
+    results.classList.remove('active');
+    return;
+  }
+
+  const matches = [];
+  chapters.forEach(ch => {
+    const raw = chapterRawMd[ch.id] || '';
+    const lines = raw.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].toLowerCase();
+      if (line.includes(query)) {
+        // Get surrounding context
+        const start = Math.max(0, i - 1);
+        const end = Math.min(lines.length, i + 2);
+        const context = lines.slice(start, end).join(' ').substring(0, 200);
+        matches.push({ chapter: ch, context: context, line: lines[i] });
+        if (matches.length >= 20) break;
+      }
+    }
+  });
+
+  if (matches.length === 0) {
+    results.innerHTML = '<div class="search-result-item"><div class="search-result-title">無搜尋結果</div><div class="search-result-context">找不到包含「' + escapeHtml(query) + '」的內容</div></div>';
+    results.classList.add('active');
+    return;
+  }
+
+  results.innerHTML = matches.map(m => {
+    const highlighted = highlightText(m.context, query);
+    return `<div class="search-result-item" onclick="goTo('${m.chapter.id}');document.getElementById('searchResults').classList.remove('active');">
+      <div class="search-result-title">${m.chapter.num} ${m.chapter.title}</div>
+      <div class="search-result-context">${highlighted}</div>
+    </div>`;
+  }).join('');
+  results.classList.add('active');
+}
+
+function highlightText(text, query) {
+  const escaped = escapeHtml(text);
+  const re = new RegExp('(' + escapeRegex(query) + ')', 'gi');
+  return escaped.replace(re, '<mark>$1</mark>');
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function debounce(fn, ms) {
+  let t;
+  return function(...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), ms); };
+}
+
+// ── Init on load ──────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  // Handle hash navigation
+  if (location.hash) {
+    const id = location.hash.slice(1);
+    if (document.getElementById(id)) goTo(id);
+  }
+});
+</script>
+</body>
+</html>

@@ -455,5 +455,13 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- MemPalace Wiki -->
+  <url>
+    <loc>https://hsiehchenwei.github.io/ai-paper-archaeology/mempalace-wiki/index.html</loc>
+    <lastmod>2026-04-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
 </urlset>
 
